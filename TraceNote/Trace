@@ -37,13 +37,12 @@ status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robot
    
    一直迭代  到max_iter
    
-  
+
 
 不同執行序同時再跑
 一個產生軌跡
 一個產生馬達角度   儲存起來
 一個抓出儲存起來的馬達角度 丟給device
-
 
 
 
@@ -56,6 +55,19 @@ manipulator_h_manager
 
 
 
+***** 軌跡規劃 *****
+void BaseModule::generateInitPoseTrajProcess()
+void BaseModule::generateJointTrajProcess()
+--規劃關節空間的軌跡
+--感覺是 P to P
 
+void BaseModule::generateTaskTrajProcess()
+--規劃工作空間的軌跡
+--感覺是 Linear
 
+我大多用 kinematics_pose_msg 下命令給手臂
+手臂動作看起來像是 linear
+下 InitPose 命令
+手臂動作看起來像是 p to p
+所以我誤以為 Robotis 沒把 p to p and linear 分開做 
 
