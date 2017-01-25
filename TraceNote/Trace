@@ -1,0 +1,62 @@
+BaseModule::process() -> thread
+
+~manipulator_h_manager package~
+#main cpp
+##manipulator_h_manager.cpp
+  /* Add Motion Module */
+  controller->addMotionModule((robotis_framework::MotionModule*) BaseModule::getInstance());
+
+  controller->startTimer();
+  
+    ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/base/joint_pose_msg", 5,
+                                                          &BaseModule::jointPoseMsgCallback, this);
+  ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/base/kinematics_pose_msg", 5,
+                                                               &BaseModule::kinematicsPoseMsgCallback, this);
+
+
+controller   
+--dynamixel含device
+--BaseModule   軌跡
+--運動學在       manipulator_h_kinematics_dynamics
+
+
+
+
+final to device is motor angle
+
+_enable -> false 應該可以停下來  因為每次都動很小
+
+status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
+規跡開始結束, ik error
+  
+  
+  
+   int     max_iter    = 30;   exceed -> error
+   
+   
+   Jacobian -> 微分運動學
+   
+   一直迭代  到max_iter
+   
+  
+
+不同執行序同時再跑
+一個產生軌跡
+一個產生馬達角度   儲存起來
+一個抓出儲存起來的馬達角度 丟給device
+
+
+
+
+manipulator_h_manager
+
+幾顆馬達設定
+1. ROBOTIS_MANIPULATOR_H.robot   幾顆馬達設定
+2. manipulator_h_kinematics_dynamics
+--manipulator_h_kinematics_dynamics_define 
+
+
+
+
+
+
