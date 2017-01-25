@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ROBOTIS-MANIPULATOR-H
 ROS packages for the ROBOTIS MANIPULATOR-H
 
@@ -9,3 +10,7 @@ rosrun manipulator_h_gui manipulator_h_gui
 
 sudo bash
 # roslaunch manipulator_h_manager manipulator_h_manager.launch en_sim:=false
+=======
+# ARC
+TKU M-Bot for Amazon Robotics Challenge (ARC)
+>>>>>>> bee2eb4565b282577b4a220ebce9cb84b0f17d2a
