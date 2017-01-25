@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: iclab7a_description
+    relative_path: urdf/pro7a.urdf
+  SRDF:
+    relative_path: config/pro7a.srdf
+  CONFIG:
+    author_name: youjun
+    author_email: youjun@tku.com
+    generated_timestamp: 1480781461
