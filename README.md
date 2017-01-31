@@ -2,6 +2,13 @@
 TKU M-Bot for Amazon Robotics Challenge (ARC)
 
 
+## Install
+
+* Install Hint for ros-kinetic-manipulator-H
+```bash
+sudo apt-get install ros-kinetic-qt-build
+```
+
 ## Manipulator Control
 
 
