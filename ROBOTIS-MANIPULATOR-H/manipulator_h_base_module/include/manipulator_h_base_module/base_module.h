@@ -44,6 +44,8 @@
 #include <ros/package.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/Float64.h>
+/* test cmd msg */
+#include "std_msgs/Float64MultiArray.h"
 #include <std_msgs/String.h>
 #include <geometry_msgs/Pose.h>
 #include <boost/thread.hpp>
@@ -118,6 +120,7 @@ public:
 
   void jointPoseMsgCallback(const manipulator_h_base_module_msgs::JointPose::ConstPtr& msg);
   void kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs::KinematicsPose::ConstPtr& msg);
+  void cmdMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& cmd);
 
   bool getJointPoseCallback(manipulator_h_base_module_msgs::GetJointPose::Request &req,
                             manipulator_h_base_module_msgs::GetJointPose::Response &res);
@@ -128,6 +131,7 @@ public:
   void generateInitPoseTrajProcess();
   void generateJointTrajProcess();
   void generateTaskTrajProcess();
+  void generateP2PTrajProcess();
 
   /* ROS Framework Functions */
   void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);

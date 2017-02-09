@@ -118,36 +118,39 @@ void BaseModule::parseIniPoseData(const std::string &path)
 
 void BaseModule::queueThread()
 {
-  ros::NodeHandle    ros_node;
-  ros::CallbackQueue callback_queue;
+    ros::NodeHandle    ros_node;
+    ros::CallbackQueue callback_queue;
 
-  ros_node.setCallbackQueue(&callback_queue);
+    ros_node.setCallbackQueue(&callback_queue);
 
-  /* publish topics */
-  status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
-  set_ctrl_module_pub_ = ros_node.advertise<std_msgs::String>("/robotis/enable_ctrl_module", 1);
+    /* publish topics */
+    status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
+    set_ctrl_module_pub_ = ros_node.advertise<std_msgs::String>("/robotis/enable_ctrl_module", 1);
 
-  /* subscribe topics */
-  ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/base/ini_pose_msg", 5,
-                                                        &BaseModule::initPoseMsgCallback, this);
-  ros::Subscriber set_mode_msg_sub = ros_node.subscribe("/robotis/base/set_mode_msg", 5,
-                                                        &BaseModule::setModeMsgCallback, this);
+    /* subscribe topics */
+    ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/base/ini_pose_msg", 5,
+                                                          &BaseModule::initPoseMsgCallback, this);
+    ros::Subscriber set_mode_msg_sub = ros_node.subscribe("/robotis/base/set_mode_msg", 5,
+                                                          &BaseModule::setModeMsgCallback, this);
 
-  ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/base/joint_pose_msg", 5,
-                                                          &BaseModule::jointPoseMsgCallback, this);
-  ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/base/kinematics_pose_msg", 5,
-                                                               &BaseModule::kinematicsPoseMsgCallback, this);
+    ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/base/joint_pose_msg", 5,
+                                                            &BaseModule::jointPoseMsgCallback, this);
+    ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/base/kinematics_pose_msg", 5,
+                                                                &BaseModule::kinematicsPoseMsgCallback, this);
+    /* topic of test cmd */
+    ros::Subscriber cmd_msg_sub = ros_node.subscribe("/robotis/base/cmd_msg", 5,
+                                                    &BaseModule::cmdMsgCallback, this);
 
-  ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/base/get_joint_pose",
-                                                                       &BaseModule::getJointPoseCallback, this);
-  ros::ServiceServer get_kinematics_pose_server = ros_node.advertiseService("/robotis/base/get_kinematics_pose",
-                                                                            &BaseModule::getKinematicsPoseCallback, this);
+    ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/base/get_joint_pose",
+                                                                        &BaseModule::getJointPoseCallback, this);
+    ros::ServiceServer get_kinematics_pose_server = ros_node.advertiseService("/robotis/base/get_kinematics_pose",
+                                                                              &BaseModule::getKinematicsPoseCallback, this);
 
-  while (ros_node.ok())
-  {
-    callback_queue.callAvailable();
-    usleep(1000);
-  }
+    while (ros_node.ok())
+    {
+        callback_queue.callAvailable();
+        usleep(1000);
+    }
 }
 
 void BaseModule::initPoseMsgCallback(const std_msgs::String::ConstPtr& msg)
@@ -249,6 +252,37 @@ void BaseModule::kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs:
   }
 
   return;
+}
+
+/* =================================== P2P msg callback func =================================== */
+void BaseModule::cmdMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& cmd)
+{
+    if (enable_ == false)
+        return;
+
+    std::cout << "Desired Cmd:" << std::endl;
+    for (int i = 0; i < cmd->data.size(); i++)
+    {
+        std::cout << cmd->data[i] << " ";
+    }
+    std::cout << std::endl;
+
+    /* 記下命令 */
+    robotis_->cmd = *cmd;
+
+    robotis_->ik_id_start_ = 0;
+    robotis_->ik_id_end_   = END_LINK;
+
+    if (robotis_->is_moving_ == false)
+    {
+        /* generate trajectory of p2p */
+        tra_gene_thread_ = new boost::thread(boost::bind(&BaseModule::generateP2PTrajProcess, this));
+        delete tra_gene_thread_;
+    }
+    else
+    {
+        ROS_INFO("previous task is alive");
+    }
 }
 
 void BaseModule::jointPoseMsgCallback(const manipulator_h_base_module_msgs::JointPose::ConstPtr& msg)
@@ -367,6 +401,82 @@ void BaseModule::generateJointTrajProcess()
   publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
 }
 
+/* =================================== P2P test =================================== */
+void BaseModule::generateP2PTrajProcess()
+{
+    if (enable_ == false)
+        return;
+
+    /* set movement time */
+    double tol = 35 * DEGREE2RADIAN; // rad per sec
+    double mov_time = 2.0;
+
+    double max_diff, abs_diff;
+    max_diff = 0.0;
+
+    /* convert cmd info */
+    double x = robotis_->cmd.data[0];
+    double y = robotis_->cmd.data[1];
+    double z = robotis_->cmd.data[2];
+
+    double roll  = robotis_->cmd.data[4] * M_PI / 180.0;
+    double pitch = robotis_->cmd.data[3] * M_PI / 180.0;
+    double yaw   = robotis_->cmd.data[5] * M_PI / 180.0;
+
+    robotis_->ik_target_position_ << x, y, z;
+    robotis_->ik_target_rotation_ = robotis_framework::convertRPYToRotation(roll, pitch, yaw);
+
+    /* calc ik */
+    bool   ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_);
+    if (!ik_success)
+    {
+        ROS_INFO("IK ERR !!!");
+        return;
+    }
+    /* calc fk(update pos and ori) */
+    manipulator_->fk();
+
+    for (int id = 1; id <= 6; id++)
+    {
+        double ini_value = joint_state_->goal_joint_state_[id].position_;
+        double tar_value = manipulator_->manipulator_link_data_[id]->joint_angle_;
+
+        abs_diff = fabs(tar_value - ini_value);
+
+        if (max_diff < abs_diff)
+            max_diff = abs_diff;
+    }
+
+    robotis_->mov_time_ = max_diff / tol;
+    int all_time_steps = int(floor((robotis_->mov_time_ / robotis_->smp_time_) + 1.0));
+    robotis_->mov_time_ = double(all_time_steps - 1) * robotis_->smp_time_;
+
+    if (robotis_->mov_time_ < mov_time)
+        robotis_->mov_time_ = mov_time;
+
+    robotis_->all_time_steps_ = int(robotis_->mov_time_ / robotis_->smp_time_) + 1;
+
+    robotis_->calc_joint_tra_.resize(robotis_->all_time_steps_, MAX_JOINT_ID + 1);
+
+    /* calculate joint trajectory */
+    for (int id = 1; id <= MAX_JOINT_ID; id++)
+    {
+        double ini_value = joint_state_->goal_joint_state_[id].position_;
+        double tar_value = manipulator_->manipulator_link_data_[id]->joint_angle_;
+
+        Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
+                                                                    robotis_->smp_time_, robotis_->mov_time_);
+
+        robotis_->calc_joint_tra_.block(0, id, robotis_->all_time_steps_, 1) = tra;
+    }
+
+    robotis_->cnt_ = 0;
+    robotis_->is_moving_ = true;
+
+    ROS_INFO("[start] send trajectory");
+    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
+}
+
 void BaseModule::generateTaskTrajProcess()
 {
   /* set movement time */
@@ -423,98 +533,100 @@ void BaseModule::generateTaskTrajProcess()
 void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
                          std::map<std::string, double> sensors)
 {
-  if (enable_ == false)
-    return;
+    if (enable_ == false)
+        return;
 
-  /*----- write curr position -----*/
+    /*----- write curr position -----*/
 
-  for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
-       state_iter != result_.end(); state_iter++)
-  {
-    std::string joint_name = state_iter->first;
-
-    robotis_framework::Dynamixel *dxl = NULL;
-    std::map<std::string, robotis_framework::Dynamixel*>::iterator dxl_it = dxls.find(joint_name);
-    if (dxl_it != dxls.end())
-      dxl = dxl_it->second;
-    else
-      continue;
-
-    double joint_curr_position = dxl->dxl_state_->present_position_;
-    double joint_goal_position = dxl->dxl_state_->goal_position_;
-
-    joint_state_->curr_joint_state_[joint_name_to_id_[joint_name]].position_ = joint_curr_position;
-    joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_ = joint_goal_position;
-  }
-
-  /*----- forward kinematics -----*/
-
-  for (int id = 1; id <= MAX_JOINT_ID; id++)
-    manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->goal_joint_state_[id].position_;
-
-  manipulator_->forwardKinematics(0);
-
-  /* ----- send trajectory ----- */
-
-//    ros::Time time = ros::Time::now();
-  if (robotis_->is_moving_ == true)
-  {
-    if (robotis_->cnt_ == 0)
-      robotis_->ik_start_rotation_ = manipulator_->manipulator_link_data_[robotis_->ik_id_end_]->orientation_;
-
-    if (robotis_->ik_solve_ == true)
+    for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
+        state_iter != result_.end(); state_iter++)
     {
-      robotis_->setInverseKinematics(robotis_->cnt_, robotis_->ik_start_rotation_);
+        std::string joint_name = state_iter->first;
 
-      int     max_iter    = 30;
-      double  ik_tol      = 1e-3;
-      bool    ik_success  = manipulator_->inverseKinematics(robotis_->ik_id_start_, robotis_->ik_id_end_,
-                                                            robotis_->ik_target_position_, robotis_->ik_target_rotation_, max_iter, ik_tol);
+        robotis_framework::Dynamixel *dxl = NULL;
+        std::map<std::string, robotis_framework::Dynamixel*>::iterator dxl_it = dxls.find(joint_name);
+        if (dxl_it != dxls.end())
+          dxl = dxl_it->second;
+        else
+          continue;
 
-      if (ik_success == true)
-      {
-        for (int id = 1; id <= MAX_JOINT_ID; id++)
-          joint_state_->goal_joint_state_[id].position_ = manipulator_->manipulator_link_data_[id]->joint_angle_;
-      }
-      else
-      {
-        ROS_INFO("[end] send trajectory (ik failed)");
-        publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "End Trajectory (IK Failed)");
+        double joint_curr_position = dxl->dxl_state_->present_position_;
+        double joint_goal_position = dxl->dxl_state_->goal_position_;
+
+        joint_state_->curr_joint_state_[joint_name_to_id_[joint_name]].position_ = joint_curr_position;
+        joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_ = joint_goal_position;
+    }
+
+    /*----- forward kinematics -----*/
+    /* 需要下面三行，末端點資訊才會被刷新(教末端點回授) */
+    for (int id = 1; id <= MAX_JOINT_ID; id++)
+        manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->goal_joint_state_[id].position_;
+
+    manipulator_->forwardKinematics(0);
+
+    /* ----- send trajectory ----- */
+
+  //    ros::Time time = ros::Time::now();
+    if (robotis_->is_moving_ == true)
+    {
+        if (robotis_->cnt_ == 0)
+            robotis_->ik_start_rotation_ = manipulator_->manipulator_link_data_[robotis_->ik_id_end_]->orientation_;
+
+        if (robotis_->ik_solve_ == true)
+        {
+            robotis_->setInverseKinematics(robotis_->cnt_, robotis_->ik_start_rotation_);
+
+            int     max_iter    = 30;
+            double  ik_tol      = 1e-3;
+
+            /* original */
+            //bool    ik_success  = manipulator_->inverseKinematics(robotis_->ik_id_start_, robotis_->ik_id_end_,
+            //                                                      robotis_->ik_target_position_, robotis_->ik_target_rotation_, max_iter, ik_tol);
+            /* kinematics of evo  */
+            bool    ik_success  = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_);
+
+            if (ik_success == true)
+            {
+                for (int id = 1; id <= MAX_JOINT_ID; id++)
+                    joint_state_->goal_joint_state_[id].position_ = manipulator_->manipulator_link_data_[id]->joint_angle_;
+            }
+            else
+            {
+                ROS_INFO("[end] send trajectory (ik failed)");
+                publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "End Trajectory (IK Failed)");
+
+                robotis_->is_moving_ = false;
+                robotis_->ik_solve_ = false;
+                robotis_->cnt_ = 0;
+            }
+        }
+        else
+        {
+            for (int id = 1; id <= MAX_JOINT_ID; id++)
+                joint_state_->goal_joint_state_[id].position_ = robotis_->calc_joint_tra_(robotis_->cnt_, id);
+        }
+
+        robotis_->cnt_++;
+    }
+
+    /*----- set joint data -----*/
+    for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
+        state_iter != result_.end(); state_iter++)
+    {
+        std::string joint_name = state_iter->first;
+        result_[joint_name]->goal_position_ = joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_;
+    }
+
+    /*---------- initialize count number ----------*/
+    if (robotis_->cnt_ >= robotis_->all_time_steps_ && robotis_->is_moving_ == true)
+    {
+        ROS_INFO("[end] send trajectory");
+        publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "End Trajectory");
 
         robotis_->is_moving_ = false;
         robotis_->ik_solve_ = false;
         robotis_->cnt_ = 0;
-      }
     }
-    else
-    {
-      for (int id = 1; id <= MAX_JOINT_ID; id++)
-        joint_state_->goal_joint_state_[id].position_ = robotis_->calc_joint_tra_(robotis_->cnt_, id);
-    }
-
-    robotis_->cnt_++;
-  }
-
-  /*----- set joint data -----*/
-
-  for (std::map<std::string, robotis_framework::DynamixelState *>::iterator state_iter = result_.begin();
-       state_iter != result_.end(); state_iter++)
-  {
-    std::string joint_name = state_iter->first;
-    result_[joint_name]->goal_position_ = joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_;
-  }
-
-  /*---------- initialize count number ----------*/
-
-  if (robotis_->cnt_ >= robotis_->all_time_steps_ && robotis_->is_moving_ == true)
-  {
-    ROS_INFO("[end] send trajectory");
-    publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "End Trajectory");
-
-    robotis_->is_moving_ = false;
-    robotis_->ik_solve_ = false;
-    robotis_->cnt_ = 0;
-  }
 }
 
 void BaseModule::stop()

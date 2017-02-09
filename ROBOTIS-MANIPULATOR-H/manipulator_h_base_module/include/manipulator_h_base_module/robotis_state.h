@@ -40,6 +40,9 @@
 #include "manipulator_h_base_module_msgs/KinematicsPose.h"
 #include "manipulator_h_kinematics_dynamics/manipulator_h_kinematics_dynamics.h"
 
+/* test cmd msg */
+#include "std_msgs/Float64MultiArray.h"
+
 namespace robotis_manipulator_h
 {
 
@@ -65,6 +68,9 @@ public:
   // msgs
   manipulator_h_base_module_msgs::JointPose joint_pose_msg_;
   manipulator_h_base_module_msgs::KinematicsPose kinematics_pose_msg_;
+  
+  /* test cmd msg */
+  std_msgs::Float64MultiArray cmd;
 
   // inverse kinematics
   bool ik_solve_;

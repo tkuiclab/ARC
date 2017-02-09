@@ -75,8 +75,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[1]->relative_position_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.126);
     manipulator_link_data_[1]->joint_axis_        = robotis_framework::getTransitionXYZ(0.0, 0.0, 1.0);
     manipulator_link_data_[1]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[1]->joint_limit_max_   = 0.5 * M_PI;
-    manipulator_link_data_[1]->joint_limit_min_   = -0.5 * M_PI;
+    manipulator_link_data_[1]->joint_limit_max_   = 0.9 * M_PI;
+    manipulator_link_data_[1]->joint_limit_min_   = -0.9 * M_PI;
     manipulator_link_data_[1]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
     manipulator_link_data_[2]->name_    = "joint2";
@@ -87,8 +87,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[2]->relative_position_ = robotis_framework::getTransitionXYZ(0.0, 0.06900, 0.033);
     manipulator_link_data_[2]->joint_axis_        = robotis_framework::getTransitionXYZ(0.0, 1.0, 0.0);
     manipulator_link_data_[2]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[2]->joint_limit_max_   = 0.5 * M_PI;
-    manipulator_link_data_[2]->joint_limit_min_   = -0.5 * M_PI;
+    manipulator_link_data_[2]->joint_limit_max_   = 0.9 * M_PI;
+    manipulator_link_data_[2]->joint_limit_min_   = -0.9 * M_PI;
     manipulator_link_data_[2]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
     manipulator_link_data_[3]->name_    = "joint3";
@@ -99,8 +99,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[3]->relative_position_ = robotis_framework::getTransitionXYZ(0.03000, -0.01150, 0.26400);
     manipulator_link_data_[3]->joint_axis_        = robotis_framework::getTransitionXYZ(0.0, 1.0, 0.0);
     manipulator_link_data_[3]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[3]->joint_limit_max_   = 0.5 * M_PI;
-    manipulator_link_data_[3]->joint_limit_min_   = -0.5 * M_PI;
+    manipulator_link_data_[3]->joint_limit_max_   = 0.9 * M_PI;
+    manipulator_link_data_[3]->joint_limit_min_   = -0.9 * M_PI;
     manipulator_link_data_[3]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
     manipulator_link_data_[4]->name_    = "joint4";
@@ -111,8 +111,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[4]->relative_position_ = robotis_framework::getTransitionXYZ(0.19500, -0.05750, 0.03000);
     manipulator_link_data_[4]->joint_axis_        = robotis_framework::getTransitionXYZ(1.0, 0.0, 0.0);
     manipulator_link_data_[4]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[4]->joint_limit_max_   = 0.5 * M_PI;
-    manipulator_link_data_[4]->joint_limit_min_   = -0.5 * M_PI;
+    manipulator_link_data_[4]->joint_limit_max_   = 0.9 * M_PI;
+    manipulator_link_data_[4]->joint_limit_min_   = -0.9 * M_PI;
     manipulator_link_data_[4]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
     manipulator_link_data_[5]->name_    = "joint5";
@@ -123,8 +123,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[5]->relative_position_ = robotis_framework::getTransitionXYZ(0.06300, 0.04500, 0.00000);
     manipulator_link_data_[5]->joint_axis_        = robotis_framework::getTransitionXYZ(0.0, 1.0, 0.0);
     manipulator_link_data_[5]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[5]->joint_limit_max_   = 0.5 * M_PI;
-    manipulator_link_data_[5]->joint_limit_min_   = -0.5 * M_PI;
+    manipulator_link_data_[5]->joint_limit_max_   = 0.9 * M_PI;
+    manipulator_link_data_[5]->joint_limit_min_   = -0.9 * M_PI;
     manipulator_link_data_[5]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
     manipulator_link_data_[6]->name_    = "joint6";
@@ -135,8 +135,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[6]->relative_position_ = robotis_framework::getTransitionXYZ(0.12300, -0.04500, 0.00000);
     manipulator_link_data_[6]->joint_axis_        = robotis_framework::getTransitionXYZ(1.0, 0.0, 0.0);
     manipulator_link_data_[6]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[6]->joint_limit_max_   = 0.5 * M_PI;
-    manipulator_link_data_[6]->joint_limit_min_   = -0.5 * M_PI;
+    manipulator_link_data_[6]->joint_limit_max_   = 0.9 * M_PI;
+    manipulator_link_data_[6]->joint_limit_min_   = -0.9 * M_PI;
     manipulator_link_data_[6]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
     manipulator_link_data_[7]->name_    = "end";
@@ -151,6 +151,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[7]->joint_limit_min_   = -100.0;
     manipulator_link_data_[7]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
   }
+
+  gen_DHLinksTable();
 }
 
 std::vector<int> ManipulatorKinematicsDynamics::findRoute(int to)
@@ -454,5 +456,274 @@ bool ManipulatorKinematicsDynamics::inverseKinematics(int from, int to, Eigen::M
   else
     return false;
 }
+
+/* ===================================== Evo Kinematics Begin ===================================== */
+void ManipulatorKinematicsDynamics::fk()
+{
+    /* get angle of joints */
+    Eigen::VectorXd angle(7);
+    for (int i = 0; i < 7; i++)
+    {
+        if (i < 2)
+            angle[i] = manipulator_link_data_[i+1]->joint_angle_;
+        else if (i == 2)
+            angle[i] = 0;
+        else
+            angle[i] = manipulator_link_data_[i]->joint_angle_;
+    }
+        
+    /* robotis的配置 角度轉換成 evo配置的 */
+    angle[1]  = -angle[1];
+    angle[1] += M_PI_2;
+    angle[3] += M_PI_2;
+    angle[5]  = -angle[5];
+
+    /* 齊次矩陣 */
+    Eigen::Matrix4d T0_6 = Eigen::Matrix4d::Identity();
+    for (int i = 0; i < angle.size(); i++)
+    {
+        Eigen::Matrix4d A;
+        Gen_TFMat(i, angle[i], A);
+        T0_6 *= A;
+    }
+
+    /* get position and mat of rotation */
+    Eigen::Vector3d pos = T0_6.block<3, 1>(0, 3);
+    Eigen::Matrix3d ori = T0_6.block<3, 3>(0, 0);
+
+/* --------------------------------------------- position -------------------------------------------- */
+    /* update position */
+    manipulator_link_data_[END_LINK]->position_ = pos;
+    std::cout << "fk x,y,z:\n" << pos << std::endl;
+
+/* ------------------------------------------- orientation ------------------------------------------- */
+    double pitch = atan2(ori(2, 2), sqrt(1 - pow(ori(2, 2), 2)));  // pitch
+    double roll, yaw;
+
+    if (abs(ori(2, 2)) < 0.9999)
+    {
+        double Cz =  ori(1, 2) / sqrt(1 - pow(ori(2, 2), 2));
+        double Sz = -ori(0, 2) / sqrt(1 - pow(ori(2, 2), 2));
+        yaw = atan2(Sz, Cz);    // yaw
+
+        double Cy =  ori(2, 0) / sqrt(1 - pow(ori(2, 2), 2));
+        double Sy = -ori(2, 1) / sqrt(1 - pow(ori(2, 2), 2));
+        roll = atan2(Sy, Cy);   // roll
+    }
+    else
+    {
+        yaw = angle[0];         // yaw
+
+        roll = (atan2(ori(1, 1), ori(0, 1)) - yaw);  // roll
+        roll = pitch > 0? roll: -roll;
+
+        if (roll > M_PI)
+            roll -= M_2_PI;
+        else if (roll < -M_PI)
+            roll += M_2_PI;
+    }
+
+    /* update matrix of rotation */
+    manipulator_link_data_[END_LINK]->orientation_ = robotis_framework::convertRPYToRotation(roll, pitch, yaw);
+    std::cout << "fk p,r,y:\n" << pitch * 180.0 / M_PI << " " << roll * 180.0 / M_PI << " " << yaw * 180.0 / M_PI << std::endl;
+}
+
+bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation)
+{
+    bool ik_success    = true;
+    bool limit_success = false;
+
+    Eigen::VectorXd angle(7);
+    Eigen::MatrixXd rpy = robotis_framework::convertRotationToRPY(tar_orientation);
+
+    double pitch = rpy(1, 0);
+    double roll  = rpy(0, 0);
+    double yaw   = rpy(2, 0);
+
+    std::cout << "ik recv x,y,z:\n" << tar_position << std::endl;
+    std::cout << "ik recv r,p,y:\n" << rpy * 180 / M_PI << std::endl;
+    
+    double Cx = cos(pitch);
+    double Sx = sin(pitch);
+    double Cy = cos(roll);
+    double Sy = sin(roll);
+    double Cz = cos(yaw);
+    double Sz = sin(yaw);
+    
+    /* desired cmd */
+    Eigen::Vector3d position = tar_position;
+    Eigen::Matrix3d RPY_Rot;                        // orientation
+    RPY_Rot << Cz*Sy + Sz*Sx*Cy,  Cz*Cy - Sz*Sx*Sy, -Sz*Cx,
+               Sz*Sy - Cz*Sx*Cy,  Sz*Cy + Cz*Sx*Sy,  Cz*Cx,
+               Cx*Cy,            -Cx*Sy,             Sx;
+
+    std::cout << "rot mat:\n" << RPY_Rot << std::endl;
+
+    int Elbow = -1;                                  // Elbow Up = -1, Elbow Down =  1
+    int Wrist = -1;                                  // Wrist Up =  1, Wrist Down = -1
+    
+    double L1 = DH(0, 2);
+    double L3 = DH(2, 0);
+    double L4 = DH(4, 2);
+    double L5 = DH(6, 2);
+    double L2 = sqrt(pow(DH(2, 2), 2) + pow(L3, 2));
+    double F  = DH(2, 2) + DH(4, 2);
+
+    /* --------------------------------------------- position -------------------------------------------- */
+    Eigen::Vector3d Hand_pose = L5 * RPY_Rot.block<3, 1>(0, 2);
+    Eigen::Vector3d WristPos = tar_position - Hand_pose;
+
+    /* joint 1 */
+    angle[0] = (fabs(WristPos(0)) < 0.000001 && fabs(WristPos(1)) < 0.000001) ?
+        0.12345: atan2(-WristPos(0) , WristPos(1));
+
+    double xc_2 = pow(WristPos(0), 2);
+    double yc_2 = pow(WristPos(1), 2);
+
+    double D = (WristPos - Eigen::Vector3d(0, 0, L1)).norm();
+    double E = (WristPos - Eigen::Vector3d(0, 0, 0)).norm();
+
+    double L34 = sqrt(pow(L3, 2) + pow(L4, 2));
+
+    double Alpha = acos((pow(L2, 2) + pow(D, 2) - pow(L34, 2)) / (2 * L2 * D));
+    double Gamma = acos((pow(L1, 2) + pow(D, 2) - pow(E, 2))   / (2 * L1 * D));
+
+    /* 偏軸的偏移角度 */
+    double Beta  = 83 * M_PI / 180.0;
+    //double Lunda = 8.75  * M_PI / 180.0;
+    
+    double Epslon = acos( (pow(L2, 2) + pow(L34, 2) - pow(D, 2)) / (2 * L2 * L34));
+    double Fai    = acos( (pow(L2, 2) + pow(L34, 2) - pow(F, 2)) / (2 * L2 * L34));
+
+    /* joint 2 to 4 */
+    angle[1] = Alpha + (Gamma - Beta);    
+    angle[3] = (360.0 * M_PI / 180.0) - (Epslon + Fai); 
+    angle[2] = 0;
+
+    /* ------------------------------------------- orientation ------------------------------------------- */
+    double sida1 = angle[0] + DH(0, 3);
+    double sida2 = angle[1] + DH(1, 3);
+    double sida3 = angle[2] + DH(2, 3);
+    double sida4 = angle[3] + DH(3, 3);
+    
+    double c1 = cos(sida1);  
+    double s1 = sin(sida1);
+    double c2 = cos(sida2);
+    double s2 = sin(sida2);
+    double c4 = cos(sida4);
+    double s4 = sin(sida4);
+
+    Eigen::Matrix3d R0_4;
+    R0_4 << -c1*s2*s4 - c1*c2*c4,  s1, c1*c2*s4 - c1*c4*s2,
+            -s1*s2*s4 - c2*c4*s1, -c1, c2*s1*s4 - c4*s1*s2,
+             c2*s4 - c4*s2,         0, c2*c4 + s2*s4;
+
+    Eigen::Matrix3d R4_6 = R0_4.transpose() * RPY_Rot;
+
+    /* joint 6 */
+    angle[5] = atan2(Wrist * sqrt(1 - pow(R4_6(2, 2), 2)), R4_6(2, 2));
+    
+    if (abs(R4_6(2, 2)) > 0.9999)
+    {
+        /* joint 5, 7 */
+        angle[4] = 0;
+        angle[6] = atan2(R4_6(1, 0) , R4_6(0, 0));
+    }
+    else
+    {
+        if (Wrist > 0)
+        {
+            angle[4] = atan2(R4_6(1,2),  R4_6(0,2));
+            angle[6] = atan2(R4_6(2,1), -R4_6(2,0));
+            if (abs(angle[4]) > 120.0 * M_PI / 180.0)
+            {
+                angle[5] = atan2(-Wrist * sqrt(1 - pow(R4_6(2, 2), 2)), R4_6(2, 2));
+                angle[4] = atan2(-R4_6(1,2) , -R4_6(0,2));
+                angle[6] = atan2(-R4_6(2,1) ,  R4_6(2,0));
+            }
+        }
+        else
+        {
+            angle[4] = atan2(-R4_6(1,2), -R4_6(0,2));
+            angle[6] = atan2(-R4_6(2,1),  R4_6(2,0));
+            if(abs(angle[4]) > 120.0 * M_PI / 180.0)
+            {
+                angle[5] = atan2(-Wrist * sqrt(1 - pow(R4_6(2, 2), 2)), R4_6(2, 2));
+                angle[4] = atan2(R4_6(1,2) ,  R4_6(0,2));
+                angle[6] = atan2(R4_6(2,1) , -R4_6(2,0));
+            }
+        }
+    }
+
+    for (int i = 0; i < 7; i++)
+        std::cout << "ik angle " << i << ": "<< angle[i] * 180.0 / M_PI << std::endl;
+
+    /* evo配置算出來的角度轉換成robotis的配置 */
+    angle[1] -= M_PI_2;
+    angle[1]  = -angle[1];
+    angle[3] -= M_PI_2;
+    angle[5]  = -angle[5]; 
+
+    /* 解出的關節角度，存起 */
+    for (int i = 0; i < 7; i++)
+    {
+        if (i < 2)
+            manipulator_link_data_[i+1]->joint_angle_ = angle[i];
+        else if (i > 2)
+            manipulator_link_data_[i]->joint_angle_ = angle[i];
+    }
+
+    /* checking joint limit */
+    std::vector<int> idx = findRoute(0, 7);
+    for (int id = 0; id < idx.size(); id++)
+    {
+        int joint_num = idx[id];
+
+        if (manipulator_link_data_[joint_num]->joint_angle_ > manipulator_link_data_[joint_num]->joint_limit_max_)
+        {
+            std::cout << "lmt: " << joint_num << std::endl;
+            limit_success = false;
+            break;
+        }
+        else if (manipulator_link_data_[joint_num]->joint_angle_ < manipulator_link_data_[joint_num]->joint_limit_min_)
+        {
+            std::cout << "lmt: " << joint_num << std::endl;
+            limit_success = false;
+            break;
+        }
+        else
+            limit_success = true;
+    }
+
+    return ik_success & limit_success;
+}
+
+void ManipulatorKinematicsDynamics::gen_DHLinksTable()
+{
+    DH.resize(7, 4);
+
+    /* a alpha d delta */
+    DH <<    0,  M_PI_2,  0.16, M_PI_2,
+             0,  M_PI_2,     0, M_PI_2,
+          0.03, -M_PI_2, 0.265,   M_PI,
+          0.03, -M_PI_2,     0,   M_PI,
+             0, -M_PI_2, 0.255,      0,
+             0,  M_PI_2,     0,      0,
+             0,       0, 0.225,      0;
+}
+
+void ManipulatorKinematicsDynamics::Gen_TFMat(int index, double theta, Eigen::Matrix4d& A)
+{
+    double c_theta = cos(theta + DH(index, 3));
+    double s_theta = sin(theta + DH(index, 3));
+    double c_alpha = cos(DH(index, 1));
+    double s_alpha = sin(DH(index, 1));
+    
+    A << c_theta, -s_theta*c_alpha,  s_theta*s_alpha, DH(index, 0) * c_theta,
+         s_theta,  c_theta*c_alpha, -c_theta*s_alpha, DH(index, 0) * s_theta,
+         0,        s_alpha,          c_alpha,         DH(index, 2),
+         0,        0,                0,               1;
+}
+/*  ===================================== Evo Kinematics End ===================================== */
 
 }

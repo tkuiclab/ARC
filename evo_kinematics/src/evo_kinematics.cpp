@@ -171,8 +171,9 @@ void InverseKinematics(std::vector<double>& pose, std::vector<double>& angle)
 
     double Alpha = acos((pow(L2, 2) + pow(D, 2) - pow(L34, 2)) / (2 * L2 * D));
     double Gamma = acos((pow(L1, 2) + pow(D, 2) - pow(E, 2))   / (2 * L1 * D));
-    double Beta  = 81.25 * M_PI / 180.0;
-    double Lunda = 8.75  * M_PI / 180.0;
+    double Beta  = 83 * M_PI / 180.0;
+    //double Beta = 81.25 * M_PI / 180.0;
+    //double Lunda = 8.75  * M_PI / 180.0;
     
     double Epslon = acos( (pow(L2, 2) + pow(L34, 2) - pow(D, 2)) / (2 * L2 * L34));
     double Fai    = acos( (pow(L2, 2) + pow(L34, 2) - pow(F, 2)) / (2 * L2 * L34));
@@ -238,15 +239,21 @@ void InverseKinematics(std::vector<double>& pose, std::vector<double>& angle)
 void Gen_DHLinksTable()
 {
     /* a alpha d delta */
-    DH << 0,  M_PI_2,   16, M_PI_2,
-          0,  M_PI_2,    0, M_PI_2,
-          3, -M_PI_2,   27, M_PI,
-          3, -M_PI_2,    0, M_PI,
-          0, -M_PI_2, 25.5,    0,
-          0,  M_PI_2,    0,    0,
-          0,       0, 22.5,    0;
+    DH << 0,  M_PI_2, 0.16,  M_PI_2,
+          0,  M_PI_2,    0,  M_PI_2,
+          0.03, -M_PI_2, 0.265, M_PI,
+          0.03, -M_PI_2,    0,  M_PI,
+          0, -M_PI_2, 0.255,    0,
+          0,  M_PI_2,    0,     0,
+          0,       0, 0.225,    0;
 
-    //std::cout << DH << std::endl;
+    // DH <<    0,  M_PI_2,  0.16,    0,
+    //          0, -M_PI_2,     0,    0,
+    //       0.03,  M_PI_2,  0.27,    0,
+    //       0.03,  M_PI_2,     0, M_PI_2,
+    //          0, -M_PI_2, 0.255,    0,
+    //          0,  M_PI_2,     0,    0,
+    //          0,       0, 0.225,    0;
 }
 
 void Gen_TFMat(int index, double theta, Eigen::Matrix4d& A)

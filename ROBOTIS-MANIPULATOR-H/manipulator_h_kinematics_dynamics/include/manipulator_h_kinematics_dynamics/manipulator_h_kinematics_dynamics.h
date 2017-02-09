@@ -46,6 +46,9 @@ enum TreeSelect
 
 class ManipulatorKinematicsDynamics
 {
+  /* DH table */
+  Eigen::MatrixXd DH;
+
 public:
   ManipulatorKinematicsDynamics();
   ManipulatorKinematicsDynamics(TreeSelect tree);
@@ -71,6 +74,13 @@ public:
                          int max_iter, double ik_err);
   bool inverseKinematics(int from, int to, Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation,
                          int max_iter, double ik_err);
+
+  /* ==================== Evo Kinematics ==================== */
+  void gen_DHLinksTable();
+  void Gen_TFMat(int index, double theta, Eigen::Matrix4d& A);
+  void fk();
+  bool ik(Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation);
+  /* ==================== Evo Kinematics ==================== */
 };
 
 }
