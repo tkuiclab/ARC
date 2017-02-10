@@ -6,11 +6,11 @@ TKU M-Bot for Amazon Robotics Challenge (ARC)
 
 * Install Hint for ros-kinetic-manipulator-H
 ```bash
-sudo apt-get install ros-kinetic-qt-build
+$ sudo apt-get install ros-kinetic-qt-build
 ```
 
-## Manipulator Control
 
+## Manipulator Control
 
 ### Using Gazebo
     
@@ -29,7 +29,10 @@ $ roslaunch manipulator_h_gazebo manipulator_h_gazebo.launch
 $ rosrun manipulator_h_gui manipulator_h_gui
 ```
 
-* Send Cmd (x, y, z, pitch, roll, yaw)
+* Publish Test Cmd
+  data: [x, y, z(m), pitch, roll, yaw(deg)]
+
+```bash
 $ rostopic pub /robotis/base/cmd_msg std_msgs/Float64MultiArray -1 "layout:
   dim:
   - label: ''
@@ -41,13 +44,12 @@ data: [0, 0.3, 0.15, -90, 0, 90]"
 
 ### Using Real Robot
 
-* Starting A New Bash Shell With The Security Privilege of Root User 
+* Starting A New Bash Shell With The Security Privilege of Root User
 ```bash
 $ sudo bash
 ```
 
-* Open Manipulator Manager Without Simulator
+* Open Manipulator Manager Without Simulator Using Root
 ```bash
 # roslaunch manipulator_h_manager manipulator_h_manager.launch en_sim:=false
 ```
-
