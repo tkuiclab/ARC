@@ -29,8 +29,8 @@ $ roslaunch manipulator_h_gazebo manipulator_h_gazebo.launch
 $ rosrun manipulator_h_gui manipulator_h_gui
 ```
 
-* Publish Test Cmd
-  data: [x, y, z(m), pitch, roll, yaw(deg)]
+* Publish Test Cmd    
+    data: [x, y, z(m), pitch, roll, yaw(deg)]
 
 ```bash
 $ rostopic pub /robotis/base/cmd_msg std_msgs/Float64MultiArray -1 "layout:
@@ -53,3 +53,5 @@ $ sudo bash
 ```bash
 # roslaunch manipulator_h_manager manipulator_h_manager.launch en_sim:=false
 ```
+
+:sunglasses:
