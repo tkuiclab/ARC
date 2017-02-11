@@ -14,12 +14,16 @@ $ sudo apt-get install ros-kinetic-qt-build
 
 ### Using Gazebo
     
-* Open Manipulator Manager With Simulator
+* Open Manipulator Manager With Simulator   
+    arg: en_sim, en_gui
+
 ```bash
 $ roslaunch manipulator_h_manager manipulator_h_manager.launch en_sim:=true
 ```
 
-* Manipulator Gazebo
+* Manipulator Gazebo    
+    arg: paused
+    
 ```bash
 $ roslaunch manipulator_h_gazebo manipulator_h_gazebo.launch
 ```
