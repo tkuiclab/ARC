@@ -32,7 +32,8 @@
 #define MANIPULATOR_KINEMATICS_DYNAMICS_MANIPULATOR_KINEMATICS_DYNAMICS_H_
 
 #include <vector>
-
+/* for checking value is nan */
+#include <cmath>
 #include "link_data.h"
 #include "manipulator_h_kinematics_dynamics_define.h"
 
