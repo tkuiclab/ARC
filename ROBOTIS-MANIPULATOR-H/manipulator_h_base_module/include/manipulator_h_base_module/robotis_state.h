@@ -49,36 +49,35 @@ namespace robotis_manipulator_h
 class RobotisState
 {
 public:
-  RobotisState();
-  ~RobotisState();
+    RobotisState();
+    ~RobotisState();
 
-  bool    is_moving_;
+    bool is_moving_;
 
-  // trajectory
-  int     cnt_;
-  int     all_time_steps_;
-  double  mov_time_;
-  double  smp_time_;
+    // trajectory
+    int cnt_;
+    int all_time_steps_;
+    double mov_time_;
+    double smp_time_;
 
-  Eigen::MatrixXd calc_joint_tra_;
-  Eigen::MatrixXd calc_task_tra_;
+    Eigen::MatrixXd joint_ini_pose_;
+    Eigen::MatrixXd calc_joint_tra_;
+    Eigen::MatrixXd calc_task_tra_;  
 
-  Eigen::MatrixXd joint_ini_pose_;
+    // msgs
+    manipulator_h_base_module_msgs::JointPose      joint_pose_msg_;
+    manipulator_h_base_module_msgs::KinematicsPose kinematics_pose_msg_;
 
-  // msgs
-  manipulator_h_base_module_msgs::JointPose joint_pose_msg_;
-  manipulator_h_base_module_msgs::KinematicsPose kinematics_pose_msg_;
-  
-  /* test cmd msg */
-  std_msgs::Float64MultiArray cmd;
+    /* test cmd msg */
+    std_msgs::Float64MultiArray cmd;
 
-  // inverse kinematics
-  bool ik_solve_;
-  Eigen::MatrixXd ik_target_position_;
-  Eigen::MatrixXd ik_start_rotation_, ik_target_rotation_;
-  int ik_id_start_, ik_id_end_;
+    // inverse kinematics
+    bool ik_solve_;
+    Eigen::MatrixXd ik_target_position_;
+    Eigen::MatrixXd ik_start_rotation_, ik_target_rotation_;
+    int ik_id_start_, ik_id_end_;
 
-  void setInverseKinematics(int cnt, Eigen::MatrixXd start_rotation);
+    void setInverseKinematics(int cnt, Eigen::MatrixXd start_rotation);
 };
 
 }

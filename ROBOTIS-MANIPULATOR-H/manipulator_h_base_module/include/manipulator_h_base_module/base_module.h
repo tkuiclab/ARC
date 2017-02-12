@@ -73,79 +73,78 @@ namespace robotis_manipulator_h
 
 class BaseJointData
 {
-public:
-  double position_;
-  double velocity_;
-  double effort_;
+  public:
+    double position_;
+    double velocity_;
+    double effort_;
 
-  int p_gain_;
-  int i_gain_;
-  int d_gain_;
+    int p_gain_;
+    int i_gain_;
+    int d_gain_;
 };
 
 class BaseJointState
 {
-public:
-  BaseJointData curr_joint_state_[ MAX_JOINT_ID + 1];
-  BaseJointData goal_joint_state_[ MAX_JOINT_ID + 1];
-  BaseJointData fake_joint_state_[ MAX_JOINT_ID + 1];
+  public:
+    BaseJointData curr_joint_state_[MAX_JOINT_ID + 1];
+    BaseJointData goal_joint_state_[MAX_JOINT_ID + 1];
+    BaseJointData fake_joint_state_[MAX_JOINT_ID + 1];
 };
 
 class BaseModule
-  : public robotis_framework::MotionModule,
-    public robotis_framework::Singleton<BaseModule>
+    : public robotis_framework::MotionModule,
+      public robotis_framework::Singleton<BaseModule>
 {
-private:
-  int             control_cycle_msec_;
-  boost::thread   queue_thread_;
-  boost::thread  *tra_gene_thread_;
+  private:
+    int control_cycle_msec_;
+    boost::thread queue_thread_;
+    boost::thread *tra_gene_thread_;
 
-  ros::Publisher  status_msg_pub_;
-  ros::Publisher  set_ctrl_module_pub_;
+    ros::Publisher status_msg_pub_;
+    ros::Publisher set_ctrl_module_pub_;
 
-  std::map<std::string, int> joint_name_to_id_;
+    std::map<std::string, int> joint_name_to_id_;
 
-  void queueThread();
+    void queueThread();
 
-  void parseIniPoseData(const std::string &path);
-  void publishStatusMsg(unsigned int type, std::string msg);
+    void parseIniPoseData(const std::string &path);
+    void publishStatusMsg(unsigned int type, std::string msg);
 
-public:
-  BaseModule();
-  virtual ~BaseModule();
+  public:
+    BaseModule();
+    virtual ~BaseModule();
 
-  /* ROS Topic Callback Functions */
-  void initPoseMsgCallback(const std_msgs::String::ConstPtr& msg);
-  void setModeMsgCallback(const std_msgs::String::ConstPtr& msg);
+    /* ROS Topic Callback Functions */
+    void initPoseMsgCallback(const std_msgs::String::ConstPtr &msg);
+    void setModeMsgCallback(const std_msgs::String::ConstPtr &msg);
 
-  void jointPoseMsgCallback(const manipulator_h_base_module_msgs::JointPose::ConstPtr& msg);
-  void kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs::KinematicsPose::ConstPtr& msg);
-  void cmdMsgCallback(const std_msgs::Float64MultiArray::ConstPtr& cmd);
+    void jointPoseMsgCallback(const manipulator_h_base_module_msgs::JointPose::ConstPtr &msg);
+    void kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs::KinematicsPose::ConstPtr &msg);
+    void cmdMsgCallback(const std_msgs::Float64MultiArray::ConstPtr &cmd);
 
-  bool getJointPoseCallback(manipulator_h_base_module_msgs::GetJointPose::Request &req,
-                            manipulator_h_base_module_msgs::GetJointPose::Response &res);
-  bool getKinematicsPoseCallback(manipulator_h_base_module_msgs::GetKinematicsPose::Request &req,
-                                 manipulator_h_base_module_msgs::GetKinematicsPose::Response &res);
+    bool getJointPoseCallback(manipulator_h_base_module_msgs::GetJointPose::Request &req,
+                              manipulator_h_base_module_msgs::GetJointPose::Response &res);
+    bool getKinematicsPoseCallback(manipulator_h_base_module_msgs::GetKinematicsPose::Request &req,
+                                   manipulator_h_base_module_msgs::GetKinematicsPose::Response &res);
 
-  /* ROS Calculation Functions */
-  void generateInitPoseTrajProcess();
-  void generateJointTrajProcess();
-  void generateTaskTrajProcess();
-  void generateP2PTrajProcess();
+    /* ROS Calculation Functions */
+    void generateInitPoseTrajProcess();
+    void generateJointTrajProcess();
+    void generateTaskTrajProcess();
+    void generateP2PTrajProcess();
 
-  /* ROS Framework Functions */
-  void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
-  void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
+    /* ROS Framework Functions */
+    void initialize(const int control_cycle_msec, robotis_framework::Robot *robot);
+    void process(std::map<std::string, robotis_framework::Dynamixel *> dxls, std::map<std::string, double> sensors);
 
-  void stop();
-  bool isRunning();
+    void stop();
+    bool isRunning();
 
-  /* Parameter */
-  BaseJointState                 *joint_state_;
-  RobotisState                   *robotis_;
-  ManipulatorKinematicsDynamics  *manipulator_;
+    /* Parameter */
+    BaseJointState *joint_state_;
+    RobotisState *robotis_;
+    ManipulatorKinematicsDynamics *manipulator_;
 };
-
 }
 
 #endif /* MANIPULATOR_BASE_MODULE_BASE_MODULE_H_ */
