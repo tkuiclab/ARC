@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 
-<robot name="pro7a" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="robotis_pro7a" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- ros_control plugin -->
   <gazebo>
@@ -62,6 +62,13 @@
     <material>Gazebo/Grey</material>
   </gazebo>
 
+  <!-- End_Link -->
+  <gazebo reference="end_link">
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
   <!-- world -->
   <link name="world" />
 
@@ -74,15 +81,14 @@
   <!-- link 1 -->
   <link name="link1">
     <inertial>
-      <!--<origin xyz="0.00023037 4.1147E-06 0.062192" rpy="0 0 0" />-->
-      <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <mass value="0.3236" />
       <inertia ixx="0.002" ixy="0.0" ixz="0.0" iyy="0.002" iyz="0.0" izz="0.002"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link1.STL" />
+        <mesh filename="package://pro7a_description/meshes/link1.STL" />
       </geometry>
       <material name="">
         <color rgba="0.79216 0.81961 0.93333 1" />
@@ -91,7 +97,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link1.STL" />
+        <mesh filename="package://pro7a_description/meshes/link1.STL" />
       </geometry>
     </collision>
   </link>
@@ -102,7 +108,7 @@
     <parent link="link1" />
     <child link="link2" />
     <axis xyz="0 0 1" />
-    <limit effort="1000" lower="-2.094395102" upper="2.094395102" velocity="6.5"/>
+    <limit effort="1000" lower="-2.62" upper="2.62" velocity="6.5"/>
     <dynamics damping="0.7"/>
   </joint>
 
@@ -120,30 +126,30 @@
   <!-- link 2 -->
   <link name="link2">
     <inertial>
-      <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-      <mass value="0.353299691884094" />
+      <origin xyz="0 0.0014958 0.032763" rpy="0 0 0" />
+      <mass value="0.35395" />
       <inertia ixx="0.002" ixy="0.0" ixz="0.0" iyy="0.002" iyz="0.0" izz="0.002"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link2.STL" />
+        <mesh filename="package://pro7a_description/meshes/link2.STL" />
       </geometry>
       <material name="">
-        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+        <color rgba="0.79216 0.81961 0.93333 1" />
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link2.STL" />
+        <mesh filename="package://pro7a_description/meshes/link2.STL" />
       </geometry>
     </collision>
   </link>
 
   <!-- joint 2 -->
   <joint name="joint2" type="revolute">
-    <origin xyz="0 -0.072 0.033" rpy="0 0 0" />
+    <origin xyz="0 -0.072 0.034" rpy="0 0 0" />
     <parent link="link2" />
     <child link="link3" />
     <axis xyz="0 1 0" />
@@ -165,36 +171,35 @@
   <!-- link 3 -->
   <link name="link3">
     <inertial>
-      <origin xyz="0.000134697491530555 0.0724327934527482 0.121867308112064" rpy="0 0 0" />
-      <mass value="0.500115096713792" />
+      <origin xyz="0.00014574 0.072437 0.12161" rpy="0 0 0" />
+      <mass value="0.50149" />
       <inertia ixx="0.002" ixy="0.0" ixz="0.0" iyy="0.002" iyz="0.0" izz="0.002"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link3.STL" />
+        <mesh filename="package://pro7a_description/meshes/link3.STL" />
       </geometry>
       <material name="">
-        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+        <color rgba="0.79216 0.81961 0.93333 1" />
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link3.STL" />
+        <mesh filename="package://pro7a_description/meshes/link3.STL" />
       </geometry>
     </collision>
   </link>
 
   <!-- joint 3 -->
   <joint name="joint3" type="revolute">
-    <!--<origin xyz="0 0.0720000000000061 0.19331679485759" rpy="0 0 0" />-->
-    <origin xyz="0 0.072 0.1933" rpy="0 0 0" />
+    <origin xyz="0 0.072 0.195" rpy="0 0 0" />
     <parent link="link3" />
     <child link="link4" />
     <axis xyz="0 0 1" />
-    <limit effort="1000" lower="-2.094395102" upper="2.094395102" velocity="6.5"/>
-    <dynamics damping="0.7"/>
+    <limit effort="1000" lower="-2.62" upper="2.62" velocity="6.5"/>
+    <dynamics damping="0.7" />
   </joint>
 
  <transmission name="tran3">
@@ -211,35 +216,34 @@
   <!-- link 4 -->
   <link name="link4">
     <inertial>
-      <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
-      <mass value="0.494453076498356" />
+      <origin xyz="0.015802 0 0.064569" rpy="0 0 0" />
+      <mass value="0.53361" />
       <inertia ixx="0.002" ixy="0.0" ixz="0.0" iyy="0.002" iyz="0.0" izz="0.002"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link4.STL" />
+        <mesh filename="package://pro7a_description/meshes/link4.STL" />
       </geometry>
       <material name="">
-        <color rgba="0.894117647058823 0.913725490196078 0.929411764705882 1" />
+        <color rgba="0.89412 0.91373 0.92941 1" />
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link4.STL" />
+        <mesh filename="package://pro7a_description/meshes/link4.STL" />
       </geometry>
     </collision>
   </link>
 
   <!-- joint 4 -->
   <joint name="joint4" type="revolute">
-    <!--<origin xyz="0.0299999998726757 -0.0600000000000077 0.0929999930015371" rpy="4.09444829912538E-16 -1.51509034294625E-31 -1.75554406335096E-14" />-->
-    <origin xyz="0.03 -0.060 0.093" rpy="0.0 0.0 0.0" />
+    <origin xyz="0.03 -0.06 0.095" rpy="0 0 0" />
     <parent link="link4" />
     <child link="link5" />
-    <axis xyz="0 -1 0" />
-    <limit effort="1000" lower="-3.141592654" upper="0.65" velocity="6.5"/>
+    <axis xyz="0 1 0" />
+    <limit effort="1000" lower="-0.65" upper="3.141592654" velocity="6.5"/>
     <dynamics damping="0.7"/>
   </joint>
 
@@ -257,35 +261,34 @@
   <!-- link 5 -->
   <link name="link5">
     <inertial>
-      <origin xyz="-0.0294640844960397 0.0600725360047954 0.118569552558269" rpy="0 0 0" />
-      <mass value="0.355062206783252" />
+      <origin xyz="-0.029459 0.060231 0.1178" rpy="0 0 0" />
+      <mass value="0.35861" />
       <inertia ixx="0.002" ixy="0.0" ixz="0.0" iyy="0.002" iyz="0.0" izz="0.002"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link5.STL" />
+        <mesh filename="package://pro7a_description/meshes/link5.STL" />
       </geometry>
       <material name="">
-        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+        <color rgba="0.79216 0.81961 0.93333 1" />
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link5.STL" />
+        <mesh filename="package://pro7a_description/meshes/link5.STL" />
       </geometry>
     </collision>
   </link>
 
   <!-- joint 5 -->
   <joint name="joint5" type="revolute">
-    <!--<origin xyz="-0.0300000000000022 0.0600000000000028 0.195000000000001" rpy="-4.09444829912538E-16 7.33949343852163E-30 1.75554406335096E-14" />-->
     <origin xyz="-0.03 0.06 0.195" rpy="0 0 0" />
     <parent link="link5" />
     <child link="link6" />
     <axis xyz="0 0 1" />
-    <limit effort="1000" lower="-2.094395102" upper="2.094395102" velocity="6.5"/>
+    <limit effort="1000" lower="-2.62" upper="2.62" velocity="6.5"/>
     <dynamics damping="0.7"/>
   </joint>
 
@@ -303,34 +306,33 @@
   <!-- link 6 -->
   <link name="link6">
     <inertial>
-      <origin xyz="0 -0.001 0.0506" rpy="0 0 0" />
-      <mass value="0.200934163479789" />
+      <origin xyz="0 -0.00099225 0.050446" rpy="0 0 0" />
+      <mass value="0.2022" />
       <inertia ixx="0.002" ixy="0.0" ixz="0.0" iyy="0.002" iyz="0.0" izz="0.002"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link6.STL" />
+        <mesh filename="package://pro7a_description/meshes/link6.STL" />
       </geometry>
       <material name="">
-        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+        <color rgba="1 1 1 1" />
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link6.STL" />
+        <mesh filename="package://pro7a_description/meshes/link6.STL" />
       </geometry>
     </collision>
   </link>
 
   <!-- joint 6 -->
   <joint name="joint6" type="revolute">
-    <!--<origin xyz="0 -0.0479999999999998 0.0630000000000001" rpy="0 0 0" />-->
     <origin xyz="0 -0.048 0.063" rpy="0 0 0" />
     <parent link="link6" />
     <child link="link7" />
-    <axis xyz="0 -1 0" />
+    <axis xyz="0 1 0" />
     <limit effort="1000" lower="-1.570796327" upper="1.570796327" velocity="6.5"/>
     <dynamics damping="0.7"/>
   </joint>
@@ -349,23 +351,68 @@
   <!-- link 7 -->
   <link name="link7">
     <inertial>
-      <origin xyz="0.0 0.04836 0.06852" rpy="0 0 0" />
-      <mass value="0.162169114093039" />
+      <origin xyz="0 0.048354 0.068515" rpy="0 0 0" />
+      <mass value="0.16217" />
       <inertia ixx="0.002" ixy="0.0" ixz="0.0" iyy="0.002" iyz="0.0" izz="0.002"/>
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link7.STL" />
+        <mesh filename="package://pro7a_description/meshes/link7.STL" />
       </geometry>
       <material name="">
-        <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+        <color rgba="0.79216 0.81961 0.93333 1" />
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://iclab7a_description/meshes/link7.STL" />
+        <mesh filename="package://pro7a_description/meshes/link7.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- joint 7 -->
+  <joint name="joint7" type="revolute">
+    <origin xyz="0 0.048 0.123" rpy="0 0 0" />
+    <parent link="link7" />
+    <child link="end_link" />
+    <axis xyz="0 0 1" />
+    <limit effort="1000" lower="-2.62" upper="2.62" velocity="6.5"/>
+    <dynamics damping="0.7"/>
+  </joint>
+
+  <transmission name="tran7">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint7">
+      <hardwareInterface>EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor7">
+      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <!-- end link -->
+  <link name="end_link">
+    <inertial>
+      <origin xyz="0 0 0.0031903" rpy="0 0 0" />
+      <mass value="0.0062712" />
+      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://pro7a_description/meshes/end_link.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://pro7a_description/meshes/end_link.STL" />
       </geometry>
     </collision>
   </link>

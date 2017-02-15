@@ -63,7 +63,7 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[0]->relative_position_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
     manipulator_link_data_[0]->joint_axis_        = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
     manipulator_link_data_[0]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[0]->joint_limit_max_   = 100.0;
+    manipulator_link_data_[0]->joint_limit_max_   =  100.0;
     manipulator_link_data_[0]->joint_limit_min_   = -100.0;
     manipulator_link_data_[0]->inertia_           = robotis_framework::getInertiaXYZ(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
@@ -75,7 +75,7 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[1]->relative_position_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.126);
     manipulator_link_data_[1]->joint_axis_        = robotis_framework::getTransitionXYZ(0.0, 0.0, 1.0);
     manipulator_link_data_[1]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[1]->joint_limit_max_   = 0.9 * M_PI;
+    manipulator_link_data_[1]->joint_limit_max_   =  0.9 * M_PI;
     manipulator_link_data_[1]->joint_limit_min_   = -0.9 * M_PI;
     manipulator_link_data_[1]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
@@ -87,7 +87,7 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[2]->relative_position_ = robotis_framework::getTransitionXYZ(0.0, 0.06900, 0.033);
     manipulator_link_data_[2]->joint_axis_        = robotis_framework::getTransitionXYZ(0.0, 1.0, 0.0);
     manipulator_link_data_[2]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[2]->joint_limit_max_   = 0.5 * M_PI;
+    manipulator_link_data_[2]->joint_limit_max_   =  0.5 * M_PI;
     manipulator_link_data_[2]->joint_limit_min_   = -0.5 * M_PI;
     manipulator_link_data_[2]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
@@ -99,8 +99,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[3]->relative_position_ = robotis_framework::getTransitionXYZ(0.03000, -0.01150, 0.26400);
     manipulator_link_data_[3]->joint_axis_        = robotis_framework::getTransitionXYZ(0.0, 1.0, 0.0);
     manipulator_link_data_[3]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[3]->joint_limit_max_   = 0.5 * M_PI;
-    manipulator_link_data_[3]->joint_limit_min_   = -0.65 * M_PI;
+    manipulator_link_data_[3]->joint_limit_max_   =  0.9 * M_PI;
+    manipulator_link_data_[3]->joint_limit_min_   = -0.9 * M_PI;
     manipulator_link_data_[3]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
     manipulator_link_data_[4]->name_    = "joint4";
@@ -111,8 +111,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[4]->relative_position_ = robotis_framework::getTransitionXYZ(0.19500, -0.05750, 0.03000);
     manipulator_link_data_[4]->joint_axis_        = robotis_framework::getTransitionXYZ(1.0, 0.0, 0.0);
     manipulator_link_data_[4]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[4]->joint_limit_max_   = 0.9 * M_PI;
-    manipulator_link_data_[4]->joint_limit_min_   = -0.9 * M_PI;
+    manipulator_link_data_[4]->joint_limit_max_   =  1    * M_PI;
+    manipulator_link_data_[4]->joint_limit_min_   = -0.65 * M_PI;
     manipulator_link_data_[4]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
     manipulator_link_data_[5]->name_    = "joint5";
@@ -123,8 +123,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[5]->relative_position_ = robotis_framework::getTransitionXYZ(0.06300, 0.04500, 0.00000);
     manipulator_link_data_[5]->joint_axis_        = robotis_framework::getTransitionXYZ(0.0, 1.0, 0.0);
     manipulator_link_data_[5]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[5]->joint_limit_max_   = 0.5 * M_PI;
-    manipulator_link_data_[5]->joint_limit_min_   = -0.5 * M_PI;
+    manipulator_link_data_[5]->joint_limit_max_   =  0.9 * M_PI;
+    manipulator_link_data_[5]->joint_limit_min_   = -0.9 * M_PI;
     manipulator_link_data_[5]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
     manipulator_link_data_[6]->name_    = "joint6";
@@ -135,21 +135,33 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
     manipulator_link_data_[6]->relative_position_ = robotis_framework::getTransitionXYZ(0.12300, -0.04500, 0.00000);
     manipulator_link_data_[6]->joint_axis_        = robotis_framework::getTransitionXYZ(1.0, 0.0, 0.0);
     manipulator_link_data_[6]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[6]->joint_limit_max_   = 0.9 * M_PI;
-    manipulator_link_data_[6]->joint_limit_min_   = -0.9 * M_PI;
+    manipulator_link_data_[6]->joint_limit_max_   =  0.5 * M_PI;
+    manipulator_link_data_[6]->joint_limit_min_   = -0.5 * M_PI;
     manipulator_link_data_[6]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
-    manipulator_link_data_[7]->name_    = "end";
+    manipulator_link_data_[7]->name_    = "joint7";
     manipulator_link_data_[7]->parent_  = 6;
     manipulator_link_data_[7]->sibling_ = -1;
-    manipulator_link_data_[7]->child_   = -1;
-    manipulator_link_data_[7]->mass_    = 0.0;
-    manipulator_link_data_[7]->relative_position_ = robotis_framework::getTransitionXYZ(0.0115, 0.0, 0.0);
-    manipulator_link_data_[7]->joint_axis_        = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
+    manipulator_link_data_[7]->child_   = 8;
+    manipulator_link_data_[7]->mass_    = 0.454;
+    manipulator_link_data_[7]->relative_position_ = robotis_framework::getTransitionXYZ(0.12300, -0.04500, 0.00000);
+    manipulator_link_data_[7]->joint_axis_        = robotis_framework::getTransitionXYZ(1.0, 0.0, 0.0);
     manipulator_link_data_[7]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-    manipulator_link_data_[7]->joint_limit_max_   = 100.0;
-    manipulator_link_data_[7]->joint_limit_min_   = -100.0;
+    manipulator_link_data_[7]->joint_limit_max_   =  0.9 * M_PI;
+    manipulator_link_data_[7]->joint_limit_min_   = -0.9 * M_PI;
     manipulator_link_data_[7]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
+
+    manipulator_link_data_[8]->name_    = "end";
+    manipulator_link_data_[8]->parent_  = 7;
+    manipulator_link_data_[8]->sibling_ = -1;
+    manipulator_link_data_[8]->child_   = -1;
+    manipulator_link_data_[8]->mass_    = 0.0;
+    manipulator_link_data_[8]->relative_position_ = robotis_framework::getTransitionXYZ(0.0115, 0.0, 0.0);
+    manipulator_link_data_[8]->joint_axis_        = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
+    manipulator_link_data_[8]->center_of_mass_    = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
+    manipulator_link_data_[8]->joint_limit_max_   = 100.0;
+    manipulator_link_data_[8]->joint_limit_min_   = -100.0;
+    manipulator_link_data_[8]->inertia_           = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
   }
 
   gen_DHLinksTable();
@@ -462,20 +474,15 @@ void ManipulatorKinematicsDynamics::fk()
 {
     /* get angle of joints */
     Eigen::VectorXd angle(7);
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < MAX_JOINT_ID; i++)
     {
-        if (i < 2)
-            angle[i] = manipulator_link_data_[i+1]->joint_angle_;
-        else if (i == 2)
-            angle[i] = 0;
-        else
-            angle[i] = manipulator_link_data_[i]->joint_angle_;
+        angle[i] = manipulator_link_data_[i+1]->joint_angle_;
     }
         
     /* robotis的配置 角度轉換成 evo配置的 */
     angle[1]  = -angle[1];
     angle[1] += M_PI_2;
-    angle[3] += M_PI_2;
+    //angle[3] += M_PI_2;
     angle[5]  = -angle[5];
 
     /* 齊次矩陣 */
@@ -652,34 +659,30 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd tar_position, Eigen::Matr
         }
     }
 
-    //for (int i = 0; i < 7; i++)
+    // for (int i = 0; i < 7; i++)
     //    std::cout << "ik angle " << i << ": "<< angle[i] * 180.0 / M_PI << std::endl;
 
     /* evo配置算出來的角度轉換成robotis的配置 */
     angle[1] -= M_PI_2;
     angle[1]  = -angle[1];
-    angle[3] -= M_PI_2;
+    //angle[3] -= M_PI_2;
     angle[5]  = -angle[5]; 
 
     /* 存起解出的關節角度 */
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < MAX_JOINT_ID; i++)
     {
+        // std::cout << "cvt ik angle " << i << ": "<< angle[i] * 180.0 / M_PI << std::endl;
+
         /* checking angle is nan */
         if (std::isnan(angle[i]))
             return false;
 
-        if (i < 2)
-            manipulator_link_data_[i+1]->joint_angle_ = angle[i];
-        else if (i > 2)
-            manipulator_link_data_[i]->joint_angle_ = angle[i];
+        manipulator_link_data_[i+1]->joint_angle_ = angle[i];
     }
 
     /* checking joint limit */
-    //std::vector<int> idx = findRoute(0, 7);
-    //for (int id = 0; id < idx.size(); id++)
     for (int joint_num = 1; joint_num <= MAX_JOINT_ID; joint_num++)
     {
-        //int joint_num = idx[id];
         LinkData& link_data = *manipulator_link_data_[joint_num];
 
         if (link_data.joint_angle_ > link_data.joint_limit_max_ ||

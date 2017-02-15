@@ -56,6 +56,8 @@ BaseModule::BaseModule()
     result_["joint4"] = new robotis_framework::DynamixelState();
     result_["joint5"] = new robotis_framework::DynamixelState();
     result_["joint6"] = new robotis_framework::DynamixelState();
+    result_["joint7"] = new robotis_framework::DynamixelState();
+
 
     joint_name_to_id_["joint1"] = 1;
     joint_name_to_id_["joint2"] = 2;
@@ -63,6 +65,7 @@ BaseModule::BaseModule()
     joint_name_to_id_["joint4"] = 4;
     joint_name_to_id_["joint5"] = 5;
     joint_name_to_id_["joint6"] = 6;
+    joint_name_to_id_["joint7"] = 7;
 
     robotis_     = new RobotisState();
     joint_state_ = new BaseJointState();
@@ -344,7 +347,6 @@ void BaseModule::generateJointTrajProcess()
             {
                 ini_value = joint_state_->goal_joint_state_[id].position_;
                 tar_value = robotis_->joint_pose_msg_.value[name_index];
-
                 break;
             }
         }

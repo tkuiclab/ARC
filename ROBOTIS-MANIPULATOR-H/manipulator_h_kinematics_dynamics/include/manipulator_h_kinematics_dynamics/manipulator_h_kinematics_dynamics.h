@@ -55,7 +55,7 @@ public:
   ManipulatorKinematicsDynamics(TreeSelect tree);
   ~ManipulatorKinematicsDynamics();
 
-  LinkData *manipulator_link_data_[ ALL_JOINT_ID + 1];
+  LinkData* manipulator_link_data_[ ALL_JOINT_ID + 1];
 
   std::vector<int> findRoute(int to);
   std::vector<int> findRoute(int from, int to);

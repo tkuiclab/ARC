@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
 <launch>
-  <arg name="gui" default="False" />
+  <arg name="en_gui" default="False" />
 
-  <param name="robot_description" textfile="$(find iclab7a_description)/urdf/pro7a.urdf" />
-  <param name="use_gui" value="$(arg gui)" />
+  <param name="robot_description" textfile="$(find pro7a_description)/urdf/pro7a.urdf" />
+  <param name="use_gui" value="$(arg en_gui)" />
   
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
     <remap from="/joint_states" to="/robotis/pro7a/joint_states" />
@@ -14,5 +14,5 @@
     <remap from="/joint_states" to="/robotis/pro7a/joint_states" />
   </node>
 
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find iclab7a_description)/launch/urdf.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find pro7a_description)/launch/urdf.rviz" />
 </launch>
