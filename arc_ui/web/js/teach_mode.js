@@ -11,12 +11,6 @@ var CmdType = {
 	Rotate_Y: "Rotate_Y",
 	Rotate_Z: "Rotate_Z",
 	Vaccum: "Vaccum",
-	Base_Init: "Base_Init",
-	Base_Stop: "Base_Stop",
-	Base_Vel : "Base_Vel",
-	Base_Pos_Index_1: "Base_Pos_Index_1",
-	Base_Pos_Index_2: "Base_Pos_Index_2",
-	Base_Pos_Index_3: "Base_Pos_Index_3"
 };
 
 
@@ -35,15 +29,7 @@ function command_selected(cmd){
 			'<option value="Rotate_Y"'+((cmd==CmdType.Rotate_Y)?"selected":"")+'>Rotate_Y</option>'+
 			'<option value="Rotate_Z"'+((cmd==CmdType.Rotate_Z)?"selected":"")+'>Rotate_Z</option>'+
 			'<option value="Vaccum"'+((cmd==CmdType.Vaccum)?"selected":"")+'>Vaccum</option>'+
-			'<option value="-----------------------">----------------------</option>'+
-			'<option value="Base_Init"'+((cmd==CmdType.Base_Init)?"selected":"")+'>Base_Init</option>'+
-			'<option value="Base_Stop"'+((cmd==CmdType.Base_Stop)?"selected":"")+'>Base_Stop</option>'+
-			'<option value="Base_Vel"'+((cmd==CmdType.Base_Vel)?"selected":"")+'>Base_Vel</option>'+
-			'<option value="Base_Pos_Index_1"'+((cmd==CmdType.Base_Pos_Index_1)?"selected":"")+'>Base_Pos_Index_1</option>'+
-			'<option value="Base_Pos_Index_2"'+((cmd==CmdType.Base_Pos_Index_2)?"selected":"")+'>Base_Pos_Index_2</option>'+
-			'<option value="Base_Pos_Index_3"'+((cmd==CmdType.Base_Pos_Index_3)?"selected":"")+'>Base_Pos_Index_3</option>'+
 			'</select>';
-
 
 	return command_select;
 }
@@ -269,6 +255,7 @@ function Cmd_change(edit,val_6){
 
 function edit_Cmd(edit){
 	var m_cmd_id = $(edit).parents('tr').attr('id');
+
 	console.log("m_cmd_id="+m_cmd_id);
 
 	$('#'+m_cmd_id).find('[name=edit_btn]').hide();
@@ -528,11 +515,6 @@ function run_unit_command(run_cmd_ind){
 		var o = quaternion_from_euler(roll * _Math.DEG2RAD, pitch  * _Math.DEG2RAD, yaw * _Math.DEG2RAD);
 
 
-		l('roll = ' + roll);
-		l('pitch = ' + pitch);
-		l('yaw = ' + yaw );
-		l('o = ' + o);
-
 		var pose_msg = new ROSLIB.Message({
 				pose:{
 					position : {
@@ -545,7 +527,6 @@ function run_unit_command(run_cmd_ind){
 						y : o[1],
 						z : o[2],
 						w : o[3]
-
 					}
 				}
 		});
@@ -555,29 +536,75 @@ function run_unit_command(run_cmd_ind){
 	}else if(cmd_mod==CmdType.Shift_X  || cmd_mod==CmdType.Shift_Y  || cmd_mod==CmdType.Shift_Z||
 				 cmd_mod==CmdType.Rotate_X || cmd_mod==CmdType.Rotate_Y || cmd_mod==CmdType.Rotate_Z ){
 
-		var data = $(selector).children("td.SubCmd").children("input").val();
-		var twist = get_twist();
+		 var request = new ROSLIB.ServiceRequest({
+		 		group_name : "arm",
+		 });
+		 pose_client.callService(request, function(res) {
+				 var p = res.group_pose.position;		//position
+				 var o = res.group_pose.orientation;			//orientation
 
-		if(cmd_mod==CmdType.Shift_X){
-			twist.linear.x = parseFloat(data);
-		}else if(cmd_mod==CmdType.Shift_Y){
-			twist.linear.y = parseFloat(data);
-		}else if(cmd_mod==CmdType.Shift_Z){
-			twist.linear.z = parseFloat(data);
-		}else if(cmd_mod==CmdType.Rotate_X){
-			twist.angular.x = parseFloat(data);
-		}else if(cmd_mod==CmdType.Rotate_Y){
-			twist.angular.y = parseFloat(data);
-		}else if(cmd_mod==CmdType.Rotate_Z){
-			twist.angular.z = parseFloat(data);
-		}
-		//console.log('twist.linear.x ='+ twist.linear.x  +',y=' + twist.linear.y + ',z=' + twist.linear.z);
-		console.log(cmd_mod,parseFloat(data));
-		var cmd_msg = new ROSLIB.Message({
-			cmd : cmd_mod,
-			pose : twist
-		});
-		mlist.push(cmd_msg);
+				 var e = euler_fomr_quaternion([o.x, o.y, o.z, o.w]);
+				 var data = $(selector).children("td.SubCmd").children("input").val();
+				 var val = parseFloat(data);
+				 //l('val='+val);
+
+				 if(cmd_mod==CmdType.Shift_X){
+			 			p.x  += val;
+			 		}else if(cmd_mod==CmdType.Shift_Y){
+			 			p.y  += val;
+			 		}else if(cmd_mod==CmdType.Shift_Z){
+			 			p.z  += val;
+			 		}else if(cmd_mod==CmdType.Rotate_X){
+			 			e[0] += val*_Math.DEG2RAD;
+			 		}else if(cmd_mod==CmdType.Rotate_Y){
+			 			e[1] += val*_Math.DEG2RAD;
+			 		}else if(cmd_mod==CmdType.Rotate_Z){
+			 			e[2] += val*_Math.DEG2RAD;
+			 		}
+
+					if(cmd_mod==CmdType.Shift_X  || cmd_mod==CmdType.Shift_Y  || cmd_mod==CmdType.Shift_Z){
+							var pose_msg = new ROSLIB.Message({
+									pose:{
+										position : {
+											x : p.x,
+											y : p.y,
+											z : p.z,
+										},
+										orientation : {
+											x : o.x,
+											y : o.y,
+											z : o.z,
+											w : o.w
+										}
+									}
+							});
+							l('pose_msg='+pose_msg);
+							pose_pub.publish(pose_msg);
+
+					}else if( cmd_mod==CmdType.Rotate_X || cmd_mod==CmdType.Rotate_Y || cmd_mod==CmdType.Rotate_Z){
+							o = quaternion_from_euler(e[0], e[1], e[2]);
+							var pose_msg = new ROSLIB.Message({
+									pose:{
+										position : {
+											x : p.x,
+											y : p.y,
+											z : p.z,
+										},
+										orientation : {
+											x : o[0],
+											y : o[1],
+											z : o[2],
+											w : o[3]
+										}
+									}
+							});
+							l('pose_msg='+pose_msg);
+							pose_pub.publish(pose_msg);
+					}
+
+		 });
+
+
 	//-------------CmdType.Vaccum-------------//
 	}else if(cmd_mod==CmdType.Vaccum){
 		var vaccum_yn = $(selector).find('[name=vaccum_select]').val()=='On' ? true:false;
@@ -593,145 +620,6 @@ function run_unit_command(run_cmd_ind){
 
 }
 
-$("#run_btn2").click(function() {
-	$(this).removeClass('active');
-	$(this).addClass('disabled');
-
-	var mlist = [];
-
-	//get each command
-	$('#teach_table tr').each(function(){
-		var cmd_mod = $(this).find('[name=cmd_mod]').children('select').val();
-		console.log(cmd_mod);
-		//-------------CmdType.Joint-------------//
-		if(cmd_mod==CmdType.Joint){
-			var float_ary = [];
-
-			$(this).children("td.SubCmd").children("input").each(function(){
-				var t_float = parseFloat( $(this).val() );
-				//console.log('$(this).val()='+t_float);
-				float_ary.push(t_float);
-			});
-
-			var cmd_msg = new ROSLIB.Message({
-				cmd : CmdType.Joint,
-				joint_position : float_ary
-			});
-
-			mlist.push(cmd_msg);
-		//-------------CmdType.PTP-------------//
-		}else if(cmd_mod==CmdType.PTP || cmd_mod==CmdType.Line){
-
-			var refer = $(this).children("td.SubCmd");
-			var twist = new ROSLIB.Message({
-				linear : {
-					x : parseFloat(refer.children("input:nth-child(1)").val()),
-					y : parseFloat(refer.children("input:nth-child(2)").val()),
-					z : parseFloat(refer.children("input:nth-child(3)").val()),
-				},
-				angular : {
-					x : parseFloat(refer.children("input:nth-child(4)").val()),
-					y : parseFloat(refer.children("input:nth-child(5)").val()),
-					z : parseFloat(refer.children("input:nth-child(6)").val()),
-				}
-			});
-
-			console.log('twist.linear.x ='+ twist.linear.x  +',y=' + twist.linear.y + ',z=' + twist.linear.z);
-
-			var cmd_msg = new ROSLIB.Message({
-				cmd : cmd_mod,
-				pose : twist
-			});
-			mlist.push(cmd_msg);
-		//-------------CmdType.Shift_X-------------//
-		}else if(cmd_mod==CmdType.Shift_X  || cmd_mod==CmdType.Shift_Y  || cmd_mod==CmdType.Shift_Z||
-			     cmd_mod==CmdType.Rotate_X || cmd_mod==CmdType.Rotate_Y || cmd_mod==CmdType.Rotate_Z ){
-
-			var data = $(this).children("td.SubCmd").children("input").val();
-			var twist = get_twist();
-
-			if(cmd_mod==CmdType.Shift_X){
-				twist.linear.x = parseFloat(data);
-			}else if(cmd_mod==CmdType.Shift_Y){
-				twist.linear.y = parseFloat(data);
-			}else if(cmd_mod==CmdType.Shift_Z){
-				twist.linear.z = parseFloat(data);
-			}else if(cmd_mod==CmdType.Rotate_X){
-				twist.angular.x = parseFloat(data);
-			}else if(cmd_mod==CmdType.Rotate_Y){
-				twist.angular.y = parseFloat(data);
-			}else if(cmd_mod==CmdType.Rotate_Z){
-				twist.angular.z = parseFloat(data);
-			}
-			//console.log('twist.linear.x ='+ twist.linear.x  +',y=' + twist.linear.y + ',z=' + twist.linear.z);
-			console.log(cmd_mod,parseFloat(data));
-			var cmd_msg = new ROSLIB.Message({
-				cmd : cmd_mod,
-				pose : twist
-			});
-			mlist.push(cmd_msg);
-		//-------------CmdType.Vaccum-------------//
-		}else if(cmd_mod==CmdType.Vaccum){
-			var vaccum_yn = $(this).find('[name=vaccum_select]').val()=='On' ? true:false;
-
-
-			var cmd_msg = new ROSLIB.Message({
-				cmd : CmdType.Vaccum,
-				vaccum : vaccum_yn
-			});
-
-			mlist.push(cmd_msg);
-		}else if(cmd_mod==CmdType.Base_Vel ){
-
-			var refer = $(this).children("td.SubCmd");
-			var twist = new ROSLIB.Message({
-				linear : {
-					x : parseFloat(refer.children("input:nth-child(1)").val()),
-					y : parseFloat(refer.children("input:nth-child(2)").val()),
-					z : 0,
-				},
-				angular : {
-					x : 0,
-					y : 0,
-					z : parseFloat(refer.children("input:nth-child(3)").val()),
-				}
-			});
-
-			//console.log('twist.linear.x ='+ twist.linear.x  +',y=' + twist.linear.y + ',z=' + twist.linear.z);
-
-			var cmd_msg = new ROSLIB.Message({
-				cmd : cmd_mod,
-				pose : twist
-			});
-			mlist.push(cmd_msg);
-		//-------------CmdType.Shift_X-------------//
-		}else if(cmd_mod==CmdType.Base_Init || cmd_mod==CmdType.Base_Stop ||
-				 cmd_mod==CmdType.Base_Pos_Index_1 || cmd_mod==CmdType.Base_Pos_Index_2 || cmd_mod==CmdType.Base_Pos_Index_3){
-			var cmd_msg = new ROSLIB.Message({
-				cmd : cmd_mod
-			});
-
-			mlist.push(cmd_msg);
-		}
-	});
-
-	//console.log('teachModeClient='+teachModeClient);
-
-	var goal = new ROSLIB.Goal({
-		actionClient : teachModeClient,
-		goalMessage : {
-			cmd_list : mlist
-		}
-	});
-	goal.on('feedback', teach_feedback);
-	goal.on('result', teach_result);
-
-
-	teach_result_trigger = false;
-	now_exe_id = 0;
-
-	goal.send();
-});
 
 $("#file_save_btn").click(function() {
 	$(this).removeClass('active');
@@ -767,7 +655,7 @@ $("#file_save_btn").click(function() {
 			var val = refer.val();
 			save_data +=  val ;  //Val End
 
-			console.log('refer.prop("pose")='+refer.attr('pose'));
+			//console.log('refer.prop("pose")='+refer.attr('pose'));
 
 			if(refer.attr('pose')!=undefined){
 				save_data +=  ',\n';
@@ -785,19 +673,6 @@ $("#file_save_btn").click(function() {
 			save_data +=  vaccum_yn +"\n";  //Val End
 
 			//save_data += '\t},\n'; // Vaccum END
-		}else if(cmd_mod==CmdType.Base_Vel){
-			save_data += '\t\t"cmd": "'+cmd_mod+'",\n';	//Base_Vel
-			save_data += '\t\t"val_3": ';	  //val_3 Start
-			var float_ary = [];
-			 $(this).children("td.SubCmd").children("input").each(function()
-		    {
-		    	var t_float = parseFloat( $(this).val() );
-		      float_ary.push( t_float );
-		    });
-			save_data += '[' + float_ary.toString()+"]\n";  //val_3 End
-		}else if(cmd_mod==CmdType.Base_Init || cmd_mod==CmdType.Base_Stop ||
-				 cmd_mod==CmdType.Base_Pos_Index_1 || cmd_mod==CmdType.Base_Pos_Index_2 || cmd_mod==CmdType.Base_Pos_Index_3){
-			save_data += '\t\t"cmd": "'+cmd_mod+'"\n';	//Base_Vel
 		}
 
 		if(index==cmd_count-1){
@@ -859,14 +734,6 @@ $("#file_read_btn").click(function() {
 			     	 cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z
 					){
 				tr_html = get_block_tr(cmd,json[index].val,json[index].pose);
-			}else if(cmd==CmdType.Base_Vel){
-
-				tr_html = get_block_tr(cmd,json[index].val_3);
-
-			}else if(cmd==CmdType.Base_Init || cmd==CmdType.Base_Stop ||
-				 cmd==CmdType.Base_Pos_Index_1 || cmd==CmdType.Base_Pos_Index_2 || cmd==CmdType.Base_Pos_Index_3
-				 ){
-				tr_html = get_block_tr(cmd);
 			}
 
 
@@ -933,27 +800,12 @@ function teach_click(t){
 
 				});
 
-				// if(m_cmd_id == undefined){
-				// 	  $('#block').children("input").each(function(){
-				// 				var v = res.joint_value[i++]*_Math.RAD2DEG;
-				// 				$(this).val(v.toFixed(2));			//ex:  0.123456789  ->  0.1234
-				//
-				// 		});
-				// }else{
-				// 	$('#'+m_cmd_id).children("td.SubCmd").children("input").each(function(){
-				// 		var v = res.joint_value[i++]*_Math.RAD2DEG;
-				// 		$(this).val(v.toFixed(2));			//ex:  0.123456789  ->  0.1234
-				//
-				// 	});
-				// }
 	  });
 
 	}else if(mod==CmdType.PTP || mod==CmdType.Line){
 		var request = new ROSLIB.ServiceRequest({
 		    group_name : "arm",
 		});
-
-		//rosservice call /robotis/base/get_kinematics_pose "group_name: 'arm'"
 
 		pose_client.callService(request, function(res) {
 			var p = res.group_pose.position;		//position
@@ -971,219 +823,14 @@ function teach_click(t){
 			});
 		});
 
-	}else if(mod==CmdType.Shift_X || mod==CmdType.Shift_Y || mod==CmdType.Shift_Z){
+	}else if(mod==CmdType.Shift_X  || mod==CmdType.Shift_Y  || mod==CmdType.Shift_Z||
+				 mod==CmdType.Rotate_X || mod==CmdType.Rotate_Y || mod==CmdType.Rotate_Z || mod==CmdType.Vaccum){
 
-		var find = false;
-
-		var now_cmd_id = m_cmd_id;
-		var request;
-		var pre_pose = [];
-
-		console.log(m_cmd_id);
-		do{
-			var pre_id = $('#'+now_cmd_id).prev("tr").prop("id");
-			if(pre_id==undefined){
-				console.error('Teach Click -> Cannot find previous position');
-				return;
-			}
-
-			//get previous tr's command
-			var pre_mod = $('#'+pre_id).children('[name=cmd_mod]').children('select').val();
-
-			if(pre_mod==CmdType.PTP || pre_mod==CmdType.Line){
-				var refer = $('#'+pre_id).children("td.SubCmd");
-
-
-				refer.children('input').each(function()
-			    {
-			    	var t_float = parseFloat( $(this).val() );
-
-			        pre_pose.push( t_float );
-			    });
-				find = true;
-			}else if(pre_mod==CmdType.Shift_X || pre_mod==CmdType.Shift_Y || pre_mod==CmdType.Shift_Z){
-
-				var pre_pose_str =  $('#'+pre_id).children("td.SubCmd").children("input").attr('pose');
-				console.log('pre_pose_str='+pre_pose_str);
-
-				if(pre_pose_str!=undefined){
-
-					var pre_pose_ary = pre_pose_str.split(",");
-					for(var ind in pre_pose_ary){
-						console.log('str='+pre_pose_ary[ind]);
-						pre_pose.push( parseFloat( pre_pose_ary[ind] ) );
-					}
-					find = true;
-				}
-			}
-			now_cmd_id = pre_id;
-		}while(!find);
-
-		if(!find)	return;
-
-
-		var twist = new ROSLIB.Message({
-		    linear : {
-		      x : pre_pose[0],
-		      y : pre_pose[1],
-		      z : pre_pose[2]
-		    },
-		    angular : {
-		      x : pre_pose[3],
-		      y : pre_pose[4],
-		      z : pre_pose[5]
-		    }
-		});
-		console.log('twist.linear.x ='+ twist.linear.x  +',y=' + twist.linear.y + ',z=' + twist.linear.z);
-		/*
-		request = new ROSLIB.ServiceRequest({
-		    cmd : "Teach:" + mod,
-		    pose : twist
-		});
-
-		//client call service
-		ui_client.callService(request, function(res) {
-	  		var shift = res.f.toFixed(3);
-	  		$('#'+m_cmd_id).children("td.SubCmd").children("input").val(shift);;
-
-	  		var now_pose = pre_pose;
-
-	  		if     (mod==CmdType.Shift_X){  	now_pose[0] += parseFloat(shift);		now_pose[0] = now_pose[0].toFixed(3);	}
-	  		else if(mod==CmdType.Shift_Y){  	now_pose[1] += parseFloat(shift);		now_pose[1] = now_pose[1].toFixed(3);	}
-	  		else if(mod==CmdType.Shift_Z){  	now_pose[2] += parseFloat(shift);		now_pose[2] = now_pose[2].toFixed(3);	}
-
-			//console.log('new_now_pose='+now_pose.toString() );
-			$('#'+m_cmd_id).children("td.SubCmd").children("input").attr('pose',now_pose.toString());
-		});
-		*/
+		alert('Cannot teach With Shift or Vaccum');
 	}
 }
 
 //----------------------------------------ROS----------------------------------------//
-// Connecting to ROS
-/*
-var ros = new ROSLIB.Ros({
-	url : 'ws://127.0.0.1:9090'
-});
-
-// If there is an error on the backend, an 'error' emit will be emitted.
-ros.on('error', function(error) {var request = new ROSLIB.ServiceRequest({
-		    cmd : "Teach:EEF_Pose",
-		});
-
-		ui_client.callService(request, function(res) {
-			var l = res.pose.linear;
-			var a = res.pose.angular;
-
-			console.log( 'Result : '   + res.result);
-			console.log( 'Pose : '   + l.x + "," + l.y + "," + l.z + "," + a.x + "," + a.y + "," + a.z );
-
-
-		  	var refer = $('#'+m_cmd_id).children("td.SubCmd");
-		  	refer.children("input:nth-child(1)").val(l.x.toFixed(2));
-		  	refer.children("input:nth-child(2)").val(l.y.toFixed(2));
-		  	refer.children("input:nth-child(3)").val(l.z.toFixed(2));
-		  	refer.children("input:nth-child(4)").val(a.x.toFixed(2));
-		  	refer.children("input:nth-child(5)").val(a.y.toFixed(2));
-		  	refer.children("input:nth-child(6)").val(a.z.toFixed(2));
-
-
-		});
-	console.log(error);
-});
-
-// Find out exactly when we made a connection.
-ros.on('connection', function() {
-	console.log('ROS Connection made!');
-});
-
-ros.on('close', function() {
-    console.log('ROS Connection closed.');
-});
-*/
-
-//-----------ActionClient-------------//
-var teachModeClient = new ROSLIB.ActionClient({
-	ros : ros,
-	serverName : '/mbot_control',
-	actionName : 'mbot_control/TeachCommandListAction'
-});
-
-
-var now_exe_id = 0;
-var teach_result_trigger = false;
-
-function teach_feedback(feedback){
-	if(teach_result_trigger)	return;
-	console.log('Feedback: ' + feedback.status);
-
-	var arrow_img = '<img src="img/right_arrow.png" align="center" style="width: 35%;"/>';
-
-	//get cmd_id
-	var fb_str = feedback.status;
-	var str_index = fb_str.indexOf('->');
-	var exe_id = fb_str.substring(str_index+2,fb_str.length);
-	var m_cmd_id = 'cmd_'+exe_id;
-	console.log('m_cmd_id=' + m_cmd_id);
-	//change to arrow_img
-	$('#'+m_cmd_id).children("td:first").html(arrow_img);
-
-
-	if(now_exe_id!=0){
-		m_cmd_id = 'cmd_'+now_exe_id;
-		//change to number
-		$('#'+m_cmd_id).children("td:first").html(now_exe_id.pad(3));
-	}
-
-	now_exe_id = parseInt(exe_id);
-}
-
-function teach_result(result){
-
-	console.log('Final Result: ' + result.notify);
-	$("#run_btn").removeClass('disabled');
-	$("#run_btn").addClass('active');
-
-
-	/*
-	$('#teach_table tr').each(function() {
-		$(this).children("td:first").html(now_exe_id.pad(3));
-	});*/
-
-
-	teach_result_trigger = true;
-
-
-	if(now_exe_id!=0){
-		m_cmd_id = 'cmd_'+now_exe_id;
-		//change to number
-		$('#'+m_cmd_id).children("td:first").html(now_exe_id.pad(3));
-	}
-
-
-}
-
-
-// ------------------------------------//
-// Subscribing to a "joint_states" Topic
-// -----------------------------------//
-/*
-var joint_ary = new Float32Array(6);;
-
-var joint_sub = new ROSLIB.Topic({
-	ros:ros,
-	name: '/robotis/present_joint_states',
-	messageType : 'sensor_msgs/JointState'
-});
-
-
-joint_sub.subscribe(function(msg){
-	for(var i =0 ;i < 6;i++){
-		joint_ary[i] = msg.position[i];
-	}
-});
-*/
-
 
 // ------------------------------------//
 // ROS for this UI
