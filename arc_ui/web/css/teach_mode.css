@@ -1,0 +1,268 @@
+body,tr,th,td{
+	//background: url(../background3.jpg);
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-position: center;
+	background-size: cover;
+}
+
+nav{
+	background-color: rgba(0, 107, 179, 0.8);
+	border-radius: 20px;
+	border-style: ridge;
+	overflow:auto;
+	margin-top: 20px;
+	margin-left: 30px;
+	margin-bottom: 10px;
+	margin-right: 30px;
+}
+
+.borderimg{
+	border: 15px solid transparent;
+	-webkit-border-image: url(../border3.png) 30 stretch; /* Safari 3.1-5 */
+	-o-border-image: url(../border3.png) 30 stretch; /* Opera 11-12.1 */
+	border-image: url(../border3.png) 30 stretch;
+	margin:auto;
+	height:760px;
+	width:98%;
+}
+
+.font_black{
+	color: #000;
+	font-family: "Times New Roman", Times, serif;
+	font-weight: bold;
+}
+
+.show_area{
+	position : fixed;
+	bottom : 10px;
+	width: 300px;
+}
+
+.add{
+	margin: 10px;
+	font-size: 20px;
+	border-radius: 30px;
+	border-style: ridge;
+}
+
+.teach_btn{
+	width: 10%;
+  float: right;
+	display: inline-block;
+	color: #fff;
+	background-color: #5bc0de;
+	border-color: #46b8da;
+	margin: 10px;
+
+	padding: 6px 12px;
+
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1.42857143;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: middle;
+	cursor: pointer;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	background-image: none;
+	border: 1px solid transparent;
+	border-radius: 4px;
+}
+
+select.options_none{
+	font-size: 22px;
+	height: 80%;
+	float: left;
+	appearance: none;
+	-moz-appearance: none; /* Firefox */
+	-webkit-appearance: none; /* Safari and Chrome */
+}
+
+select.options{
+	font-size: 24px;
+	border-radius: 10px;
+	border-style: ridge;
+	padding-top:5px;
+	padding-bottom:5px;
+	appearance: menulist;
+	-moz-appearance: menulist; /* Firefox */
+	-webkit-appearance: menulist; /* Safari and Chrome */
+	font-family: "Times New Roman", Times, serif;
+}
+
+.block_sty{
+	width: 10%;
+	border-radius: 10px;
+	border-style: ridge;
+	color : #000;
+	border-style: inset;
+	background-color: rgba(255, 255, 255);
+	text-align: right;
+	font-family: "Times New Roman", Times, serif;
+}
+
+td .block_sty{
+	width: 15%;
+	font-size: 26px;
+	color : #000;
+	border-style: inset;
+	background-color: rgba(255, 255, 255);
+	text-align: right;
+	font-family: "Times New Roman", Times, serif;
+}
+
+td .block_sty_none{
+	background-color: rgba(0, 0, 0, 0);
+	font-size: 28px;
+	text-align: right;
+	font-family: "Times New Roman", Times, serif;
+	width: 15%;
+	border-style:none;
+}
+
+select.options_cmd{
+	font-size: 26px;
+	color : #000;
+	height: 80%;
+	border-style: inset;
+	appearance: menulist;
+	-moz-appearance: menulist; /* Firefox */
+	-webkit-appearance: menulist; /* Safari and Chrome */
+}
+
+select.options_cmd_none{
+	font-size: 26px;
+	background-color: rgba(0, 0, 0, 0);
+	height:80%;
+	border-style: none;
+	appearance: none;
+	-moz-appearance: none; /* Firefox */
+	-webkit-appearance: none; /* Safari and Chrome */
+}
+
+#block,#shift_block,#base_vel_block input{
+	font-size: 24px;
+	height: 80%;
+	size:5;
+}
+
+#base{
+	border-style: solid;
+	border-width: medium;
+	margin-left: 30px;
+	margin-right: 30px;
+	height: 200px;
+	overflow:auto;
+}
+
+.default{
+	display:block;
+}
+
+.edit{
+	display:none;
+}
+
+table{
+	width : 99%;
+	margin : auto;
+	display : block;
+	height : 100%;
+	border-collapse: collapse;
+}
+
+thead {
+	font-size : 20px;
+	display : block;
+	width : 100%;
+	border-collapse: collapse;
+	border-bottom: solid #0000ff;
+}
+
+tbody{
+	display : block;
+	height : 85%;
+	width : 100%;
+	overflow : auto;
+}
+
+tr{
+	display : block;
+	width: 100%;
+	font-size: 28px;
+}
+
+/*th, td
+{
+	border:solid black 1px;
+}*/
+
+th:nth-child(1),td:nth-child(1){
+	display : inline-block;
+	width:10%;
+	text-align:center;
+}
+td:nth-child(1){
+	border-right: solid #0000ff;
+}
+th:nth-child(2),td:nth-child(2){
+	display : inline-block;
+	width:15%;
+	text-align:center;
+}
+td:nth-child(2){
+	border-right: solid #0000ff;
+}
+th:nth-child(3),td:nth-child(3){
+	display : inline-block;
+	text-align:center;
+	width:60%;
+}
+th:nth-child(4),td:nth-child(4){
+	display : inline-block;
+	text-align:center;
+	width:10%;
+}
+th:nth-child(5),td:nth-child(5){
+	display : inline-block;
+	width:5%;
+	text-align:center;
+}
+
+tr:nth-child(even){
+	background: #0090DD;
+}
+
+tr:nth-child(odd){
+	background: #FFF;
+}
+
+.onDND{
+	background: #CCC;
+}
+
+.teach_btn{
+	height: 100%
+}
+
+.img_show{
+	height: 32px;
+	width: 32px;
+	display: none;
+	margin:3px;
+}
+
+#show_btn{
+	font-family:Times New Roman, Times, serif;
+	font-weight: bold;
+	box-shadow: 3px 3px;
+	font-size : 12px;
+	color:white;
+	background-color:rgba(0, 115, 153,1);
+	display:inline-block;
+	width:100%
+}

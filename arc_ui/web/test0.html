@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Teach Mode</title>
+
+	</head>
+<body>
+
+
+	<script src="js/jquery/jquery.min.js"></script>
+
+  <script src="js/math/Math.js"></script>
+  <script src="js/math/Matrix4.js"></script>
+  <script src="js/math/Vector3.js"></script>
+  <script src="js/math/Quaternion.js"></script>
+  <script src="js/math/Euler.js"></script>
+
+  <script>
+  function quaternion_matrix(quaternion){
+      // """Return homogeneous rotation matrix from quaternion.
+      //
+      // >>> R = quaternion_matrix([0.06146124, 0, 0, 0.99810947])
+      // >>> numpy.allclose(R, rotation_matrix(0.123, (1, 0, 0)))
+      // True
+
+
+      q = nj.array(quaternion[:4], dtype=nj.float64)
+      // nq = numpy.dot(q, q)
+      // if nq < _EPS:
+      //     return numpy.identity(4)
+      // q *= math.sqrt(2.0 / nq)
+      // q = numpy.outer(q, q)
+      // return numpy.array((
+      //     (1.0-q[1, 1]-q[2, 2],     q[0, 1]-q[2, 3],     q[0, 2]+q[1, 3], 0.0),
+      //     (    q[0, 1]+q[2, 3], 1.0-q[0, 0]-q[2, 2],     q[1, 2]-q[0, 3], 0.0),
+      //     (    q[0, 2]-q[1, 3],     q[1, 2]+q[0, 3], 1.0-q[0, 0]-q[1, 1], 0.0),
+      //     (                0.0,                 0.0,                 0.0, 1.0)
+      //     ), dtype=numpy.float64)
+  }
+  // var x = 0;
+  // var y = 0.00034906584331;
+  // var z = 0;
+  // var w = 0.999999939077;
+
+    // var x =  0.141937896193;
+    // var  y= 0.000345531748338;
+    // var  z= -4.95456744509e-05;
+    // var  w = 0.989875503171;
+
+    // var x = -0.000136601742118;
+    // var y = 0.000317726871084;
+    // var z = 0.384128395267;
+    // var w =  0.923279619801;
+  //   var x = 0.249551875462;
+  //   var y = 0.106247508251;
+  //  var z= 0.0610616711224;
+  //   var w= 0.96057628576;
+   //
+  //   var x= 0.254720186399;
+  //   var y= 0.0564377583427;
+  //   var z= 0.0746908660235;
+  //   var w= 0.962472690837;
+
+    var x = 0.282022538161;
+    var y = 0.157035464967;
+    var z= 0.0680701333135;
+    var w= 0.944017800501;
+
+
+
+  var n = Math.sqrt( x*x + y*y + z*z + w*w);
+  console.log('n = ' + n);
+
+  var q = new Quaternion( x , y , z , w);
+  //var ang = new Vec3();
+  var e = new Euler();
+  e.setFromQuaternion(q,'XYZ');
+  //console.log('raw = ' + e.x + 'pitch = ' + e.y +'yaw = ' + e.z);
+  //qua.toEuler(ang);
+  document.write('roll = ' + e.x*_Math.RAD2DEG + '<BR>'+
+                'pitch = ' + e.y*_Math.RAD2DEG + '<BR>'+
+                'yaw = ' + e.z*_Math.RAD2DEG + '<BR>');
+    document.write('<BR>');
+
+  //  var roll = 16.32 * _Math.DEG2RAD;
+  //  var pitch = 0.04 * _Math.DEG2RAD;
+  //  var yaw   = 0;
+
+   var roll = 16.32 * _Math.DEG2RAD;
+   var pitch = 0.04 * _Math.DEG2RAD;
+   var yaw   = 0;
+
+    var e2 = new Euler(roll,pitch,yaw);
+    e2.order = 'XYZ';
+    var q2 = new Quaternion();
+    e.order = 'XYZ';
+    q2.setFromEuler(e);
+
+    document.write('x = ' + q2.x + '<BR>'+
+                  'y = ' + q2.y + '<BR>'+
+                  'z = ' + q2.z + '<BR>'+
+                  'w = ' + q2.w);
+
+
+  </script>
+
+  </body>
+</html>

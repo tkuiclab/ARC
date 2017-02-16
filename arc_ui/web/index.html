@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+	<!-- mm_web -->
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  	<meta charset="utf-8">
+	<title>JSON Decoder</title>
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  	<!-- Styles -->
+	<link rel="stylesheet" href="font-awesome-4.3.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="css/starter-template.css">
+   
+   	<!-- jQuery UI-->
+	<link rel="stylesheet" href="jquery-ui-1.11.4/jquery-ui.css">
+	<!------------------------------------------------------------------------------>
+<body>
+	<nav>
+		<ul class="list-unstyled main-menu">  
+			<!--Include your navigation here-->
+			<li class="text-left"><a href="http://blog.themearmada.com/demos/off-canvas-menu/#" id="nav-close">x</a></li>
+			<li><a href="remote_control.html">Remote Control <span class="icon"></span></a></li>
+			<li><a href="teach_mode.html">Teach Mode <span class="icon"></span></a></li>
+			<li><a href="http://www.iarc.tku.edu.tw/">TKU IARC <span class="icon"></span></a></li>
+		</ul>
+	</nav>
+	<div id="fixedTop">
+		<ul>
+			<li class="left">
+				<a id="nav-expander" class="nav-expander fixed"><i class="fa fa-bars fa-lg white"></i></a>
+			</li>
+			<li class="center">
+				<strong>Mobile Manipulator</strong>
+			</li>
+			<li  class="right">
+				<a id="rosConnect"><i class="fa fa-wifi fa-2x white" id="ipNum" title=""></i></a>
+			</li>
+		</ul>
+	</div>
+	<BR>
+	<BR>
+	<BR>
+	<!-- Motion Button -->
+	<table>
+	<tr>
+		<td><input type="file" id="files" name="files[]" multiple /></td>
+		<td><button id="RunBtn">RUN</button></td>
+	</tr>
+	<tr>
+		<td><output id="list"></output></td>
+	</tr>
+	</table>
+	<!-- Information Panel -->
+	<div class="col-md-4 panel panel-info">
+		<div class="panel-heading" style="text-align:center"><strong>Information</strong></div>
+		<div>
+			<p>info test</p>
+		</div>
+	</div>
+	<!-- Shelf Table -->
+	<div id="id01" class="col-md-4">
+		<table width="300px" height="400px" cellpadding="0" cellspacing="0" border="3px" bordercolor="#4fd7f4" style="text-align:center">
+		<tr height="10%">
+			<td colspan="3"><strong>Shelf</strong></td>
+		</tr>
+		<tr height="22.5%">
+			<td id="bin_A" width="33%"></td>
+			<td id="bin_B" width="34%"></td>
+			<td id="bin_C" width="33%"></td>
+		</tr>
+		<tr height="22.5%">
+			<td id="bin_D" width="20%"></td>
+			<td id="bin_E" width="20%"></td>
+			<td id="bin_F" width="20%"></td>
+		</tr>
+		<tr height="22.5%">
+			<td id="bin_G" width="20%"></td>
+			<td id="bin_H" width="20%"></td>
+			<td id="bin_I" width="20%"></td>
+		</tr>
+		<tr height="22.5%">
+			<td id="bin_J" width="20%"></td>
+			<td id="bin_K" width="20%"></td>
+			<td id="bin_L" width="20%"></td>
+		</tr>
+		</table>
+	</div>
+	<!-- Tote Panel -->
+	<div class="col-md-4">
+		<div width="100px" height="400px" cellpadding="0" cellspacing="0" style="border:3px solid #4fd7f4">
+		<div width="100%" height="10%" style="text-align:center; border-bottom:1px solid #4fd7f4"><strong>Tote</strong></div>
+		<div width="100%" height="90%" id="show_Tote">
+		</div>
+		</div>
+	</div>
+	<!-- Dialog -->
+	<div class="row"></div>
+	<div class="modal fade" id="setting_Dialog" role="dialog">
+		<div class="modal-dialog">
+		<!--content-->
+		<div class="modal-content" style="width:300px">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4>Dialog Setting</h4>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+<script src="js/roslib/eventemitter2.min.js"></script>
+<script src="js/roslib/roslib.min.js"></script>
+<script src="js/jquery/jquery.min.js"></script>
+<script src="js/jquery/jquery.navgoco.js"></script>
+<script src="js/bootstrap/bootstrap.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/ros_init.js"></script>
+<script src="jquery-ui-1.11.4/external/jquery/jquery.js"></script>
+<script src="jquery-ui-1.11.4/jquery-ui.js"></script>
+<script type="text/javascript" type="text/javascript">
+	//Read JSON file & Send JSON String to strategy by action
+	var xmlhttp = new XMLHttpRequest();
+	var url = "";//file's url
+	xmlhttp.onreadystatechange = function(){
+		if(xmlhttp.readyState == 4 && xmlhttp.status == 200){
+			parse_APC_json(xmlhttp.responseText);
+			var goal = new ROSLIB.Goal({
+				actionClient : jsonClient,
+				goalMessage : {
+					cmd : "Read_File", //Read_File, Pick_Run, Stow_Run
+					data : xmlhttp.responseText //Json string
+				}
+			});
+			goal.send();			
+		}
+	};
+	xmlhttp.open("GET",url,true);
+	xmlhttp.send();
+
+	function parse_APC_json(data)
+	{
+		var myArr = JSON.parse(data);
+		if(myArr.bin_contents != undefined && myArr.stow_contents == undefined){
+			//erase Tote's elements
+			$("#show_Tote").html('');
+			//show on Shelf table
+			show_Shelf_json(myArr);
+			//Click RUN button, then send motion command to strategy by action.
+			$("#RunBtn").on('click',function(e){
+				var goal = new ROSLIB.Goal({
+					actionClient : jsonClient,
+					goalMessage : {
+						cmd : "Pick_Run", //Readfile, Pick_Run, Stow_Run
+						data : ""
+					}
+				});
+				goal.send();
+			});
+		}else if(myArr.bin_contents == undefined && myArr.stow_contents != undefined){
+			//erase Shelf's elements
+			$("#bin_A").html('');
+			$("#bin_B").html('');
+			$("#bin_C").html('');
+			$("#bin_D").html('');
+			$("#bin_E").html('');
+			$("#bin_F").html('');
+			$("#bin_G").html('');
+			$("#bin_H").html('');
+			$("#bin_I").html('');
+			$("#bin_J").html('');
+			$("#bin_K").html('');
+			$("#bin_L").html('');
+			//show on Tote table
+			show_Tote_json(myArr);
+			//Click RUN button, then send motion command to strategy by action.
+			$("#RunBtn").on('click',function(e){
+				var goal = new ROSLIB.Goal({
+					actionClient : jsonClient,
+					goalMessage : {
+						cmd : "Stow_Run", //Readfile, Pick_Run, Stow_Run
+						data : ""
+					}
+				});
+				goal.send();
+			});
+		}else{
+			alert("APC Json Format ERROR");
+		}
+	}
+	//show json elements to shelf
+	function show_Shelf_json(arr)
+	{
+		var outA="";var outB="";var outC="";
+		var outD="";var outE="";var outF="";
+		var outG="";var outH="";var outI="";
+		var outJ="";var outK="";var outL="";
+		var i;
+		for(i=0;i<arr.bin_contents.bin_A.length;i++){
+			if(arr.bin_contents.bin_A[i] === arr.work_order[0].item){
+				outA+='<strong style="color:red">'+arr.bin_contents.bin_A[i]+'</strong>'+"<br>";
+			}else{
+				outA+=arr.bin_contents.bin_A[i]+"<br>";
+			}
+		}
+		for(i=0;i<arr.bin_contents.bin_B.length;i++){
+			if(arr.bin_contents.bin_B[i] === arr.work_order[1].item){
+				outB+='<strong style="color:red">'+arr.bin_contents.bin_B[i]+'</strong>'+"<br>";
+			}else{
+				outB+=arr.bin_contents.bin_B[i]+"<br>";
+			}
+		}
+		for(i=0;i<arr.bin_contents.bin_C.length;i++){
+			if(arr.bin_contents.bin_C[i] === arr.work_order[2].item){
+				outC+='<strong style="color:red">'+arr.bin_contents.bin_C[i]+'</strong>'+"<br>";
+			}else{
+				outC+=arr.bin_contents.bin_C[i]+"<br>";
+			}
+		}
+		for(i=0;i<arr.bin_contents.bin_D.length;i++){
+			if(arr.bin_contents.bin_D[i] === arr.work_order[3].item){
+				outD+='<strong style="color:red">'+arr.bin_contents.bin_D[i]+'</strong>'+"<br>";
+			}else{
+				outD+=arr.bin_contents.bin_D[i]+"<br>";
+			}
+		}
+		for(i=0;i<arr.bin_contents.bin_E.length;i++){
+			if(arr.bin_contents.bin_E[i] === arr.work_order[4].item){
+				outE+='<strong style="color:red">'+arr.bin_contents.bin_E[i]+'</strong>'+"<br>";
+			}else{
+				outE+=arr.bin_contents.bin_E[i]+"<br>";
+			}
+		}
+		for(i=0;i<arr.bin_contents.bin_F.length;i++){
+			if(arr.bin_contents.bin_F[i] === arr.work_order[5].item){
+				outF+='<strong style="color:red">'+arr.bin_contents.bin_F[i]+'</strong>'+"<br>";
+			}else{
+				outF+=arr.bin_contents.bin_F[i]+"<br>";
+			}
+		}
+		for(i=0;i<arr.bin_contents.bin_G.length;i++){
+			if(arr.bin_contents.bin_G[i] === arr.work_order[6].item){
+				outG+='<strong style="color:red">'+arr.bin_contents.bin_G[i]+'</strong>'+"<br>";
+			}else{
+				outG+=arr.bin_contents.bin_G[i]+"<br>";
+			}
+		}
+		for(i=0;i<arr.bin_contents.bin_H.length;i++){
+			if(arr.bin_contents.bin_H[i] === arr.work_order[7].item){
+				outH+='<strong style="color:red">'+arr.bin_contents.bin_H[i]+'</strong>'+"<br>";
+			}else{
+				outH+=arr.bin_contents.bin_H[i]+"<br>";
+			}
+		}
+		for(i=0;i<arr.bin_contents.bin_I.length;i++){
+			if(arr.bin_contents.bin_I[i] === arr.work_order[8].item){
+				outI+='<strong style="color:red">'+arr.bin_contents.bin_I[i]+'</strong>'+"<br>";
+			}else{
+				outI+=arr.bin_contents.bin_I[i]+"<br>";
+			}
+		}
+		for(i=0;i<arr.bin_contents.bin_J.length;i++){
+			if(arr.bin_contents.bin_J[i] === arr.work_order[9].item){
+				outJ+='<strong style="color:red">'+arr.bin_contents.bin_J[i]+'</strong>'+"<br>";
+			}else{
+				outJ+=arr.bin_contents.bin_J[i]+"<br>";
+			}
+		}
+		for(i=0;i<arr.bin_contents.bin_K.length;i++){
+			if(arr.bin_contents.bin_K[i] === arr.work_order[10].item){
+				outK+='<strong style="color:red">'+arr.bin_contents.bin_K[i]+'</strong>'+"<br>";
+			}else{
+				outK+=arr.bin_contents.bin_K[i]+"<br>";
+			}
+		}
+		for(i=0;i<arr.bin_contents.bin_L.length;i++){
+			if(arr.bin_contents.bin_L[i] === arr.work_order[11].item){
+				outL+='<strong style="color:red">'+arr.bin_contents.bin_L[i]+'</strong>'+"<br>";
+			}else{
+				outL+=arr.bin_contents.bin_L[i]+"<br>";
+			}
+		}
+		/*for(i=0;i<arr.length;i++){
+			out+='<a href="'+arr[i].url+'">'+arr[i].display+'</a><br>';
+		}*/
+		document.getElementById("bin_A").innerHTML = outA;
+		document.getElementById("bin_B").innerHTML = outB;
+		document.getElementById("bin_C").innerHTML = outC;
+		document.getElementById("bin_D").innerHTML = outD;
+		document.getElementById("bin_E").innerHTML = outE;
+		document.getElementById("bin_F").innerHTML = outF;
+		document.getElementById("bin_G").innerHTML = outG;
+		document.getElementById("bin_H").innerHTML = outH;
+		document.getElementById("bin_I").innerHTML = outI;
+		document.getElementById("bin_J").innerHTML = outJ;
+		document.getElementById("bin_K").innerHTML = outK;
+		document.getElementById("bin_L").innerHTML = outL;
+	}
+	//show json elements to tote
+	function show_Tote_json(arr)
+	{
+		var out="";
+		var i;
+		var sw = 0;
+		for(i=0; i<arr.stow_contents.length; i++){
+			sw = 0;
+			for(j=0; j<arr.work_order.length; j++){
+				if(arr.stow_contents[i] === arr.work_order[j].item){
+					sw = 1;
+				}
+			}
+			if(sw == 1){
+				out+='<li><strong style="color:red">'+arr.stow_contents[i]+'</strong></li>';
+			}else{
+				out+='<li>'+arr.stow_contents[i]+"</li>";
+			}
+		}
+		document.getElementById("show_Tote").innerHTML = '<ul>'+out+'</ul>';
+	}
+	//Open Local Files Dialog
+	function handleFileSelect(evt)
+	{
+		var files = evt.target.files; // FileList object
+
+		// files is a FileList of File objects. List some properties.
+		var output = [];
+		for (var i = 0, f; f = files[i]; i++) {
+			output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+			f.size, ' bytes, last modified: ',
+			f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+			'</li>');
+
+			url = "json/"+f.name;//open the json file in folder '/json'
+			xmlhttp.open("GET",url,true);
+			xmlhttp.send();
+		}
+		document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+	}
+	document.getElementById('files').addEventListener('change', handleFileSelect, false);
+</script>
+</body>
+</html>
