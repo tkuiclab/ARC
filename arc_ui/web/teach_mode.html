@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Teach Mode</title>
+
+    <!-- Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/teach_mode.css" rel="stylesheet">
+
+	</head>
+<body>
+
+
+	<nav>
+		<button type="button" id="addbtn" class="add">
+			<span class="glyphicon glyphicon-plus"></span>
+		</button>
+
+		<select class="options" id="cmd_select">
+			<option value="Choose">Choose</option>
+			<option value="Joint">Joint</option>
+			<option value="PTP">PTP</option>
+			<option value="Line">Line</option>
+			<option value="Shift_X">Shift_X</option>
+			<option value="Shift_Y">Shift_Y</option>
+			<option value="Shift_Z">Shift_Z</option>
+			<option value="Rotate_X">Rotate_X</option>
+			<option value="Rotate_Y">Rotate_Y</option>
+			<option value="Rotate_Z">Rotate_Z</option>
+     	<option value="Vaccum">Vaccum</option>
+      <!--
+			<option value="-----------------------">----------------------</option>
+			<option value="Base_Vel">Base_Vel</option>
+			<option value="Base_Stop">Base_Stop</option>
+			<option value="Base_Init">Base_Init</option>
+			<option value="Base_Pos_Index_1">Base_Pos_Index_1</option>
+			<option value="Base_Pos_Index_2">Base_Pos_Index_2</option>
+			<option value="Base_Pos_Index_3">Base_Pos_Index_3</option>
+    -->
+		</select>
+
+		<div id="block" style= "display:none;">
+			<input value="0" id="block_1" class="block_sty" type="number"/>
+			<input value="0" id="block_2" class="block_sty" type="number"/>
+			<input value="0" id="block_3" class="block_sty" type="number"/>
+			<input value="0" id="block_4" class="block_sty" type="number"/>
+			<input value="0" id="block_5" class="block_sty" type="number"/>
+			<input value="0" id="block_6" class="block_sty" type="number"/>
+		</div>
+
+		<div id="vaccum_block" style= "display:none;">
+			<select class="options" id="vaccum_select">
+				<option value="On">On</option>
+				<option value="Off">Off</option>
+			</select>
+		</div>
+
+		<div id="shift_block" style= "display:none;">
+			<input value="0" id="shift_val" class="block_sty" type="number"/>
+		</div>
+		<!--
+		<div id="base_vel_block" style= "display:none;">
+			<input value="0" id="base_vel_block_1" class="block_sty" type="number"/>
+			<input value="0" id="base_vel_block_2" class="block_sty" type="number"/>
+			<input value="0" id="base_vel_block_3" class="block_sty" type="number"/>
+		</div>
+		-->
+		<button name="teach_btn" class="teach_btn" style="width:10%; float:right;" onclick="teach_click(this)">
+		<span class="glyphicon glyphicon-pushpin"/>Teach
+		</button>
+	</nav>
+
+		<div class="borderimg">
+			<table>
+				<thead>
+					<tr>
+						<th width="15%" class="font_black">Order<input id="move_cmd" style="margin-left:1px;" type="checkbox"></td>
+						<th width="20%" class="font_black">Command</td>
+						<th width="50%" class="font_black">Parameter</td>
+						<th width="10%" class="font_black">Edit</td>
+						<th width="5%" class="font_black">Delete</td>
+					</tr>
+				</thead>
+				<tbody id="teach_table" style="font-size: 24px" ondrop="drop(event)" ondragover="allowDrop(event)">
+				</tbody>
+			</table>
+		</div>
+	<br>
+	<div style="text-align:center;">
+    <button id="set_mode_btn" type="button" class="btn btn-success btn-lg active">Set Mode</button>
+		<button id="run_btn" type="button" class="btn btn-success btn-lg active">Run Teach Command</button>
+		<button id="file_save_btn" type="button" class="btn btn-success btn-lg active">Save</button>
+		<button id="file_read_btn" type="button" class="btn btn-success btn-lg active">Read</button>
+	</div>
+
+	<div class="show_area">
+		<textarea id="test_json_data" style="display:none;" cols="40" rows="20">
+
+		</textarea>
+		<button id="show_btn" >S h o w</button>
+	</div>
+	<script src="js/jquery/jquery.min.js"></script>
+  <script src="bootstrap/js/bootstrap.min.js"></script>
+
+	<script src="js/roslib/eventemitter2.min.js"></script>
+	<script src="js/roslib/roslib.js"></script>
+  <script src="js/ros_init.js"></script>
+
+  <script src="js/math/numjs.min.js"></script>
+  <script src="js/math/Math.js"></script>
+  <script src="js/math/euler_quaternion_converter.js"></script>
+
+	<script src="js/teach_mode.js"></script>
+
+  </body>
+</html>
