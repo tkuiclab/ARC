@@ -9,6 +9,7 @@ project(manipulator_h_kinematics_dynamics)
 ################################################################################
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  roslib
   robotis_math
   cmake_modules
 )

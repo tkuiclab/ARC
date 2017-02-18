@@ -417,12 +417,13 @@ void BaseModule::generateP2PTrajProcess()
     double roll  = robotis_->cmd.data[4] * M_PI / 180.0;
     double pitch = robotis_->cmd.data[3] * M_PI / 180.0;
     double yaw   = robotis_->cmd.data[5] * M_PI / 180.0;
+    double fai   = robotis_->cmd.data.size() == 7? robotis_->cmd.data[6] * M_PI / 180.0: 0;
 
     robotis_->ik_target_position_ << x, y, z;
     robotis_->ik_target_rotation_ = robotis_framework::convertRPYToRotation(roll, pitch, yaw);
 
     /* calc ik */
-    bool ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_);
+    bool ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_, fai);
     if (!ik_success)
     {
         ROS_INFO("IK ERR !!!");
@@ -430,6 +431,9 @@ void BaseModule::generateP2PTrajProcess()
     }
     /* calc fk(update pos and ori) */
     manipulator_->fk();
+    std::cout << "FK position_: " << manipulator_->manipulator_link_data_[END_LINK]->position_ << std::endl;
+    std::cout << "FK Redundancy: " << manipulator_->get_Redundancy() * 180 / M_PI << std::endl;
+
 
     for (int id = 1; id <= 6; id++)
     {
