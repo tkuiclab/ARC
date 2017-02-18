@@ -1,4 +1,4 @@
-# ARC
+# ARC :sunglasses:
 TKU M-Bot for Amazon Robotics Challenge (ARC)
 
 
@@ -25,7 +25,7 @@ $ roslaunch manipulator_h_manager manipulator_h_manager.launch en_sim:=true
     arg: paused
     
 ```bash
-$ roslaunch manipulator_h_gazebo manipulator_h_gazebo.launch
+$ roslaunch pro7a_description pro7a_gazebo.launch
 ```
 
 * Manipulator Test GUI
@@ -34,7 +34,8 @@ $ rosrun manipulator_h_gui manipulator_h_gui
 ```
 
 * Publish Test Cmd    
-    data: [x, y, z(m), pitch, roll, yaw(deg)]
+    data: [x, y, z(m), pitch, roll, yaw, fai(deg)]
+    the fai angle is option value.
 
 ```bash
 $ rostopic pub /robotis/base/cmd_msg std_msgs/Float64MultiArray -1 "layout:
@@ -43,7 +44,7 @@ $ rostopic pub /robotis/base/cmd_msg std_msgs/Float64MultiArray -1 "layout:
     size: 0
     stride: 0
   data_offset: 0
-data: [0, 0.3, 0.15, -90, 0, 90]"
+data: [0, 0.3, 0.15, -90, 0, 90, 45]" -1
 ```
 
 ### Using Real Robot
@@ -57,5 +58,3 @@ $ sudo bash
 ```bash
 # roslaunch manipulator_h_manager manipulator_h_manager.launch en_sim:=false
 ```
-
-:sunglasses:
