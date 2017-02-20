@@ -121,6 +121,8 @@ class BaseModule
     void jointPoseMsgCallback(const manipulator_h_base_module_msgs::JointPose::ConstPtr &msg);
     void kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs::KinematicsPose::ConstPtr &msg);
     void cmdMsgCallback(const std_msgs::Float64MultiArray::ConstPtr &cmd);
+    void P2PCallBack(const std_msgs::Float64MultiArray::ConstPtr &cmd);
+    void LineCallBack(const std_msgs::Float64MultiArray::ConstPtr &cmd);
 
     bool getJointPoseCallback(manipulator_h_base_module_msgs::GetJointPose::Request &req,
                               manipulator_h_base_module_msgs::GetJointPose::Response &res);
@@ -139,7 +141,6 @@ class BaseModule
 
     void stop();
     bool isRunning();
-
     /* Parameter */
     BaseJointState *joint_state_;
     RobotisState *robotis_;

@@ -98,7 +98,7 @@ void BaseModule::parseIniPoseData(const std::string &path)
     double _mov_time;
     _mov_time = doc["mov_time"].as<double>();
 
-    robotis_->mov_time_ = _mov_time;
+    robotis_->mov_time_ = 2;// not sure cnang (changed)
 
     // parse target pose
     YAML::Node _tar_pose_node = doc["tar_pose"];
@@ -138,6 +138,13 @@ void BaseModule::queueThread()
                                                             &BaseModule::jointPoseMsgCallback, this);
     ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/base/kinematics_pose_msg", 5,
                                                                  &BaseModule::kinematicsPoseMsgCallback, this);
+    
+    ros::Subscriber JointP2P_msg_sub = ros_node.subscribe("/robotis/base/JointP2P_msg", 5,
+                                                                 &BaseModule::P2PCallBack, this);
+
+    ros::Subscriber TaskP2P_msg_sub = ros_node.subscribe("/robotis/base/TaskP2P_msg", 5,
+                                                                 &BaseModule::LineCallBack, this);                                                                                                                          
+
     /* topic of test cmd */
     ros::Subscriber cmd_msg_sub = ros_node.subscribe("/robotis/base/cmd_msg", 5,
                                                      &BaseModule::cmdMsgCallback, this);
@@ -228,10 +235,78 @@ bool BaseModule::getKinematicsPoseCallback(manipulator_h_base_module_msgs::GetKi
     return true;
 }
 
+void BaseModule::P2PCallBack(const std_msgs::Float64MultiArray::ConstPtr &cmd)
+{
+    if (enable_ == false)
+        return;
+
+    // Display Cmd
+    std::cout << "Desired Cmd:" << std::endl;
+    for (int i = 0; i < cmd->data.size(); i++)
+    {
+        std::cout << cmd->data[i] << " ";
+    }
+
+    /* 記下命令 */
+    robotis_->cmd = *cmd;
+
+    robotis_->ik_id_start_ = 0;
+    robotis_->ik_id_end_   = END_LINK;
+
+    if (robotis_->is_moving_ == false)
+    {
+        tra_gene_thread_ = new boost::thread(boost::bind(&BaseModule::generateP2PTrajProcess, this));
+        delete tra_gene_thread_;
+    }
+    else
+    {
+        ROS_INFO("previous task is alive");
+    }
+}
+
+void BaseModule::LineCallBack(const std_msgs::Float64MultiArray::ConstPtr &cmd)
+{
+    if (enable_ == false)
+        return;
+
+    // Display Cmd
+    std::cout << "Desired Cmd:" << std::endl;
+    for (int i = 0; i < cmd->data.size(); i++)
+    {
+        std::cout << cmd->data[i] << " ";
+    }
+
+    /* 記下命令 */
+    robotis_->cmd = *cmd;
+    robotis_->kinematics_pose_msg_.pose.position.x = cmd->data[0];
+    robotis_->kinematics_pose_msg_.pose.position.y = cmd->data[1];
+    robotis_->kinematics_pose_msg_.pose.position.z = cmd->data[2];
+    Eigen::Quaterniond quaterion = robotis_framework::convertRPYToQuaternion(cmd->data[3],cmd->data[4],cmd->data[5]);
+    robotis_->kinematics_pose_msg_.pose.orientation.w = quaterion.w();
+    robotis_->kinematics_pose_msg_.pose.orientation.x = quaterion.x();
+    robotis_->kinematics_pose_msg_.pose.orientation.y = quaterion.y();
+    robotis_->kinematics_pose_msg_.pose.orientation.z = quaterion.z();
+
+    robotis_->ik_id_start_ = 0;
+    robotis_->ik_id_end_   = END_LINK;
+
+    if (robotis_->is_moving_ == false)
+    {
+        tra_gene_thread_ = new boost::thread(boost::bind(&BaseModule::generateTaskTrajProcess, this));
+        delete tra_gene_thread_;
+    }
+    else
+    {
+        ROS_INFO("previous task is alive");
+    }
+}
+
 void BaseModule::kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs::KinematicsPose::ConstPtr &msg)
 {
     if (enable_ == false)
         return;
+
+    //msg->pose.position.x
 
     robotis_->kinematics_pose_msg_ = *msg;
 

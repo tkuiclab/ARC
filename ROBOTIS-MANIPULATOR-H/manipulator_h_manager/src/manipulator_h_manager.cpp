@@ -42,53 +42,55 @@
 
 using namespace robotis_manipulator_h;
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "Robotis_Manipulator_H_Manager");
-    ros::NodeHandle nh;
+  ros::init(argc, argv, "Robotis_Manipulator_H_Manager");
+  ros::NodeHandle nh;
 
-    ROS_INFO("manager->init");
-    robotis_framework::RobotisController *controller = robotis_framework::RobotisController::getInstance();
+  ROS_INFO("manager->init");
+  robotis_framework::RobotisController *controller = robotis_framework::RobotisController::getInstance();
 
-    /* Load ROS Parameter */
-    std::string offset_file = nh.param<std::string>("offset_table", "");
-    std::string robot_file  = nh.param<std::string>("robot_file_path", "");
-    std::string init_file   = nh.param<std::string>("init_file_path", "");
+  /* Load ROS Parameter */
+  std::string offset_file = nh.param<std::string>("offset_table", "");
+  std::string robot_file  = nh.param<std::string>("robot_file_path", "");
 
-    /* gazebo simulation */
-    controller->gazebo_mode_ = nh.param<bool>("gazebo", false);
-    if (controller->gazebo_mode_ == true)
-    {
-        std::string robot_name = nh.param<std::string>("gazebo_robot_name", "");
-        if (robot_name != "")
-            controller->gazebo_robot_name_ = robot_name;
-    }
+  std::string init_file   = nh.param<std::string>("init_file_path", "");
 
-    if (robot_file == "")
-    {
-        ROS_ERROR("NO robot file path in the ROS parameters.");
-        return -1;
-    }
+  /* gazebo simulation */
+  controller->gazebo_mode_ = nh.param<bool>("gazebo", false);
+  if (controller->gazebo_mode_ == true)
+  {
+    std::string robot_name = nh.param<std::string>("gazebo_robot_name", "");
+    if (robot_name != "")//_Cxx_hashtable_define_trivial_hash
+      controller->gazebo_robot_name_ = robot_name;
+  }
 
-    if (controller->initialize(robot_file, init_file) == false)
-    {
-        ROS_ERROR("ROBOTIS Controller Initialize Fail!");
-        return -1;
-    }
+  if (robot_file == "")
+  {
+    ROS_ERROR("NO robot file path in the ROS parameters.");
+    return -1;
+  }
 
-    if (offset_file != "")
-        controller->loadOffset(offset_file);
+  if (controller->initialize(robot_file, init_file) == false)
+  {
+    ROS_ERROR("ROBOTIS Controller Initialize Fail!");
+    return -1;
+  }
 
-    sleep(1);
+  if (offset_file != "")
+    controller->loadOffset(offset_file);
 
-    /* Add Motion Module */
-    controller->addMotionModule((robotis_framework::MotionModule *) BaseModule::getInstance());
-    controller->startTimer();
+  sleep(1);
 
-    while (ros::ok())
-    {
-        usleep(100);
-    }
+  /* Add Motion Module */
+  controller->addMotionModule((robotis_framework::MotionModule*) BaseModule::getInstance());
 
-    return 0;
+  controller->startTimer();
+
+  while (ros::ok())
+  {
+    usleep(100);
+  }
+
+  return 0;
 }
