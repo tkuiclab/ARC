@@ -1,0 +1,140 @@
+//Direct Control Button
+//cause there has a lot of button need to send the value each other,so move this js code stand out the index.js
+var speedArr;
+var default_speed = 50;
+$('#direction_speed_send').on('click',function(e){
+	if(document.getElementById('direction_speed_value').value >=0 && document.getElementById('direction_speed_value').value<=100){
+		default_speed = document.getElementById('direction_speed_value').value / 1;
+		document.getElementById('direction_speed_value').value = '';
+		document.getElementById('direction_speed_value').placeholder = default_speed * 1;
+	}else{
+		alert("Speed only allow 0~100%");
+	}
+});
+function direct(dirID,spArr){
+<<<<<<< HEAD:web/js/index_base_panel.js
+	$(dirID).on('mousedown',function(e){
+//		var float64 = returnArray6(spArr[0],spArr[1],spArr[2],spArr[3],spArr[4],spArr[5]);
+=======
+	$(dirID).bind('mousedown touchstart',function(e){
+>>>>>>> 70d8c2447f8efa08130868e616dadeba5e37f2da:web/js/remote_control/index_base_panel.js~
+		var twist = new ROSLIB.Message({
+			linear : {
+			x : spArr[0]*default_speed,
+			y : spArr[1]*default_speed,
+			z : spArr[2]*default_speed
+			},
+			angular : {
+			x : spArr[3]*default_speed,
+			y : spArr[4]*default_speed,
+			z : spArr[5]*default_speed
+			}
+		});
+<<<<<<< HEAD:web/js/index_base_panel.js
+		direct_Pub.publish(twist);
+		$("#infoContent").html('Topic was send twist'
+					+"<BR>linear:<BR>"+ twist.linear.x +"<BR>"+ twist.linear.y +"<BR>"+ twist.linear.z
+					+"<BR>angular<BR>"+ twist.angular.x +"<BR>"+ twist.angular.y +"<BR>"+ twist.angular.z
+		);console.log(twist.linear.x+":"+twist.linear.y+":"+twist.linear.z);
+	});
+	//when mouseUp stop the motion
+	$(dirID).on('mouseup',function(e){
+		var twist = new ROSLIB.Message({
+			linear : {x : 0,y : 0,z : 0},
+			angular : {x : 0,y : 0,z : 0}
+		});
+		direct_Pub.publish(twist);
+=======
+		base_Pub.publish(twist);
+		$("#infoContent").html('Topic was send twist'
+					+"<BR>linear:<BR>"+ twist.linear.x +"<BR>"+ twist.linear.y +"<BR>"+ twist.linear.z
+					+"<BR>angular<BR>"+ twist.angular.x +"<BR>"+ twist.angular.y +"<BR>"+ twist.angular.z
+		);
+	});
+	//when mouseUp stop the motion
+	$(dirID).bind('mouseup touchend',function(e){
+		if(dirID == '#direction_base_enable' || dirID == '#direction_base_disable'){
+			var twist = new ROSLIB.Message({
+				linear : {x : spArr[0],y : spArr[1],z : spArr[2]},
+				angular : {x : spArr[3],y : spArr[4],z : spArr[5]}
+			});
+		}else{
+			var twist = new ROSLIB.Message({
+				linear : {x : 0,y : 0,z : 0},
+				angular : {x : 0,y : 0,z : 0}
+			});
+		}
+		base_Pub.publish(twist);
+		$("#infoContent").html('Topic was send twist'
+					+"<BR>linear:<BR>"+ twist.linear.x +"<BR>"+ twist.linear.y +"<BR>"+ twist.linear.z
+					+"<BR>angular<BR>"+ twist.angular.x +"<BR>"+ twist.angular.y +"<BR>"+ twist.angular.z
+		);
+	});
+	//Speacial case for dialog setting
+	if(dirID == 'Base'){
+		var twist = new ROSLIB.Message({
+			linear : {x : spArr[0],y : spArr[1],z : spArr[2]},
+			angular : {x : spArr[3],y : spArr[4],z : spArr[5]}
+		});
+		base_Pub.publish(twist);
+>>>>>>> 70d8c2447f8efa08130868e616dadeba5e37f2da:web/js/remote_control/index_base_panel.js~
+		$("#infoContent").html('Topic was send twist'
+					+"<BR>linear:<BR>"+ twist.linear.x +"<BR>"+ twist.linear.y +"<BR>"+ twist.linear.z
+					+"<BR>angular<BR>"+ twist.angular.x +"<BR>"+ twist.angular.y +"<BR>"+ twist.angular.z
+		);
+<<<<<<< HEAD:web/js/index_base_panel.js
+	});
+}
+speedArr = [ 0, 0, 1, 0, 0, 0];
+direct("#direction_up",speedArr);
+speedArr = [ 0, 0,-1, 0, 0, 0];
+direct("#direction_down",speedArr);
+=======
+	}
+};
+//enable the controller
+//angular.x -> 0:speed mode, 1:enable, 2:stop
+speedArr = [ 0, 0, 0, 1, 0, 0];
+direct("#direction_base_enable",speedArr);
+//disable the controller
+speedArr = [ 0, 0, 0, 2, 0, 0];
+direct("#direction_base_disable",speedArr);
+//Speed Mode
+>>>>>>> 70d8c2447f8efa08130868e616dadeba5e37f2da:web/js/remote_control/index_base_panel.js~
+speedArr = [ 0, 1, 0, 0, 0, 0];
+direct("#direction_front",speedArr);
+speedArr = [ 0,-1, 0, 0, 0, 0];
+direct("#direction_back",speedArr);
+speedArr = [ 1, 0, 0, 0, 0, 0];
+<<<<<<< HEAD:web/js/index_base_panel.js
+direct("#direction_right",speedArr);
+speedArr = [-1, 0, 0, 0, 0, 0];
+direct("#direction_left",speedArr);
+
+speedArr = [ 0, 0, 0, 0, 0,-1];
+direct("#direction_yaw_left",speedArr);
+speedArr = [ 0, 0, 0, 0, 0, 1];
+direct("#direction_yaw_right",speedArr);
+speedArr = [ 0, 0, 0, 1, 0, 0];
+direct("#direction_pitch_up",speedArr);
+speedArr = [ 0, 0, 0,-1, 0, 0];
+direct("#direction_pitch_down",speedArr);
+speedArr = [ 0, 0, 0, 0, 1, 0];
+direct("#direction_roll_right",speedArr);
+speedArr = [ 0, 0, 0, 0,-1, 0];
+direct("#direction_roll_left",speedArr);
+=======
+direct("#direction_base_right",speedArr);
+//Base Dialog Setting
+$("#control_send_base_d").on('click',function(e){
+	var lx = $("#input_base_lx_d").val()/100;
+	var ly = $("#input_base_ly_d").val()/100;
+	var az = $("#input_base_az_d").val()/100;
+	if(lx >= 0 && lx <=1 && ly >= 0 && ly <=1 && az >= 0 && az <=1){
+		speedArr = [ lx, ly, 0, 0, 0, az];
+		direct("Base",speedArr);
+	}else{
+		alert("Value needs to be 0~100%");
+	}
+});
+>>>>>>> 70d8c2447f8efa08130868e616dadeba5e37f2da:web/js/remote_control/index_base_panel.js~

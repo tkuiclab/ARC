@@ -1,0 +1,105 @@
+{
+  "bin_contents":
+  {
+    "bin_A":
+    [
+        "oreo_mega_stuf","champion_copper_plus_spark_plug","expo_dry_erase_board_eraser","kong_duck_dog_toy"
+    ],
+    "bin_B":
+    [
+        "genuine_joe_plastic_stir_sticks"
+    ],
+    "bin_C":
+    [
+        ""
+    ],
+    "bin_D":
+    [
+        ""
+    ],
+    "bin_E":
+    [
+        ""
+    ],
+    "bin_F":
+    [
+        ""
+    ],
+    "bin_G":
+    [
+        ""
+    ],
+    "bin_H":
+    [
+        ""
+    ],
+    "bin_I":
+    [
+        ""
+    ],
+    "bin_J":
+    [
+	""
+    ],
+    "bin_K":
+    [
+	""
+    ],
+    "bin_L":
+    [
+	""
+    ]
+  },
+
+  "work_order":
+  [
+    {
+    "bin": "bin_A",
+    "item": "oreo_mega_stuf"
+    },
+    {
+    "bin": "bin_B",
+    "item": "genuine_joe_plastic_stir_sticks"
+    },
+    {
+      "bin": "bin_C",
+      "item": ""
+    },
+    {
+      "bin": "bin_D",
+      "item": ""
+    },
+    {
+      "bin": "bin_E",
+      "item": ""
+    },
+    {
+      "bin": "bin_F",
+      "item": ""
+    },
+    {
+      "bin": "bin_G",
+      "item": ""
+    },
+    {
+      "bin": "bin_H",
+      "item": ""
+    },
+    {
+      "bin": "bin_I",
+      "item": ""
+    },
+    {
+      "bin": "bin_J",
+      "item": ""
+    },
+    {
+      "bin": "bin_K",
+      "item": ""
+    },
+    {
+      "bin": "bin_L",
+      "item": ""
+    }
+ ]
+}

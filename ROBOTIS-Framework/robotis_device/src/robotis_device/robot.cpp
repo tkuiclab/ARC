@@ -91,6 +91,8 @@ Robot::Robot(std::string robot_file_path, std::string dev_desc_dir_path)
 
       // remove comment ( # )
       std::size_t pos = input_str.find("#");
+
+      /* found "#" */
       if (pos != std::string::npos)
         input_str = input_str.substr(0, pos);
 
@@ -106,6 +108,7 @@ Robot::Robot(std::string robot_file_path, std::string dev_desc_dir_path)
         continue;
       }
 
+      /* [ port info ] */
       if (session == SESSION_PORT_INFO)
       {
         std::vector<std::string> tokens = split(input_str, '|');
@@ -116,8 +119,10 @@ Robot::Robot(std::string robot_file_path, std::string dev_desc_dir_path)
 
         ports_[tokens[0]] = dynamixel::PortHandler::getPortHandler(tokens[0].c_str());
         ports_[tokens[0]]->setBaudRate(std::atoi(tokens[1].c_str()));
+        /* default device is "joint1" */
         port_default_device_[tokens[0]] = tokens[2];
       }
+      /* [ device info ] */
       else if (session == SESSION_DEVICE_INFO)
       {
         std::vector<std::string> tokens = split(input_str, '|');
@@ -132,6 +137,7 @@ Robot::Robot(std::string robot_file_path, std::string dev_desc_dir_path)
           float       protocol  = std::atof(tokens[4].c_str());
           std::string dev_name  = tokens[5];
 
+          /* dxls_ get dynamixel info */
           dxls_[dev_name] = getDynamixel(file_path, id, port, protocol);
 
           Dynamixel *dxl = dxls_[dev_name];

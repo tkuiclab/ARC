@@ -1,0 +1,10 @@
+string cmd
+float64[] float_ary
+geometry_msgs/Twist pose
+string str
+---
+string result
+string res_s
+float64 f
+geometry_msgs/Twist pose
+

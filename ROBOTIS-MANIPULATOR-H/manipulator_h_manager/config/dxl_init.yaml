@@ -32,7 +32,7 @@ joint3 :   # H54-100-S500-R
    return_delay_time     :  10    # item name : value
    operating_mode        :  3
    shutdown              :  58
-   homing_offset         :  -62738   # 45 deg
+   homing_offset         :  0
    torque_limit          :  310
    max_position_limit    :  250950
    min_position_limit    : -250950
@@ -47,6 +47,21 @@ joint4 :   # H54-100-S500-R
    return_delay_time     :  10    # item name : value
    operating_mode        :  3
    shutdown              :  58
+   homing_offset         :  -62738   # 45 deg
+   torque_limit          :  310
+   max_position_limit    :  250950
+   min_position_limit    : -250950
+   goal_torque           : 310
+   goal_velocity         : 0
+   goal_acceleration     : 0
+   position_p_gain       : 32
+   velocity_p_gain       : 256
+   velocity_i_gain       : 16
+
+joint5 :   # H54-100-S500-R
+   return_delay_time     :  10    # item name : value
+   operating_mode        :  3
+   shutdown              :  58
    homing_offset         :  0
    torque_limit          :  310
    max_position_limit    :  250950
@@ -58,7 +73,7 @@ joint4 :   # H54-100-S500-R
    velocity_p_gain       : 256
    velocity_i_gain       : 16
 
-joint5  :   # H42-20-S300-R
+joint6  :   # H42-20-S300-R
    return_delay_time     : 10    
    operating_mode        : 3     
    shutdown              : 58    
@@ -73,7 +88,7 @@ joint5  :   # H42-20-S300-R
    velocity_p_gain       : 440
    velocity_i_gain       : 40
 
-joint6  :   # H42-20-S300-R
+joint7  :   # H42-20-S300-R
    return_delay_time     : 10    
    operating_mode        : 3     
    shutdown              : 58    

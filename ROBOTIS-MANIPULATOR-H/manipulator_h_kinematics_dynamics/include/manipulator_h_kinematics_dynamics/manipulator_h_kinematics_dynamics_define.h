@@ -34,12 +34,12 @@
 namespace robotis_manipulator_h
 {
 
-#define MAX_JOINT_ID  6
-#define ALL_JOINT_ID  7
+#define MAX_JOINT_ID  7
+#define ALL_JOINT_ID  8
 
 #define MAX_ITER      10
 
-#define END_LINK      7
+#define END_LINK      8
 
 #define PRINT_MAT(X) std::cout << #X << ":\n" << X << std::endl << std::endl
 

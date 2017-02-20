@@ -37,51 +37,85 @@
 #include "link_data.h"
 #include "manipulator_h_kinematics_dynamics_define.h"
 
+/* for load yaml */
+#include <map>
+#include <string>
+#include <ros/package.h>
+#include <yaml-cpp/yaml.h>
+
 namespace robotis_manipulator_h
 {
 
 enum TreeSelect
 {
-  ARM
+    ARM
 };
 
 class ManipulatorKinematicsDynamics
 {
-  /* DH table */
-  Eigen::MatrixXd DH;
+private:
+    /* DH table */
+    Eigen::MatrixXd DH;
+    /* Link Param */
+    double L_se;
+    double L_sl;
+    double L_ew;
+    double rho1;
+    double rho2;
+
+    double fai;
 
 public:
-  ManipulatorKinematicsDynamics();
-  ManipulatorKinematicsDynamics(TreeSelect tree);
-  ~ManipulatorKinematicsDynamics();
+    ManipulatorKinematicsDynamics();
+    ManipulatorKinematicsDynamics(TreeSelect tree);
+    ~ManipulatorKinematicsDynamics();
 
-  LinkData *manipulator_link_data_[ ALL_JOINT_ID + 1];
+    LinkData *manipulator_link_data_[ALL_JOINT_ID + 1];
 
-  std::vector<int> findRoute(int to);
-  std::vector<int> findRoute(int from, int to);
+    std::vector<int> findRoute(int to);
+    std::vector<int> findRoute(int from, int to);
 
-  double totalMass(int joint_ID);
-  Eigen::MatrixXd calcMC(int joint_ID);
-  Eigen::MatrixXd calcCOM(Eigen::MatrixXd MC);
+    double totalMass(int joint_ID);
+    Eigen::MatrixXd calcMC(int joint_ID);
+    Eigen::MatrixXd calcCOM(Eigen::MatrixXd MC);
 
-  void forwardKinematics(int joint_ID);
+    void forwardKinematics(int joint_ID);
 
-  Eigen::MatrixXd calcJacobian(std::vector<int> idx);
-  Eigen::MatrixXd calcJacobianCOM(std::vector<int> idx);
-  Eigen::MatrixXd calcVWerr(Eigen::MatrixXd tar_position, Eigen::MatrixXd curr_position,
-                            Eigen::MatrixXd tar_orientation, Eigen::MatrixXd curr_orientation);
+    Eigen::MatrixXd calcJacobian(std::vector<int> idx);
+    Eigen::MatrixXd calcJacobianCOM(std::vector<int> idx);
+    Eigen::MatrixXd calcVWerr(Eigen::MatrixXd tar_position, Eigen::MatrixXd curr_position,
+                              Eigen::MatrixXd tar_orientation, Eigen::MatrixXd curr_orientation);
 
-  bool inverseKinematics(int to, Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation,
-                         int max_iter, double ik_err);
-  bool inverseKinematics(int from, int to, Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation,
-                         int max_iter, double ik_err);
+    bool inverseKinematics(int to, Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation,
+                           int max_iter, double ik_err);
+    bool inverseKinematics(int from, int to, Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation,
+                           int max_iter, double ik_err);
 
-  /* ==================== Evo Kinematics ==================== */
-  void gen_DHLinksTable();
-  void Gen_TFMat(int index, double theta, Eigen::Matrix4d& A);
-  void fk();
-  bool ik(Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation);
-  /* ==================== Evo Kinematics ==================== */
+    /* ==================== Evo Kinematics ==================== */
+    void load_LinkParam();
+    void set_LinkParam();
+
+    void gen_TFMat(int index, double theta, Eigen::Matrix4d& A);
+
+    inline double get_Redundancy() { return fai; }
+
+    /* ------------------ forward kinematics ------------------ */
+    void fk();
+    double cal_Redundancy(std::vector<Eigen::Vector3d>& jointPos);
+
+    /* ------------------ inverse kinematics ------------------ */
+    bool ik(Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation, double tarFai = 0);
+    void cal_ElbowInfo(Eigen::Vector3d& P_s, Eigen::Vector3d& P_w, double Fai, Eigen::Vector3d& P_e,Eigen::Vector3d& P_LJ);
+
+    Eigen::Vector3d cal_ElbowPos(Eigen::Matrix4d& RotMatrix, double Angle, double LinkLen, double Fai);
+    Eigen::Matrix4d cal_ElbowRotMatrix(Eigen::Vector3d& P_s, Eigen::Vector3d& P_w, Eigen::Vector3d& E);
+
+    double cal_VecIncAngle(Eigen::Vector3d& v1, Eigen::Vector3d& v2);
+    double cal_VecIncAngle(Eigen::Vector3d& origin, Eigen::Vector3d& p1, Eigen::Vector3d& p2);
+
+    /* Normalize Angle between 0 and 360 */
+    void normalizeAngle(double& rad);
+    /* ==================== Evo Kinematics ==================== */
 };
 
 }
