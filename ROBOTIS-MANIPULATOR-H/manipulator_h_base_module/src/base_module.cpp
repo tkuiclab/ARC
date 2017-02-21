@@ -492,7 +492,8 @@ void BaseModule::generateP2PTrajProcess()
     double roll  = robotis_->cmd.data[4] * M_PI / 180.0;
     double pitch = robotis_->cmd.data[3] * M_PI / 180.0;
     double yaw   = robotis_->cmd.data[5] * M_PI / 180.0;
-    double fai   = robotis_->cmd.data.size() == 7? robotis_->cmd.data[6] * M_PI / 180.0: 0;
+    double fai   = robotis_->cmd.data.size() == 7 ? robotis_->cmd.data[6] * M_PI / 180.0 : 0.0;
+    std::cout << "fai " << fai << std::endl;
 
     robotis_->ik_target_position_ << x, y, z;
     robotis_->ik_target_rotation_ = robotis_framework::convertRPYToRotation(roll, pitch, yaw);
@@ -508,7 +509,6 @@ void BaseModule::generateP2PTrajProcess()
     manipulator_->fk();
     std::cout << "FK position_: " << manipulator_->manipulator_link_data_[END_LINK]->position_ << std::endl;
     std::cout << "FK Redundancy: " << manipulator_->get_Redundancy() * 180 / M_PI << std::endl;
-
 
     for (int id = 1; id <= 6; id++)
     {
@@ -596,9 +596,19 @@ void BaseModule::generateTaskTrajProcess()
         robotis_->calc_task_tra_.block(0, dim, robotis_->all_time_steps_, 1) = tra;
     }
 
+    /* generation trajectory fro redundancy */
+    double ini_value = manipulator_->get_Redundancy();
+    double tar_value = 40 * M_PI /180.0;
+
+    Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
+                                                               robotis_->smp_time_, robotis_->mov_time_);
+
+    robotis_->calc_fai_tra.resize(robotis_->all_time_steps_, 1);
+    robotis_->calc_fai_tra.block(0, 0, robotis_->all_time_steps_, 1) = tra;
+
     robotis_->cnt_ = 0;
     robotis_->is_moving_ = true;
-    robotis_->ik_solve_ = true;
+    robotis_->ik_solve_  = true;
 
     ROS_INFO("[start] send trajectory");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
@@ -636,7 +646,6 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
     for (int id = 1; id <= MAX_JOINT_ID; id++)
         manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->goal_joint_state_[id].position_;
 
-    //manipulator_->forwardKinematics(0);
     manipulator_->fk();
 
     /* ----- send trajectory ----- */
@@ -647,17 +656,10 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
 
         if (robotis_->ik_solve_ == true)
         {
-            robotis_->setInverseKinematics(robotis_->cnt_, robotis_->ik_start_rotation_);
+            robotis_->setInverseKinematics();
 
-            int    max_iter = 30;
-            double ik_tol   = 1e-3;
-
-            /* original */
-            //bool    ik_success  = manipulator_->inverseKinematics(robotis_->ik_id_start_, robotis_->ik_id_end_,
-            //                                                      robotis_->ik_target_position_, robotis_->ik_target_rotation_, max_iter, ik_tol);
             /* kinematics of evo  */
-            bool ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_);
-
+            bool ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_, robotis_->ik_target_fai);
             if (ik_success == true)
             {
                 for (int id = 1; id <= MAX_JOINT_ID; id++)

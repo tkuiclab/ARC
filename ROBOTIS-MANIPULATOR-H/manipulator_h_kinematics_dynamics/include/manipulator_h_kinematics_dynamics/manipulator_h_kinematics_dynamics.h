@@ -104,7 +104,7 @@ public:
     double cal_Redundancy(std::vector<Eigen::Vector3d>& jointPos);
 
     /* ------------------ inverse kinematics ------------------ */
-    bool ik(Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation, double tarFai = 0);
+    bool ik(Eigen::MatrixXd& tar_position, Eigen::MatrixXd& tar_orientation, double tarFai = 0);
     void cal_ElbowInfo(Eigen::Vector3d& P_s, Eigen::Vector3d& P_w, double Fai, Eigen::Vector3d& P_e,Eigen::Vector3d& P_LJ);
 
     Eigen::Vector3d cal_ElbowPos(Eigen::Matrix4d& RotMatrix, double Angle, double LinkLen, double Fai);
@@ -115,6 +115,8 @@ public:
 
     /* Normalize Angle between 0 and 360 */
     void normalizeAngle(double& rad);
+
+    double roundN(double num, int digit = 0);
     /* ==================== Evo Kinematics ==================== */
 };
 
