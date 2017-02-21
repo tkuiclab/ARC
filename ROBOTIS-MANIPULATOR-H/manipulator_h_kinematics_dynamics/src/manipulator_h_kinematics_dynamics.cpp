@@ -38,6 +38,8 @@
 #include <iostream>
 #include "manipulator_h_kinematics_dynamics/manipulator_h_kinematics_dynamics.h"
 
+#define ROUND_DIGITS 10
+
 namespace robotis_manipulator_h
 {
 
@@ -50,6 +52,8 @@ ManipulatorKinematicsDynamics::~ManipulatorKinematicsDynamics()
 
 ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
 {
+    fai = 0;
+    
     for (int id = 0; id <= ALL_JOINT_ID; id++)
         manipulator_link_data_[id] = new LinkData();
 
@@ -504,11 +508,11 @@ void ManipulatorKinematicsDynamics::fk()
     manipulator_link_data_[END_LINK]->position_ = pos;
 
     /* ------------------------------------------- orientation ------------------------------------------- */
-    double pitch = atan2(ori(2, 2), sqrt(1 - pow(ori(2, 2), 2))); // pitch
+    double pitch = atan2(ori(2, 2), roundN(sqrt(1 - pow(ori(2, 2), 2)), ROUND_DIGITS)); // pitch
     double roll, yaw;
 
     /* pitch != +-90 deg */
-    if (fabs(ori(2, 2)) < 0.9999)
+    if (fabs(ori(2, 2)) <= 1.0 - pow(10, -8))
     {
         double Cz =  ori(1, 2) / sqrt(1 - pow(ori(2, 2), 2));
         double Sz = -ori(0, 2) / sqrt(1 - pow(ori(2, 2), 2));
@@ -541,7 +545,7 @@ void ManipulatorKinematicsDynamics::fk()
     this->fai = cal_Redundancy(jointPos);
 }
 
-bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd tar_position, Eigen::MatrixXd tar_orientation, double tarFai /* = 0 */)
+bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::MatrixXd& tar_orientation, double tarFai /* = 0 */)
 {
     Eigen::VectorXd angle(7);
     Eigen::MatrixXd rpy = robotis_framework::convertRotationToRPY(tar_orientation);
@@ -552,6 +556,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd tar_position, Eigen::Matr
 
     std::cout << "ik recv x,y,z:\n" << tar_position << std::endl;
     std::cout << "ik recv r,p,y:\n" << rpy * 180 / M_PI << std::endl;
+    std::cout << "ik recv fai: " << tarFai * 180 / M_PI << std::endl;
 
     double Cx = cos(pitch);
     double Sx = sin(pitch);
@@ -700,20 +705,23 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd tar_position, Eigen::Matr
         }
     }
 
+    // for (int i = 0; i < 7; i++)
+    //    std::cout << "ik angle " << i+1 << ": "<< angle[i] * 180.0 / M_PI << std::endl;
+
     for (int i = 0; i < MAX_JOINT_ID; i++)
     {
         /* checking angle is nan */
         if (std::isnan(angle[i]))
+        {
+            std::cout << "angle[" << i << "] is nan" << std::endl;
             return false;
+        }
 
         if((fabs(angle[i]) > 0) && (fabs(angle[i]) < 0.0001))
             angle[i] = 0;
 
         normalizeAngle(angle[i]);
     }
-
-    // for (int i = 0; i < 7; i++)
-    //    std::cout << "ik angle " << i << ": "<< angle[i] * 180.0 / M_PI << std::endl;
 
     /* evo配置算出來的角度轉換成robotis的配置 */
     angle[1] -= M_PI_2;
@@ -771,7 +779,7 @@ double ManipulatorKinematicsDynamics::cal_Redundancy(std::vector<Eigen::Vector3d
     Vector3d P_w = jointPos[6];
 
     double L_sw = (P_w - P_s).norm();
-
+    
     double BAE = acos((pow(L_se, 2) + pow(L_sw, 2) - pow(L_ew, 2)) / (2 * L_se * L_sw)); 
     Vector3d E = P_s + (P_w - P_s) * L_se * cos(BAE) / L_sw;
 
@@ -830,21 +838,20 @@ Eigen::Vector3d ManipulatorKinematicsDynamics::cal_ElbowPos(Eigen::Matrix4d& Rot
 
 double ManipulatorKinematicsDynamics::cal_VecIncAngle(Eigen::Vector3d& v1, Eigen::Vector3d& v2)
 {
-    double a = v1.dot(v2);
-    double b = v1.norm() * v2.norm();
+    double a = roundN(v1.dot(v2), ROUND_DIGITS);
+    double b = roundN(v1.norm() * v2.norm(), ROUND_DIGITS);
+
     /* angle */
     return acos(a / b);
 }
 
 double ManipulatorKinematicsDynamics::cal_VecIncAngle(Eigen::Vector3d& origin, Eigen::Vector3d& p1, Eigen::Vector3d& p2)
 {
-    using namespace Eigen;
-    Vector3d v1 = p1 - origin;
+    Eigen::Vector3d v1 = p1 - origin;
+    Eigen::Vector3d v2 = p2 - origin;
+    double a = roundN(v1.dot(v2), ROUND_DIGITS);
+    double b = roundN(v1.norm() * v2.norm(), ROUND_DIGITS);
 
-    Vector3d v2 = p2 - origin;
-
-    double a = v1.dot(v2);
-    double b = v1.norm() * v2.norm();
     /* angle */
     return acos(a / b);
 }
@@ -914,6 +921,16 @@ void ManipulatorKinematicsDynamics::normalizeAngle(double& rad)
         rad -= M_PI * 2.0;
     else if (rad < -M_PI)
         rad += M_PI * 2.0;
+}
+
+double ManipulatorKinematicsDynamics::roundN(double num, int digit /* = 0 */)
+{
+    double real = round(num);
+    double dot  = modf(num, &real);
+    dot = dot * pow(10.0, (double)digit);
+    dot = round(dot) / pow(10.0, (double)digit);
+
+    return real + dot;
 }
 
 /*  ===================================== Evo Kinematics End ===================================== */

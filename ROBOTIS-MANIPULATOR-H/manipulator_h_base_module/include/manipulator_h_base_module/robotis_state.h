@@ -62,7 +62,9 @@ public:
 
     Eigen::MatrixXd joint_ini_pose_;
     Eigen::MatrixXd calc_joint_tra_;
-    Eigen::MatrixXd calc_task_tra_;  
+    Eigen::MatrixXd calc_task_tra_;
+    /* trajectory of redundancy */
+    Eigen::MatrixXd calc_fai_tra;
 
     // msgs
     manipulator_h_base_module_msgs::JointPose      joint_pose_msg_;
@@ -75,9 +77,10 @@ public:
     bool ik_solve_;
     Eigen::MatrixXd ik_target_position_;
     Eigen::MatrixXd ik_start_rotation_, ik_target_rotation_;
+    double ik_target_fai;
     int ik_id_start_, ik_id_end_;
 
-    void setInverseKinematics(int cnt, Eigen::MatrixXd start_rotation);
+    void setInverseKinematics();
 };
 
 }

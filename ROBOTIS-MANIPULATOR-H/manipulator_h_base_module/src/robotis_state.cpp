@@ -50,6 +50,7 @@ RobotisState::RobotisState()
 
     calc_joint_tra_ = Eigen::MatrixXd::Zero(all_time_steps_, MAX_JOINT_ID + 1);
     calc_task_tra_  = Eigen::MatrixXd::Zero(all_time_steps_, 3);
+    calc_fai_tra    = Eigen::MatrixXd::Zero(all_time_steps_, 1);
 
     joint_ini_pose_ = Eigen::MatrixXd::Zero(MAX_JOINT_ID + 1, 1);
 
@@ -61,6 +62,8 @@ RobotisState::RobotisState()
     ik_start_rotation_  = robotis_framework::convertRPYToRotation(0.0, 0.0, 0.0);
     ik_target_rotation_ = robotis_framework::convertRPYToRotation(0.0, 0.0, 0.0);
 
+    ik_target_fai = 0;
+
     ik_id_start_ = 0;
     ik_id_end_   = 0;
 }
@@ -69,20 +72,23 @@ RobotisState::~RobotisState()
 {
 }
 
-/* ----- Setting ori of current tick for ik ----- */
-void RobotisState::setInverseKinematics(int cnt, Eigen::MatrixXd start_rotation)
+/* ----- Setting pos, ori, fai of next tick for ik ----- */
+void RobotisState::setInverseKinematics()
 {
     for (int dim = 0; dim < 3; dim++)
-        ik_target_position_.coeffRef(dim, 0) = calc_task_tra_.coeff(cnt, dim);
+        ik_target_position_.coeffRef(dim, 0) = calc_task_tra_.coeff(cnt_, dim);
 
-    Eigen::Quaterniond start_quaternion = robotis_framework::convertRotationToQuaternion(start_rotation);
+    Eigen::Quaterniond start_quaternion = robotis_framework::convertRotationToQuaternion(ik_start_rotation_);
     Eigen::Quaterniond target_quaternion(kinematics_pose_msg_.pose.orientation.w,
                                          kinematics_pose_msg_.pose.orientation.x,
                                          kinematics_pose_msg_.pose.orientation.y,
                                          kinematics_pose_msg_.pose.orientation.z);
 
-    double count = (double)cnt / (double)all_time_steps_;
+    double count = (double)cnt_ / (double)all_time_steps_;
 
     Eigen::Quaterniond quaternion = start_quaternion.slerp(count, target_quaternion);
     ik_target_rotation_ = robotis_framework::convertQuaternionToRotation(quaternion);
+
+    /* get next step redundancy */
+    ik_target_fai = calc_fai_tra(cnt_, 0);
 }
