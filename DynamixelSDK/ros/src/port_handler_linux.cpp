@@ -42,7 +42,7 @@
 
 #include "dynamixel_sdk/port_handler_linux.h"
 
-#define LATENCY_TIMER   4  // msec (USB latency timer)
+#define LATENCY_TIMER   8  // msec (USB latency timer)
 
 using namespace dynamixel;
 

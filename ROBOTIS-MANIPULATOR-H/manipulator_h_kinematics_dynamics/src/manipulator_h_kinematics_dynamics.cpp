@@ -556,7 +556,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
 
     std::cout << "ik recv x,y,z:\n" << tar_position << std::endl;
     std::cout << "ik recv r,p,y:\n" << rpy * 180 / M_PI << std::endl;
-    std::cout << "ik recv fai: " << tarFai * 180 / M_PI << std::endl;
+    // std::cout << "ik recv fai: " << tarFai * 180 / M_PI << std::endl;
 
     double Cx = cos(pitch);
     double Sx = sin(pitch);
@@ -696,7 +696,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
         {
             angle[4] = atan2(-R4_7(1, 2), -R4_7(0, 2));
             angle[6] = atan2(-R4_7(2, 1),  R4_7(2, 0));
-            if (abs(angle[4]) > 120.0 * M_PI / 180.0)
+            if (fabs(angle[4]) > 120.0 * M_PI / 180.0)
             {
                 angle[5] = atan2(-Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
                 angle[4] = atan2(R4_7(1, 2),  R4_7(0, 2));
@@ -729,12 +729,12 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     //angle[3] -= M_PI_2;
     angle[5] = -angle[5];
 
-    // for (int i = 0; i < 7; i++)
-    //    std::cout << "cvt ik angle " << i << ": "<< angle[i] * 180.0 / M_PI << std::endl;
+    for (int i = 0; i < 7; i++)
+       std::cout << "cvt ik angle " << i+1 << ": "<< angle[i] * 180.0 / M_PI << std::endl;
 
     for (int i = 0; i < MAX_JOINT_ID; i++)
     {
-        LinkData &link_data = *manipulator_link_data_[i + 1];
+        LinkData &link_data = *manipulator_link_data_[i+1];
 
         /* 存起解出的關節角度 */
         link_data.joint_angle_ = angle[i];
@@ -743,7 +743,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
         if (link_data.joint_angle_ > link_data.joint_limit_max_ ||
             link_data.joint_angle_ < link_data.joint_limit_min_)
         {
-            std::cout << "ik joint limit: " << i + 1 << std::endl;
+            std::cout << "ik joint limit: " << i+1 << " " << link_data.joint_angle_*180.0/M_PI << std::endl;
             return false;
         }
     }

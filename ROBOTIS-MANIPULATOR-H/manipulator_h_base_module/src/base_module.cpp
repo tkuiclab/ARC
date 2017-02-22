@@ -523,7 +523,7 @@ void BaseModule::generateTaskTrajProcess()
 
     /* generation trajectory fro redundancy */
     double ini_value = manipulator_->get_Redundancy();
-    double tar_value = 40 * M_PI /180.0;
+    double tar_value = 0 * M_PI /180.0;
 
     Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
                                                                robotis_->smp_time_, robotis_->mov_time_);

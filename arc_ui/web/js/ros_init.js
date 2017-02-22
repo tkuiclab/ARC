@@ -11,7 +11,8 @@ if(typeof(Storage) !== "undefined") {
 	if(!tmpURL){
 		localStorage.setItem("rosURL",'127.0.0.1');
 		tmpURL = localStorage.getItem("rosURL");
-	}else if(!tmpHOST){
+	}
+	if(!tmpHOST){
 		localStorage.setItem("rosHOST",'9090');
 		tmpHOST = localStorage.getItem("rosHOST");
 	}
