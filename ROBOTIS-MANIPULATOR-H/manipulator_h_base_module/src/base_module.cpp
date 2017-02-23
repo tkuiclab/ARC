@@ -238,20 +238,22 @@ bool BaseModule::getKinematicsPoseCallback(manipulator_h_base_module_msgs::GetKi
     return true;
 }
 
-void BaseModule::P2PCallBack(const std_msgs::Float64MultiArray::ConstPtr &cmd)
+void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd1)
 {
     if (enable_ == false)
         return;
 
     // Display Cmd
     std::cout << "Desired Cmd:" << std::endl;
-    for (int i = 0; i < cmd->data.size(); i++)
+    for (int i = 0; i < cmd1->data.size(); i++)
     {
-        std::cout << cmd->data[i] << " ";
+        std::cout << cmd1->data[i] << " ";
     }
 
     /* 記下命令 */
-    robotis_->cmd = *cmd;
+    // robotis_->cmd = *cmd;
+    robotis_->ik_cmd = *cmd1;
+
 
     robotis_->ik_id_start_ = 0;
     robotis_->ik_id_end_   = END_LINK;
@@ -267,24 +269,24 @@ void BaseModule::P2PCallBack(const std_msgs::Float64MultiArray::ConstPtr &cmd)
     }
 }
 
-void BaseModule::LineCallBack(const std_msgs::Float64MultiArray::ConstPtr &cmd)
+void BaseModule::LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd1)
 {
     if (enable_ == false)
         return;
 
     // Display Cmd
     std::cout << "Desired Cmd:" << std::endl;
-    for (int i = 0; i < cmd->data.size(); i++)
+    for (int i = 0; i < cmd1->data.size(); i++)
     {
-        std::cout << cmd->data[i] << " ";
+        std::cout << cmd1->data[i] << " ";
     }
 
     /* 記下命令 */
-    robotis_->cmd = *cmd;
-    robotis_->kinematics_pose_msg_.pose.position.x = cmd->data[0];
-    robotis_->kinematics_pose_msg_.pose.position.y = cmd->data[1];
-    robotis_->kinematics_pose_msg_.pose.position.z = cmd->data[2];
-    Eigen::Quaterniond quaterion = robotis_framework::convertRPYToQuaternion(cmd->data[3],cmd->data[4],cmd->data[5]);
+    //robotis_->cmd = *cmd;
+    robotis_->kinematics_pose_msg_.pose.position.x = cmd1->data[0];
+    robotis_->kinematics_pose_msg_.pose.position.y = cmd1->data[1];
+    robotis_->kinematics_pose_msg_.pose.position.z = cmd1->data[2];
+    Eigen::Quaterniond quaterion = robotis_framework::convertRPYToQuaternion(cmd1->data[3],cmd1->data[4],cmd1->data[5]);
     robotis_->kinematics_pose_msg_.pose.orientation.w = quaterion.w();
     robotis_->kinematics_pose_msg_.pose.orientation.x = quaterion.x();
     robotis_->kinematics_pose_msg_.pose.orientation.y = quaterion.y();
@@ -485,14 +487,14 @@ void BaseModule::generateP2PTrajProcess()
     max_diff = 0.0;
 
     /* convert cmd info */
-    double x = robotis_->cmd.data[0];
-    double y = robotis_->cmd.data[1];
-    double z = robotis_->cmd.data[2];
+    double x = robotis_->ik_cmd.data[0];
+    double y = robotis_->ik_cmd.data[1];
+    double z = robotis_->ik_cmd.data[2];
 
-    double roll  = robotis_->cmd.data[4] * M_PI / 180.0;
-    double pitch = robotis_->cmd.data[3] * M_PI / 180.0;
-    double yaw   = robotis_->cmd.data[5] * M_PI / 180.0;
-    double fai   = robotis_->cmd.data.size() == 7 ? robotis_->cmd.data[6] * M_PI / 180.0 : 0.0;
+    double roll  = robotis_->ik_cmd.data[4] * M_PI / 180.0;
+    double pitch = robotis_->ik_cmd.data[3] * M_PI / 180.0;
+    double yaw   = robotis_->ik_cmd.data[5] * M_PI / 180.0;
+    double fai   = robotis_->ik_cmd.data.size() == 7 ? robotis_->ik_cmd.data[6] * M_PI / 180.0 : 0.0;
     std::cout << "fai " << fai << std::endl;
 
     robotis_->ik_target_position_ << x, y, z;

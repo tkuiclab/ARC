@@ -56,6 +56,7 @@
 
 #include "robotis_controller_msgs/JointCtrlModule.h"
 #include "robotis_controller_msgs/StatusMsg.h"
+#include "manipulator_h_base_module_msgs/IK_Cmd.h"
 
 #include "manipulator_h_base_module_msgs/JointPose.h"
 #include "manipulator_h_base_module_msgs/KinematicsPose.h"
@@ -121,8 +122,8 @@ class BaseModule
     void jointPoseMsgCallback(const manipulator_h_base_module_msgs::JointPose::ConstPtr &msg);
     void kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs::KinematicsPose::ConstPtr &msg);
     void cmdMsgCallback(const std_msgs::Float64MultiArray::ConstPtr &cmd);
-    void P2PCallBack(const std_msgs::Float64MultiArray::ConstPtr &cmd);
-    void LineCallBack(const std_msgs::Float64MultiArray::ConstPtr &cmd);
+    void P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd);
+    void LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd1);
 
     bool getJointPoseCallback(manipulator_h_base_module_msgs::GetJointPose::Request &req,
                               manipulator_h_base_module_msgs::GetJointPose::Response &res);
