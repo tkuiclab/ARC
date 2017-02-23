@@ -2,7 +2,7 @@
 
 <launch>    
 
-    <arg name="en_sim" default="true" />
+    <arg name="en_sim" default="false" />
     <arg name="en_gui" default="false" />
 
     <param name="gazebo"                   value="$(arg en_sim)"     type="bool" />
@@ -20,5 +20,7 @@
     <!-- Add gui node for test -->
     <node name="manipulator_n_gui" pkg="manipulator_h_gui" type="manipulator_h_gui"
             output="screen" if="$(arg en_gui)" />
+
+    <include file="$(find arc_ui)/launch/ui.launch" />
 
 </launch>
