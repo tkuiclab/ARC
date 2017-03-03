@@ -729,8 +729,8 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     //angle[3] -= M_PI_2;
     angle[5] = -angle[5];
 
-    for (int i = 0; i < 7; i++)
-       std::cout << "cvt ik angle " << i+1 << ": "<< angle[i] * 180.0 / M_PI << std::endl;
+    // for (int i = 0; i < 7; i++)
+    //    std::cout << "cvt ik angle " << i+1 << ": "<< angle[i] * 180.0 / M_PI << std::endl;
 
     for (int i = 0; i < MAX_JOINT_ID; i++)
     {

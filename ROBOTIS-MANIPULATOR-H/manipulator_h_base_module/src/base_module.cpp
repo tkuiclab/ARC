@@ -142,15 +142,11 @@ void BaseModule::queueThread()
     ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/base/kinematics_pose_msg", 5,
                                                                  &BaseModule::kinematicsPoseMsgCallback, this);
     
+    /* arc using */
     ros::Subscriber JointP2P_msg_sub = ros_node.subscribe("/robotis/base/JointP2P_msg", 5,
                                                                  &BaseModule::P2PCallBack, this);
-
     ros::Subscriber TaskP2P_msg_sub = ros_node.subscribe("/robotis/base/TaskP2P_msg", 5,
                                                                  &BaseModule::LineCallBack, this);                                                                                                                          
-
-    /* topic of test cmd */
-    ros::Subscriber cmd_msg_sub = ros_node.subscribe("/robotis/base/cmd_msg", 5,
-                                                     &BaseModule::cmdMsgCallback, this);
 
     ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/base/get_joint_pose",
                                                                          &BaseModule::getJointPoseCallback, this);
@@ -238,22 +234,43 @@ bool BaseModule::getKinematicsPoseCallback(manipulator_h_base_module_msgs::GetKi
     return true;
 }
 
-void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd1)
+/* =================================== P2P msg callback func =================================== */
+void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd)
 {
     if (enable_ == false)
         return;
 
     // Display Cmd
     std::cout << "Desired Cmd:" << std::endl;
-    for (int i = 0; i < cmd1->data.size(); i++)
+    for (int i = 0; i < cmd->data.size(); i++)
     {
-        std::cout << cmd1->data[i] << " ";
+        std::cout << cmd->data[i] << " ";
     }
 
-    /* 記下命令 */
-    // robotis_->cmd = *cmd;
-    robotis_->ik_cmd = *cmd1;
+    /* convert cmd info */
+    double x = cmd->data[0];
+    double y = cmd->data[1];
+    double z = cmd->data[2];
 
+    double roll  = cmd->data[4] * M_PI / 180.0;
+    double pitch = cmd->data[3] * M_PI / 180.0;
+    double yaw   = cmd->data[5] * M_PI / 180.0;
+    robotis_->ik_cmd_fai = cmd->data.size() == 7 ? cmd->data[6] * M_PI / 180.0 : 0.0;
+
+    robotis_->ik_target_position_ << x, y, z;
+    robotis_->ik_target_rotation_ = robotis_framework::convertRPYToRotation(roll, pitch, yaw);
+
+    /* calc ik */
+    bool ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_, robotis_->ik_cmd_fai);
+    if (!ik_success)
+    {
+        ROS_INFO("IK ERR !!!");
+        return;
+    }
+    /* calc fk(update pos and ori) */
+    manipulator_->fk();
+    std::cout << "FK position_: " << manipulator_->manipulator_link_data_[END_LINK]->position_ << std::endl;
+    std::cout << "FK Redundancy: " << manipulator_->get_Redundancy() * 180 / M_PI << std::endl;
 
     robotis_->ik_id_start_ = 0;
     robotis_->ik_id_end_   = END_LINK;
@@ -269,28 +286,30 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     }
 }
 
-void BaseModule::LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd1)
+void BaseModule::LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd)
 {
     if (enable_ == false)
         return;
 
     // Display Cmd
     std::cout << "Desired Cmd:" << std::endl;
-    for (int i = 0; i < cmd1->data.size(); i++)
+    for (int i = 0; i < cmd->data.size(); i++)
     {
-        std::cout << cmd1->data[i] << " ";
+        std::cout << cmd->data[i] << " ";
     }
 
     /* 記下命令 */
-    //robotis_->cmd = *cmd;
-    robotis_->kinematics_pose_msg_.pose.position.x = cmd1->data[0];
-    robotis_->kinematics_pose_msg_.pose.position.y = cmd1->data[1];
-    robotis_->kinematics_pose_msg_.pose.position.z = cmd1->data[2];
-    Eigen::Quaterniond quaterion = robotis_framework::convertRPYToQuaternion(cmd1->data[3],cmd1->data[4],cmd1->data[5]);
+    robotis_->kinematics_pose_msg_.pose.position.x = cmd->data[0];
+    robotis_->kinematics_pose_msg_.pose.position.y = cmd->data[1];
+    robotis_->kinematics_pose_msg_.pose.position.z = cmd->data[2];
+    Eigen::Quaterniond quaterion = robotis_framework::convertRPYToQuaternion(cmd->data[4] * M_PI / 180.0,
+                                                                             cmd->data[3] * M_PI / 180.0,
+                                                                             cmd->data[5] * M_PI / 180.0);
     robotis_->kinematics_pose_msg_.pose.orientation.w = quaterion.w();
     robotis_->kinematics_pose_msg_.pose.orientation.x = quaterion.x();
     robotis_->kinematics_pose_msg_.pose.orientation.y = quaterion.y();
     robotis_->kinematics_pose_msg_.pose.orientation.z = quaterion.z();
+    robotis_->ik_cmd_fai = cmd->data.size() == 7 ? cmd->data[6] * M_PI / 180.0 : 0.0;
 
     robotis_->ik_id_start_ = 0;
     robotis_->ik_id_end_   = END_LINK;
@@ -311,8 +330,6 @@ void BaseModule::kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs:
     if (enable_ == false)
         return;
 
-    //msg->pose.position.x
-
     robotis_->kinematics_pose_msg_ = *msg;
 
     robotis_->ik_id_start_ = 0;
@@ -321,37 +338,6 @@ void BaseModule::kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs:
     if (robotis_->is_moving_ == false)
     {
         tra_gene_thread_ = new boost::thread(boost::bind(&BaseModule::generateTaskTrajProcess, this));
-        delete tra_gene_thread_;
-    }
-    else
-    {
-        ROS_INFO("previous task is alive");
-    }
-}
-
-/* =================================== P2P msg callback func =================================== */
-void BaseModule::cmdMsgCallback(const std_msgs::Float64MultiArray::ConstPtr &cmd)
-{
-    if (enable_ == false)
-        return;
-
-    std::cout << "Desired Cmd:" << std::endl;
-    for (int i = 0; i < cmd->data.size(); i++)
-    {
-        std::cout << cmd->data[i] << " ";
-    }
-    std::cout << std::endl;
-
-    /* 記下命令 */
-    robotis_->cmd = *cmd;
-
-    robotis_->ik_id_start_ = 0;
-    robotis_->ik_id_end_   = END_LINK;
-
-    if (robotis_->is_moving_ == false)
-    {
-        /* generate trajectory of p2p */
-        tra_gene_thread_ = new boost::thread(boost::bind(&BaseModule::generateP2PTrajProcess, this));
         delete tra_gene_thread_;
     }
     else
@@ -486,33 +472,7 @@ void BaseModule::generateP2PTrajProcess()
     double max_diff, abs_diff;
     max_diff = 0.0;
 
-    /* convert cmd info */
-    double x = robotis_->ik_cmd.data[0];
-    double y = robotis_->ik_cmd.data[1];
-    double z = robotis_->ik_cmd.data[2];
-
-    double roll  = robotis_->ik_cmd.data[4] * M_PI / 180.0;
-    double pitch = robotis_->ik_cmd.data[3] * M_PI / 180.0;
-    double yaw   = robotis_->ik_cmd.data[5] * M_PI / 180.0;
-    double fai   = robotis_->ik_cmd.data.size() == 7 ? robotis_->ik_cmd.data[6] * M_PI / 180.0 : 0.0;
-    std::cout << "fai " << fai << std::endl;
-
-    robotis_->ik_target_position_ << x, y, z;
-    robotis_->ik_target_rotation_ = robotis_framework::convertRPYToRotation(roll, pitch, yaw);
-
-    /* calc ik */
-    bool ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_, fai);
-    if (!ik_success)
-    {
-        ROS_INFO("IK ERR !!!");
-        return;
-    }
-    /* calc fk(update pos and ori) */
-    manipulator_->fk();
-    std::cout << "FK position_: " << manipulator_->manipulator_link_data_[END_LINK]->position_ << std::endl;
-    std::cout << "FK Redundancy: " << manipulator_->get_Redundancy() * 180 / M_PI << std::endl;
-
-    for (int id = 1; id <= 6; id++)
+    for (int id = 1; id <= MAX_JOINT_ID; id++)
     {
         double ini_value = joint_state_->goal_joint_state_[id].position_;
         double tar_value = manipulator_->manipulator_link_data_[id]->joint_angle_;
@@ -600,7 +560,7 @@ void BaseModule::generateTaskTrajProcess()
 
     /* generation trajectory fro redundancy */
     double ini_value = manipulator_->get_Redundancy();
-    double tar_value = 0 * M_PI /180.0;
+    double tar_value = robotis_->ik_cmd_fai;
 
     Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
                                                                robotis_->smp_time_, robotis_->mov_time_);

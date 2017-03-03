@@ -72,15 +72,11 @@ public:
     manipulator_h_base_module_msgs::KinematicsPose kinematics_pose_msg_;
     manipulator_h_base_module_msgs::IK_Cmd         ik_cmd;
 
-    /* test cmd msg */
-    std_msgs::Float64MultiArray cmd;
-    
-
     // inverse kinematics
     bool ik_solve_;
     Eigen::MatrixXd ik_target_position_;
     Eigen::MatrixXd ik_start_rotation_, ik_target_rotation_;
-    double ik_target_fai;
+    double ik_target_fai, ik_cmd_fai;
     int ik_id_start_, ik_id_end_;
 
     void setInverseKinematics();

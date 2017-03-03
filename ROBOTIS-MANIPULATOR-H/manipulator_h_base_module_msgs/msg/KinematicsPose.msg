@@ -1,2 +1,2 @@
-string    	   name
+string             name
 geometry_msgs/Pose pose
