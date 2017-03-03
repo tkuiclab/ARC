@@ -140,12 +140,12 @@ function get_block_tr(option_cmd,val){
 
 	if(option_cmd==CmdType.Joint || option_cmd==CmdType.PTP || option_cmd==CmdType.Line){
 		if(val==undefined){
-			for(var i=1;i<=6;i++){
+			for(var i=1;i<=7;i++){//chg
 				var t_id = '#block_'+i;
 				sub_cmd += '<input class="block_sty_none" type="number" value="'+$(t_id).val()+'"readonly>';
 			}
 		}else{
-			for(var i=0;i<6;i++){
+			for(var i=0;i<7;i++){//chg
 				sub_cmd += '<input class="block_sty_none" type="number" value="'+val[i]+'"readonly>\n';
 			}
 		}
@@ -204,21 +204,43 @@ function get_block_tr(option_cmd,val){
 	return add_tr;
 }
 
-addbtn.onclick = function(){
+// addbtn.onclick = function(){
+
+// 	var cmd = $("#cmd_select").val();
+// 	var tr_html = '';
+
+// 	if(cmd != 'Choose') tr_html = get_block_tr(cmd);
+
+// 	console.log('in_add_btn');
+
+// 	$('#teach_table').append(tr_html);
+
+// 	$('#teach_table').scrollTop($('#teach_table')[0].scrollHeight);
+
+// 	order_list();
+// }
+$("#addbtn").click(function(){//chg
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
 
 	var cmd = $("#cmd_select").val();
 	var tr_html = '';
 
 	if(cmd != 'Choose') tr_html = get_block_tr(cmd);
 
-	//console.log(tr_html);
+	console.log('in_add_btn');
 
 	$('#teach_table').append(tr_html);
 
 	$('#teach_table').scrollTop($('#teach_table')[0].scrollHeight);
 
 	order_list();
-}
+
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+
+});
 
 var cmd_edit = new Array;
 var vac_cmd;
@@ -300,7 +322,7 @@ function save_Cmd(edit){
 	$('#'+m_cmd_id).find('[name=true_btn]').hide();
 	$('#'+m_cmd_id).find('[name=false_btn]').hide();
 	$('#'+m_cmd_id).find('[name=teach_btn]').hide();
-
+ 
 	var mod = $('tr#'+m_cmd_id).find('[name=cmd_mod]').children('select').val();
 
 	$('#'+m_cmd_id).find('[name=cmd_mod]').children('select').attr("class","options_cmd_none");
@@ -408,7 +430,7 @@ function get_twist(){
 			x : 0.0,
 			y : 0.0,
 			z : 0.0,
-		}
+		}  
 	});
 
 	return twist;
@@ -419,15 +441,36 @@ $("#set_mode_btn").click(function(){
 	$(this).addClass('disabled');
 
 	var str_msg = new ROSLIB.Message({
-		data : "set_mode"
+		data : "set_mode_btn"
 	});
-
+	console.log('in set_mode_bnt');
 	set_mode_pub.publish(str_msg);
 
 
 	$(this).addClass('active');
 	$(this).removeClass('disabled');
 
+});
+
+$("#Test_btn").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var tmp_num = 132;
+	var tmp_num_arr = [0, 0.3, 0.2, -90, 0, 0];
+	// tmp_num_arr.push(1.0);
+	// tmp_num_arr.push(2.0);
+
+	console.log('in test_bnt');
+
+	var Test_msg = new ROSLIB.Message({
+		data : tmp_num_arr
+	});
+
+	Test_pub.publish(Test_msg);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
 });
 
 $("#run_btn").click(function() {
@@ -523,8 +566,7 @@ function run_unit_command(run_cmd_ind){
 						z : parseFloat(refer.children("input:nth-child(3)").val()),
 					},
 					orientation : {
-						x : o[0],
-						y : o[1],
+						x : o[0],    
 						z : o[2],
 						w : o[3]
 					}
@@ -861,6 +903,15 @@ var set_mode_pub = new ROSLIB.Topic({
 	name:'/robotis/base/set_mode_msg',
 	messageType : 'std_msgs/String'
 });
+
+var Test_pub = new ROSLIB.Topic({
+	ros : ros,
+	name:'/robotis/base/JointP2P_msg',
+	//messageType : 'std_msgs/Float64'
+	messageType : 'manipulator_h_base_module_msgs/IK_Cmd'
+});
+
+
 
 var joint_pub = new ROSLIB.Topic({
 	ros : ros,

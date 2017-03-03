@@ -130,14 +130,14 @@ void BaseModule::queueThread()
     /* publish topics */
     status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
     set_ctrl_module_pub_ = ros_node.advertise<std_msgs::String>("/robotis/enable_ctrl_module", 1);
-
     /* subscribe topics */
     ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/base/ini_pose_msg", 5,
                                                           &BaseModule::initPoseMsgCallback, this);
+
     ros::Subscriber set_mode_msg_sub = ros_node.subscribe("/robotis/base/set_mode_msg", 5,
                                                           &BaseModule::setModeMsgCallback, this);
 
-    ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/base/joint_pose_msg", 5,
+    ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("tmp_num_arr", 5,
                                                             &BaseModule::jointPoseMsgCallback, this);
     ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/base/kinematics_pose_msg", 5,
                                                                  &BaseModule::kinematicsPoseMsgCallback, this);
