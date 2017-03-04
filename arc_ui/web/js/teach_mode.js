@@ -357,7 +357,6 @@ function break_Cmd(edit){
 
 	$('#'+m_cmd_id).find('[name=cmd_mod]').children('select').attr("class","options_cmd_none");
 	$('#'+m_cmd_id).find('[name=cmd_mod]').children('select').attr("disabled","disabled");
-
 	var i = 0;
 	if(mod==CmdType.Joint || mod==CmdType.PTP || mod==CmdType.Line ||
 			mod==CmdType.Shift_X || mod==CmdType.Shift_Y || mod==CmdType.Shift_Z ||
@@ -457,7 +456,7 @@ $("#Test_btn").click(function(){
 	$(this).addClass('disabled');
 
 	var tmp_num = 132;
-	var tmp_num_arr = [0, 0.3, 0.2, -90, 0, 0];
+	var tmp_num_arr = [0, 0.3, 0.2, -90, 0, 0, -40];
 	// tmp_num_arr.push(1.0);
 	// tmp_num_arr.push(2.0);
 
@@ -478,7 +477,8 @@ $("#run_btn").click(function() {
 	$(this).addClass('disabled');
 
 	run_cmd_ind = 0;
-	next_command();
+	 next_command();
+	
 });
 
 
@@ -504,7 +504,7 @@ function next_command(){
 
 		run_unit_command(run_cmd_ind);
 
-		//next_command();
+		// next_command();
 	}else{
 		$("#run_btn").addClass('active');
 		$("#run_btn").removeClass('disabled');
@@ -547,33 +547,52 @@ function run_unit_command(run_cmd_ind){
 
 	}else if(cmd_mod==CmdType.PTP || cmd_mod==CmdType.Line){
 		//-------------CmdType.PTP,Line-------------//
+		// var refer = $(selector).children("td.SubCmd");
+
+
+		// var roll = parseFloat(refer.children("input:nth-child(4)").val()) ;
+		// var pitch = parseFloat(refer.children("input:nth-child(5)").val());
+		// var yaw = parseFloat(refer.children("input:nth-child(6)").val()) ;
+
+
+		// var o = quaternion_from_euler(roll * _Math.DEG2RAD, pitch  * _Math.DEG2RAD, yaw * _Math.DEG2RAD);
+
+		// var pose_msg = new ROSLIB.Message({
+		// 		pose:{
+		// 			position : {
+		// 				x : parseFloat(refer.children("input:nth-child(1)").val()),
+		// 				y : parseFloat(refer.children("input:nth-child(2)").val()),
+		// 				z : parseFloat(refer.children("input:nth-child(3)").val()),
+		// 			},
+		// 			orientation : {
+		// 				x : o[0],    
+		// 				z : o[2],
+		// 				w : o[3]
+		// 			}
+		// 		}
+		// });
+		// pose_pub.publish(pose_msg);
+		//=================chg start======================================
 		var refer = $(selector).children("td.SubCmd");
 
-
-		var roll = parseFloat(refer.children("input:nth-child(4)").val()) ;
-		var pitch = parseFloat(refer.children("input:nth-child(5)").val());
-		var yaw = parseFloat(refer.children("input:nth-child(6)").val()) ;
-
-
-		var o = quaternion_from_euler(roll * _Math.DEG2RAD, pitch  * _Math.DEG2RAD, yaw * _Math.DEG2RAD);
-
-
-		var pose_msg = new ROSLIB.Message({
-				pose:{
-					position : {
-						x : parseFloat(refer.children("input:nth-child(1)").val()),
-						y : parseFloat(refer.children("input:nth-child(2)").val()),
-						z : parseFloat(refer.children("input:nth-child(3)").val()),
-					},
-					orientation : {
-						x : o[0],    
-						z : o[2],
-						w : o[3]
-					}
-				}
+		var x     = parseFloat(refer.children("input:nth-child(1)").val()) ;
+		var y     = parseFloat(refer.children("input:nth-child(2)").val()) ;
+		var z     = parseFloat(refer.children("input:nth-child(3)").val()) ;
+		var roll  = parseFloat(refer.children("input:nth-child(4)").val()) ;
+		var pitch = parseFloat(refer.children("input:nth-child(5)").val()) ;
+		var yaw   = parseFloat(refer.children("input:nth-child(6)").val()) ;
+		var fai   = parseFloat(refer.children("input:nth-child(7)").val()) ;
+		
+		// var tmp_Cmd = [0, 0.3, 0.2, -90, 0, 0, 0];
+		var tmp_Cmd = [x, y, z, pitch, roll, yaw, fai];
+		var Test_msg = new ROSLIB.Message({
+			data : tmp_Cmd
 		});
 
-		pose_pub.publish(pose_msg);
+		Test_pub.publish(Test_msg);
+		console.log('in task2')
+		//=================chg over=======================================
+
 	//-------------CmdType.Shift_X-------------//
 	}else if(cmd_mod==CmdType.Shift_X  || cmd_mod==CmdType.Shift_Y  || cmd_mod==CmdType.Shift_Z||
 				 cmd_mod==CmdType.Rotate_X || cmd_mod==CmdType.Rotate_Y || cmd_mod==CmdType.Rotate_Z ){
