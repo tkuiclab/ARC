@@ -63,6 +63,7 @@ RobotisState::RobotisState()
     ik_target_rotation_ = robotis_framework::convertRPYToRotation(0.0, 0.0, 0.0);
 
     ik_target_fai = 0;
+    ik_cmd_fai    = 0;
 
     ik_id_start_ = 0;
     ik_id_end_   = 0;
