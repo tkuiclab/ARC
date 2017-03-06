@@ -605,25 +605,21 @@ function run_unit_command(run_cmd_ind){
 							l('pose_msg='+pose_msg);
 							pose_pub.publish(pose_msg);
 					}
-
 		 });
 
-
 	//-------------CmdType.Vaccum-------------//
-	}else if(cmd_mod==CmdType.Vaccum){
-		var vaccum_yn = $(selector).find('[name=vaccum_select]').val()=='On' ? true:false;
-
+	} else if (cmd_mod == CmdType.Vaccum) {
+		var vaccum_yn = $(selector).find('[name=vaccum_select]').val() == 'On'?
+						true: false;
 
 		var cmd_msg = new ROSLIB.Message({
-			cmd : CmdType.Vaccum,
-			vaccum : vaccum_yn
+			data : vaccum_yn
 		});
 
-		mlist.push(cmd_msg);
+		vaccum_pub.publish(cmd_msg);
+		next_command();
 	}
-
 }
-
 
 $("#file_save_btn").click(function() {
 	$(this).removeClass('active');
@@ -888,6 +884,12 @@ var pose_pub = new ROSLIB.Topic({
 	messageType : 'manipulator_h_base_module_msgs/IK_Cmd'
 });
 
+var vaccum_pub = new ROSLIB.Topic({
+	ros : ros,
+	name:'/vaccum',
+	messageType : 'std_msgs/Bool'
+});
+
 var status_sub = new ROSLIB.Topic({
 	ros:ros,
 	name: '/robotis/status',
@@ -898,7 +900,6 @@ status_sub.subscribe(function(msg){
 	if(msg.status_msg=="End Trajectory"){
 		l('in End Trajectory');
 		next_command();
-
 	}
 });
 
