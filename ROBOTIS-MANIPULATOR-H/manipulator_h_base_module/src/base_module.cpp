@@ -353,18 +353,18 @@ void BaseModule::JointControlCallback(const manipulator_h_base_module_msgs::Join
     robotis_->joint_pose_msg_ = *msg;
 
     //Convert cmd from deg to rad
-    // msg.value[i] = msg.value[i]*M_PI/180.0;
-    for (int i = 0; i < robotis_->joint_pose_msg_.name.size(); i++)
-    {
-        for (int id = 1; id <= MAX_JOINT_ID; id++)
-        {
-            if (manipulator_->manipulator_link_data_[id]->name_ == robotis_->joint_pose_msg_.name[i])
-            {
-                robotis_->joint_pose_msg_.value[i] = robotis_->joint_pose_msg_.value[i]*M_PI/180.0;
-                break;
-            }
-        }
-    }
+    // for (int i = 0; i < robotis_->joint_pose_msg_.name.size(); i++)
+    // {
+    //     for (int id = 1; id <= MAX_JOINT_ID; id++)
+    //     {
+    //         if (manipulator_->manipulator_link_data_[id]->name_ == robotis_->joint_pose_msg_.name[i])
+    //         {
+    //             robotis_->joint_pose_msg_.value[i] = robotis_->joint_pose_msg_.value[i]*M_PI/180.0;
+    //             break;
+    //         }
+    //     }
+    // }
+    //------------------convert over-------------------------------
 
     if (robotis_->is_moving_ == false)
     {
