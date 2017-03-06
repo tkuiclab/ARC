@@ -35,9 +35,9 @@ function command_selected(cmd){
 }
 
 var addbtn = document.getElementById("addbtn");
-var edit_img = '<img name="edit_btn" src="img/edit.png" onclick="edit_Cmd(this)"/>';
-var true_img = '<img name="true_btn" src="img/true.png" class="img_show" onclick="save_Cmd(this)"/>';
-var false_img = '<img name="false_btn" src="img/false.png" class="img_show" onclick="break_Cmd(this)"/>';
+var edit_img   = '<img name="edit_btn"   src="img/edit.png"   onclick="edit_Cmd(this)"/>';
+var true_img   = '<img name="true_btn"   src="img/true.png"   class="img_show" onclick="save_Cmd(this)"/>';
+var false_img  = '<img name="false_btn"  src="img/false.png"  class="img_show" onclick="break_Cmd(this)"/>';
 var delete_img = '<img name="delete_opt" src="img/delete.png" style="width:20px; height:auto; text-align:right;" onclick="delete_Cmd(this)"/>';
 var teach_a = '<button name="teach_btn" class="btn btn-info btn-block" style="width:80px; display:none;" onclick="teach_click(this)"><span class="glyphicon glyphicon-pushpin"></span>Teach</button>';
 var cmd_id;
@@ -111,8 +111,8 @@ function cmd_select_change(ev,mod){
 	}else if(cmd==CmdType.Vaccum){
 		$("#vaccum_block").show();
 		$("#vaccum_block").css("display","inline");
-	}else if(cmd==CmdType.Shift_X || cmd==CmdType.Shift_Y || cmd==CmdType.Shift_Z ||
-				 cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z){
+	}else if(cmd==CmdType.Shift_X  || cmd==CmdType.Shift_Y  || cmd==CmdType.Shift_Z ||
+			 cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z){
 		$("#shift_block").show();
 		$("#shift_block").css("display","inline");
 	}else if(cmd==CmdType.Base_Vel){
@@ -193,11 +193,7 @@ function get_block_tr(option_cmd,val){
 	'<tr class="font_black" id="" >' +
 		'<td name="cmd_mod">'+command_selected(option_cmd)+'</td>'+
 		'<td class="SubCmd">'+sub_cmd+'</td>'+
-		'<td>'+edit_img+
-		true_img +
-		false_img +
-		teach_a +
-		'</td>'+
+		'<td>'+edit_img + true_img + false_img + teach_a +'</td>'+
 		'<td style="text-align:center;">'+delete_img+'</td>'+
 	'</tr>';
 
@@ -251,12 +247,12 @@ function Cmd_change(edit,val_6){
 
 	if(cmd==CmdType.Joint || cmd==CmdType.PTP || cmd==CmdType.Line){
 		if(val_6==undefined){
-			for(var i=1;i<=6;i++){
+			for(var i=1;i<=7;i++){
 				var t_id = '#block_'+i;
 				sub_cmd += '<input class="block_sty" type="number" value="'+$(t_id).val()+'">';
 			}
 		}else{
-			for(var i=0;i<6;i++){
+			for(var i=0;i<7;i++){
 				sub_cmd += '<input class="block_sty" type="number" value="'+val_6[i]+'">\n';
 			}
 		}
@@ -455,22 +451,35 @@ $("#Test_btn").click(function(){
 	$(this).removeClass('active');
 	$(this).addClass('disabled');
 
-	var tmp_num = 132;
-	var tmp_num_arr = [0, 0.3, 0.2, -90, 0, 0, -40];
-	// tmp_num_arr.push(1.0);
-	// tmp_num_arr.push(2.0);
-
+	var tmp_num_arr = [0, 0.3, 0.2, -90, 0, 0, 0];
 	console.log('in test_bnt');
 
 	var Test_msg = new ROSLIB.Message({
 		data : tmp_num_arr
 	});
-
-	Test_pub.publish(Test_msg);
-
+	Test_pub.publish(Test_msg);//P2P
+	
 	$(this).addClass('active');
 	$(this).removeClass('disabled');
 });
+
+
+// $("#Test_btn").click(function(){
+// 	$(this).removeClass('active');
+// 	$(this).addClass('disabled');
+
+// 	var tmp_num_arr = [0, 0.5, 0.2, -90, 0, 0, 0];
+// 	console.log('in test2_btn');
+
+// 	var Test_msg = new ROSLIB.Message({
+// 		data : tmp_num_arr
+// 	});
+// 	Test_pub2.publish(Test_msg);//Line
+	
+// 	$(this).addClass('active');
+// 	$(this).removeClass('disabled');
+// });
+
 
 $("#run_btn").click(function() {
 	$(this).removeClass('active');
@@ -547,31 +556,6 @@ function run_unit_command(run_cmd_ind){
 
 	}else if(cmd_mod==CmdType.PTP || cmd_mod==CmdType.Line){
 		//-------------CmdType.PTP,Line-------------//
-		// var refer = $(selector).children("td.SubCmd");
-
-
-		// var roll = parseFloat(refer.children("input:nth-child(4)").val()) ;
-		// var pitch = parseFloat(refer.children("input:nth-child(5)").val());
-		// var yaw = parseFloat(refer.children("input:nth-child(6)").val()) ;
-
-
-		// var o = quaternion_from_euler(roll * _Math.DEG2RAD, pitch  * _Math.DEG2RAD, yaw * _Math.DEG2RAD);
-
-		// var pose_msg = new ROSLIB.Message({
-		// 		pose:{
-		// 			position : {
-		// 				x : parseFloat(refer.children("input:nth-child(1)").val()),
-		// 				y : parseFloat(refer.children("input:nth-child(2)").val()),
-		// 				z : parseFloat(refer.children("input:nth-child(3)").val()),
-		// 			},
-		// 			orientation : {
-		// 				x : o[0],    
-		// 				z : o[2],
-		// 				w : o[3]
-		// 			}
-		// 		}
-		// });
-		// pose_pub.publish(pose_msg);
 		//=================chg start======================================
 		var refer = $(selector).children("td.SubCmd");
 
@@ -583,14 +567,15 @@ function run_unit_command(run_cmd_ind){
 		var yaw   = parseFloat(refer.children("input:nth-child(6)").val()) ;
 		var fai   = parseFloat(refer.children("input:nth-child(7)").val()) ;
 		
-		// var tmp_Cmd = [0, 0.3, 0.2, -90, 0, 0, 0];
 		var tmp_Cmd = [x, y, z, pitch, roll, yaw, fai];
 		var Test_msg = new ROSLIB.Message({
 			data : tmp_Cmd
 		});
-
-		Test_pub.publish(Test_msg);
-		console.log('in task2')
+		if(cmd_mod==CmdType.PTP)
+			Test_pub.publish(Test_msg);
+		else
+			Test_pub2.publish(Test_msg);
+		console.log('in task')
 		//=================chg over=======================================
 
 	//-------------CmdType.Shift_X-------------//
@@ -927,6 +912,12 @@ var Test_pub = new ROSLIB.Topic({
 	ros : ros,
 	name:'/robotis/base/JointP2P_msg',
 	//messageType : 'std_msgs/Float64'
+	messageType : 'manipulator_h_base_module_msgs/IK_Cmd'
+});
+
+var Test_pub2 = new ROSLIB.Topic({
+	ros : ros,
+	name:'/robotis/base/TaskP2P_msg',
 	messageType : 'manipulator_h_base_module_msgs/IK_Cmd'
 });
 
