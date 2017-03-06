@@ -1,5 +1,5 @@
 body,tr,th,td{
-	//background: url(../background3.jpg);
+	/*background: url(../background3.jpg);*/
 	background-repeat: no-repeat;
 	background-attachment: fixed;
 	background-position: center;
@@ -48,7 +48,7 @@ nav{
 
 .teach_btn{
 	width: 10%;
-  float: right;
+	float: right;
 	display: inline-block;
 	color: #fff;
 	background-color: #5bc0de;

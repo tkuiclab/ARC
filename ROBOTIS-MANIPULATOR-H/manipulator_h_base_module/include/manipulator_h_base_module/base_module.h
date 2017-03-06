@@ -57,7 +57,6 @@
 #include "robotis_controller_msgs/JointCtrlModule.h"
 #include "robotis_controller_msgs/StatusMsg.h"
 #include "manipulator_h_base_module_msgs/IK_Cmd.h"
-#include "manipulator_h_base_module_msgs/FK_Cmd.h"
 
 #include "manipulator_h_base_module_msgs/JointPose.h"
 #include "manipulator_h_base_module_msgs/KinematicsPose.h"

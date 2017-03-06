@@ -230,6 +230,7 @@ bool BaseModule::getKinematicsPoseCallback(manipulator_h_base_module_msgs::GetKi
     res.group_pose.orientation.x = quaternion.x();
     res.group_pose.orientation.y = quaternion.y();
     res.group_pose.orientation.z = quaternion.z();
+    res.group_redundancy = manipulator_->get_Redundancy();
 
     return true;
 }
