@@ -24,6 +24,7 @@ add_message_files(
   JointPose.msg
   KinematicsPose.msg
   IK_Cmd.msg
+  FK_Cmd.msg
 )
 
 add_service_files(

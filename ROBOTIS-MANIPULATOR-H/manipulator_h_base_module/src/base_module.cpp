@@ -137,12 +137,12 @@ void BaseModule::queueThread()
     ros::Subscriber set_mode_msg_sub = ros_node.subscribe("/robotis/base/set_mode_msg", 5,
                                                           &BaseModule::setModeMsgCallback, this);
 
-    ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("tmp_num_arr", 5,
-                                                            &BaseModule::jointPoseMsgCallback, this);
     ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/base/kinematics_pose_msg", 5,
                                                                  &BaseModule::kinematicsPoseMsgCallback, this);
     
     /* arc using */
+    ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/base/Joint_Control", 5,
+                                                            &BaseModule::JointControlCallback, this);
     ros::Subscriber JointP2P_msg_sub = ros_node.subscribe("/robotis/base/JointP2P_msg", 5,
                                                                  &BaseModule::P2PCallBack, this);
     ros::Subscriber TaskP2P_msg_sub = ros_node.subscribe("/robotis/base/TaskP2P_msg", 5,
@@ -345,13 +345,26 @@ void BaseModule::kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs:
         ROS_INFO("previous task is alive");
     }
 }
-
-void BaseModule::jointPoseMsgCallback(const manipulator_h_base_module_msgs::JointPose::ConstPtr &msg)
+void BaseModule::JointControlCallback(const manipulator_h_base_module_msgs::JointPose::ConstPtr &msg)
 {
     if (enable_ == false)
         return;
 
     robotis_->joint_pose_msg_ = *msg;
+
+    //Convert cmd from deg to rad
+    // msg.value[i] = msg.value[i]*M_PI/180.0;
+    for (int i = 0; i < robotis_->joint_pose_msg_.name.size(); i++)
+    {
+        for (int id = 1; id <= MAX_JOINT_ID; id++)
+        {
+            if (manipulator_->manipulator_link_data_[id]->name_ == robotis_->joint_pose_msg_.name[i])
+            {
+                robotis_->joint_pose_msg_.value[i] = robotis_->joint_pose_msg_.value[i]*M_PI/180.0;
+                break;
+            }
+        }
+    }
 
     if (robotis_->is_moving_ == false)
     {
@@ -435,7 +448,7 @@ void BaseModule::generateJointTrajProcess()
     for (int id = 1; id <= MAX_JOINT_ID; id++)
     {
         double ini_value = joint_state_->goal_joint_state_[id].position_;
-        double tar_value;
+        double tar_value = ini_value;
 
         for (int name_index = 0; name_index < robotis_->joint_pose_msg_.name.size(); name_index++)
         {
@@ -455,7 +468,7 @@ void BaseModule::generateJointTrajProcess()
     robotis_->cnt_ = 0;
     robotis_->is_moving_ = true;
 
-    ROS_INFO("[start] send trajectory");
+    ROS_INFO("[start] send trajectory123");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
 }
 

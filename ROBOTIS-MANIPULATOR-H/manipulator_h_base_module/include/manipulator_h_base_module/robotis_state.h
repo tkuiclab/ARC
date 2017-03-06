@@ -39,6 +39,7 @@
 #include "manipulator_h_base_module_msgs/JointPose.h"
 #include "manipulator_h_base_module_msgs/KinematicsPose.h"
 #include "manipulator_h_base_module_msgs/IK_Cmd.h"
+#include "manipulator_h_base_module_msgs/FK_Cmd.h"
 #include "manipulator_h_kinematics_dynamics/manipulator_h_kinematics_dynamics.h"
 
 /* test cmd msg */
@@ -71,6 +72,7 @@ public:
     manipulator_h_base_module_msgs::JointPose      joint_pose_msg_;
     manipulator_h_base_module_msgs::KinematicsPose kinematics_pose_msg_;
     manipulator_h_base_module_msgs::IK_Cmd         ik_cmd;
+    manipulator_h_base_module_msgs::FK_Cmd         fk_cmd;
 
     // inverse kinematics
     bool ik_solve_;
