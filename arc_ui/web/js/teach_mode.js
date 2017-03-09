@@ -429,13 +429,26 @@ $("#Test_btn").click(function(){
 	$(this).removeClass('active');
 	$(this).addClass('disabled');
 
-	var tmp_num_arr = [0, 0.3, 0.2, -90, 0, 0, 0];
+	//var tmp_num_arr = [0, 0.3, 0.2, -90, 0, 0, 0];
+	var tmp_num_arr = [];
+	tmp_num_arr.push(parseFloat($("#block_1").val()));
+	tmp_num_arr.push(parseFloat($("#block_2").val()));
+	tmp_num_arr.push(parseFloat($("#block_3").val()));
+	tmp_num_arr.push(parseFloat($("#block_4").val()));
+	tmp_num_arr.push(parseFloat($("#block_5").val()));
+	tmp_num_arr.push(parseFloat($("#block_6").val()));
+	tmp_num_arr.push(parseFloat($("#block_7").val()));
+
 	console.log('in test_bnt');
 
 	var Test_msg = new ROSLIB.Message({
 		data : tmp_num_arr
 	});
-	Test_pub.publish(Test_msg);//P2P
+	//$("#cmd_select").val()
+	if($("#cmd_select").val()==CmdType.PTP)
+		Test_pub.publish(Test_msg);//P2P
+	else if($("#cmd_select").val()==CmdType.Line)
+		Test_pub2.publish(Test_msg);//Line
 	
 	$(this).addClass('active');
 	$(this).removeClass('disabled');
