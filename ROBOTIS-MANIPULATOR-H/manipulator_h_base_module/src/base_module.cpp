@@ -36,7 +36,6 @@
  */
 
 #include <stdio.h>
-
 #include "manipulator_h_base_module/base_module.h"
 
 using namespace robotis_manipulator_h;
@@ -70,6 +69,9 @@ BaseModule::BaseModule()
     robotis_     = new RobotisState();
     joint_state_ = new BaseJointState();
     manipulator_ = new ManipulatorKinematicsDynamics(ARM);
+
+    /* init velocity */
+    vel_percent  = DEFAULT_SPD;
 }
 
 BaseModule::~BaseModule()
@@ -98,20 +100,15 @@ void BaseModule::parseIniPoseData(const std::string &path)
     }
 
     // parse movement time
-    double _mov_time;
-    _mov_time = doc["mov_time"].as<double>();
-
-    robotis_->mov_time_ = 2;// not sure cnang (changed)
+    double _mov_time = doc["mov_time"].as<double>();
+    robotis_->mov_time_ = _mov_time;
 
     // parse target pose
     YAML::Node _tar_pose_node = doc["tar_pose"];
     for (YAML::iterator _it = _tar_pose_node.begin(); _it != _tar_pose_node.end(); ++_it)
     {
-        int _id;
-        double _value;
-
-        _id = _it->first.as<int>();
-        _value = _it->second.as<double>();
+        int    _id    = _it->first.as<int>();
+        double _value = _it->second.as<double>();
 
         robotis_->joint_ini_pose_.coeffRef(_id, 0) = _value * DEGREE2RADIAN;
     }
@@ -130,28 +127,32 @@ void BaseModule::queueThread()
     /* publish topics */
     status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
     set_ctrl_module_pub_ = ros_node.advertise<std_msgs::String>("/robotis/enable_ctrl_module", 1);
-    /* subscribe topics */
-    ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/base/ini_pose_msg", 5,
-                                                          &BaseModule::initPoseMsgCallback, this);
 
+    /* service */
+    ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/base/get_joint_pose",
+                                                                         &BaseModule::getJointPoseCallback,
+                                                                         this);
+    ros::ServiceServer get_kinematics_pose_server = ros_node.advertiseService("/robotis/base/get_kinematics_pose",
+                                                                         &BaseModule::getKinematicsPoseCallback,
+                                                                         this);
+
+    /* subscribe topics */
     ros::Subscriber set_mode_msg_sub = ros_node.subscribe("/robotis/base/set_mode_msg", 5,
                                                           &BaseModule::setModeMsgCallback, this);
-
+    ros::Subscriber ini_pose_msg_sub = ros_node.subscribe("/robotis/base/ini_pose_msg", 5,
+                                                          &BaseModule::initPoseMsgCallback, this);
     ros::Subscriber kinematics_pose_msg_sub = ros_node.subscribe("/robotis/base/kinematics_pose_msg", 5,
                                                                  &BaseModule::kinematicsPoseMsgCallback, this);
     
-    /* arc using */
+    /* created for arc */
+    ros::Subscriber velocity_msg_sub   = ros_node.subscribe("/robotis/base/set_velocity", 5,
+                                                            &BaseModule::setVelCallback, this);
     ros::Subscriber joint_pose_msg_sub = ros_node.subscribe("/robotis/base/Joint_Control", 5,
                                                             &BaseModule::JointControlCallback, this);
-    ros::Subscriber JointP2P_msg_sub = ros_node.subscribe("/robotis/base/JointP2P_msg", 5,
-                                                                 &BaseModule::P2PCallBack, this);
-    ros::Subscriber TaskP2P_msg_sub = ros_node.subscribe("/robotis/base/TaskP2P_msg", 5,
-                                                                 &BaseModule::LineCallBack, this);                                                                                                                          
-
-    ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/base/get_joint_pose",
-                                                                         &BaseModule::getJointPoseCallback, this);
-    ros::ServiceServer get_kinematics_pose_server = ros_node.advertiseService("/robotis/base/get_kinematics_pose",
-                                                                              &BaseModule::getKinematicsPoseCallback, this);
+    ros::Subscriber JointP2P_msg_sub   = ros_node.subscribe("/robotis/base/JointP2P_msg", 5,
+                                                            &BaseModule::P2PCallBack, this);
+    ros::Subscriber TaskP2P_msg_sub    = ros_node.subscribe("/robotis/base/TaskP2P_msg", 5,
+                                                            &BaseModule::LineCallBack, this);
 
     while (ros_node.ok())
     {
@@ -160,37 +161,7 @@ void BaseModule::queueThread()
     }
 }
 
-void BaseModule::initPoseMsgCallback(const std_msgs::String::ConstPtr &msg)
-{
-    if (enable_ == false)
-        return;
-
-    if (robotis_->is_moving_ == false)
-    {
-        if (msg->data == "ini_pose")
-        {
-            // parse initial pose
-            std::string ini_pose_path = ros::package::getPath("manipulator_h_base_module") + "/config/ini_pose.yaml";
-            parseIniPoseData(ini_pose_path);
-
-            tra_gene_thread_ = new boost::thread(boost::bind(&BaseModule::generateInitPoseTrajProcess, this));
-            delete tra_gene_thread_;
-        }
-    }
-    else
-    {
-        ROS_INFO("previous task is alive");
-    }
-}
-
-void BaseModule::setModeMsgCallback(const std_msgs::String::ConstPtr &msg)
-{
-    std_msgs::String str_msg;
-    str_msg.data = "base_module";
-
-    set_ctrl_module_pub_.publish(str_msg);
-}
-
+/* =================================== service =================================== */
 bool BaseModule::getJointPoseCallback(manipulator_h_base_module_msgs::GetJointPose::Request &req,
                                       manipulator_h_base_module_msgs::GetJointPose::Response &res)
 {
@@ -235,18 +206,71 @@ bool BaseModule::getKinematicsPoseCallback(manipulator_h_base_module_msgs::GetKi
     return true;
 }
 
-/* =================================== P2P msg callback func =================================== */
-void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd)
+/* =================================== subscribe =================================== */
+/* ----------------------------------- set mode ----------------------------------- */
+void BaseModule::setModeMsgCallback(const std_msgs::String::ConstPtr &msg)
+{
+    std_msgs::String str_msg;
+    str_msg.data = "base_module";
+
+    set_ctrl_module_pub_.publish(str_msg);
+}
+
+/* ----------------------------------- velocity ----------------------------------- */
+void BaseModule::setVelCallback(const std_msgs::Float64::ConstPtr &msg)
+{
+    vel_percent = msg->data * 0.01;
+    ROS_INFO("velocity set to %.2f", msg->data);
+}
+
+/* ----------------------------------- inital pose ----------------------------------- */
+void BaseModule::initPoseMsgCallback(const std_msgs::String::ConstPtr &msg)
 {
     if (enable_ == false)
         return;
 
-    // Display Cmd
-    std::cout << "Desired Cmd:" << std::endl;
-    for (int i = 0; i < cmd->data.size(); i++)
+    if (robotis_->is_moving_ == false)
     {
-        std::cout << cmd->data[i] << " ";
+        if (msg->data == "ini_pose")
+        {
+            // parse initial pose
+            std::string ini_pose_path = ros::package::getPath("manipulator_h_base_module") + "/config/ini_pose.yaml";
+            parseIniPoseData(ini_pose_path);
+
+            tra_gene_thread_ = new boost::thread(boost::bind(&BaseModule::generateInitPoseTrajProcess, this));
+            delete tra_gene_thread_;
+        }
     }
+    else
+    {
+        ROS_INFO("previous task is alive");
+    }
+}
+
+/* ----------------------------------- joint ----------------------------------- */
+void BaseModule::JointControlCallback(const manipulator_h_base_module_msgs::JointPose::ConstPtr &msg)
+{
+    if (enable_ == false)
+        return;
+
+    robotis_->joint_pose_msg_ = *msg;
+
+    if (robotis_->is_moving_ == false)
+    {
+        tra_gene_thread_ = new boost::thread(boost::bind(&BaseModule::generateJointTrajProcess, this));
+        delete tra_gene_thread_;
+    }
+    else
+    {
+        ROS_INFO("previous task is alive");
+    }
+}
+
+/* ----------------------------------- ptp ----------------------------------- */
+void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd)
+{
+    if (enable_ == false)
+        return;
 
     /* convert cmd info */
     double x = cmd->data[0];
@@ -262,16 +286,18 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     robotis_->ik_target_rotation_ = robotis_framework::convertRPYToRotation(roll, pitch, yaw);
 
     /* calc ik */
-    bool ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_, robotis_->ik_cmd_fai);
+    bool ik_success = manipulator_->ik(robotis_->ik_target_position_,
+                                       robotis_->ik_target_rotation_,
+                                       robotis_->ik_cmd_fai);
     if (!ik_success)
     {
-        ROS_INFO("IK ERR !!!");
+        ROS_INFO("PTP: IK ERR !!!");
         return;
     }
-    /* calc fk(update pos and ori) */
-    manipulator_->fk();
-    std::cout << "FK position_: " << manipulator_->manipulator_link_data_[END_LINK]->position_ << std::endl;
-    std::cout << "FK Redundancy: " << manipulator_->get_Redundancy() * 180 / M_PI << std::endl;
+
+    // manipulator_->fk();
+    // std::cout << "FK position_: " << manipulator_->manipulator_link_data_[END_LINK]->position_ << std::endl;
+    // std::cout << "FK Redundancy: " << manipulator_->get_Redundancy() * 180 / M_PI << std::endl;
 
     robotis_->ik_id_start_ = 0;
     robotis_->ik_id_end_   = END_LINK;
@@ -287,19 +313,15 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     }
 }
 
+/* ----------------------------------- line ----------------------------------- */
 void BaseModule::LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd)
 {
     if (enable_ == false)
         return;
 
-    // Display Cmd
-    std::cout << "Desired Cmd:" << std::endl;
-    for (int i = 0; i < cmd->data.size(); i++)
-    {
-        std::cout << cmd->data[i] << " ";
-    }
-
     /* 記下命令 */
+    robotis_->ik_cmd = *cmd;
+
     robotis_->kinematics_pose_msg_.pose.position.x = cmd->data[0];
     robotis_->kinematics_pose_msg_.pose.position.y = cmd->data[1];
     robotis_->kinematics_pose_msg_.pose.position.z = cmd->data[2];
@@ -326,6 +348,7 @@ void BaseModule::LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Cons
     }
 }
 
+/* ----------------------------------- original line ----------------------------------- */
 void BaseModule::kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs::KinematicsPose::ConstPtr &msg)
 {
     if (enable_ == false)
@@ -346,38 +369,9 @@ void BaseModule::kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs:
         ROS_INFO("previous task is alive");
     }
 }
-void BaseModule::JointControlCallback(const manipulator_h_base_module_msgs::JointPose::ConstPtr &msg)
-{
-    if (enable_ == false)
-        return;
 
-    robotis_->joint_pose_msg_ = *msg;
-
-    //Convert cmd from deg to rad
-    // for (int i = 0; i < robotis_->joint_pose_msg_.name.size(); i++)
-    // {
-    //     for (int id = 1; id <= MAX_JOINT_ID; id++)
-    //     {
-    //         if (manipulator_->manipulator_link_data_[id]->name_ == robotis_->joint_pose_msg_.name[i])
-    //         {
-    //             robotis_->joint_pose_msg_.value[i] = robotis_->joint_pose_msg_.value[i]*M_PI/180.0;
-    //             break;
-    //         }
-    //     }
-    // }
-    //------------------convert over-------------------------------
-
-    if (robotis_->is_moving_ == false)
-    {
-        tra_gene_thread_ = new boost::thread(boost::bind(&BaseModule::generateJointTrajProcess, this));
-        delete tra_gene_thread_;
-    }
-    else
-    {
-        ROS_INFO("previous task is alive");
-    }
-}
-
+/* =================================== generate trajectory =================================== */
+/* ----------------------------------- inital pose ----------------------------------- */
 void BaseModule::generateInitPoseTrajProcess()
 {
     if (enable_ == false)
@@ -401,22 +395,21 @@ void BaseModule::generateInitPoseTrajProcess()
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
 }
 
+/* ----------------------------------- joint ----------------------------------- */
 void BaseModule::generateJointTrajProcess()
 {
     if (enable_ == false)
         return;
 
     /* set movement time */
-    double tol = 35 * DEGREE2RADIAN; // rad per sec
-    double mov_time = 2.0;
-
-    double max_diff, abs_diff;
-    max_diff = 0.0;
+    double tol      = vel_percent * MAX_JSPD; // rad per sec
+    double mov_time = vel_percent * BASE_MOVE_TIME;
+    double max_diff = 0.0;
 
     for (int name_index = 0; name_index < robotis_->joint_pose_msg_.name.size(); name_index++)
     {
-        double ini_value;
-        double tar_value;
+        double ini_value = 0;
+        double tar_value = 0;
 
         for (int id = 1; id <= MAX_JOINT_ID; id++)
         {
@@ -428,7 +421,7 @@ void BaseModule::generateJointTrajProcess()
             }
         }
 
-        abs_diff = fabs(tar_value - ini_value);
+        double abs_diff = fabs(tar_value - ini_value);
 
         if (max_diff < abs_diff)
             max_diff = abs_diff;
@@ -442,7 +435,6 @@ void BaseModule::generateJointTrajProcess()
         robotis_->mov_time_ = mov_time;
 
     robotis_->all_time_steps_ = int(robotis_->mov_time_ / robotis_->smp_time_) + 1;
-
     robotis_->calc_joint_tra_.resize(robotis_->all_time_steps_, MAX_JOINT_ID + 1);
 
     /* calculate joint trajectory */
@@ -469,29 +461,30 @@ void BaseModule::generateJointTrajProcess()
     robotis_->cnt_ = 0;
     robotis_->is_moving_ = true;
 
-    ROS_INFO("[start] send trajectory123");
+    ROS_INFO("joint: max_diff: %.3f (deg)", max_diff * RADIAN2DEGREE);
+    ROS_INFO("joint: mov_time: %.3f (s)", robotis_->mov_time_);
+
+    ROS_INFO("[start] send trajectory");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
 }
 
-/* =================================== P2P test =================================== */
+/* ----------------------------------- ptp ----------------------------------- */
 void BaseModule::generateP2PTrajProcess()
 {
     if (enable_ == false)
         return;
 
     /* set movement time */
-    double tol = 35 * DEGREE2RADIAN; // rad per sec
-    double mov_time = 2.0;
-
-    double max_diff, abs_diff;
-    max_diff = 0.0;
+    double tol      = vel_percent * MAX_JSPD; // rad per sec
+    double mov_time = vel_percent * BASE_MOVE_TIME;
+    double max_diff = 0.0;
 
     for (int id = 1; id <= MAX_JOINT_ID; id++)
     {
         double ini_value = joint_state_->goal_joint_state_[id].position_;
-        double tar_value = manipulator_->manipulator_link_data_[id]->joint_angle_;
+        double tar_value = manipulator_->ik_calc_joint_angle_[id - 1];
 
-        abs_diff = fabs(tar_value - ini_value);
+        double abs_diff = fabs(tar_value - ini_value);
 
         if (max_diff < abs_diff)
             max_diff = abs_diff;
@@ -505,14 +498,13 @@ void BaseModule::generateP2PTrajProcess()
         robotis_->mov_time_ = mov_time;
 
     robotis_->all_time_steps_ = int(robotis_->mov_time_ / robotis_->smp_time_) + 1;
-
     robotis_->calc_joint_tra_.resize(robotis_->all_time_steps_, MAX_JOINT_ID + 1);
 
     /* calculate joint trajectory */
     for (int id = 1; id <= MAX_JOINT_ID; id++)
     {
         double ini_value = joint_state_->goal_joint_state_[id].position_;
-        double tar_value = manipulator_->manipulator_link_data_[id]->joint_angle_;
+        double tar_value = manipulator_->ik_calc_joint_angle_[id - 1];
 
         Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
                                                                     robotis_->smp_time_, robotis_->mov_time_);
@@ -523,16 +515,21 @@ void BaseModule::generateP2PTrajProcess()
     robotis_->cnt_ = 0;
     robotis_->is_moving_ = true;
 
+    ROS_INFO("ptp: max_diff: %.3f (deg)", max_diff * RADIAN2DEGREE);
+    ROS_INFO("ptp: mov_time: %.3f (s)", robotis_->mov_time_);
+
     ROS_INFO("[start] send trajectory");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
 }
 
+/* ----------------------------------- line ----------------------------------- */
 void BaseModule::generateTaskTrajProcess()
 {
     /* set movement time */
-    double tol = 0.1; // m per sec
-    double mov_time = 2.0;
+    double tol      = vel_percent * MAX_ESPD; // m per sec
+    double mov_time = vel_percent * BASE_MOVE_TIME;
 
+    /* end-effoctor */
     double diff = sqrt(
                         pow(manipulator_->manipulator_link_data_[robotis_->ik_id_end_]->position_.coeff(0, 0)
                             - robotis_->kinematics_pose_msg_.pose.position.x, 2)
@@ -543,15 +540,63 @@ void BaseModule::generateTaskTrajProcess()
                   );
 
     robotis_->mov_time_ = diff / tol;
+
+    /* redundancy */
+    double ini_fai = manipulator_->get_Redundancy();
+    double tar_fai = robotis_->ik_cmd_fai;
+    double dif_fai = fabs(tar_fai - ini_fai);
+
+    if (dif_fai >= 0.1)
+    {
+        robotis_->ik_target_position_ << robotis_->ik_cmd.data[0],
+                                         robotis_->ik_cmd.data[1],
+                                         robotis_->ik_cmd.data[2];
+        robotis_->ik_target_rotation_ = robotis_framework::convertRPYToRotation(
+                                            robotis_->ik_cmd.data[3],
+                                            robotis_->ik_cmd.data[4],
+                                            robotis_->ik_cmd.data[5]
+                                        );
+        /* calc ik */
+        bool ik_success = manipulator_->ik(robotis_->ik_target_position_,
+                                           robotis_->ik_target_rotation_,
+                                           robotis_->ik_cmd_fai);
+        if (!ik_success)
+        {
+            ROS_INFO("LINE: IK WILL ERR !!!");
+        }
+
+        /* set movement time */
+        double f_tol      = vel_percent * MAX_JSPD; // rad per sec
+        double f_max_diff = 0.0;
+        for (int id = 1; id <= MAX_JOINT_ID; id++)
+        {
+            double ini_value = joint_state_->goal_joint_state_[id].position_;
+            double tar_value = manipulator_->ik_calc_joint_angle_[id - 1];
+            double abs_diff = fabs(tar_value - ini_value);
+
+            if (f_max_diff < abs_diff)
+                f_max_diff = abs_diff;
+        }
+
+        double f_mov_time = f_max_diff / f_tol;
+        if (robotis_->mov_time_ < f_mov_time)
+            robotis_->mov_time_ = f_mov_time;
+
+        ROS_INFO("line: f diff:   %.3f (deg)", f_max_diff * 180/M_PI);
+    }
+
+    /* calculate all step */
     int all_time_steps = int(floor((robotis_->mov_time_ / robotis_->smp_time_) + 1.0));
     robotis_->mov_time_ = double(all_time_steps - 1) * robotis_->smp_time_;
 
     if (robotis_->mov_time_ < mov_time)
         robotis_->mov_time_ = mov_time;
 
-    robotis_->all_time_steps_ = int(robotis_->mov_time_ / robotis_->smp_time_) + 1;
-
+    robotis_->all_time_steps_ = all_time_steps;//int(robotis_->mov_time_ / robotis_->smp_time_) + 1;
     robotis_->calc_task_tra_.resize(robotis_->all_time_steps_, 3);
+ 
+    ROS_INFO("line: e diff:   %.3f (m)", diff);
+    ROS_INFO("line: mov_time: %.3f (s)", robotis_->mov_time_);
 
     /* calculate trajectory */
     for (int dim = 0; dim < 3; dim++)
@@ -573,10 +618,7 @@ void BaseModule::generateTaskTrajProcess()
     }
 
     /* generation trajectory fro redundancy */
-    double ini_value = manipulator_->get_Redundancy();
-    double tar_value = robotis_->ik_cmd_fai;
-
-    Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
+    Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_fai, 0.0, 0.0, tar_fai, 0.0, 0.0,
                                                                robotis_->smp_time_, robotis_->mov_time_);
 
     robotis_->calc_fai_tra.resize(robotis_->all_time_steps_, 1);
@@ -590,6 +632,7 @@ void BaseModule::generateTaskTrajProcess()
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
 }
 
+/* =================================== main process =================================== */
 void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> dxls,
                          std::map<std::string, double> sensors)
 {

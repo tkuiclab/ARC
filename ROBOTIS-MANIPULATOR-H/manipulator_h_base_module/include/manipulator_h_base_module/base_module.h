@@ -44,8 +44,6 @@
 #include <ros/package.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/Float64.h>
-/* test cmd msg */
-#include "std_msgs/Float64MultiArray.h"
 #include <std_msgs/String.h>
 #include <geometry_msgs/Pose.h>
 #include <boost/thread.hpp>
@@ -66,6 +64,11 @@
 
 #include "manipulator_h_kinematics_dynamics/manipulator_h_kinematics_dynamics.h"
 #include "robotis_state.h"
+
+#define MAX_JSPD       100 * DEGREE2RADIAN  // deg/s
+#define MAX_ESPD       0.5                  //   m/s
+#define BASE_MOVE_TIME 0.1
+#define DEFAULT_SPD    30 * 0.01
 
 namespace robotis_manipulator_h
 {
@@ -121,9 +124,9 @@ class BaseModule
 
     void JointControlCallback(const manipulator_h_base_module_msgs::JointPose::ConstPtr &msg);
     void kinematicsPoseMsgCallback(const manipulator_h_base_module_msgs::KinematicsPose::ConstPtr &msg);
-    void cmdMsgCallback(const std_msgs::Float64MultiArray::ConstPtr &cmd);
     void P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd);
-    void LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd1);
+    void LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd);
+    void setVelCallback(const std_msgs::Float64::ConstPtr &msg);
 
     bool getJointPoseCallback(manipulator_h_base_module_msgs::GetJointPose::Request &req,
                               manipulator_h_base_module_msgs::GetJointPose::Response &res);
@@ -146,6 +149,8 @@ class BaseModule
     BaseJointState *joint_state_;
     RobotisState *robotis_;
     ManipulatorKinematicsDynamics *manipulator_;
+
+    double vel_percent;
 };
 }
 

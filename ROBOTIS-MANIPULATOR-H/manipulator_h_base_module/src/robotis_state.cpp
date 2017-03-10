@@ -90,6 +90,9 @@ void RobotisState::setInverseKinematics()
     Eigen::Quaterniond quaternion = start_quaternion.slerp(count, target_quaternion);
     ik_target_rotation_ = robotis_framework::convertQuaternionToRotation(quaternion);
 
+    // std::cout << "setInverseKinematics start: \n" << ik_start_rotation_  << std::endl;
+    // std::cout << "setInverseKinematics target:\n" << ik_target_rotation_ << std::endl;
+
     /* get next step redundancy */
     ik_target_fai = calc_fai_tra(cnt_, 0);
 }
