@@ -211,9 +211,11 @@ bool BaseModule::getKinematicsPoseCallback(manipulator_h_base_module_msgs::GetKi
 void BaseModule::setModeMsgCallback(const std_msgs::String::ConstPtr &msg)
 {
     std_msgs::String str_msg;
-    str_msg.data = "base_module";
+    str_msg.data = msg->data != "" ? "base_module" : "";
 
+    /* sending empty string can stop all module */
     set_ctrl_module_pub_.publish(str_msg);
+    ROS_INFO("set module '%s'", str_msg.data.c_str());
 }
 
 /* ----------------------------------- velocity ----------------------------------- */
