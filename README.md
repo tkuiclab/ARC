@@ -15,7 +15,7 @@ $ sudo apt-get install ros-kinetic-qt-build
 ### Using Gazebo
     
 * Open Manipulator Manager With Simulator   
-    arg: en_sim, en_gui
+    arg: en_sim, en_gui, en_vac
 
 ```bash
 $ roslaunch manipulator_h_manager manipulator_h_manager.launch en_sim:=true
@@ -23,38 +23,37 @@ $ roslaunch manipulator_h_manager manipulator_h_manager.launch en_sim:=true
 
 * Manipulator Gazebo    
     arg: paused
-    
+
 ```bash
 $ roslaunch pro7a_description pro7a_gazebo.launch
 ```
 
-* Manipulator Test GUI
-```bash
-$ rosrun manipulator_h_gui manipulator_h_gui
-```
-
-* Publish Test Cmd    
-    data: [x, y, z(m), pitch, roll, yaw, fai(deg)]
-    the fai angle is option value.
+* Publish Velocity    
+    data: percent (%)
 
 ```bash
-$ rostopic pub /robotis/base/cmd_msg std_msgs/Float64MultiArray -1 "layout:
-  dim:
-  - label: ''
-    size: 0
-    stride: 0
-  data_offset: 0
-data: [0, 0.3, 0.15, -90, 0, 90, 45]" -1
+$ rostopic pub /robotis/base/set_velocity std_msgs/Float64 "data: 30" -1
 ```
+
+* Publish Software Emergency Stop    
+    using software to stop manipulator motion.      
+    data: ''
+
+```bash
+$ rostopic pub /robotis/base/set_mode_msg std_msgs/String "data: ''"  -1
+```
+
 
 ### Using Real Robot
 
 * Starting A New Bash Shell With The Security Privilege of Root User
+
 ```bash
 $ sudo bash
 ```
 
 * Open Manipulator Manager Without Simulator Using Root
+
 ```bash
 # roslaunch manipulator_h_manager manipulator_h_manager.launch en_sim:=false
 ```
