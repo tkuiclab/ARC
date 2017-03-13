@@ -916,8 +916,14 @@ status_sub.subscribe(function(msg){
 	}
 });
 
-// /robotis/base/joint_pose_msg [manipulator_h_base_module_msgs/JointPose]
-// * /robotis/base/set_mode_msg [std_msgs/String]
-// * /rosout [rosgraph_msgs/Log]
-// * /robotis/base/ini_pose_msg [std_msgs/String]
-// * /robotis/base/kinematics_pose_msg
+//=====================
+//Navigation Menu Slider
+$('#nav-expander').on('click',function(e){
+	e.preventDefault();
+	$('body').toggleClass('nav-expanded');
+});
+$('#nav-close').on('click',function(e){
+	e.preventDefault();
+	$('body').removeClass('nav-expanded');
+});
+//=====================

@@ -1,45 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <title>Teach Mode</title>
+	<!-- mm_web -->
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  	<meta charset="utf-8">
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <!-- Bootstrap -->
+  	<!-- Styles -->
+	<link rel="stylesheet" href="font-awesome-4.3.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="css/starter-template.css">
+
+   	<!-- jQuery UI-->
+	<link rel="stylesheet" href="jquery-ui-1.11.4/jquery-ui.css">
+	
+	  <!-- Bootstrap -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 		<link href="css/teach_mode.css" rel="stylesheet">
+</head>
 
-	</head>
-<body>
+<body class="">
+
+	<!--off-canvas start-->
+	<!--<div id="mySidenav" class="sidenav">
+		<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+		<a href="#">A</a>
+		<a href="#">B</a>
+		<a href="#">C</a>
+	</div>
+
+	<div id="main">
+		<span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; </span>
+	</div>-->
+	<!--off-canvas over-->
 
 	<nav>
-		<button type="button" id="addbtn" class="add">
-			<span class="glyphicon glyphicon-plus"></span>
-		</button>
+		<ul class="list-unstyled main-menu">
+			<!--Include your navigation here-->
+			<li class="text-left"><a href="http://blog.themearmada.com/demos/off-canvas-menu/#" id="nav-close">x</a></li>
+			<li><a href="teach_mode.html">Teach Mode <span class="icon"></span></a></li>
+			<li><a href="index.html">JSON Decoder <span class="icon"></span></a></li>
+			<li><a href="http://www.iarc.tku.edu.tw/APC">TKU IARC <span class="icon"></span></a></li>
+		</ul>
+	</nav>
 
-		<select class="options" id="cmd_select">
-			<option value="Choose"	>Choose  	</option>
-			<option value="Joint"	>Joint 	 	</option>
-			<option value="PTP"		>PTP 		</option>
-			<option value="Line"	>Line 		</option>
-			<option value="Shift_X" >Shift_X 	</option>
-			<option value="Shift_Y" >Shift_Y 	</option>
-			<option value="Shift_Z" >Shift_Z 	</option>
-			<option value="Rotate_X">Rotate_X 	</option>
-			<option value="Rotate_Y">Rotate_Y 	</option>
-			<option value="Rotate_Z">Rotate_Z 	</option>
-     	<option value="Vaccum">Vaccum</option>
-      <!--
-			<option value="-----------------------">----------------------</option>
-			<option value="Base_Vel">Base_Vel</option>
-			<option value="Base_Stop">Base_Stop</option>
-			<option value="Base_Init">Base_Init</option>
-			<option value="Base_Pos_Index_1">Base_Pos_Index_1</option>
-			<option value="Base_Pos_Index_2">Base_Pos_Index_2</option>
-			<option value="Base_Pos_Index_3">Base_Pos_Index_3</option>
-       -->
-		</select>
+	<!--Top Bar Start-->
+	<div id="fixedTop">
+	<ul >
+		<li class="left">
+			<a id="nav-expander" class="nav-expander fixed"><i class="fa fa-bars fa-lg white"></i></a>
+		</li>
 
-		<!--<div id="block">-->
+		<li class="center">
+			<strong>TKU M-Bot</strong>
+			<a id="rosConnect" style="cursor:pointer">
+					<span 
+						class="fa-stack fa-lg">
+						<i class="fa fa-wifi  fa-stack-1x" id="ipNum" title=""></i>
+						<i id="wifiBanned" class=""></i>
+					</span>
+			</a>
+		</li>
+
+		<li  class="right">
+
+		</li>
+	</ul>
+	</div>
+	<BR><BR>
+	<!--Top Bar Over-->
+
+<div >
+	<div class="TE">
+		<button name="teach_btn" class="teach_btn" style="width:8%; float:right;" onclick="teach_click(this)">
+			<span class="glyphicon glyphicon-pushpin"/>Teach</button>
+
+		<div style="text-align:left;" border-bottom:solid>
+			<button id="addbtn" 		class="Task_btn"> <span class="glyphicon glyphicon-plus" ></span> Add Task 			</button>
+			<button id="set_mode_btn"   class="Task_btn"> <span class="glyphicon glyphicon-flash"></span> Set Mode 			</button>
+			<button id="run_btn" 		class="Task_btn"> <span class="glyphicon glyphicon-play"></span> Run Task    		</button>
+			<button id="file_save_btn"  class="Task_btn"> <span class="glyphicon glyphicon-floppy-disk"></span> Save Task  	</button>
+			<button id="file_read_btn"  class="Task_btn"> <span class="glyphicon glyphicon-folder-open"></span>  Read Task  </button>
+			<button id="Test_btn"  		class="Task_btn"> <span class="glyphicon glyphicon-wrench"></span>  Test 			</button>
+		</div><hr>
+	
+		<div id="block_lab">
+			<!--<label id="block_lab_1" class="block_lab_sty"> CmdType 	</label>-->
+			<select class="options" id="cmd_select">
+				<option value="Choose"	>Choose  	</option>
+				<option value="Joint"	>Joint 	 	</option>
+				<option value="PTP"		>PTP 		</option>
+				<option value="Line"	>Line 		</option>
+				<option value="Shift_X" >Shift_X 	</option>
+				<option value="Shift_Y" >Shift_Y 	</option>
+				<option value="Shift_Z" >Shift_Z 	</option>
+				<option value="Rotate_X">Rotate_X 	</option>
+				<option value="Rotate_Y">Rotate_Y 	</option>
+				<option value="Rotate_Z">Rotate_Z 	</option>
+				<option value="Vaccum">Vaccum 		</option>
+			</select>
+
+			<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
+			<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
+			<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
+			<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
+			<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
+			<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
+			<label id="block_lab_7" class="block_lab_sty"> Fai		</label>
+		</div>
+	
 		<div id="block" style= "display:none;">
+		<!--<div id="block">-->
+			<label id="block_lab_1" class="block_lab_sty2"> Cmd 		</label>
 			<input value="0" id="block_1" class="block_sty" type="number"/>
 			<input value="0" id="block_2" class="block_sty" type="number"/>
 			<input value="0" id="block_3" class="block_sty" type="number"/>
@@ -49,34 +123,36 @@
 			<input value="0" id="block_7" class="block_sty" type="number"/>
 		</div>
 
+		<div id="block_lab">
+			<label id="block_lab_1" class="block_lab_sty2"> TCP_FB 	</label>
+			<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
+			<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
+			<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
+			<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
+			<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
+			<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
+			<label id="block_lab_7" class="block_lab_sty"> Fai		</label> 
+			<br>
+			<label id="block_lab_1" class="block_lab_sty2"> Joint_FB </label>
+			<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
+			<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
+			<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
+			<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
+			<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
+			<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
+			<label id="block_lab_7" class="block_lab_sty"> Fai		</label> 
+		</div>
+
 		<div id="vaccum_block" style= "display:none;">
 			<select class="options" id="vaccum_select">
 				<option value="On">On</option>
 				<option value="Off">Off</option>
 			</select>
 		</div>
-
+	
 		<div id="shift_block" style= "display:none;">
 			<input value="0" id="shift_val" class="block_sty" type="number"/>
 		</div>
-		<!--
-		<div id="base_vel_block" style= "display:none;">
-			<input value="0" id="base_vel_block_1" class="block_sty" type="number"/>
-			<input value="0" id="base_vel_block_2" class="block_sty" type="number"/>
-			<input value="0" id="base_vel_block_3" class="block_sty" type="number"/>
-		</div>
-		-->
-		<button name="teach_btn" class="teach_btn" style="width:10%; float:right;" onclick="teach_click(this)">
-		<span class="glyphicon glyphicon-pushpin"/>Teach
-		</button>
-	</nav>
-	
-	<div style="text-align:center;">
-    	<button id="set_mode_btn"   type="button" class="btn btn-success btn-lg active">Set Mode</button>
-		<button id="run_btn" 		type="button" class="btn btn-success btn-lg active">Run Teach Command</button>
-		<button id="file_save_btn"  type="button" class="btn btn-success btn-lg active">Save</button>
-		<button id="file_read_btn"  type="button" class="btn btn-success btn-lg active">Read</button>
-		<button id="Test_btn"  		type="button" class="btn btn-success btn-lg active">Test</button>
 	</div>
 
 		<div class="borderimg">
@@ -96,13 +172,13 @@
 		</div>
 	<br>
 	
-
 	<div class="show_area">
 		<textarea id="test_json_data" style="display:none;" cols="40" rows="20">
 
 		</textarea>
 		<button id="show_btn" >S h o w</button>
 	</div>
+</div>
   	<script src="js/jquery/jquery.min.js"></script>
   	<script src="bootstrap/js/bootstrap.min.js"></script>
 	<script src="js/roslib/eventemitter2.min.js"></script>
@@ -114,6 +190,16 @@
   	<script src="js/math/euler_quaternion_converter.js"></script>
 
 	<script src="js/teach_mode.js"></script>
+
+<!-- Javascript================================================== -->
+<script src="js/roslib/eventemitter2.min.js"></script>
+<script src="js/roslib/roslib.min.js"></script>
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="js/jquery/jquery.navgoco.js"></script>
+<script src="js/bootstrap/bootstrap.min.js"></script>
+
+<script src="jquery-ui-1.11.4/external/jquery/jquery.js"></script>
+<script src="jquery-ui-1.11.4/jquery-ui.js"></script>
 
   </body>
 </html>

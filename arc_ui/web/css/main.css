@@ -112,7 +112,7 @@ body.nav-expanded {
 	height: 0;
 	display: inline-block;
 	vertical-align: top;
-	border-top: 4px solid #4f5963;
+	border-top: 4px solid #4f5963;{}
 	border-right: 4px solid transparent;
 	border-left: 4px solid transparent;
 	content: "";
@@ -183,6 +183,14 @@ body.nav-expanded {
 }
 
 
+#fixedTop ul li a{
+	padding: 0.5em;
+    color:#fff;
+	cursor: hand;
+	text-decoration: none;
+	
+}		
+
 li.left{
 	float:left;
 	width: 30%;
@@ -206,13 +214,6 @@ li.right{
 	width: 30%;
 }
 
-#fixedTop ul li a{
-	padding: 0.5em;
-    color:#fff;
-	cursor: hand;
-	text-decoration: none;
-	
-}		
 
 a.control{
 	cursor: pointer;
