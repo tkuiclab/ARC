@@ -175,7 +175,7 @@ bool BaseModule::getJointPoseCallback(manipulator_h_base_module_msgs::GetJointPo
             if (manipulator_->manipulator_link_data_[id]->name_ == req.joint_name[name_index])
             {
                 res.joint_name.push_back(manipulator_->manipulator_link_data_[id]->name_);
-                res.joint_value.push_back(joint_state_->goal_joint_state_[id].position_);
+                res.joint_value.push_back(joint_state_->curr_joint_state_[id].position_);
 
                 break;
             }
@@ -322,8 +322,6 @@ void BaseModule::LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Cons
         return;
 
     /* 記下命令 */
-    robotis_->ik_cmd = *cmd;
-
     robotis_->kinematics_pose_msg_.pose.position.x = cmd->data[0];
     robotis_->kinematics_pose_msg_.pose.position.y = cmd->data[1];
     robotis_->kinematics_pose_msg_.pose.position.z = cmd->data[2];
@@ -381,7 +379,7 @@ void BaseModule::generateInitPoseTrajProcess()
 
     for (int id = 1; id <= MAX_JOINT_ID; id++)
     {
-        double ini_value = joint_state_->goal_joint_state_[id].position_;
+        double ini_value = joint_state_->curr_joint_state_[id].position_;
         double tar_value = robotis_->joint_ini_pose_.coeff(id, 0);
 
         Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
@@ -417,7 +415,7 @@ void BaseModule::generateJointTrajProcess()
         {
             if (manipulator_->manipulator_link_data_[id]->name_ == robotis_->joint_pose_msg_.name[name_index])
             {
-                ini_value = joint_state_->goal_joint_state_[id].position_;
+                ini_value = joint_state_->curr_joint_state_[id].position_;
                 tar_value = robotis_->joint_pose_msg_.value[name_index];
                 break;
             }
@@ -442,7 +440,7 @@ void BaseModule::generateJointTrajProcess()
     /* calculate joint trajectory */
     for (int id = 1; id <= MAX_JOINT_ID; id++)
     {
-        double ini_value = joint_state_->goal_joint_state_[id].position_;
+        double ini_value = joint_state_->curr_joint_state_[id].position_;
         double tar_value = ini_value;
 
         for (int name_index = 0; name_index < robotis_->joint_pose_msg_.name.size(); name_index++)
@@ -483,7 +481,7 @@ void BaseModule::generateP2PTrajProcess()
 
     for (int id = 1; id <= MAX_JOINT_ID; id++)
     {
-        double ini_value = joint_state_->goal_joint_state_[id].position_;
+        double ini_value = joint_state_->curr_joint_state_[id].position_;
         double tar_value = manipulator_->ik_calc_joint_angle_[id - 1];
 
         double abs_diff = fabs(tar_value - ini_value);
@@ -505,7 +503,7 @@ void BaseModule::generateP2PTrajProcess()
     /* calculate joint trajectory */
     for (int id = 1; id <= MAX_JOINT_ID; id++)
     {
-        double ini_value = joint_state_->goal_joint_state_[id].position_;
+        double ini_value = joint_state_->curr_joint_state_[id].position_;
         double tar_value = manipulator_->ik_calc_joint_angle_[id - 1];
 
         Eigen::MatrixXd tra = robotis_framework::calcMinimumJerkTra(ini_value, 0.0, 0.0, tar_value, 0.0, 0.0,
@@ -548,16 +546,18 @@ void BaseModule::generateTaskTrajProcess()
     double tar_fai = robotis_->ik_cmd_fai;
     double dif_fai = fabs(tar_fai - ini_fai);
 
-    if (dif_fai >= 0.1)
+    //if (dif_fai >= 0.1)
     {
-        robotis_->ik_target_position_ << robotis_->ik_cmd.data[0],
-                                         robotis_->ik_cmd.data[1],
-                                         robotis_->ik_cmd.data[2];
-        robotis_->ik_target_rotation_ = robotis_framework::convertRPYToRotation(
-                                            robotis_->ik_cmd.data[3],
-                                            robotis_->ik_cmd.data[4],
-                                            robotis_->ik_cmd.data[5]
-                                        );
+        robotis_->ik_target_position_ << robotis_->kinematics_pose_msg_.pose.position.x,
+                                         robotis_->kinematics_pose_msg_.pose.position.y,
+                                         robotis_->kinematics_pose_msg_.pose.position.z;
+        robotis_->ik_target_rotation_ = robotis_framework::convertQuaternionToRotation(
+                                         Eigen::Quaterniond(
+                                         robotis_->kinematics_pose_msg_.pose.orientation.w,
+                                         robotis_->kinematics_pose_msg_.pose.orientation.x,
+                                         robotis_->kinematics_pose_msg_.pose.orientation.y,
+                                         robotis_->kinematics_pose_msg_.pose.orientation.z));
+
         /* calc ik */
         bool ik_success = manipulator_->ik(robotis_->ik_target_position_,
                                            robotis_->ik_target_rotation_,
@@ -565,6 +565,7 @@ void BaseModule::generateTaskTrajProcess()
         if (!ik_success)
         {
             ROS_INFO("LINE: IK WILL ERR !!!");
+            return;
         }
 
         /* set movement time */
@@ -572,7 +573,7 @@ void BaseModule::generateTaskTrajProcess()
         double f_max_diff = 0.0;
         for (int id = 1; id <= MAX_JOINT_ID; id++)
         {
-            double ini_value = joint_state_->goal_joint_state_[id].position_;
+            double ini_value = joint_state_->curr_joint_state_[id].position_;
             double tar_value = manipulator_->ik_calc_joint_angle_[id - 1];
             double abs_diff = fabs(tar_value - ini_value);
 
@@ -665,7 +666,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
     /*----- forward kinematics -----*/
     /* 需要下面三行，末端點資訊才會被刷新(教末端點回授) */
     for (int id = 1; id <= MAX_JOINT_ID; id++)
-        manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->goal_joint_state_[id].position_;
+        manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->curr_joint_state_[id].position_;
 
     manipulator_->fk();
 

@@ -157,6 +157,7 @@ void RobotisController::initializeSyncWrite()
             (dxl->bulk_read_items_[i]->item_name_ == dxl->present_position_item_->item_name_))
         {
           dxl->dxl_state_->present_position_ = dxl->convertValue2Radian(read_data) - dxl->dxl_state_->position_offset_;   // remove offset
+          /* --------- initialize goal position is present position --------- */
           dxl->dxl_state_->goal_position_ = dxl->dxl_state_->present_position_;
 
           port_to_sync_write_position_[dxl->port_name_]->addParam(dxl->id_, sync_write_data);
