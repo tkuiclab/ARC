@@ -71,6 +71,8 @@ public:
     ~ManipulatorKinematicsDynamics();
 
     LinkData *manipulator_link_data_[ALL_JOINT_ID + 1];
+    /* saving value of calculation about ik */
+    double    ik_calc_joint_angle_[MAX_JOINT_ID];
 
     std::vector<int> findRoute(int to);
     std::vector<int> findRoute(int from, int to);

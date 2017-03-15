@@ -41,8 +41,7 @@
 #include "manipulator_h_base_module_msgs/IK_Cmd.h"
 #include "manipulator_h_kinematics_dynamics/manipulator_h_kinematics_dynamics.h"
 
-/* test cmd msg */
-#include "std_msgs/Float64MultiArray.h"
+// #include <iostream>
 
 namespace robotis_manipulator_h
 {

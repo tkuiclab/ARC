@@ -508,7 +508,13 @@ void ManipulatorKinematicsDynamics::fk()
     manipulator_link_data_[END_LINK]->position_ = pos;
 
     /* ------------------------------------------- orientation ------------------------------------------- */
-    double pitch = atan2(ori(2, 2), roundN(sqrt(1 - pow(ori(2, 2), 2)), ROUND_DIGITS)); // pitch
+    /* fixed value range */
+    if (ori(2, 2) > 1.0)
+        ori(2, 2) = 1.0;
+    if (ori(2, 2) < -1.0)
+        ori(2, 2) = -1.0;
+
+    double pitch = atan2(ori(2, 2), sqrt(1 - pow(ori(2, 2), 2))); // pitch
     double roll, yaw;
 
     /* pitch != +-90 deg */
@@ -554,8 +560,8 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     double roll  = rpy(0, 0);
     double yaw   = rpy(2, 0);
 
-    std::cout << "ik recv x,y,z:\n" << tar_position << std::endl;
-    std::cout << "ik recv r,p,y:\n" << rpy * 180 / M_PI << std::endl;
+    // std::cout << "ik recv x,y,z:\n" << tar_position << std::endl;
+    // std::cout << "ik recv r,p,y:\n" << rpy * 180 / M_PI << std::endl;
     // std::cout << "ik recv fai: " << tarFai * 180 / M_PI << std::endl;
 
     double Cx = cos(pitch);
@@ -737,13 +743,15 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
         LinkData &link_data = *manipulator_link_data_[i+1];
 
         /* 存起解出的關節角度 */
-        link_data.joint_angle_ = angle[i];
+        link_data.joint_angle_  = angle[i];
+        /* saving value of calculation about ik */
+        ik_calc_joint_angle_[i] = angle[i];
 
         /* checking joint limit */
         if (link_data.joint_angle_ > link_data.joint_limit_max_ ||
             link_data.joint_angle_ < link_data.joint_limit_min_)
         {
-            std::cout << "ik joint limit: " << i+1 << " " << link_data.joint_angle_*180.0/M_PI << std::endl;
+            std::cout << "ik joint limit: " << i+1 << " " << link_data.joint_angle_ * 180.0 / M_PI << std::endl;
             return false;
         }
     }
