@@ -18,23 +18,15 @@
 	
 	  <!-- Bootstrap -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
-		<link href="css/teach_mode.css" rel="stylesheet">
+	<link href="css/teach_mode.css" rel="stylesheet">
+
+	<!--for multi-tab-->
+  	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 
 <body class="">
-
-	<!--off-canvas start-->
-	<!--<div id="mySidenav" class="sidenav">
-		<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-		<a href="#">A</a>
-		<a href="#">B</a>
-		<a href="#">C</a>
-	</div>
-
-	<div id="main">
-		<span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; </span>
-	</div>-->
-	<!--off-canvas over-->
 
 	<nav>
 		<ul class="list-unstyled main-menu">
@@ -56,8 +48,7 @@
 		<li class="center">
 			<strong>TKU M-Bot</strong>
 			<a id="rosConnect" style="cursor:pointer">
-					<span 
-						class="fa-stack fa-lg">
+					<span class="fa-stack ">
 						<i class="fa fa-wifi  fa-stack-1x" id="ipNum" title=""></i>
 						<i id="wifiBanned" class=""></i>
 					</span>
@@ -72,113 +63,531 @@
 	<BR><BR>
 	<!--Top Bar Over-->
 
-<div >
-	<div class="TE">
-		<button name="teach_btn" class="teach_btn" style="width:8%; float:right;" onclick="teach_click(this)">
-			<span class="glyphicon glyphicon-pushpin"/>Teach</button>
 
-		<div style="text-align:left;" border-bottom:solid>
-			<button id="addbtn" 		class="Task_btn"> <span class="glyphicon glyphicon-plus" ></span> Add Task 			</button>
-			<button id="set_mode_btn"   class="Task_btn"> <span class="glyphicon glyphicon-flash"></span> Set Mode 			</button>
-			<button id="run_btn" 		class="Task_btn"> <span class="glyphicon glyphicon-play"></span> Run Task    		</button>
-			<button id="file_save_btn"  class="Task_btn"> <span class="glyphicon glyphicon-floppy-disk"></span> Save Task  	</button>
-			<button id="file_read_btn"  class="Task_btn"> <span class="glyphicon glyphicon-folder-open"></span>  Read Task  </button>
-			<button id="Test_btn"  		class="Task_btn"> <span class="glyphicon glyphicon-wrench"></span>  Test 			</button>
-		</div><hr>
+	<!--Multi-Tab start-->
+	<ul class="nav nav-tabs">
+
+		<li >
+			<a href="#tab1_Task_Editor" data-toggle="tab">Task Editor</a>
+		</li>
+
+		<li class="active">
+			<a href="#tab2_Robot_Control" data-toggle="tab">Robot Control</a>
+		</li>
+
+	</ul>
+
+	<!--Multi-Tab over-->
+
+
+<div class="tab-content"> <!--  tab-pane fade  -->
+
+	<div id="tab1_Task_Editor" class="tab-pane fade ">
+		<div class="TE">
+			<button name="teach_btn" class="teach_btn" style="width:8%; float:right;" onclick="teach_click(this)">
+				<span class="glyphicon glyphicon-pushpin"/>Teach</button>
+
+			<div style="text-align:left;" border-bottom:solid>
+				<button id="addbtn" 		class="Task_btn"> <span class="glyphicon glyphicon-plus" ></span> Add Task 			</button>
+				<button id="set_mode_btn"   class="Task_btn"> <span class="glyphicon glyphicon-flash"></span> Set Mode 			</button>
+				<button id="run_btn" 		class="Task_btn"> <span class="glyphicon glyphicon-play"></span> Run Task    		</button>
+				<button id="file_save_btn"  class="Task_btn"> <span class="glyphicon glyphicon-floppy-disk"></span> Save Task  	</button>
+				<button id="file_read_btn"  class="Task_btn"> <span class="glyphicon glyphicon-folder-open"></span>  Read Task  </button>
+				<button id="Test_btn"  		class="Task_btn"> <span class="glyphicon glyphicon-wrench"></span>  Test 			</button>
+			</div><hr>
+		
+			<div id="block_lab">
+				<!--<label id="block_lab_1" class="block_lab_sty"> CmdType 	</label>-->
+				<select class="options" id="cmd_select">
+					<option value="Choose"	>Choose  	</option>
+					<option value="Joint"	>Joint 	 	</option>
+					<option value="PTP"		>PTP 		</option>
+					<option value="Line"	>Line 		</option>
+					<option value="Shift_X" >Shift_X 	</option>
+					<option value="Shift_Y" >Shift_Y 	</option>
+					<option value="Shift_Z" >Shift_Z 	</option>
+					<option value="Rotate_X">Rotate_X 	</option>
+					<option value="Rotate_Y">Rotate_Y 	</option>
+					<option value="Rotate_Z">Rotate_Z 	</option>
+					<option value="Vaccum">Vaccum 		</option>
+				</select>
+
+				<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
+				<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
+				<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
+				<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
+				<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
+				<label id="block_lab_7" class="block_lab_sty"> Fai		</label>
+			</div>
+		
+			<div id="block" style= "display:none;">
+			<!--<div id="block">-->
+				<label id="block_lab_1" class="block_lab_sty2"> Cmd 		</label>
+				<input value="0" id="block_1" class="block_sty" type="number"/>
+				<input value="0" id="block_2" class="block_sty" type="number"/>
+				<input value="0" id="block_3" class="block_sty" type="number"/>
+				<input value="0" id="block_4" class="block_sty" type="number"/>
+				<input value="0" id="block_5" class="block_sty" type="number"/>
+				<input value="0" id="block_6" class="block_sty" type="number"/>
+				<input value="0" id="block_7" class="block_sty" type="number"/>
+			</div>
+
+			<div id="block_lab">
+				<label id="block_lab_1" class="block_lab_sty2"> TCP_FB 	</label>
+				<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
+				<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
+				<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
+				<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
+				<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
+				<label id="block_lab_7" class="block_lab_sty"> Fai		</label> 
+				<br>
+				<label id="block_lab_1" class="block_lab_sty2"> Joint_FB </label>
+				<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
+				<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
+				<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
+				<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
+				<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
+				<label id="block_lab_7" class="block_lab_sty"> Fai		</label> 
+			</div>
+
+			<div id="vaccum_block" style= "display:none;">
+				<select class="options" id="vaccum_select">
+					<option value="On">On</option>
+					<option value="Off">Off</option>
+				</select>
+			</div>
+		
+			<div id="shift_block" style= "display:none;">
+				<input value="0" id="shift_val" class="block_lab_sty" type="number"/>
+			</div>
+		
+		</div> <!--Task Control Pad-->
+
+			<div class="borderimg">
+				<table>
+					<thead>
+						<tr class="font_black"  >
+							<th style = "width:10%" >Order<input id="move_cmd" style="margin-left:1px;" type="checkbox"></td>
+							<th style = "width:15%" >Command</td>
+							<th style = "width:60%" >Parameter</td>
+							<th style = "width:10%" >Edit</td>
+							<th style = "width:5%"  >Delete</td>
+						</tr>
+					</thead>
+					<tbody id="teach_table" style="font-size: 24px" ondrop="drop(event)" ondragover="allowDrop(event)">
+					</tbody>
+				</table>
+			</div>
+		<br>
+		
+		<div class="show_area">
+			<textarea id="test_json_data" style="display:none;" cols="40" rows="20">
+
+			</textarea>
+			<button id="show_btn" >S h o w</button>
+		</div>
+	</div>  <!--Tab1__Task Editor-->
 	
-		<div id="block_lab">
-			<!--<label id="block_lab_1" class="block_lab_sty"> CmdType 	</label>-->
-			<select class="options" id="cmd_select">
-				<option value="Choose"	>Choose  	</option>
-				<option value="Joint"	>Joint 	 	</option>
-				<option value="PTP"		>PTP 		</option>
-				<option value="Line"	>Line 		</option>
-				<option value="Shift_X" >Shift_X 	</option>
-				<option value="Shift_Y" >Shift_Y 	</option>
-				<option value="Shift_Z" >Shift_Z 	</option>
-				<option value="Rotate_X">Rotate_X 	</option>
-				<option value="Rotate_Y">Rotate_Y 	</option>
-				<option value="Rotate_Z">Rotate_Z 	</option>
-				<option value="Vaccum">Vaccum 		</option>
-			</select>
-
-			<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
-			<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
-			<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
-			<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
-			<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
-			<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
-			<label id="block_lab_7" class="block_lab_sty"> Fai		</label>
-		</div>
-	
-		<div id="block" style= "display:none;">
-		<!--<div id="block">-->
-			<label id="block_lab_1" class="block_lab_sty2"> Cmd 		</label>
-			<input value="0" id="block_1" class="block_sty" type="number"/>
-			<input value="0" id="block_2" class="block_sty" type="number"/>
-			<input value="0" id="block_3" class="block_sty" type="number"/>
-			<input value="0" id="block_4" class="block_sty" type="number"/>
-			<input value="0" id="block_5" class="block_sty" type="number"/>
-			<input value="0" id="block_6" class="block_sty" type="number"/>
-			<input value="0" id="block_7" class="block_sty" type="number"/>
+	<div id="tab2_Robot_Control" class="tab-pane fade in active" >
+		
+	<!--======================== FeedBack Table Start ========================-->	
+	<div class="panel panel-info col-lg-4 col-md-4" style="height:415px">
+		
+		<!-- Default panel contents -->
+		<div class="panel-heading">
+			<a id="control_edit_eef" class="control"><i class="fa fa-pencil-square-o fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a>
+			<strong style="font-size:16px">&nbsp;&nbsp;Robot FeedBack</strong>
 		</div>
 
-		<div id="block_lab">
-			<label id="block_lab_1" class="block_lab_sty2"> TCP_FB 	</label>
-			<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
-			<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
-			<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
-			<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
-			<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
-			<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
-			<label id="block_lab_7" class="block_lab_sty"> Fai		</label> 
-			<br>
-			<label id="block_lab_1" class="block_lab_sty2"> Joint_FB </label>
-			<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
-			<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
-			<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
-			<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
-			<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
-			<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
-			<label id="block_lab_7" class="block_lab_sty"> Fai		</label> 
-		</div>
+		<!-- Table -->
+		<div id="FB_Table2">
+			<table >  <!--cellpadding="10" border='0'-->
+				<tbody>
+					<tr style="background:none"> <th colspan="2">TCP</th></tr>
 
-		<div id="vaccum_block" style= "display:none;">
-			<select class="options" id="vaccum_select">
-				<option value="On">On</option>
-				<option value="Off">Off</option>
-			</select>
-		</div>
-	
-		<div id="shift_block" style= "display:none;">
-			<input value="0" id="shift_val" class="block_sty" type="number"/>
-		</div>
-	</div>
-
-		<div class="borderimg">
-			<table>
-				<thead>
 					<tr>
-						<th width="15%" class="font_black">Order<input id="move_cmd" style="margin-left:1px;" type="checkbox"></td>
-						<th width="20%" class="font_black">Command</td>
-						<th width="50%" class="font_black">Parameter</td>
-						<th width="10%" class="font_black">Edit</td>
-						<th width="5%"  class="font_black">Delete</td>
+						<td><label > X:</label> </td>
+						<td><label > 0</label> </td>
+						<td><label > Y:</label> </td>
+						<td><label > 0</label> </td>
+						<td><label > Z:</label> </td>
+						<td><label > 0</label> </td>
 					</tr>
-				</thead>
-				<tbody id="teach_table" style="font-size: 24px" ondrop="drop(event)" ondragover="allowDrop(event)">
+
+					<tr>
+						<td><label > Rx:</label> </td>
+						<td><label > Rx</label> </td>
+						<td><label > Ry:</label> </td>
+						<td><label > Ry</label> </td>
+						<td><label > Rz:</label> </td>
+						<td><label > Rz</label> </td>
+						<td><label > RF:</label> </td>
+						<td><label > RF</label> </td>
+					</tr>
+
 				</tbody>
 			</table>
 		</div>
-	<br>
-	
-	<div class="show_area">
-		<textarea id="test_json_data" style="display:none;" cols="40" rows="20">
+		<hr>
+		<div id="FB_Table">
+			<table >
+				<tbody >
 
-		</textarea>
-		<button id="show_btn" >S h o w</button>
+					<!--=================Joint FeedBack =================-->
+					<!--<tr>
+						<td style="background:lightblue"> Joint </td>
+						<td style="background:lightblue" colspan="2"> Feed Back </td>
+					</tr>-->
+					<!--jmp1-->
+			
+					<tr>
+						<td rowspan="2" >J1</td>
+						<td > P-Limit </td>
+						<td > N-Limit </td>
+						<tr><td> Angle</td></tr>
+					</tr>
+					<!--<tr>  <td colspan="2"></td> <td>Angle</td> </tr>-->
+
+					<tr >
+						<!--<th rowspan="2">&nbsp</th>-->
+						<td rowspan="2" >J2</td>
+						<td > b1 </td>
+						<td > b2 </td>
+					</tr>
+					<tr style="background:none"> <th colspan="2">Angle</th></tr>
+
+					<tr >
+						<td rowspan="2" valign="middle" >J3</td>
+						<td > a1 </td>
+						<td > a2 </td>
+					</tr>
+					<tr style="background:none"> <th colspan="2">Angle</th></tr>
+
+					<tr >
+						<!--<th rowspan="2">&nbsp</th>-->
+						<td rowspan="2" valign="middle" >J4</td>
+						<td > b1 </td>
+						<td > b2 </td>
+					</tr>
+					<tr style="background:none"> <th colspan="2">Angle</th></tr>
+
+					<tr >
+						<!--<th rowspan="2">&nbsp</th>-->
+						<td rowspan="2" valign="middle" >J5</td>
+						<td > b1 </td>
+						<td > b2 </td>
+					</tr>
+					<tr style="background:none"> <th colspan="2">Angle</th></tr>
+
+					<tr >
+						<td rowspan="2" valign="middle" >J6</td>
+						<td > a1 </td>
+						<td > a2 </td>
+					</tr>
+					<tr style="background:none"> <th colspan="2">Angle</th></tr>
+
+					<tr >
+						<!--<th rowspan="2">&nbsp</th>-->
+						<td rowspan="2" valign="middle" >J7</td>
+						<td > b1 </td>
+						<td > b2 </td>
+					</tr>
+					<tr style="background:none"> <th colspan="2">Angle</th></tr>
+				</tbody>
+			</table>
+		</div> <!--FB Table-->
+
+	</div>  <!--<div class="panel panel-info col-lg-4 col-md-4" style="height:415px">  FB-->
+	<!--======================== FeedBack Table Over========================-->
+
+	<!--======================== TCP Control Table Start========================-->
+	<div class="panel panel-info col-lg-4 col-md-4" style="height:465px">
+		<!-- Default panel contents -->
+		<div class="panel-heading">
+			<a id="control_edit_eef" class="control"><i class="fa fa-pencil-square-o fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a>
+			<strong style="font-size:16px">&nbsp;&nbsp;TCP Control &nbsp &nbsp</strong>
+			
+			<input value="0" class="PTP_Control_type"  type="number"/>
+			<label style="font-size:100%"> cm &nbsp</label>
+			<br>
+			<input value="0" class="PTP_Control_type" type="number"style="margin-left:188px" >
+			<labelstyle="font-size:100%"><strong> deg </strong></label> 	
+		</div>		
+
+		<!-- Table -->
+		<div id="TCP_Table">
+		<table class="table" width="100%" height="70%">
+			<tbody>
+
+				<tr>
+					<td width="40%">X</td>
+					<td width="40%"><h4 id="output_lx" style="color:red"><h4></td>
+					<td width="10%"><a id="plus_lx" class="control"><i class="fa fa-plus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+					<td width="10%"><a id="minus_lx" class="control"><i class="fa fa-minus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Y</td>
+					<td width="40%"><h4 id="output_lx" style="color:red"></td>
+					<td width="10%"><a id="plus_lx" class="control"><i class="fa fa-plus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+					<td width="10%"><a id="minus_lx" class="control"><i class="fa fa-minus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Z</td>
+					<td width="40%"><h4 id="output_lx" style="color:red"></td>
+					<td width="10%"><a id="plus_lx" class="control"><i class="fa fa-plus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+					<td width="10%"><a id="minus_lx" class="control"><i class="fa fa-minus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Pitch</td>
+					<td width="40%"><h4 id="output_lx" style="color:red"></td>
+					<td width="10%"><a id="plus_lx" class="control"><i class="fa fa-plus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+					<td width="10%"><a id="minus_lx" class="control"><i class="fa fa-minus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Roll</td>
+					<td width="40%"><h4 id="output_lx" style="color:red"></td>
+					<td width="10%"><a id="plus_lx" class="control"><i class="fa fa-plus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+					<td width="10%"><a id="minus_lx" class="control"><i class="fa fa-minus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Yaw</td>
+					<td width="40%"><h4 id="output_lx" style="color:red"></td>
+					<td width="10%"><a id="plus_lx" class="control"><i class="fa fa-plus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+					<td width="10%"><a id="minus_lx" class="control"><i class="fa fa-minus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Fai</td>
+					<td width="40%"><h4 id="output_lx" style="color:red"></td>
+					<td width="10%"><a id="plus_lx" class="control"><i class="fa fa-plus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+					<td width="10%"><a id="minus_lx" class="control"><i class="fa fa-minus-circle fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a></td>
+				</tr>
+
+				<tr>
+					<td width="40%" >Vaccum</td>
+					<td width="40%"><h4 id="output_lx" style="color:red"></td>
+					<td> <label class="switch">
+						<input type="checkbox" checked>
+						<div class="slider round"></div></label> 
+					</td> <td> </td>
+				</tr>
+
+			<tbody>
+		</table>
+		</div>
+	</div>  <!--<div class="panel panel-info col-lg-4 col-md-4" style="height:415px">  TCP  -->
+	<!--======================== TCP Control Table Over ========================-->
+
+	<!--======================== Joint Control Table Start========================-->
+	<div class="panel panel-info col-lg-4 col-md-4" style="height:465px">
+		<!-- Default panel contents -->
+		<div class="panel-heading">
+			<a id="control_edit_eef" class="control"><i class="fa fa-pencil-square-o fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a>
+			<strong style="font-size:16px">&nbsp;&nbsp;Joint Control&nbsp;&nbsp</strong>
+
+			<input value="0" style="width:100px" class="block_sty"  type="number"/>
+			<label style="font-size:100%"> deg </label> 	
+		</div>
+
+		<!-- Table -->
+		<div id="Joint_Table">
+		<table class="table" width="100%" height="70%">
+			<tbody>
+				<tr height="10%">
+					<td width="20%" style="text-align:center"><strong>Joint1</strong></td>
+					<td width="10%"><a id="control_base_L" class="control"><i class="fa fa-caret-left fa-2x"></i></a></td>
+					<td width="60%" class="progress">
+						<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+						<h4 id="output_j1p"></h4></div>
+					</td>
+					<td width="10%" height="10px" align="right"><a id="control_base_R" class="control"><i class="fa fa-caret-right fa-2x"></i></a></td>
+				</tr>
+
+				<tr height="10%">
+					<td width="20%" style="text-align:center"><strong>Joint2</strong></td>
+					<td width="10%"><a id="control_base_L" class="control"><i class="fa fa-caret-left fa-2x"></i></a></td>
+					<td width="60%" class="progress">
+						<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+						<h4 id="output_j1p"></h4></div>
+					</td>
+					<td width="10%" height="10px" align="right"><a id="control_base_R" class="control"><i class="fa fa-caret-right fa-2x"></i></a></td>
+				</tr>
+
+				<tr height="10%">
+					<td width="20%" style="text-align:center"><strong>Joint3</strong></td>
+					<td width="10%"><a id="control_base_L" class="control"><i class="fa fa-caret-left fa-2x"></i></a></td>
+					<td width="60%" class="progress">
+						<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+						<h4 id="output_j1p"></h4></div>
+					</td>
+					<td width="10%" height="10px" align="right"><a id="control_base_R" class="control"><i class="fa fa-caret-right fa-2x"></i></a></td>
+				</tr>
+
+				<tr height="10%">
+					<td width="20%" style="text-align:center"><strong>Joint4</strong></td>
+					<td width="10%"><a id="control_base_L" class="control"><i class="fa fa-caret-left fa-2x"></i></a></td>
+					<td width="60%" class="progress">
+						<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+						<h4 id="output_j1p"></h4></div>
+					</td>
+					<td width="10%" height="10px" align="right"><a id="control_base_R" class="control"><i class="fa fa-caret-right fa-2x"></i></a></td>
+				</tr>
+
+				<tr height="10%">
+					<td width="20%" style="text-align:center"><strong>Joint5</strong></td>
+					<td width="10%"><a id="control_base_L" class="control"><i class="fa fa-caret-left fa-2x"></i></a></td>
+					<td width="60%" class="progress">
+						<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+						<h4 id="output_j1p"></h4></div>
+					</td>
+					<td width="10%" height="10px" align="right"><a id="control_base_R" class="control"><i class="fa fa-caret-right fa-2x"></i></a></td>
+				</tr>
+
+				<tr height="10%">
+					<td width="20%" style="text-align:center"><strong>Joint6</strong></td>
+					<td width="10%"><a id="control_base_L" class="control"><i class="fa fa-caret-left fa-2x"></i></a></td>
+					<td width="60%" class="progress">
+						<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+						<h4 id="output_j1p"></h4></div>
+					</td>
+					<td width="10%" height="10px" align="right"><a id="control_base_R" class="control"><i class="fa fa-caret-right fa-2x"></i></a></td>
+				</tr>	
+
+				<tr height="10%">
+					<td width="20%" style="text-align:center"><strong>Joint7</strong></td>
+					<td width="10%"><a id="control_base_L" class="control"><i class="fa fa-caret-left fa-2x"></i></a></td>
+					<td width="60%" class="progress">
+						<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+						<h4 id="output_j1p"></h4></div>
+					</td>
+					<td width="10%" height="10px" align="right"><a id="control_base_R" class="control"><i class="fa fa-caret-right fa-2x"></i></a></td>
+				</tr>	
+
+				<tr height="10%">
+					<td width="20%" style="text-align:center"><strong>Shift_X</strong></td>
+					<td width="10%"><a id="control_base_L" class="control"><i class="fa fa-caret-left fa-2x"></i></a></td>
+					<td width="60%" class="progress">
+						<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+						<h4 id="output_j1p"></h4></div>
+					</td>
+					<td width="10%" height="10px" align="right"><a id="control_base_R" class="control"><i class="fa fa-caret-right fa-2x"></i></a></td>
+				</tr>	
+
+				<tr height="10%">
+					<td width="20%" style="text-align:center"><strong>Shift_Z</strong></td>
+					<td width="10%"><a id="control_base_L" class="control"><i class="fa fa-caret-left fa-2x"></i></a></td>
+					<td width="60%" class="progress">
+						<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+						<h4 id="output_j1p"></h4></div>
+					</td>
+					<td width="10%" height="10px" align="right"><a id="control_base_R" class="control"><i class="fa fa-caret-right fa-2x"></i></a></td>
+				</tr>	
+
+			<tbody>
+		</table>
+
+	</div>  <!--<div class="panel panel-info col-lg-4 col-md-4" style="height:415px">  TCP  -->
+	<!--======================== Joint Control Table Start========================-->
+
+	<!-- Dialog : popup when the button is clicked -->
+	<div class="modal fade" id="setting_Dialog" role="dialog">
+		<div class="modal-dialog">
+		<!--content-->
+		<div class="modal-content" style="width:300px">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+				<h4>Dialog Setting</h4>
+			</div>
+			<div class="modal-body">
+				<!-- Joint Setting Table-->
+				<table id="dialog_table_joint">
+					<tbody>
+					<tr height="15%">
+						<td>Base</td>
+						<td><input type="text" class="form-control" id="input_j1_d"data-fv-field="number"></td>
+					</tr>
+					<tr height="15%">
+						<td>Shoulder</td>
+						<td><input class="form-control input-sm" id="input_j2_d" type="text"></td>
+					</tr>
+					<tr height="15%">
+						<td>Elbow</td>
+						<td><input class="form-control input-sm" id="input_j3_d" type="text"></td>
+					</tr>
+					<tr height="15%">
+						<td>Wrist1</td>
+						<td><input class="form-control input-sm" id="input_j4_d" type="text"></td>
+					</tr>
+					<tr height="15%">
+						<td>Wrist2</td>
+						<td><input class="form-control input-sm" id="input_j5_d" type="text"></td>
+					</tr>
+					<tr height="15%">
+						<td>Wrist3</td>
+						<td><input class="form-control input-sm" id="input_j6_d" type="text"></td>
+					</tr>
+					<tr height="10%">
+						<td>Send</td>
+						<td><a id="control_send_joint_d" class="control"><i class="fa fa-paper-plane  fa-2x"></i></a></td>
+					</tr>
+					</tbody>
+			<BR>
+				</table>
+
+				<!-- EEF Setting Table-->
+				<table id="dialog_table_eef">
+					<tbody>
+					<tr height="15%">
+						<td>X</td>
+						<td><input type="text" class="form-control" id="input_lx_d"data-fv-field="number"></td>
+					</tr>
+					<tr height="15%">
+						<td>Y</td>
+						<td><input class="form-control input-sm" id="input_ly_d" type="text"></td>
+					</tr>
+					<tr height="15%">
+						<td>Z</td>
+						<td><input class="form-control input-sm" id="input_lz_d" type="text"></td>
+					</tr>
+					<tr height="15%">
+						<td>RX</td>
+						<td><input class="form-control input-sm" id="input_ax_d" type="text"></td>
+					</tr>
+					<tr height="15%">
+						<td>RY</td>
+						<td><input class="form-control input-sm" id="input_ay_d" type="text"></td>
+					</tr>
+					<tr height="15%">
+						<td>RZ</td>
+						<td><input class="form-control input-sm" id="input_az_d" type="text"></td>
+					</tr>
+					<tr height="10%">
+						<td>Send</td>
+						<td><a id="control_send_eef_d" class="control"><i class="fa fa-paper-plane  fa-2x"></i></a></td>
+					</tr>
+					</tbody>
+				</table>
+			<BR>
+				
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
 	</div>
-</div>
+
+	</div>   <!--Tab2_Robot COntrol-->
+
+</div> <!--tab-content-->
+
   	<script src="js/jquery/jquery.min.js"></script>
   	<script src="bootstrap/js/bootstrap.min.js"></script>
 	<script src="js/roslib/eventemitter2.min.js"></script>
@@ -201,5 +610,11 @@
 <script src="jquery-ui-1.11.4/external/jquery/jquery.js"></script>
 <script src="jquery-ui-1.11.4/jquery-ui.js"></script>
 
+<!--<script src="js/remote_control/index.js"></script>-->
+<!--<script src="js/remote_control/index_eef_panel.js"></script>
+<script src="js/remote_control/joint_panel.js"></script>
+<script src="js/remote_control/index_direct_panel.js"></script>-->
+
   </body>
 </html>
+

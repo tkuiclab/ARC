@@ -161,8 +161,6 @@ body.nav-expanded {
   opacity: 1;
 }
 
-
-
 #fixedTop {
   position: fixed;
   top: 0;
@@ -204,8 +202,6 @@ li.center{
 
     width: 40%;
 }
-
-
 
 li.right{
 	text-align:right;
