@@ -66,9 +66,9 @@
 #include "robotis_state.h"
 
 #define MAX_JSPD       100 * DEGREE2RADIAN  // deg/s
-#define MAX_ESPD       0.5                  //   m/s
-#define BASE_MOVE_TIME 0.1
-#define DEFAULT_SPD    30 * 0.01
+#define MAX_ESPD       0.4                  //   m/s
+#define BASE_MOVE_TIME 0.2
+#define DEFAULT_SPD    20 * 0.01
 
 namespace robotis_manipulator_h
 {

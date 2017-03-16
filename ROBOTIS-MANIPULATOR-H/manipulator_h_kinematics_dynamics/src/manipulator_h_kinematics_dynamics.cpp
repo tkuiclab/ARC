@@ -38,7 +38,7 @@
 #include <iostream>
 #include "manipulator_h_kinematics_dynamics/manipulator_h_kinematics_dynamics.h"
 
-#define ROUND_DIGITS 10
+#define ROUND_DIGITS 8
 
 namespace robotis_manipulator_h
 {
@@ -509,10 +509,8 @@ void ManipulatorKinematicsDynamics::fk()
 
     /* ------------------------------------------- orientation ------------------------------------------- */
     /* fixed value range */
-    if (ori(2, 2) > 1.0)
-        ori(2, 2) = 1.0;
-    if (ori(2, 2) < -1.0)
-        ori(2, 2) = -1.0;
+    if (fabs(ori(2, 2)) > 1)
+        ori(2, 2) = ori(2, 2) > 0 ? 1 : -1;
 
     double pitch = atan2(ori(2, 2), sqrt(1 - pow(ori(2, 2), 2))); // pitch
     double roll, yaw;
@@ -607,9 +605,9 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     double a = P_LJ(2) - d_bs;
     double b = L_sl;
 
-    if(P_LJ(1) > 0.0001)
+    if(P_LJ(1) >= 0)//0.0001)
     {
-        if (P_w(1) < 0.0001)      //(LJ, W) = (+, -)
+        if (P_w(1) < 0)//0.0001)      //(LJ, W) = (+, -)
         {
             angle[0] = atan2(-P_LJ(0), P_LJ(1)) - M_PI;
             angle[1] = M_PI - asin(a / b);
@@ -622,7 +620,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     }
     else
     {
-        if (P_w(1) > 0.0001)        //(LJ, W) = (-, +)
+        if (P_w(1) >= 0)//0.0001)        //(LJ, W) = (-, +)
         {
             angle[0] = atan2(-P_LJ(0), P_LJ(1)) - M_PI;
             angle[1] = M_PI - asin(a / b);
@@ -646,7 +644,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     Eigen::Vector4d C = A[1].inverse() * A[0].inverse() * P_e4;
 
     angle[2] = acos(C(0) / sqrt(pow(C(0), 2) + pow(C(1), 2))) - M_PI;
-    angle[2] = C(1) > 0.0001? angle[2]: -angle[2];
+    angle[2] = C(1) > 0.0001 ? angle[2] : -angle[2];
 
     // /* ------------------------------------------- orientation ------------------------------------------- */
     double sida1 = angle[0] + DH(0, 3);
@@ -765,7 +763,12 @@ void ManipulatorKinematicsDynamics::cal_ElbowInfo(Eigen::Vector3d& P_s, Eigen::V
     double L_sw = (P_w - P_s).norm();
     double    a = pow(L_se, 2) + pow(L_sw, 2) - pow(L_ew, 2);
     double    b = 2 * L_se * L_sw;
-    double  BAE = acos(a / b);
+    double  a_b = a / b;
+    if (fabs(a_b) > 1)
+        a_b = a_b > 0 ? 1 : -1;
+
+    double  BAE = acos(a_b);
+    
     Vector3d  E = P_s + (P_w - P_s) * L_se * cos(BAE) / L_sw;
     double  low_BAE = BAE + rho1;
 
