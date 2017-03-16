@@ -5,30 +5,22 @@
 	},
 	"2":{
 		"cmd": "PTP",
-		"val_7": [0,0.4,0.2,0,0,0,0]
+		"val_7": [0,0.35,0.2,0,-90,0,0]
 	},
 	"3":{
 		"cmd": "Rotate_X",
-		"val": 40
+		"val": 30
 	},
 	"4":{
 		"cmd": "Rotate_X",
-		"val": -40
+		"val": -30
 	},
 	"5":{
-		"cmd": "Rotate_Y",
+		"cmd": "Rot_Fai",
 		"val": 40
 	},
 	"6":{
-		"cmd": "Rotate_Y",
-		"val": -40
-	},
-	"7":{
-		"cmd": "Rotate_Z",
-		"val": 40
-	},
-	"8":{
-		"cmd": "Rotate_Z",
+		"cmd": "Rot_Fai",
 		"val": -40
 	}
 }

@@ -27,6 +27,7 @@ function command_selected(cmd){
 			'<option value="Rotate_X"'+((cmd==CmdType.Rotate_X)?"selected":"")+'>Rotate_X</option>'+
 			'<option value="Rotate_Y"'+((cmd==CmdType.Rotate_Y)?"selected":"")+'>Rotate_Y</option>'+
 			'<option value="Rotate_Z"'+((cmd==CmdType.Rotate_Z)?"selected":"")+'>Rotate_Z</option>'+
+			'<option value="Rot_Fai"'+((cmd==CmdType.Rot_Fai)?"selected":"")+'>Rot_Fai</option>'+
 			'<option value="Vaccum"'+((cmd==CmdType.Vaccum)?"selected":"")+'>Vaccum</option>'+
 			'</select>';
 
@@ -111,7 +112,7 @@ function cmd_select_change(ev,mod){
 		$("#vaccum_block").show();
 		$("#vaccum_block").css("display","inline");
 	}else if(cmd==CmdType.Shift_X  || cmd==CmdType.Shift_Y  || cmd==CmdType.Shift_Z ||
-			 cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z){
+			 cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z|| cmd==CmdType.Rot_Fai){
 		$("#shift_block").show();
 		$("#shift_block").css("display","inline");
 	}else if(cmd==CmdType.Base_Vel){
@@ -128,7 +129,7 @@ function cmd_select_change(ev,mod){
 		}else if(mod==CmdType.Vaccum){
 			$("#vaccum_select").val($('#'+ev).find('[name=vaccum_select]').val());
 		}else if(mod==CmdType.Shift_X || mod==CmdType.Shift_Y || mod==CmdType.Shift_Z ||
-					 mod==CmdType.Rotate_X || mod==CmdType.Rotate_Y || mod==CmdType.Rotate_Z){
+				 mod==CmdType.Rotate_X || mod==CmdType.Rotate_Y || mod==CmdType.Rotate_Z||mod==CmdType.Rot_Fai){
 			$("#shift_val").val($('#'+ev).children("td.SubCmd").children("input").val());
 		}
 	}
@@ -166,7 +167,7 @@ function get_block_tr(option_cmd,val){
 		}
 
 	}else if(option_cmd==CmdType.Shift_X || option_cmd==CmdType.Shift_Y || option_cmd==CmdType.Shift_Z||
-		     option_cmd==CmdType.Rotate_X || option_cmd==CmdType.Rotate_Y || option_cmd==CmdType.Rotate_Z){
+		     option_cmd==CmdType.Rotate_X || option_cmd==CmdType.Rotate_Y || option_cmd==CmdType.Rotate_Z|| option_cmd==CmdType.Rot_Fai){
 		if(val==undefined){
 			sub_cmd = '<input class="block_sty_none" type="number" value="'+$('#shift_val').val()+'"readonly>';
 		}else{
@@ -180,7 +181,6 @@ function get_block_tr(option_cmd,val){
 				sub_cmd += '<input class="block_sty_none" type="number" value="'+$(t_id).val()+'"readonly>';
 			}
 		}else{
-
 
 			for(var i=0;i<3;i++){
 				sub_cmd += '<input class="block_sty_none" type="number" value="'+val[i]+'"readonly>\n';
@@ -243,7 +243,7 @@ function Cmd_change(edit,val_7){
 				'<option value="Off"'+(($('#vaccum_select').val() == "Off")?"selected":"")+'>Off</option>' +
 			'</select>';
 	}else if(cmd==CmdType.Shift_X || cmd==CmdType.Shift_Y || cmd==CmdType.Shift_Z||
-		     cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z){
+		     cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z|| cmd==CmdType.Rot_Fai){
 		sub_cmd = '<input class="block_sty" type="number" value="'+$('#shift_val').val()+'">';
 	}
 
@@ -273,8 +273,8 @@ function edit_Cmd(edit){
 
 	if(mod=='Base_Vel' || mod==CmdType.Joint || mod==CmdType.PTP || mod==CmdType.Line ||
 			mod==CmdType.Shift_X || mod==CmdType.Shift_Y || mod==CmdType.Shift_Z ||
-			mod==CmdType.Rotate_X || mod==CmdType.Rotate_Y || mod==CmdType.Rotate_Z || mod==CmdType.Base_Vel
-			){
+			mod==CmdType.Rotate_X || mod==CmdType.Rotate_Y || mod==CmdType.Rotate_Z ||
+			mod==CmdType.Base_Vel || mod==CmdType.Rot_Fai){
 
 		$('#'+m_cmd_id).children("td.SubCmd").children("input").each(function(){
 			$(this).removeAttr("readonly");
@@ -306,7 +306,8 @@ function save_Cmd(edit){
 
 	if(mod==CmdType.Joint || mod==CmdType.PTP || mod==CmdType.Line ||
 			mod==CmdType.Shift_X || mod==CmdType.Shift_Y || mod==CmdType.Shift_Z ||
-			mod==CmdType.Rotate_X || mod==CmdType.Rotate_Y || mod==CmdType.Rotate_Z ||  mod==CmdType.Base_Vel){
+			mod==CmdType.Rotate_X || mod==CmdType.Rotate_Y || mod==CmdType.Rotate_Z ||
+			mod==CmdType.Rot_Fai || mod==CmdType.Base_Vel){
 		$('#'+m_cmd_id).children("td.SubCmd").children("input").each(function(){
 			//console.log("in save");
 			$(this).attr("readonly","readonly");
@@ -336,7 +337,8 @@ function break_Cmd(edit){
 	var i = 0;
 	if(mod==CmdType.Joint || mod==CmdType.PTP || mod==CmdType.Line ||
 			mod==CmdType.Shift_X || mod==CmdType.Shift_Y || mod==CmdType.Shift_Z ||
-			mod==CmdType.Rotate_X || mod==CmdType.Rotate_Y || mod==CmdType.Rotate_Z || mod==CmdType.Base_Vel){
+			mod==CmdType.Rotate_X || mod==CmdType.Rotate_Y || mod==CmdType.Rotate_Z || 
+			mod==CmdType.Rot_Fai||mod==CmdType.Base_Vel){
 		$('#'+m_cmd_id).children("td.SubCmd").children("input").each(function(){
 			$(this).val(cmd_edit[i++]);
 			$(this).attr("readonly","readonly");
@@ -526,7 +528,7 @@ function run_unit_command(run_cmd_ind){
 			});
 
 			joint_pub.publish(cmd_msg);
-			l.log('in Joint Control');
+			// l.log('in Joint Control');
 
 	}else if(cmd_mod==CmdType.PTP || cmd_mod==CmdType.Line){
 		//-------------CmdType.PTP,Line-------------//
@@ -575,14 +577,14 @@ function run_unit_command(run_cmd_ind){
 					 p.y += val;
 				 } else if (cmd_mod == CmdType.Shift_Z) {
 					 p.z += val;
-				 } else if (cmd_mod == CmdType.Rotate_X) {
-					 e[1] += val * _Math.DEG2RAD;
+				 } else if (cmd_mod == CmdType.Rotate_X) {//_Math.DEG2RAD
+					 e[1] += val * 1;
 				 } else if (cmd_mod == CmdType.Rotate_Y) {
-					 e[0] += val * _Math.DEG2RAD;
+					 e[0] += val * 1;
 				 } else if (cmd_mod == CmdType.Rotate_Z) {
-					 e[2] += val * _Math.DEG2RAD;
+					 e[2] += val * 1;
 				 } else if (cmd_mod == CmdType.Rot_Fai) {
-					 f += val * _Math.DEG2RAD;
+					 f += val * 1;
 				 }
 
 				var x     = parseFloat(p.x) ;
@@ -591,42 +593,17 @@ function run_unit_command(run_cmd_ind){
 				var roll  = parseFloat(e[0]) ;
 				var pitch = parseFloat(e[1]) ;
 				var yaw   = parseFloat(e[2]) ;
-				// var roll  = e[0] ;
-				// var pitch = e[1] ;
-				// var yaw   = e[2] ;
 				var fai   = parseFloat(f) ;
 				var tmp_Cmd = [x, y, z, pitch, roll, yaw, fai];
+				console.log('e[0] is '+roll);
+				console.log('e[1] is '+pitch);
+				console.log('e[2] is '+yaw);
+				console.log('fai is '+fai);
 
-				 if (cmd_mod == CmdType.Shift_X || cmd_mod == CmdType.Shift_Y || cmd_mod == CmdType.Shift_Z) {
-					 var pose_msg = new ROSLIB.Message({
-						 data : tmp_Cmd
-					 });
-					 l('pose_msg=' + pose_msg);
-					 pose_pub.publish(pose_msg);
-				 }
-				 else if (cmd_mod == CmdType.Rotate_X || cmd_mod == CmdType.Rotate_Y || cmd_mod == CmdType.Rotate_Z)
-				 {
-					//  o = quaternion_from_euler(e[0], e[1], e[2]);
-					 var pose_msg = new ROSLIB.Message({
-						 data : tmp_Cmd
-						//  pose: {
-						// 	 position: {
-						// 		 x: p.x,
-						// 		 y: p.y,
-						// 		 z: p.z,
-						// 	 },
-						// 	 orientation: {
-						// 		 x: o[0],
-						// 		 y: o[1],
-						// 		 z: o[2],
-						// 		 w: o[3]
-						// 	 }
-						//  }
-					 });
-
-					 l('pose_msg=' + pose_msg);
-					 pose_pub.publish(pose_msg);
-				 }
+				var pose_msg = new ROSLIB.Message({
+					data: tmp_Cmd
+				});
+				pose_pub.publish(pose_msg);
 		 });
 
 	//-------------CmdType.Vaccum-------------//
@@ -652,7 +629,7 @@ $("#file_save_btn").click(function() {
 	var cmd_count = $('#teach_table tr').length;
 	$('#teach_table tr').each(function(index,element) {
 		var cmd_mod = $(this).children('[name=cmd_mod]').children('select').val();
-
+		console.log('cmd type = ' + cmd_mod);
 		//-------------CmdType.Joint-------------//
 		save_data += '\t"'+$(this).children('td.order').html()+'":{\n';
 		if(cmd_mod==CmdType.Joint || cmd_mod==CmdType.PTP || cmd_mod==CmdType.Line){
@@ -668,7 +645,8 @@ $("#file_save_btn").click(function() {
 
 		//-------------CmdType.Shift-------------//
 		}else if(cmd_mod==CmdType.Shift_X  || cmd_mod==CmdType.Shift_Y  || cmd_mod==CmdType.Shift_Z ||
-			     cmd_mod==CmdType.Rotate_X || cmd_mod==CmdType.Rotate_Y || cmd_mod==CmdType.Rotate_Z ){
+			     cmd_mod==CmdType.Rotate_X || cmd_mod==CmdType.Rotate_Y || cmd_mod==CmdType.Rotate_Z ||
+				 cmd_mod==CmdType.Rot_Fai ){
 			//save_data += '\t"'+cmd_mod+'":{\n';	// Shift_X or Shift_Y or Shift_Z START
 			save_data += '\t\t"cmd": "'+cmd_mod+'",\n';	// Joint or PTP or Line START
 			save_data += '\t\t"val": ';	  //Val Start
@@ -753,8 +731,8 @@ $("#file_read_btn").click(function() {
 			}else if(cmd==CmdType.Vaccum){
 				tr_html = get_block_tr(cmd,json[index].val);
 			}else if(cmd==CmdType.Shift_X  || cmd==CmdType.Shift_Y  || cmd==CmdType.Shift_Z||
-			     	 cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z
-					){
+			     	 cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z||
+					 cmd==CmdType.Rot_Fai){
 				tr_html = get_block_tr(cmd,json[index].val,json[index].pose);
 			}
 
@@ -781,9 +759,12 @@ function parse_json_2_cmd_list(cmd,val){
 	}else if(cmd==CmdType.Vaccum){
 		tr_html = get_block_tr(val.Val);
 	}else if(cmd==CmdType.Shift_X  || cmd==CmdType.Shift_Y  || cmd==CmdType.Shift_Z ||
-			 cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z ){
+			 cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z || cmd==CmdType.Rot_Fai)
+	{
 		tr_html = get_block_tr(cmd,val.Val);
-	}else{
+	}
+	else
+	{
 		return;
 	}
 	$('#teach_table').append(tr_html);
@@ -845,7 +826,7 @@ function teach_click(t){
 		});
 
 	}else if(mod==CmdType.Shift_X  || mod==CmdType.Shift_Y  || mod==CmdType.Shift_Z||
-				 mod==CmdType.Rotate_X || mod==CmdType.Rotate_Y || mod==CmdType.Rotate_Z || mod==CmdType.Vaccum){
+				 mod==CmdType.Rotate_X || mod==CmdType.Rotate_Y || mod==CmdType.Rotate_Z || mod==CmdType.Rot_Fai || mod==CmdType.Vaccum){
 
 		alert('Cannot teach With Shift or Vaccum');
 	}
