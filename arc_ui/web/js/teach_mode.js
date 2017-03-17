@@ -460,9 +460,6 @@ $("#Test_btn").click(function(){
 	$(this).removeClass('disabled');
 });
 
-
-// var data = $(selector).children("td.SubCmd").children("input").val();
-// 		Move_TCP_Rel(cmd_mod, data);
 $("#plus_lx").click(function(){
 	$(this).removeClass('active');
 	$(this).addClass('disabled');
@@ -636,6 +633,29 @@ $("#minus_f").click(function(){
 	$(this).addClass('active');
 	$(this).removeClass('disabled');
 });
+// btn_Joint_ABS
+
+$("#btn_Joint_ABS").click(function() 
+{
+	var Ctrl_Joint_Num;
+	var sel_item = $("#Joint_Ctrl_Typ_Sel").val();
+	if	   (sel_item=='Joint1')  Ctrl_Joint_Num = 0;
+	else if(sel_item=='Joint2')  Ctrl_Joint_Num = 1;
+	else if(sel_item=='Joint3')  Ctrl_Joint_Num = 2;
+	else if(sel_item=='Joint4')  Ctrl_Joint_Num = 3;
+	else if(sel_item=='Joint5')  Ctrl_Joint_Num = 4;
+	else if(sel_item=='Joint6')  Ctrl_Joint_Num = 5;
+	else if(sel_item=='Joint7')  Ctrl_Joint_Num = 6;
+	else 						 Ctrl_Joint_Num = -1;
+	
+	
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+
+	console.log('sel_item = '+sel_item);
+	console.log('Ctrl_Joint_Num = '+Ctrl_Joint_Num);
+	console.log('ang = '+ang);
+	Joint_Control(Ctrl_Joint_Num, ang, "ABS");
+});
 
 // Joint Rel_Control
 $("#plus_J1").click(function()
@@ -738,7 +758,8 @@ function Joint_Control(Joint_id, ang, Control_Type)
 	else if(Joint_id==3)	Joint_Num = 'joint4';
 	else if(Joint_id==4)	Joint_Num = 'joint5';
 	else if(Joint_id==5)	Joint_Num = 'joint6';
-	else 					Joint_Num = 'joint7';
+	else if(Joint_id==6)	Joint_Num = 'joint7';
+	else 					Control_Type = 'none' ;
 	if(Control_Type=="REL")
 	{
 		var request = new ROSLIB.ServiceRequest({
@@ -769,7 +790,7 @@ function Joint_Control(Joint_id, ang, Control_Type)
 			$(this).removeClass('disabled');
 		});
 	}
-	else
+	else if(Control_Type=="ABS")
 	{
 		$(this).removeClass('active'); 
 		$(this).addClass('disabled');
@@ -785,6 +806,7 @@ function Joint_Control(Joint_id, ang, Control_Type)
 			value: float_ary
 		});
 		console.log('in ABS joint control');
+		console.log('ABS CMD='+ang);
 
 		joint_pub.publish(cmd_msg);
 
@@ -835,6 +857,25 @@ $("#btn_Line").click(function(){
 		data : tmp_num_arr
 	});
 		Test_pub2.publish(Test_msg);//Line
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#btn_Home").click(function(){
+	$(this).removeClass('active'); 
+	$(this).addClass('disabled');
+
+	var joint_name_ary = ['joint1', 'joint2', 'joint3', 'joint4',  'joint5','joint6',  'joint7' ];
+	var float_ary = [0, 0, 0, 0, 0, 0, 0];
+
+	var cmd_msg = new ROSLIB.Message({
+		name: joint_name_ary,
+		value: float_ary
+	});
+	console.log('in Home control');
+
+	joint_pub.publish(cmd_msg);
 
 	$(this).addClass('active');
 	$(this).removeClass('disabled');

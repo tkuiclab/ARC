@@ -238,11 +238,11 @@
 			<a id="control_edit_eef" class="control"><i class="fa fa-pencil-square-o fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a>
 			<strong style="font-size:16px">&nbsp;&nbsp;TCP Control &nbsp &nbsp</strong>
 			
-			<input value="0" id="txt_Shift_Pose" class="PTP_Control_type"  type="number"/>
-			<label style="font-size:100%"> cm &nbsp</label>
+			<input value="0" id="txt_Shift_Pose" class="PTP_Control_type" style="margin-left: 59px" type="number"/>
+			<label style="font-size:100%"> (m) &nbsp</label>
 			<br>
-			<input value="0" id="txt_Rot_Orien" class="PTP_Control_type" type="number"style="margin-left:188px" >
-			<labelstyle="font-size:100%"><strong> deg </strong></label> 	
+			<input value="0" id="txt_Rot_Orien" class="PTP_Control_type" style="margin-left:215px" type="number" >
+			<labelstyle="font-size:100%"><strong> (deg) </strong></label> 	
 		</div>		
 
 		<!-- Table --> <!--jmp-->
@@ -319,10 +319,23 @@
 		<!-- Default panel contents -->
 		<div class="panel-heading">
 			<a id="control_edit_eef" class="control"><i class="fa fa-pencil-square-o fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a>
-			<strong style="font-size:16px">&nbsp;&nbsp;Joint Control&nbsp;&nbsp</strong>
-
-			<input value="0" style="width:100px" id="txt_Joint_Rel" class="block_sty"  type="number"/>
-			<label style="font-size:100%"> deg </label> 	
+			<!--<strong style="font-size:16px">&nbsp;&nbsp;Joint Control&nbsp;&nbsp</strong>-->
+			<strong style="font-size:16px">&nbsp;&nbsp;Joint Control &nbsp &nbsp</strong>
+			<br>
+			<select  id="Joint_Ctrl_Typ_Sel" style="margin-left:0px">
+				<option value="none"   > none    </option>
+				<option value="Joint1"> Joint1 </option>
+				<option value="Joint2"> Joint2 </option>
+				<option value="Joint3"> Joint3 </option>
+				<option value="Joint4"> Joint4 </option>
+				<option value="Joint5"> Joint5 </option>
+				<option value="Joint6"> Joint6 </option>
+				<option value="Joint7"> Joint7 </option>
+			</select>
+			<input value="0" style="width:90px" id="txt_Joint_Rel" class="block_sty"  type="number"/>
+			<label style="font-size:100%"> (deg) </label> 
+			&nbsp;
+			<button id="btn_Joint_ABS" > Move ABS </button>	
 		</div>
 
 		<!-- Table -->
@@ -336,87 +349,87 @@
 							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
 							<h4 id="output_j1p"></h4></div>
 						</td>
-						<td width="10%" height="10px" align="right"><button id="minus_J1" class="btn_Joint_Rel_Control"><i class="fa fa-caret-right fa-2x"></i></button></td>
+						<td width="10%" height="10px" align="right"><button id="minus_J1" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>
 
 					<tr height="10%">
 						<td width="20%" style="text-align:center"><strong>Joint2</strong></td>
-						<td width="10%"><button id="plus_J2" class="control"><i class="fa fa-caret-left fa-2x"></i></button></td>
+						<td width="10%"><button id="plus_J2" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
 							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
 							<h4 id="output_j1p"></h4></div>
 						</td>
-						<td width="10%" height="10px" align="right"><button id="minus_J2" class="control"><i class="fa fa-caret-right fa-2x"></i></button></td>
+						<td width="10%" height="10px" align="right"><button id="minus_J2" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>
 
 					<tr height="10%">
 						<td width="20%" style="text-align:center"><strong>Joint3</strong></td>
-						<td width="10%"><button id="plus_J3" class="control"><i class="fa fa-caret-left fa-2x"></i></button></td>
+						<td width="10%"><button id="plus_J3" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
 							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
 							<h4 id="output_j1p"></h4></div>
 						</td>
-						<td width="10%" height="10px" align="right"><button id="minus_J3" class="control"><i class="fa fa-caret-right fa-2x"></i></button></td>
+						<td width="10%" height="10px" align="right"><button id="minus_J3" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>
 
 					<tr height="10%">
 						<td width="20%" style="text-align:center"><strong>Joint4</strong></td>
-						<td width="10%"><button id="plus_J4" class="control"><i class="fa fa-caret-left fa-2x"></i></button></td>
+						<td width="10%"><button id="plus_J4" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
 							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
 							<h4 id="output_j1p"></h4></div>
 						</td>
-						<td width="10%" height="10px" align="right"><button id="minus_J4" class="control"><i class="fa fa-caret-right fa-2x"></i></button></td>
+						<td width="10%" height="10px" align="right"><button id="minus_J4" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>
 
 					<tr height="10%">
 						<td width="20%" style="text-align:center"><strong>Joint5</strong></td>
-						<td width="10%"><button id="plus_J5" class="control"><i class="fa fa-caret-left fa-2x"></i></button></td>
+						<td width="10%"><button id="plus_J5" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
 							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
 							<h4 id="output_j1p"></h4></div>
 						</td>
-						<td width="10%" height="10px" align="right"><button id="minus_J5" class="control"><i class="fa fa-caret-right fa-2x"></i></button></td>
+						<td width="10%" height="10px" align="right"><button id="minus_J5" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>
 
 					<tr height="10%">
 						<td width="20%" style="text-align:center"><strong>Joint6</strong></td>
-						<td width="10%"><button id="plus_J6" class="control"><i class="fa fa-caret-left fa-2x"></i></button></td>
+						<td width="10%"><button id="plus_J6" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
 							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
 							<h4 id="output_j1p"></h4></div>
 						</td>
-						<td width="10%" height="10px" align="right"><button id="minus_J6" class="control"><i class="fa fa-caret-right fa-2x"></i></button></td>
+						<td width="10%" height="10px" align="right"><button id="minus_J6" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>	
 
 					<tr height="10%">
 						<td width="20%" style="text-align:center"><strong>Joint7</strong></td>
-						<td width="10%"><button id="plus_J7" class="control"><i class="fa fa-caret-left fa-2x"></i></button></td>
+						<td width="10%"><button id="plus_J7" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
 							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
 							<h4 id="output_j1p"></h4></div>
 						</td>
-						<td width="10%" height="10px" align="right"><button id="minus_J7" class="control"><i class="fa fa-caret-right fa-2x"></i></button></td>
+						<td width="10%" height="10px" align="right"><button id="minus_J7" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>	
 
 					<tr height="10%">
 						<td width="20%" style="text-align:center"><strong>Shift_X</strong></td>
-						<td width="10%"><button id="control_base_L" class="control"><i class="fa fa-caret-left fa-2x"></i></button></td>
+						<td width="10%"><button id="control_base_L" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
 							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
 							<h4 id="output_j1p"></h4></div>
 						</td>
-						<td width="10%" height="10px" align="right"><button id="control_base_R" class="control"><i class="fa fa-caret-right fa-2x"></i></button></td>
+						<td width="10%" height="10px" align="right"><button id="control_base_R" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>	
 
 					<tr height="10%">
 						<td width="20%" style="text-align:center"><strong>Shift_Z</strong></td>
-						<td width="10%"><button id="control_base_L" class="control"><i class="fa fa-caret-left fa-2x"></i></button></td>
+						<td width="10%"><button id="control_base_L" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
 							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
 							<h4 id="output_j1p"></h4></div>
 						</td>
-						<td width="10%" height="10px" align="right"><button id="control_base_R" class="control"><i class="fa fa-caret-right fa-2x"></i></button></td>
+						<td width="10%" height="10px" align="right"><button id="control_base_R" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>	
 				<tbody>
 			</table>
