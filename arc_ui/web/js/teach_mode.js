@@ -14,6 +14,8 @@ var CmdType = {
 	Vaccum: "Vaccum",
 };
 
+var Control_Type = {REL:"REL", ABS:"ABS"};
+
 function command_selected(cmd){
 	//console.log('cmd='+cmd);
 
@@ -458,6 +460,386 @@ $("#Test_btn").click(function(){
 	$(this).removeClass('disabled');
 });
 
+
+// var data = $(selector).children("td.SubCmd").children("input").val();
+// 		Move_TCP_Rel(cmd_mod, data);
+$("#plus_lx").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Shift_Pose").val();
+	
+	Move_TCP_Rel(CmdType.Shift_X, data);
+	console.log('in plus_x'+data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#minus_lx").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Shift_Pose").val();
+	data*=-1;
+	Move_TCP_Rel(CmdType.Shift_X, data);
+	console.log('in minus_x'+data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#plus_ly").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Shift_Pose").val();
+	
+	Move_TCP_Rel(CmdType.Shift_Y, data);
+	console.log('in plus_x'+data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#minus_ly").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Shift_Pose").val();
+	data*=-1;
+	Move_TCP_Rel(CmdType.Shift_Y, data);
+	console.log('in minus_x'+data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+
+$("#plus_lz").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Shift_Pose").val();
+	
+	Move_TCP_Rel(CmdType.Shift_Z, data);
+	console.log('in plus_x'+data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#minus_lz").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Shift_Pose").val();
+	data*=-1;
+	Move_TCP_Rel(CmdType.Shift_Z, data);
+	console.log('in minus_x'+data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#plus_ax").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Rot_Orien").val();
+	
+	Move_TCP_Rel(CmdType.Rotate_X, data);
+	console.log('in plus_x'+data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#minus_ax").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Rot_Orien").val();
+	data*=-1;
+	Move_TCP_Rel(CmdType.Rotate_X, data);
+	console.log('in minus_x'+data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#plus_ay").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Rot_Orien").val();
+	Move_TCP_Rel(CmdType.Rotate_Y, data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#minus_ay").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Rot_Orien").val();
+	data*=-1;
+	Move_TCP_Rel(CmdType.Rotate_Y, data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#plus_az").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Rot_Orien").val();
+	Move_TCP_Rel(CmdType.Rotate_Z, data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#minus_az").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Rot_Orien").val();
+	data*=-1;
+	Move_TCP_Rel(CmdType.Rotate_Z, data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#plus_f").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Rot_Orien").val();
+	Move_TCP_Rel(CmdType.Rot_Fai, data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#minus_f").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var data = $("#txt_Rot_Orien").val();
+	data*=-1;
+	Move_TCP_Rel(CmdType.Rot_Fai, data);
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+// Joint Rel_Control
+$("#plus_J1").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	Joint_Control(0, ang, "REL");
+});
+
+$("#minus_J1").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	ang *= -1;
+	Joint_Control(0, ang, "REL");
+});
+
+$("#plus_J2").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	Joint_Control(1, ang, "REL");
+});
+
+$("#minus_J2").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	ang *= -1;
+	Joint_Control(1, ang, "REL");
+});
+
+$("#plus_J3").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	Joint_Control(2, ang, "REL");
+});
+
+$("#minus_J3").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	ang *= -1;
+	Joint_Control(2, ang, "REL");
+});
+
+$("#plus_J4").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	Joint_Control(3, ang, "REL");
+});
+
+$("#minus_J4").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	ang *= -1;
+	Joint_Control(3, ang, "REL");
+});
+
+$("#plus_J5").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	Joint_Control(4, ang, "REL");
+});
+
+$("#minus_J5").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	ang *= -1;
+	Joint_Control(4, ang, "REL");
+});
+
+$("#plus_J6").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	Joint_Control(5, ang, "REL");
+});
+
+$("#minus_J6").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	ang *= -1;
+	Joint_Control(5, ang, "REL");
+});
+
+$("#plus_J7").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	Joint_Control(6, ang, "REL");
+});
+
+$("#minus_J7").click(function()
+{
+	var ang = parseFloat($("#txt_Joint_Rel").val());
+	ang *= -1;
+	Joint_Control(6, ang, "REL");
+});
+
+function Joint_Control(Joint_id, ang, Control_Type)
+{
+	var Joint_Num;
+	if	   (Joint_id==0)	Joint_Num = 'joint1';
+	else if(Joint_id==1)	Joint_Num = 'joint2';
+	else if(Joint_id==2)	Joint_Num = 'joint3';
+	else if(Joint_id==3)	Joint_Num = 'joint4';
+	else if(Joint_id==4)	Joint_Num = 'joint5';
+	else if(Joint_id==5)	Joint_Num = 'joint6';
+	else 					Joint_Num = 'joint7';
+	if(Control_Type=="REL")
+	{
+		var request = new ROSLIB.ServiceRequest({
+		    joint_name :['joint1', 'joint2', 'joint3','joint4','joint5','joint6','joint7'],
+		});
+		joint_client.callService(request, function (res) 
+		{
+			$(this).removeClass('active'); 
+			$(this).addClass('disabled');
+
+			var joint_name_ary = [Joint_Num] ;
+			var float_ary = [];
+			var orig_ang = res.joint_value[Joint_id];
+
+			ang = ang*_Math.DEG2RAD + orig_ang;
+			float_ary.push(ang);
+
+			var cmd_msg = new ROSLIB.Message({
+				name: joint_name_ary,
+				value: float_ary
+			});
+			console.log('in REL joint control');
+			console.log('Joint_Num = ' + orig_ang);
+
+			joint_pub.publish(cmd_msg);
+
+			$(this).addClass('active');
+			$(this).removeClass('disabled');
+		});
+	}
+	else
+	{
+		$(this).removeClass('active'); 
+		$(this).addClass('disabled');
+
+		var joint_name_ary = [Joint_Num];
+		var float_ary = [];
+
+		ang = ang * _Math.DEG2RAD;
+		float_ary.push(ang);
+
+		var cmd_msg = new ROSLIB.Message({
+			name: joint_name_ary,
+			value: float_ary
+		});
+		console.log('in ABS joint control');
+
+		joint_pub.publish(cmd_msg);
+
+		$(this).addClass('active');
+		$(this).removeClass('disabled');
+	}
+}
+
+$("#btn_PTP").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	//var tmp_num_arr = [0, 0.3, 0.2, -90, 0, 0, 0];
+	var tmp_num_arr = [];
+	tmp_num_arr.push(parseFloat($("#MF_block_x").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_y").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_z").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_pitch").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_roll").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_yaw").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_fai").val()));
+
+	var Test_msg = new ROSLIB.Message({
+		data : tmp_num_arr
+	});
+		Test_pub.publish(Test_msg);//P2P
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#btn_Line").click(function(){
+	$(this).removeClass('active');
+	$(this).addClass('disabled');
+
+	var tmp_num_arr = [];
+	tmp_num_arr.push(parseFloat($("#MF_block_x").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_y").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_z").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_pitch").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_roll").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_yaw").val()));
+	tmp_num_arr.push(parseFloat($("#MF_block_fai").val()));
+
+	// console.log('in test_bnt');
+
+	var Test_msg = new ROSLIB.Message({
+		data : tmp_num_arr
+	});
+		Test_pub2.publish(Test_msg);//Line
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
 $("#run_btn").click(function() {
 	$(this).removeClass('active');
 	$(this).addClass('disabled');
@@ -501,16 +883,15 @@ function next_command(){
 	}
 }
 
-
 //run one command
 function run_unit_command(run_cmd_ind){
 	var selector = '#teach_table tr:nth-child('+run_cmd_ind+')';
 	var cmd_mod =$(selector).find('[name=cmd_mod]').children('select').val();
 
-	//l('selector=' + selector);
 	l('cmd_mod= ' + cmd_mod);
 
-	if(cmd_mod==CmdType.Joint){
+	if(cmd_mod==CmdType.Joint)
+	{
 		  //var joint_name_ary = ['joint1', 'joint2', 'joint3', 'joint4',  'joint5',]
 			var joint_name_ary = [] ;
 			var float_ary = [];
@@ -528,9 +909,9 @@ function run_unit_command(run_cmd_ind){
 			});
 
 			joint_pub.publish(cmd_msg);
-			// l.log('in Joint Control');
-
-	}else if(cmd_mod==CmdType.PTP || cmd_mod==CmdType.Line){
+	}
+	else if(cmd_mod==CmdType.PTP || cmd_mod==CmdType.Line)
+	{
 		//-------------CmdType.PTP,Line-------------//
 		//=================chg start======================================
 		var refer = $(selector).children("td.SubCmd");
@@ -555,69 +936,122 @@ function run_unit_command(run_cmd_ind){
 		//=================chg over=======================================
 
 	//-------------CmdType.Shift_X-------------//
-	}else if(cmd_mod==CmdType.Shift_X  || cmd_mod==CmdType.Shift_Y  || cmd_mod==CmdType.Shift_Z||
+	} 
+	else if( cmd_mod==CmdType.Shift_X  || cmd_mod==CmdType.Shift_Y  || cmd_mod==CmdType.Shift_Z  ||
 			 cmd_mod==CmdType.Rotate_X || cmd_mod==CmdType.Rotate_Y || cmd_mod==CmdType.Rotate_Z ||
-			 cmd_mod==CmdType.Rot_Fai){
+			 cmd_mod==CmdType.Rot_Fai)
+	{
+		var data = $(selector).children("td.SubCmd").children("input").val();
+		Move_TCP_Rel(cmd_mod, data);
+		//-----------------------------------------
+		// var request = new ROSLIB.ServiceRequest({
+		// 	group_name: "arm",
+		// });
+		// pose_client.callService(request, function (res) 
+		// {
+		// 	var p = res.group_pose.position;						//position
+		// 	var o = res.group_pose.orientation;					//orientation
+		// 	var e = euler_fomr_quaternion([o.x, o.y, o.z, o.w]);	//Convert quaternion to RPY
+		// 	var f = res.group_redundancy;
+		// 	var data = $(selector).children("td.SubCmd").children("input").val();
+		// 	var val = parseFloat(data);
 
-		 var request = new ROSLIB.ServiceRequest({
-		 		group_name : "arm",
-		 });
-		 pose_client.callService(request, function(res) {
-				 var p = res.group_pose.position;						//position
-				 var o = res.group_pose.orientation;					//orientation
-				 var e = euler_fomr_quaternion([o.x, o.y, o.z, o.w]);	//Convert quaternion to RPY
-				 var f = res.group_redundancy;
-				 var data = $(selector).children("td.SubCmd").children("input").val();
-				 var val = parseFloat(data);
-				 //l('val='+val);   cmd_mod==CmdType.Rot_Fai
+		// 	if (cmd_mod == CmdType.Shift_X) {
+		// 		p.x += val;
+		// 	} else if (cmd_mod == CmdType.Shift_Y) {
+		// 		p.y += val;
+		// 	} else if (cmd_mod == CmdType.Shift_Z) {
+		// 		p.z += val;
+		// 	} else if (cmd_mod == CmdType.Rotate_X) {//_Math.DEG2RAD
+		// 		e[1] += val * 1;
+		// 	} else if (cmd_mod == CmdType.Rotate_Y) {
+		// 		e[0] += val * 1;
+		// 	} else if (cmd_mod == CmdType.Rotate_Z) {
+		// 		e[2] += val * 1;
+		// 	} else if (cmd_mod == CmdType.Rot_Fai) {
+		// 		f += val * 1;
+		// 	}
 
-				 if(cmd_mod==CmdType.Shift_X){
-			 		p.x  += val;
-				 } else if (cmd_mod == CmdType.Shift_Y) {
-					 p.y += val;
-				 } else if (cmd_mod == CmdType.Shift_Z) {
-					 p.z += val;
-				 } else if (cmd_mod == CmdType.Rotate_X) {//_Math.DEG2RAD
-					 e[1] += val * 1;
-				 } else if (cmd_mod == CmdType.Rotate_Y) {
-					 e[0] += val * 1;
-				 } else if (cmd_mod == CmdType.Rotate_Z) {
-					 e[2] += val * 1;
-				 } else if (cmd_mod == CmdType.Rot_Fai) {
-					 f += val * 1;
-				 }
+		// 	var x = parseFloat(p.x);
+		// 	var y = parseFloat(p.y);
+		// 	var z = parseFloat(p.z);
+		// 	var roll = parseFloat(e[0]);
+		// 	var pitch = parseFloat(e[1]);
+		// 	var yaw = parseFloat(e[2]);
+		// 	var fai = parseFloat(f);
+		// 	var tmp_Cmd = [x, y, z, pitch, roll, yaw, fai];
 
-				var x     = parseFloat(p.x) ;
-				var y     = parseFloat(p.y) ;
-				var z     = parseFloat(p.z) ;
-				var roll  = parseFloat(e[0]) ;
-				var pitch = parseFloat(e[1]) ;
-				var yaw   = parseFloat(e[2]) ;
-				var fai   = parseFloat(f) ;
-				var tmp_Cmd = [x, y, z, pitch, roll, yaw, fai];
-				console.log('e[0] is '+roll);
-				console.log('e[1] is '+pitch);
-				console.log('e[2] is '+yaw);
-				console.log('fai is '+fai);
-
-				var pose_msg = new ROSLIB.Message({
-					data: tmp_Cmd
-				});
-				pose_pub.publish(pose_msg);
-		 });
-
-	//-------------CmdType.Vaccum-------------//
-	} else if (cmd_mod == CmdType.Vaccum) {
-		var vaccum_yn = $(selector).find('[name=vaccum_select]').val() == 'On'?
-						true: false;
+		// 	var pose_msg = new ROSLIB.Message({
+		// 		data: tmp_Cmd
+		// 	});
+		// 	pose_pub.publish(pose_msg);
+		// });
+	}
+	//-------------CmdType.Vaccum-------------// 
+	else if (cmd_mod == CmdType.Vaccum) {
+		var vaccum_yn = $(selector).find('[name=vaccum_select]').val() == 'On' ?
+			true : false;
 
 		var cmd_msg = new ROSLIB.Message({
-			data : vaccum_yn
+			data: vaccum_yn
 		});
 
 		vaccum_pub.publish(cmd_msg);
 		next_command();
 	}
+}
+
+function Move_TCP_Rel(cmd_mod, data)
+{
+	var request = new ROSLIB.ServiceRequest({
+		group_name: "arm",
+	});
+	pose_client.callService(request, function (res) {
+		var p = res.group_pose.position;						//position
+		var o = res.group_pose.orientation;					//orientation
+		var e = euler_fomr_quaternion([o.x, o.y, o.z, o.w]);	//Convert quaternion to RPY
+		var f = res.group_redundancy;
+		var val = parseFloat(data);
+		
+		e[0]=e[0]*180/3.1415926;
+		e[1]=e[1]*180/3.1415926;
+		e[2]=e[2]*180/3.1415926;
+		f=f*180/3.1415926;
+
+		if (cmd_mod == CmdType.Shift_X) {
+			p.x += val;
+		} else if (cmd_mod == CmdType.Shift_Y) {
+			p.y += val;
+		} else if (cmd_mod == CmdType.Shift_Z) {
+			p.z += val;
+		} else if (cmd_mod == CmdType.Rotate_X) {//_Math.DEG2RAD
+			e[1] += val * 1;
+		} else if (cmd_mod == CmdType.Rotate_Y) {
+			e[0] += val * 1;
+		} else if (cmd_mod == CmdType.Rotate_Z) {
+			e[2] += val * 1;
+		} else if (cmd_mod == CmdType.Rot_Fai) {
+			f += val * 1;
+		}
+
+		var x = parseFloat(p.x);
+		var y = parseFloat(p.y);
+		var z = parseFloat(p.z);
+		var roll = parseFloat(e[0]);
+		var pitch = parseFloat(e[1]);
+		var yaw = parseFloat(e[2]);
+		var fai = parseFloat(f);
+		var tmp_Cmd = [x, y, z, pitch, roll, yaw, fai];
+		
+		console.log('roll='+roll);
+		console.log('pitch='+pitch);
+		console.log('yaw='+yaw);
+
+		var pose_msg = new ROSLIB.Message({
+			data: tmp_Cmd
+		});
+		pose_pub.publish(pose_msg);
+	});
 }
 
 $("#file_save_btn").click(function() {
