@@ -160,6 +160,13 @@ var _Math = {
 
 		return value;
 
+	},
+
+	_Roundn: function(value, n)
+	{
+		var LV  = Math.pow(10, n);
+		// var tmp = Math.round(value*pow(10, n-1));
+		return Math.ceil(value*LV)/LV;
 	}
 
 };

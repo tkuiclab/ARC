@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
     <title>Teach Mode</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 	<!-- mm_web -->
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   	<meta charset="utf-8">
@@ -24,6 +26,7 @@
   	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 </head>
 
 <body class="">
@@ -194,41 +197,37 @@
 	
 	<div id="tab2_Robot_Control" class="tab-pane fade in active" >
 		
-	<div id="MF_TCP_Control">
-		<table >
-			<tbody >
-				<br>
-				&nbsp&nbsp&nbsp&nbsp&nbsp
-				<label style="font-size:100%"> X: </label>
-				<input value="0" style="width:100px" id="MF_block_x" class="MF_block" type="number" /> &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp
-				<label style="font-size:100%"> Y: </label>
-				<input value="0" style="width:100px" id="MF_block_y" class="MF_block" type="number" /> &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp
-				<label style="font-size:100%"> Z: </label>
-				<input value="0" style="width:100px" id="MF_block_z" class="MF_block" type="number" /> &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp
-				
-				<button id="set_mode_btn" class="btn_MF_Control" style="margin-left:130px"> <span class="glyphicon glyphicon-flash"></span> Set Mode </button>
-				<label style="margin-left:30px"> Speed(%): </label>
-				<input value="0" style="margin-left:10px" id="MF_block_spd" class="MF_block" type="number" /> &nbsp&nbsp
+	<div id="MF_TCP_Control" class="MF">
+		
+			<br> &nbsp&nbsp&nbsp&nbsp&nbsp
+			<label style="font-size:100%"> X: </label>
+			<input value="0" style="width:100px" id="MF_block_x" class="MF_block" type="number" /> &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp
+			<label style="font-size:100%"> Y: </label>
+			<input value="0" style="width:100px" id="MF_block_y" class="MF_block" type="number" /> &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp
+			<label style="font-size:100%"> Z: </label>
+			<input value="0" style="width:100px" id="MF_block_z" class="MF_block" type="number" /> &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp
 
-				<BR>
-				<label style="font-size:100%"> Pitch: </label>
-				<input value="0" style="width:100px" id="MF_block_pitch"class="MF_block" type="number" /> &nbsp&nbsp
+			<button id="set_mode_btn" class="btn_MF_Control" style="margin-left:130px"> <span class="glyphicon glyphicon-flash"></span> Set Mode </button>
+			<label style="margin-left:30px"> Speed(%): </label>
+			<input value="0" style="margin-left:10px" id="MF_block_spd" class="MF_block" type="number" /> &nbsp&nbsp
 
-				<label style="font-size:100%"> Roll: </label>
-				<input value="0" style="width:100px" id="MF_block_roll"class="MF_block" type="number" /> &nbsp&nbsp
+			<BR>
+			<label style="font-size:100%"> Pitch: </label>
+			<input value="0" style="width:100px" id="MF_block_pitch" class="MF_block" type="number" /> &nbsp&nbsp
 
-				<label style="font-size:100%"> Yaw: </label>
-				<input value="0" style="width:100px" id="MF_block_yaw"class="MF_block" type="number" /> &nbsp&nbsp
+			<label style="font-size:100%"> Roll: </label>
+			<input value="0" style="width:100px" id="MF_block_roll" class="MF_block" type="number" /> &nbsp&nbsp
 
-				<label style="font-size:100%"> Fai: </label>
-				<input value="0" style="width:100px" id="MF_block_fai"class="MF_block" type="number" /> &nbsp&nbsp
+			<label style="font-size:100%"> Yaw: </label>
+			<input value="0" style="width:100px" id="MF_block_yaw" class="MF_block" type="number" /> &nbsp&nbsp
 
-				<button id="btn_PTP"  class="btn_MF_Control"> PTP </button>
-				<button id="btn_Line" class="btn_MF_Control"> Line </button>
-				<button id="btn_Home" class="btn_MF_Control"> Home </button>
-					
-			</tbody>
-		</table>
+			<label style="font-size:100%"> Fai: </label>
+			<input value="0" style="width:100px" id="MF_block_fai" class="MF_block" type="number" /> &nbsp&nbsp
+
+			<button id="btn_PTP" class="btn_MF_Control"> PTP </button>
+			<button id="btn_Line" class="btn_MF_Control"> Line </button>
+			<button id="btn_Home" class="btn_MF_Control"> Home </button>
+		
 	</div>
 	<BR>
 	<!--======================== TCP Control Table Start========================-->
@@ -303,8 +302,8 @@
 					<td width="40%" >Vaccum</td>
 					<td width="40%"><h4 id="output_lx" style="color:red"></td>
 					<td> <label class="switch">
-						<input type="checkbox" checked>
-						<div class="slider round"></div></label> 
+						<input type="checkbox" >
+						<div id="Vaccum_Control" class="slider round"></div></label> 
 					</td> <td> </td>
 				</tr>
 
@@ -346,8 +345,8 @@
 						<td width="20%" style="text-align:center"><strong>Joint1</strong></td>
 						<td width="10%"><button id="plus_J1" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
-							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
-							<h4 id="output_j1p"></h4></div>
+							<!--<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j1p" class="MF_Joint_FeedBack"></h4></div>
 						</td>
 						<td width="10%" height="10px" align="right"><button id="minus_J1" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>
@@ -356,8 +355,8 @@
 						<td width="20%" style="text-align:center"><strong>Joint2</strong></td>
 						<td width="10%"><button id="plus_J2" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
-							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
-							<h4 id="output_j1p"></h4></div>
+							<!--<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j2p" class="MF_Joint_FeedBack"></h4></div>
 						</td>
 						<td width="10%" height="10px" align="right"><button id="minus_J2" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>
@@ -366,8 +365,8 @@
 						<td width="20%" style="text-align:center"><strong>Joint3</strong></td>
 						<td width="10%"><button id="plus_J3" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
-							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
-							<h4 id="output_j1p"></h4></div>
+							<!--<div id="progress-bar_j3" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j3p" class="MF_Joint_FeedBack"></h4></div>
 						</td>
 						<td width="10%" height="10px" align="right"><button id="minus_J3" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>
@@ -376,8 +375,8 @@
 						<td width="20%" style="text-align:center"><strong>Joint4</strong></td>
 						<td width="10%"><button id="plus_J4" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
-							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
-							<h4 id="output_j1p"></h4></div>
+							<!--<div id="progress-bar_j4" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j4p" class="MF_Joint_FeedBack"></h4></div>
 						</td>
 						<td width="10%" height="10px" align="right"><button id="minus_J4" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>
@@ -386,8 +385,8 @@
 						<td width="20%" style="text-align:center"><strong>Joint5</strong></td>
 						<td width="10%"><button id="plus_J5" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
-							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
-							<h4 id="output_j1p"></h4></div>
+							<!--<div id="progress-bar_j5" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j5p" class="MF_Joint_FeedBack"></h4></div>
 						</td>
 						<td width="10%" height="10px" align="right"><button id="minus_J5" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>
@@ -396,8 +395,8 @@
 						<td width="20%" style="text-align:center"><strong>Joint6</strong></td>
 						<td width="10%"><button id="plus_J6" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
-							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
-							<h4 id="output_j1p"></h4></div>
+							<!--<div id="progress-bar_j6" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j6p" class="MF_Joint_FeedBack"></h4></div>
 						</td>
 						<td width="10%" height="10px" align="right"><button id="minus_J6" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>	
@@ -406,8 +405,8 @@
 						<td width="20%" style="text-align:center"><strong>Joint7</strong></td>
 						<td width="10%"><button id="plus_J7" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
-							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
-							<h4 id="output_j1p"></h4></div>
+							<!--<div id="progress-bar_j7" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j7p" class="MF_Joint_FeedBack" ></h4></div>
 						</td>
 						<td width="10%" height="10px" align="right"><button id="minus_J7" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>	
@@ -416,8 +415,8 @@
 						<td width="20%" style="text-align:center"><strong>Shift_X</strong></td>
 						<td width="10%"><button id="control_base_L" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
-							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
-							<h4 id="output_j1p"></h4></div>
+							<div id="progress-bar_SX" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+							<h4 id="output_SX"></h4></div>
 						</td>
 						<td width="10%" height="10px" align="right"><button id="control_base_R" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>	
@@ -426,8 +425,8 @@
 						<td width="20%" style="text-align:center"><strong>Shift_Z</strong></td>
 						<td width="10%"><button id="control_base_L" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
 						<td width="60%" class="progress">
-							<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
-							<h4 id="output_j1p"></h4></div>
+							<div id="progress-bar_SZ" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+							<h4 id="output_SZ"></h4></div>
 						</td>
 						<td width="10%" height="10px" align="right"><button id="control_base_R" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
 					</tr>	

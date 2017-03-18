@@ -103,6 +103,18 @@ select.options{
 	/*margin: 10px;*/
 }
 
+.MF_Joint_FeedBack
+{
+	color: red;
+	text-align: center;
+}
+
+/*.MF_Joint_FeedBack h
+{
+	color: red;
+	text-align: center;
+}*/
+
 #MF_TCP_Control
 {
 	text-align: left;
@@ -359,7 +371,7 @@ li.left{
 
 li.right{
 	text-align:right;
-	margin:0;
+	margin:0
 	float:right;
 	width: 30%;
 }
@@ -378,6 +390,12 @@ div.TE{
 	margin-right: 10px;
 }
 
+div.MF{
+	background-color: rgba(0, 107, 179, 0.8);
+	border-radius: 20px;
+	border-style: ridge;
+	overflow:auto;
+}
 
 /*nav-expander*/
 a.nav-expander {
@@ -625,6 +643,7 @@ a.control{
 {
 	background:none;
 }
+
 
 #Joint_Table td:nth-child(1)
 {

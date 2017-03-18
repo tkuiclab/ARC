@@ -13,7 +13,8 @@ var CmdType = {
 	Rot_Fai: "Rot_Fai",
 	Vaccum: "Vaccum",
 };
-
+var yn_cnt = false;
+var test_cnt=0;
 var Control_Type = {REL:"REL", ABS:"ABS"};
 
 function command_selected(cmd){
@@ -427,35 +428,80 @@ $("#set_mode_btn").click(function(){
 
 	$(this).addClass('active');
 	$(this).removeClass('disabled');
+
+	FB_Timer();
 });
 
-$("#Test_btn").click(function(){
+function FB_Timer()
+{
+	setInterval
+	(
+		function()
+		{
+			Get_Robot_FB();
+		},100
+	);
+}
+
+function Get_Robot_FB() 
+{
+	var request_TCP = new ROSLIB.ServiceRequest({
+		group_name: "arm",
+	});
+
+	pose_client.callService(request_TCP, function (res) 
+	{
+		// Display TCP FeedBack
+		var p = res.group_pose.position;						//position
+		var o = res.group_pose.orientation;					//orientation
+		var e = euler_fomr_quaternion([o.x, o.y, o.z, o.w]);	//Convert quaternion to RPY
+		var f = res.group_redundancy;
+
+		var fb_TCP=[];
+		var fb_TCP_name=["#output_lx", "#output_ly", "#output_lz", 
+						 "#output_ay", "#output_ax", "#output_az", "#output_f"];
+		
+		fb_TCP[0] = _Math._Roundn(parseFloat(p.x),2);
+		fb_TCP[1] = _Math._Roundn(parseFloat(p.y),2);	
+		fb_TCP[2] = _Math._Roundn(parseFloat(p.z),2);
+		fb_TCP[6] = _Math._Roundn(f*_Math.RAD2DEG, 2);
+
+		for(var i=0;i<3;i++)
+			fb_TCP[i+3] = _Math._Roundn(e[i]*_Math.RAD2DEG, 2);
+		for(var i=0;i<7;i++)
+			$(fb_TCP_name[i]).html(fb_TCP[i]);
+	});
+
+	var request_Joint = new ROSLIB.ServiceRequest
+	({
+		joint_name :['joint1', 'joint2', 'joint3','joint4','joint5','joint6','joint7'],
+	});
+	joint_client.callService(request_Joint, function (res) 
+	{
+		// Display Joint FeedBack
+		var fb_ang=[];
+		var fb_ang_name=["#output_j1p", "#output_j2p", "#output_j3p", "#output_j4p", 
+						 "#output_j5p", "#output_j6p", "#output_j7p"];
+		for(var i=0;i<7;i++)
+		{
+			fb_ang[i] = _Math._Roundn(res.joint_value[i]*_Math.RAD2DEG, 2);
+			$(fb_ang_name[i]).html(fb_ang[i]);
+		}
+	});
+}
+$("#Test_btn").click(function(){ //tb
 	$(this).removeClass('active');
 	$(this).addClass('disabled');
-
-	//var tmp_num_arr = [0, 0.3, 0.2, -90, 0, 0, 0];
-	var tmp_num_arr = [];
-	tmp_num_arr.push(parseFloat($("#block_1").val()));
-	tmp_num_arr.push(parseFloat($("#block_2").val()));
-	tmp_num_arr.push(parseFloat($("#block_3").val()));
-	tmp_num_arr.push(parseFloat($("#block_4").val()));
-	tmp_num_arr.push(parseFloat($("#block_5").val()));
-	tmp_num_arr.push(parseFloat($("#block_6").val()));
-	tmp_num_arr.push(parseFloat($("#block_7").val()));
-
-	// console.log('in test_bnt');
-
-	var Test_msg = new ROSLIB.Message({
-		data : tmp_num_arr
+	var request = new ROSLIB.ServiceRequest
+	({
+		joint_name :['joint1', 'joint2', 'joint3','joint4','joint5','joint6','joint7'],
 	});
-	//$("#cmd_select").val()
-	if($("#cmd_select").val()==CmdType.PTP)
-		Test_pub.publish(Test_msg);//P2P
-	else if($("#cmd_select").val()==CmdType.Line)
-		Test_pub2.publish(Test_msg);//Line
-	else if($("#cmd_select").val()==CmdType.Joint)
-		Test_pub2.publish(Test_msg);//Joint
 
+	joint_client.callService(request, function (res) {
+		var fb_ang = res.joint_value[0];
+		$("#output_lx").html(fb_ang);
+	});
+	
 	$(this).addClass('active');
 	$(this).removeClass('disabled');
 });
@@ -749,6 +795,17 @@ $("#minus_J7").click(function()
 	Joint_Control(6, ang, "REL");
 });
 
+$("#Vaccum_Control").click(function() //  yn
+{
+	yn_cnt = !yn_cnt;
+	console.log('yn_cntn='+yn_cnt);
+
+	var cmd_msg = new ROSLIB.Message({
+		data: yn_cnt
+	});
+	vaccum_pub.publish(cmd_msg);
+});
+
 function Joint_Control(Joint_id, ang, Control_Type)
 {
 	var Joint_Num;
@@ -984,52 +1041,10 @@ function run_unit_command(run_cmd_ind){
 	{
 		var data = $(selector).children("td.SubCmd").children("input").val();
 		Move_TCP_Rel(cmd_mod, data);
-		//-----------------------------------------
-		// var request = new ROSLIB.ServiceRequest({
-		// 	group_name: "arm",
-		// });
-		// pose_client.callService(request, function (res) 
-		// {
-		// 	var p = res.group_pose.position;						//position
-		// 	var o = res.group_pose.orientation;					//orientation
-		// 	var e = euler_fomr_quaternion([o.x, o.y, o.z, o.w]);	//Convert quaternion to RPY
-		// 	var f = res.group_redundancy;
-		// 	var data = $(selector).children("td.SubCmd").children("input").val();
-		// 	var val = parseFloat(data);
-
-		// 	if (cmd_mod == CmdType.Shift_X) {
-		// 		p.x += val;
-		// 	} else if (cmd_mod == CmdType.Shift_Y) {
-		// 		p.y += val;
-		// 	} else if (cmd_mod == CmdType.Shift_Z) {
-		// 		p.z += val;
-		// 	} else if (cmd_mod == CmdType.Rotate_X) {//_Math.DEG2RAD
-		// 		e[1] += val * 1;
-		// 	} else if (cmd_mod == CmdType.Rotate_Y) {
-		// 		e[0] += val * 1;
-		// 	} else if (cmd_mod == CmdType.Rotate_Z) {
-		// 		e[2] += val * 1;
-		// 	} else if (cmd_mod == CmdType.Rot_Fai) {
-		// 		f += val * 1;
-		// 	}
-
-		// 	var x = parseFloat(p.x);
-		// 	var y = parseFloat(p.y);
-		// 	var z = parseFloat(p.z);
-		// 	var roll = parseFloat(e[0]);
-		// 	var pitch = parseFloat(e[1]);
-		// 	var yaw = parseFloat(e[2]);
-		// 	var fai = parseFloat(f);
-		// 	var tmp_Cmd = [x, y, z, pitch, roll, yaw, fai];
-
-		// 	var pose_msg = new ROSLIB.Message({
-		// 		data: tmp_Cmd
-		// 	});
-		// 	pose_pub.publish(pose_msg);
-		// });
 	}
 	//-------------CmdType.Vaccum-------------// 
-	else if (cmd_mod == CmdType.Vaccum) {
+	else if (cmd_mod == CmdType.Vaccum) 
+	{
 		var vaccum_yn = $(selector).find('[name=vaccum_select]').val() == 'On' ?
 			true : false;
 
