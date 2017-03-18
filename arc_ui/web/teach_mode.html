@@ -119,8 +119,8 @@
 				<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
 				<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
 				<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
-				<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
-				<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_4" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_5" class="block_lab_sty"> Pitch 	</label> 
 				<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
 				<label id="block_lab_7" class="block_lab_sty"> Fai		</label>
 			</div>
@@ -142,8 +142,8 @@
 				<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
 				<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
 				<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
-				<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
-				<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_4" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_5" class="block_lab_sty"> Pitch 	</label> 
 				<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
 				<label id="block_lab_7" class="block_lab_sty"> Fai		</label> 
 				<br>
@@ -151,8 +151,8 @@
 				<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
 				<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
 				<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
-				<label id="block_lab_4" class="block_lab_sty"> Pitch 	</label> 
-				<label id="block_lab_5" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_4" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_5" class="block_lab_sty"> Pitch 	</label> 
 				<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
 				<label id="block_lab_7" class="block_lab_sty"> Fai		</label> 
 			</div>
@@ -234,7 +234,7 @@
 	<div class="panel panel-info col-lg-4 col-md-4" style="height:515px">
 		<!-- Default panel contents -->
 		<div class="panel-heading">
-			<a id="control_edit_eef" class="control"><i class="fa fa-pencil-square-o fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a>
+			<a id="control_edit_eef" class="control"><i class="fa fa-pencil-square-o fa-2x"></i></a>
 			<strong style="font-size:16px">&nbsp;&nbsp;TCP Control &nbsp &nbsp</strong>
 			
 			<input value="0" id="txt_Shift_Pose" class="PTP_Control_type" style="margin-left: 59px" type="number"/>
@@ -317,7 +317,7 @@
 	<div class="panel panel-info col-lg-4 col-md-4" style="height:515px">
 		<!-- Default panel contents -->
 		<div class="panel-heading">
-			<a id="control_edit_eef" class="control"><i class="fa fa-pencil-square-o fa-2x" data-toggle="modal" data-target="#setting_Dialog"></i></a>
+			<a id="control_edit_eef" class="control"><i class="fa fa-pencil-square-o fa-2x"></i></a>
 			<!--<strong style="font-size:16px">&nbsp;&nbsp;Joint Control&nbsp;&nbsp</strong>-->
 			<strong style="font-size:16px">&nbsp;&nbsp;Joint Control &nbsp &nbsp</strong>
 			<br>
@@ -436,93 +436,6 @@
 		
 	</div>  <!--<div class="panel panel-info col-lg-4 col-md-4" style="height:415px">  TCP  -->
 	<!--======================== Joint Control Table Start========================-->
-
-	<!-- Dialog : popup when the button is clicked -->
-	<div class="modal fade" id="setting_Dialog" role="dialog">
-		<div class="modal-dialog">
-		<!--content-->
-		<div class="modal-content" style="width:300px">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal">&times;</button>
-				<h4>Dialog Setting</h4>
-			</div>
-			<div class="modal-body">
-				<!-- Joint Setting Table-->
-				<table id="dialog_table_joint">
-					<tbody>
-					<tr height="15%">
-						<td>Base</td>
-						<td><input type="text" class="form-control" id="input_j1_d"data-fv-field="number"></td>
-					</tr>
-					<tr height="15%">
-						<td>Shoulder</td>
-						<td><input class="form-control input-sm" id="input_j2_d" type="text"></td>
-					</tr>
-					<tr height="15%">
-						<td>Elbow</td>
-						<td><input class="form-control input-sm" id="input_j3_d" type="text"></td>
-					</tr>
-					<tr height="15%">
-						<td>Wrist1</td>
-						<td><input class="form-control input-sm" id="input_j4_d" type="text"></td>
-					</tr>
-					<tr height="15%">
-						<td>Wrist2</td>
-						<td><input class="form-control input-sm" id="input_j5_d" type="text"></td>
-					</tr>
-					<tr height="15%">
-						<td>Wrist3</td>
-						<td><input class="form-control input-sm" id="input_j6_d" type="text"></td>
-					</tr>
-					<tr height="10%">
-						<td>Send</td>
-						<td><a id="control_send_joint_d" class="control"><i class="fa fa-paper-plane  fa-2x"></i></a></td>
-					</tr>
-					</tbody>
-			<BR>
-				</table>
-
-				<!-- EEF Setting Table-->
-				<table id="dialog_table_eef">
-					<tbody>
-					<tr height="15%">
-						<td>X</td>
-						<td><input type="text" class="form-control" id="input_lx_d"data-fv-field="number"></td>
-					</tr>
-					<tr height="15%">
-						<td>Y</td>
-						<td><input class="form-control input-sm" id="input_ly_d" type="text"></td>
-					</tr>
-					<tr height="15%">
-						<td>Z</td>
-						<td><input class="form-control input-sm" id="input_lz_d" type="text"></td>
-					</tr>
-					<tr height="15%">
-						<td>RX</td>
-						<td><input class="form-control input-sm" id="input_ax_d" type="text"></td>
-					</tr>
-					<tr height="15%">
-						<td>RY</td>
-						<td><input class="form-control input-sm" id="input_ay_d" type="text"></td>
-					</tr>
-					<tr height="15%">
-						<td>RZ</td>
-						<td><input class="form-control input-sm" id="input_az_d" type="text"></td>
-					</tr>
-					<tr height="10%">
-						<td>Send</td>
-						<td><a id="control_send_eef_d" class="control"><i class="fa fa-paper-plane  fa-2x"></i></a></td>
-					</tr>
-					</tbody>
-				</table>
-			<BR>
-				
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-			</div>
-		</div>
-	</div>
 
 	</div>   <!--Tab2_Robot COntrol-->
 

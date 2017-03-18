@@ -249,6 +249,10 @@ function Cmd_change(edit,val_7){
 		     cmd==CmdType.Rotate_X || cmd==CmdType.Rotate_Y || cmd==CmdType.Rotate_Z|| cmd==CmdType.Rot_Fai){
 		sub_cmd = '<input class="block_sty" type="number" value="'+$('#shift_val').val()+'">';
 	}
+	// else if(cmd==CmdType.Joint)
+	// {
+	// 	$("#block_lab_1").val()="dd";
+	// }
 
 	$(edit).parents("tr").children('.SubCmd').children().remove();
 	$(edit).parents("tr").children('.SubCmd').append(sub_cmd);
