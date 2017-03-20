@@ -391,7 +391,7 @@ void BaseModule::generateInitPoseTrajProcess()
     robotis_->cnt_ = 0;
     robotis_->is_moving_ = true;
 
-    ROS_INFO("[start] send trajectory001");
+    ROS_INFO("[start] send trajectory");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
 }
 
@@ -464,7 +464,7 @@ void BaseModule::generateJointTrajProcess()
     ROS_INFO("joint: max_diff: %.3f (deg)", max_diff * RADIAN2DEGREE);
     ROS_INFO("joint: mov_time: %.3f (s)", robotis_->mov_time_);
 
-    ROS_INFO("[start] send trajectory002");
+    ROS_INFO("[start] send trajectory");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
 }
 
@@ -518,7 +518,7 @@ void BaseModule::generateP2PTrajProcess()
     ROS_INFO("ptp: max_diff: %.3f (deg)", max_diff * RADIAN2DEGREE);
     ROS_INFO("ptp: mov_time: %.3f (s)", robotis_->mov_time_);
 
-    ROS_INFO(" send trajectory");
+    ROS_INFO("[start] send trajectory");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
 }
 
@@ -631,7 +631,7 @@ void BaseModule::generateTaskTrajProcess()
     robotis_->is_moving_ = true;
     robotis_->ik_solve_  = true;
 
-    ROS_INFO("[start] send trajectory003");
+    ROS_INFO("[start] send trajectory");
     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "Start Trajectory");
 }
 
@@ -717,7 +717,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
     /*---------- initialize count number ----------*/
     if (robotis_->cnt_ >= robotis_->all_time_steps_ && robotis_->is_moving_ == true)
     {
-        ROS_INFO("[end] send trajectory");
+        ROS_INFO("[ end ] send trajectory");
         publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "End Trajectory");
 
         robotis_->is_moving_ = false;

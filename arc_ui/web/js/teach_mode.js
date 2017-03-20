@@ -800,15 +800,17 @@ $("#minus_J7").click(function()
 	Joint_Control(6, ang, "REL");
 });
 
-$("#Vaccum_Control").click(function() //  yn
-{
+$("#Vaccum_Control").click(function() {
 	yn_cnt = !yn_cnt;
-	console.log('yn_cntn='+yn_cnt);
+	console.log('yn_cntn = '+yn_cnt);
 
-	var cmd_msg = new ROSLIB.Message({
-		data: yn_cnt
+	var req = new ROSLIB.ServiceRequest({
+		cmd: yn_cnt? 'vacuumOn': 'vacuumOff',
 	});
-	vaccum_pub.publish(cmd_msg);
+
+	vacuum_client.callService(req, function (res) {
+		console.log('Is vacuum cmd success: ' + res.success);
+	});
 });
 
 function Joint_Control(Joint_id, ang, Control_Type)
@@ -983,7 +985,6 @@ function next_command(){
 		//restore final cmd to id
 		var pre_selector = '#teach_table tr:nth-child('+run_cmd_ind+')';
 		$(pre_selector).children("td:first").html(run_cmd_ind);
-
 	}
 }
 
@@ -1052,15 +1053,22 @@ function run_unit_command(run_cmd_ind)
 	//-------------CmdType.Vaccum-------------// 
 	else if (cmd_mod == CmdType.Vaccum) 
 	{
-		var vaccum_yn = $(selector).find('[name=vaccum_select]').val() == 'On' ?
-			true : false;
+		var vaccum_yn = $(selector).find('[name=vaccum_select]').val()
+			== 'On'? true: false;
 
-		var cmd_msg = new ROSLIB.Message({
-			data: vaccum_yn
+		var req = new ROSLIB.ServiceRequest({
+			cmd: vaccum_yn? 'vacuumOn': 'vacuumOff',
 		});
 
-		vaccum_pub.publish(cmd_msg);
-		next_command();
+		vacuum_client.callService(req, function (res) {
+			console.log('Is vacuum cmd success: ' + res.success);
+
+			// rework
+			// if (res.success == false)
+			// 	run_cmd_ind--;
+
+			next_command();
+		});
 	}
 }
 
@@ -1385,10 +1393,10 @@ var pose_pub = new ROSLIB.Topic({
 	messageType : 'manipulator_h_base_module_msgs/IK_Cmd'
 });
 
-var vaccum_pub = new ROSLIB.Topic({
-	ros : ros,
-	name:'/vaccum',
-	messageType : 'std_msgs/Bool'
+var vacuum_client = new ROSLIB.Service({
+    ros : ros,
+    name : '/robot_cmd',
+    serviceType : 'vacuum_cmd_msg/VacuumCmd'
 });
 
 var status_sub = new ROSLIB.Topic({
