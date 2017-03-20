@@ -52,7 +52,8 @@ function hide_all(){
 	$("#base_vel_block").hide();
 }
 
-function order_list(){
+function order_list()
+{
 	var num = 1;
 	$('#teach_table tr').each(function(){
 		cmd_id = 'cmd_' + num;
@@ -812,6 +813,7 @@ $("#Vaccum_Control").click(function() //  yn
 
 function Joint_Control(Joint_id, ang, Control_Type)
 {
+	run_cmd_ind = $('#teach_table tr').length;
 	var Joint_Num;
 	if	   (Joint_id==0)	Joint_Num = 'joint1';
 	else if(Joint_id==1)	Joint_Num = 'joint2';
@@ -879,7 +881,7 @@ function Joint_Control(Joint_id, ang, Control_Type)
 $("#btn_PTP").click(function(){
 	$(this).removeClass('active');
 	$(this).addClass('disabled');
-
+	run_cmd_ind = $('#teach_table tr').length;
 	//var tmp_num_arr = [0, 0.3, 0.2, -90, 0, 0, 0];
 	var tmp_num_arr = [];
 	tmp_num_arr.push(parseFloat($("#MF_block_x").val()));
@@ -902,7 +904,7 @@ $("#btn_PTP").click(function(){
 $("#btn_Line").click(function(){
 	$(this).removeClass('active');
 	$(this).addClass('disabled');
-
+	run_cmd_ind = $('#teach_table tr').length;
 	var tmp_num_arr = [];
 	tmp_num_arr.push(parseFloat($("#MF_block_x").val()));
 	tmp_num_arr.push(parseFloat($("#MF_block_y").val()));
@@ -926,7 +928,7 @@ $("#btn_Line").click(function(){
 $("#btn_Home").click(function(){
 	$(this).removeClass('active'); 
 	$(this).addClass('disabled');
-
+	run_cmd_ind = $('#teach_table tr').length;
 	var joint_name_ary = ['joint1', 'joint2', 'joint3', 'joint4',  'joint5','joint6',  'joint7' ];
 	var float_ary = [0, 0, 0, 0, 0, 0, 0];
 
@@ -986,7 +988,8 @@ function next_command(){
 }
 
 //run one command
-function run_unit_command(run_cmd_ind){
+function run_unit_command(run_cmd_ind)
+{
 	var selector = '#teach_table tr:nth-child('+run_cmd_ind+')';
 	var cmd_mod =$(selector).find('[name=cmd_mod]').children('select').val();
 
@@ -1063,6 +1066,7 @@ function run_unit_command(run_cmd_ind){
 
 function Move_TCP_Rel(cmd_mod, data)
 {
+	run_cmd_ind = $('#teach_table tr').length;
 	var request = new ROSLIB.ServiceRequest({
 		group_name: "arm",
 	});
