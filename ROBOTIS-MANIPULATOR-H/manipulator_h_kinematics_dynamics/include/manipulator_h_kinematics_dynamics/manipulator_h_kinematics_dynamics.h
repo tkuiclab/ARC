@@ -96,6 +96,8 @@ public:
     /* ==================== Evo Kinematics ==================== */
     void load_LinkParam();
     void set_LinkParam();
+    // set endlink length
+    bool set_endlink(double);
 
     void gen_TFMat(int index, double theta, Eigen::Matrix4d& A);
 

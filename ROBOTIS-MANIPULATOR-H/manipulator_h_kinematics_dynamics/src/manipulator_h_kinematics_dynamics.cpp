@@ -944,5 +944,14 @@ double ManipulatorKinematicsDynamics::roundN(double num, int digit /* = 0 */)
     return real + dot;
 }
 
+bool ManipulatorKinematicsDynamics::set_endlink(double length)
+{
+    if (0.1 > length || 1.0 < length)
+        return false;
+
+    DH(6, 2) = length;
+    return true;
+}
+
 /*  ===================================== Evo Kinematics End ===================================== */
 }

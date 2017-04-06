@@ -154,6 +154,9 @@ void BaseModule::queueThread()
     ros::Subscriber TaskP2P_msg_sub    = ros_node.subscribe("/robotis/base/TaskP2P_msg", 5,
                                                             &BaseModule::LineCallBack, this);
 
+    ros::Subscriber set_endlink_msg_sub = ros_node.subscribe("/robotis/base/set_endlink", 5,
+                                                        &BaseModule::setEndLinkCallback, this);
+
     while (ros_node.ok())
     {
         callback_queue.callAvailable();
@@ -223,6 +226,13 @@ void BaseModule::setVelCallback(const std_msgs::Float64::ConstPtr &msg)
 {
     vel_percent = msg->data * 0.01;
     ROS_INFO("velocity set to %.2f", msg->data);
+}
+
+/* ----------------------------------- end link length ----------------------------------- */
+void BaseModule::setEndLinkCallback(const std_msgs::Float64::ConstPtr &msg)
+{
+    if (manipulator_->set_endlink(msg->data))
+        ROS_INFO("endlink set to %.2f", msg->data);
 }
 
 /* ----------------------------------- inital pose ----------------------------------- */

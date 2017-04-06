@@ -127,6 +127,7 @@ class BaseModule
     void P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd);
     void LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd);
     void setVelCallback(const std_msgs::Float64::ConstPtr &msg);
+    void setEndLinkCallback(const std_msgs::Float64::ConstPtr &msg);
 
     bool getJointPoseCallback(manipulator_h_base_module_msgs::GetJointPose::Request &req,
                               manipulator_h_base_module_msgs::GetJointPose::Response &res);
