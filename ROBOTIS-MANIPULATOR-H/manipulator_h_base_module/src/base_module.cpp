@@ -175,7 +175,8 @@ bool BaseModule::getJointPoseCallback(manipulator_h_base_module_msgs::GetJointPo
             if (manipulator_->manipulator_link_data_[id]->name_ == req.joint_name[name_index])
             {
                 res.joint_name.push_back(manipulator_->manipulator_link_data_[id]->name_);
-                res.joint_value.push_back(joint_state_->curr_joint_state_[id].position_);
+                // res.joint_value.push_back(joint_state_->curr_joint_state_[id].position_);
+                res.joint_value.push_back(joint_state_->goal_joint_state_[id].position_);
 
                 break;
             }

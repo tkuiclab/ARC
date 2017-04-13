@@ -484,6 +484,7 @@ function Get_Robot_FB()
 	joint_client.callService(request_Joint, function (res) 
 	{
 		// Display Joint FeedBack
+		// $("#MF_block_x").html("gh");
 		var fb_ang=[];
 		var fb_ang_name=["#output_j1p", "#output_j2p", "#output_j3p", "#output_j4p", 
 						 "#output_j5p", "#output_j6p", "#output_j7p"];
@@ -492,6 +493,7 @@ function Get_Robot_FB()
 			fb_ang[i] = _Math._Roundn(res.joint_value[i]*_Math.RAD2DEG, 2);
 			$(fb_ang_name[i]).html(fb_ang[i]);
 		}
+		
 	});
 }
 $("#Test_btn").click(function(){ //tb
@@ -894,10 +896,18 @@ $("#btn_PTP").click(function(){
 	tmp_num_arr.push(parseFloat($("#MF_block_yaw").val()));
 	tmp_num_arr.push(parseFloat($("#MF_block_fai").val()));
 
+	var vel = parseFloat($("#MF_block_spd").val());
+
 	var Test_msg = new ROSLIB.Message({
 		data : tmp_num_arr
 	});
-		Test_pub.publish(Test_msg);//P2P
+	Test_pub.publish(Test_msg);//P2P
+
+	var Vel_msg = new ROSLIB.Message({
+		data : vel
+	});
+	vel_pub.publish(Vel_msg);
+	
 
 	$(this).addClass('active');
 	$(this).removeClass('disabled');
@@ -922,6 +932,29 @@ $("#btn_Line").click(function(){
 		data : tmp_num_arr
 	});
 		Test_pub2.publish(Test_msg);//Line
+
+	$(this).addClass('active');
+	$(this).removeClass('disabled');
+});
+
+$("#btn_InitPos").click(function(){
+	$(this).removeClass('active'); 
+	$(this).addClass('disabled');
+	
+	// 對於Input元件來說，要用val()顯示，不能用html()
+	var tmp_num_arr = [0.3, 0, 0.2, -90, 0, 0, 0];
+	$("#MF_block_x")	.val(tmp_num_arr[0]);
+	$("#MF_block_y")	.val(tmp_num_arr[1]);
+	$("#MF_block_z")	.val(tmp_num_arr[2]);
+	$("#MF_block_pitch").val(tmp_num_arr[3]);
+	$("#MF_block_roll")	.val(tmp_num_arr[4]);
+	$("#MF_block_yaw")	.val(tmp_num_arr[5]);
+	$("#MF_block_fai")	.val(tmp_num_arr[6]);
+
+	var Test_msg = new ROSLIB.Message({
+		data : tmp_num_arr
+	});
+		Test_pub.publish(Test_msg);//P2P
 
 	$(this).addClass('active');
 	$(this).removeClass('disabled');
@@ -1097,22 +1130,22 @@ function Move_TCP_Rel(cmd_mod, data)
 		} else if (cmd_mod == CmdType.Shift_Z) {
 			p.z += val;
 		} else if (cmd_mod == CmdType.Rotate_X) {//_Math.DEG2RAD
-			e[1] += val * 1;
+			e[1] += val;
 		} else if (cmd_mod == CmdType.Rotate_Y) {
-			e[0] += val * 1;
+			e[0] += val;
 		} else if (cmd_mod == CmdType.Rotate_Z) {
-			e[2] += val * 1;
+			e[2] += val;
 		} else if (cmd_mod == CmdType.Rot_Fai) {
-			f += val * 1;
+			f += val;
 		}
 
-		var x = parseFloat(p.x);
-		var y = parseFloat(p.y);
-		var z = parseFloat(p.z);
-		var roll = parseFloat(e[0]);
+		var x 	  = parseFloat(p.x);
+		var y 	  = parseFloat(p.y);
+		var z 	  = parseFloat(p.z);
+		var roll  = parseFloat(e[0]);
 		var pitch = parseFloat(e[1]);
-		var yaw = parseFloat(e[2]);
-		var fai = parseFloat(f);
+		var yaw   = parseFloat(e[2]);
+		var fai   = parseFloat(f);
 		var tmp_Cmd = [x, y, z, pitch, roll, yaw, fai];
 		
 		console.log('roll='+roll);
@@ -1391,6 +1424,12 @@ var pose_pub = new ROSLIB.Topic({
 	ros : ros,
 	name:'/robotis/base/TaskP2P_msg',
 	messageType : 'manipulator_h_base_module_msgs/IK_Cmd'
+});
+
+var vel_pub = new ROSLIB.Topic({
+	ros : ros,
+	name:'/robotis/base/set_velocity',
+	messageType : 'std_msgs/Float64'
 });
 
 var vacuum_client = new ROSLIB.Service({

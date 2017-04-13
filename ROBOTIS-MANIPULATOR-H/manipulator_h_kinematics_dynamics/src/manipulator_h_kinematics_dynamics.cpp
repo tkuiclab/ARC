@@ -502,6 +502,9 @@ void ManipulatorKinematicsDynamics::fk()
     /* get position and mat of rotation */
     Eigen::Vector3d pos = T0_6.block<3, 1>(0, 3);
     Eigen::Matrix3d ori = T0_6.block<3, 3>(0, 0);
+    double tmp = pos(0);
+    pos(0) = pos(1);
+    pos(1) = tmp;
 
     /* --------------------------------------------- position -------------------------------------------- */
     /* update position */
@@ -570,6 +573,9 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     double Sz = sin(yaw);
 
     /* desired cmd */
+    double tmp = tar_position(0);
+    tar_position(0) = tar_position(1);
+    tar_position(1) = tmp;
     Eigen::Vector3d position = tar_position;
     Eigen::Matrix3d RPY_Rot; // orientation
     RPY_Rot << Cz*Sy + Sz*Sx*Cy, Cz*Cy - Sz*Sx*Sy, -Sz*Cx,
@@ -727,6 +733,9 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
         normalizeAngle(angle[i]);
     }
 
+    for (int i = 0; i < MAX_JOINT_ID; i++)
+        std::cout <<"Joint"<<i+1<<" is  "<<angle[i]*180.0 / M_PI<<std::endl;
+
     /* evo配置算出來的角度轉換成robotis的配置 */
     angle[1] -= M_PI_2;
     angle[1] = -angle[1];
@@ -752,7 +761,9 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
             std::cout << "ik joint limit: " << i+1 << " " << link_data.joint_angle_ * 180.0 / M_PI << std::endl;
             return false;
         }
+        std::cout <<"r_Joint"<<i+1<<" is  "<<angle[i]*180.0 / M_PI<<std::endl;
     }
+    
     return true;
 }
 
