@@ -9,6 +9,15 @@ TKU M-Bot for Amazon Robotics Challenge (ARC)
 $ sudo apt-get install ros-kinetic-qt-build
 ```
 
+* Install libmodbus
+```bash
+$ git clone https://github.com/stephane/libmodbus.git
+$ cd libmodbus
+$ ./autogen.sh
+$ ./configure
+$ make
+$ sudo make install
+```
 
 ## Manipulator Control
 
