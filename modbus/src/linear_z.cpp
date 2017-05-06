@@ -43,6 +43,22 @@ int main(int argc, char **argv)
     uint16_t *tab_rw_rq_registers;
     uint16_t *tab_rp_registers;
 
+    ros::init(argc, argv, "linear_z");
+    //==================== Added by yc start ===============
+    ros::NodeHandle nh_param("~");
+    //std_msgs::String port;
+    std::string port;
+    int  baud_rate;
+
+    nh_param.param<std::string>("port", port,"ttyUSB0");
+
+    std::cout<<"===============================\n";
+    std::cout<<port<<"\n";
+    std::cout<<"===============================\n";
+    
+    nh_param.param<int>("baud", baud_rate, 9600);
+    //==================== Added by yc over =================
+
     /* RTU */
 
     ctx = modbus_new_rtu("/dev/ttyUSB0", 9600, 'E', 8, 1);
@@ -73,7 +89,7 @@ int main(int argc, char **argv)
     tab_rw_rq_registers = (uint16_t *)malloc(nb * sizeof(uint16_t));
     memset(tab_rw_rq_registers, 0, nb * sizeof(uint16_t));
 
-    ros::init(argc, argv, "linear_z");
+    //ros::init(argc, argv, "linear_z");
     ros::NodeHandle n;
 
     ros::Subscriber sub = n.subscribe("position_topic", 10, first_topic_callback);

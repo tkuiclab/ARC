@@ -29,4 +29,10 @@
         <param name = "baud" value = "57600" />
     </node>
 
+    <!-- run modbus -->
+    <node name="linear_z" pkg="modbus" type="linear_z" >
+        <param name = "port" value ="/dev/ttyUSB0" />
+        <param name = "baud" value = "9600" />
+    </node>
+
 </launch>
