@@ -1,0 +1,51 @@
+#include "../include/6D_pose_estimation.hpp"
+
+using namespace ObjEstAction_namespace;
+
+void ObjEstAction::cloud_cb(const sensor_msgs::PointCloud2ConstPtr& input)
+{
+  sensor_msgs::PointCloud2 output;
+  pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
+  output = *input;
+  pcl::fromROSMsg(output,*cloud);
+  viewer.showCloud(cloud);
+  if(foto)
+  {
+    ROS_INFO("Digan whisky!");
+    pcl::PCDWriter writer1;
+    std::stringstream ss1;
+    ss1 << OUT_DIR << "scene_cloud" << ".pcd";
+    writer1.write<pcl::PointXYZRGBA> (ss1.str (), *cloud, false);
+    ss1.str("");
+    ss1.clear();
+  }
+  foto = false;
+}
+void ObjEstAction::goalCB()
+{
+  foto = true;
+}
+
+void ObjEstAction::preemptCB()
+{
+  ROS_INFO("%s: Preempted", action_name_.c_str());
+  as_.setPreempted();
+}
+
+void ObjEstAction::SetInputDirectory(std::string outdir)
+{
+  OUT_DIR = outdir;
+  ROS_INFO("Directory is %s",OUT_DIR.c_str());
+}
+
+int main (int argc, char **argv)
+{
+  ros::init(argc, argv, "object_pose_estimator");
+
+  ObjEstAction ObjEst("ObjEst");
+
+  ros::spin();
+  
+  return (0);
+}
+

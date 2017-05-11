@@ -1,0 +1,8 @@
+#goal definition
+int32 object_name
+---
+#result definition
+int32 object_pose
+---
+#feedback
+int32 progress

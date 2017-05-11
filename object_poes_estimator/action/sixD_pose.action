@@ -1,0 +1,8 @@
+#goal
+string object_name
+---
+#result
+int64 object_pose
+---
+#feedback
+int64 progress
