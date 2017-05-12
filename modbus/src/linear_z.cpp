@@ -6,14 +6,14 @@
 
 #include "ros/ros.h"
 #include "std_msgs/Int32.h"
-#include "std_msgs/Int32.h"
+// #include "std_msgs/Int64.h"
 #include "std_msgs/String.h"
-
+#include "modbus/LM_Cmd.h"
 #include "modbus/modbus.h"
 
 #define LOOP 1
-#define ID_LINEAR_X 1
-#define ID_LINEAR_Z 2
+#define USB0 0
+#define USB1 1
 #define ADDRESS_START 0
 #define ADDRESS_END 99
 // #define position
@@ -21,19 +21,24 @@
 std_msgs::Int32 std_msg;
 std_msgs::Int32 feedback;
 ros::Publisher feedback_pub;
+modbus::LM_Cmd LM_Msg;
 bool pub = false;
+modbus_t *ctx, *ctz, *tmp_ct;
 
-void first_topic_callback(const std_msgs::Int32::ConstPtr &msg)
+
+
+void first_topic_callback(const modbus::LM_Cmd::ConstPtr &tmp_LM_Msg)
 {
-    ROS_INFO("position: [%i]", msg->data);
-    std_msg.data = msg->data;
+    ROS_INFO("position: [%i]", tmp_LM_Msg->x);
+    LM_Msg.x = tmp_LM_Msg->x;
+    LM_Msg.z = tmp_LM_Msg->z;
+    LM_Msg.id = tmp_LM_Msg->id;
     pub = true;
 }
-
 modbus_t* Init_Modus_RTU(bool &Is_Success, int ID, std::string Port, int BaudRate)
 {
-    modbus_t* ct = modbus_new_rtu("/dev/ttyUSB0", 9600, 'E', 8, 2);
-    modbus_set_slave(ct, 2);
+    modbus_t*ct = modbus_new_rtu(Port.c_str(), 9600, 'E', 8, ID);
+    modbus_set_slave(ct, ID);
     if (modbus_connect(ct) == -1)
     {
         fprintf(stderr, "Connection failed: %s\n",
@@ -63,12 +68,22 @@ void SendCmd(bool Is_Pub, modbus_t* ctx, int pos)
         rc = modbus_write_register(ctx, 6145, 1);
 
         //位置
-        rc = modbus_write_register(ctx, 6146, 0);
-        rc = modbus_write_register(ctx, 6147, std_msg.data);
+        int up_pos = pos-65535;
+        if(up_pos<=0)
+        {
+            rc = modbus_write_register(ctx, 6146, 0);
+            rc = modbus_write_register(ctx, 6147, pos);
+        }
+        else
+        {
+            rc = modbus_write_register(ctx, 6146, 1);
+            rc = modbus_write_register(ctx, 6147, up_pos);
+            std::cout<<"up pos = "<<up_pos<<"\n";
+        }
 
         //速度
         rc = modbus_write_register(ctx, 6148, 0);
-        rc = modbus_write_register(ctx, 6149, 1500);
+        rc = modbus_write_register(ctx, 6149, 3000);
 
         //起動
         rc = modbus_write_register(ctx, 6150, 0);
@@ -98,10 +113,26 @@ void SendCmd(bool Is_Pub, modbus_t* ctx, int pos)
     }
 }
 
+void callback1(const ros::TimerEvent&)
+{
+  if((LM_Msg.id == 1)||(LM_Msg.id == 3))   
+    {
+        SendCmd(true, ctx, LM_Msg.x);  //ctx_ID_1  USB0  right
+        ROS_INFO("Callback 1 triggered");
+    }
+}
+
+void callback2(const ros::TimerEvent&)
+{
+    if((LM_Msg.id == 2)||(LM_Msg.id == 3))   
+    {
+        SendCmd(true, ctz, LM_Msg.z);  //ctz_ID_2  USB1  left
+        ROS_INFO("Callback 2 triggered");
+    }
+}
+
 int main(int argc, char **argv)
 {
-    modbus_t *ctx, *ctz;
-
     // For Allocate_and_Init_MemorySpace
     uint16_t *tab_rq_registers;
     uint16_t *tab_rp_registers;
@@ -110,23 +141,30 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "linear_z");
     
     ros::NodeHandle nh_param("~");
-    std::string port;
+    std::string port_x;
+    std::string port_z;
     int  baud_rate;
 
-    nh_param.param<std::string>("port", port,"ttyUSB0");
-    nh_param.param<int>("baud", baud_rate, 9600);
+    nh_param.param<std::string>("port_x", port_x,"ttyUSB0");
+    nh_param.param<std::string>("port_z", port_z,"ttyUSB1");
     
+    nh_param.param<int>("baud", baud_rate, 9600);
+    // std::cout<<port<<"\n";
+
     //========================= Initialize Modbus_RTU ============================= 
-    bool IsConnect_ctx = true;
-    ctx = Init_Modus_RTU(IsConnect_ctx, 2, "/dev/ttyUSB0", 9600);
-    if(IsConnect_ctx == false) 
+    bool Connect_X_OK = false;
+    bool Connect_Z_OK = false;
+    ctx = Init_Modus_RTU(Connect_X_OK, 1, "/dev/ttyUSB0", 9600);
+    ctz = Init_Modus_RTU(Connect_Z_OK, 2, "/dev/ttyUSB1", 9600);
+    
+    if((Connect_X_OK == false)||(Connect_X_OK == false))
     {
-        std::cout<<"CONNECT ERROR!!!!!\n";
-        ROS_INFO("Connect ERROR!!!");
+        if(Connect_X_OK == false)   std::cout<<"CONNECT X ERROR!!!!!\n";
+        if(Connect_Z_OK == false)   std::cout<<"CONNECT Z ERROR!!!!!\n";
         return -1;
     }
-    else
-        std::cout<<"Connect port : "<<port<<"\n";
+    std::cout<<"Connect_X_OK = "<<Connect_X_OK<<"\n";
+    std::cout<<"Connect_Z_OK = "<<Connect_Z_OK<<"\n";
 
     // ============================= Subscribe message =============================
     ros::NodeHandle n;
@@ -134,10 +172,19 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(10);
 
     // ============================= ROS Loop =============================
+
     while (ros::ok())
     {
-        //GetFeedBack(ctx, tab_rp_registers, tab_rq_registers);
-        SendCmd(pub, ctx, std_msg.data);
+        if((LM_Msg.id == 1)||(LM_Msg.id == 3))   
+        {
+            tmp_ct = ctx;
+            SendCmd(true, ctx, LM_Msg.x);
+        }
+        if(LM_Msg.id == 2)
+        {
+            tmp_ct = ctz;
+            SendCmd(true, ctz, LM_Msg.z);
+        }
         loop_rate.sleep();
         ros::spinOnce();
     }
