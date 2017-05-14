@@ -1,0 +1,4 @@
+string             group_name
+---
+geometry_msgs/Pose group_pose
+float64            group_redundancy

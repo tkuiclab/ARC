@@ -1,0 +1,132 @@
+//Base Control Button
+//cause there has a lot of button need to send the value each other,so move this js code stand out the index.js
+var speedArr;
+var default_speed = 0.5;
+$('#direction_base_speed_send').on('click',function(e){
+	if(document.getElementById('direction_base_speed_value').value >=0 && document.getElementById('direction_base_speed_value').value<=100){
+		default_speed = document.getElementById('direction_base_speed_value').value / 100;
+		document.getElementById('direction_base_speed_value').value = '';
+		document.getElementById('direction_base_speed_value').placeholder = default_speed * 100;
+	}else{
+		alert("Speed only allow 0~100%");
+	}
+});
+function direct(dirID,spArr){
+	$(dirID).on('mousedown',function(e){
+		var milst = [];
+		var twist = new ROSLIB.Message({
+			linear : {
+			x : spArr[0]*default_speed,
+			y : spArr[1]*default_speed,
+			z : spArr[2]*default_speed
+			},
+			angular : {
+			x : spArr[3]*default_speed,
+			y : spArr[4]*default_speed,
+			z : spArr[5]*default_speed
+			}
+		});
+		var send = new ROSLIB.Message({
+			cmd : 'Base',
+			pose : twist
+		});
+		mlist.push(send);
+		var goal = new ROSLIB.Goal({
+			actionClient : teachModeClient,
+			goalMessage : {
+				cmd_list : mlist
+			}
+		});
+		$("#infoContent").html('Goal was send cmdlist'
+					+'<BR>Cmd : ' + send.cmd
+					+"<BR>Pose : "
+					+"<BR>linear:<BR>"+ send.pose.linear.x +"<BR>"+ send.pose.linear.y +"<BR>"+ send.pose.linear.z
+					+"<BR>angular<BR>"+ send.pose.angular.x +"<BR>"+ send.pose.angular.y +"<BR>"+ send.pose.angular.z
+		);
+		goal.send();
+		mlist = [];
+
+	});
+	//when mouseUp stop the motion
+	$(dirID).on('mouseup',function(e){
+		var milst = [];
+		var twist = new ROSLIB.Message({
+			linear : {x : 0,y : 0,z : 0},
+			angular : {x : 0,y : 0,z : 0}
+		});
+		var send = new ROSLIB.Message({cmd : 'Base', pose : twist});
+		mlist.push(send);
+		var goal = new ROSLIB.Goal({
+			actionClient : teachModeClient,
+			goalMessage : {
+				cmd_list : mlist
+			}
+		});
+		$("#infoContent").html('Topic was send twist'
+					+"<BR>linear:<BR>"+ twist.linear.x +"<BR>"+ twist.linear.y +"<BR>"+ twist.linear.z
+					+"<BR>angular<BR>"+ twist.angular.x +"<BR>"+ twist.angular.y +"<BR>"+ twist.angular.z
+		);
+		goal.send();
+		mlist = [];
+	});
+};
+function action(cmdName,valArr){
+	var mlist=[];
+	var twist = new ROSLIB.Message({
+		linear : {
+		x : valArr[0],
+		y : valArr[1],
+		z : valArr[2]
+		},
+		angular : {
+		x : valArr[3],
+		y : valArr[4],
+		z : valArr[5]
+		}
+	});
+	var send = new ROSLIB.Message({
+		cmd : cmdName,
+		pose : twist
+	});
+	mlist.push(send);
+	var goal = new ROSLIB.Goal({
+		actionClient : teachModeClient,
+		goalMessage : {
+			cmd_list : mlist
+		}
+	});
+	$("#infoContent").html('Goal was send cmdlist'
+				+'<BR>Cmd : ' + send.cmd
+				+"<BR>Pose : "
+				+"<BR>linear:<BR>"+ send.pose.linear.x +"<BR>"+ send.pose.linear.y +"<BR>"+ send.pose.linear.z
+				+"<BR>angular<BR>"+ send.pose.angular.x +"<BR>"+ send.pose.angular.y +"<BR>"+ send.pose.angular.z
+	);
+	goal.send();
+	mlist = [];
+};
+//enable the controller
+//angular.x : 0:speed mode, 1:enable, 2:stop
+speedArr = [ 0, 0, 0, 1, 0, 0];
+direct("#direction_base_enable",speedArr);
+//disable the controller
+speedArr = [ 0, 0, 0, 2, 0, 0];
+direct("#direction_base_disable",speedArr);
+//Speed Mode
+speedArr = [ 0, 1, 0, 0, 0, 0];
+direct("#direction_base_front",speedArr);
+speedArr = [ 0,-1, 0, 0, 0, 0];
+direct("#direction_base_back",speedArr);
+speedArr = [-1, 0, 0, 0, 0, 0];
+direct("#direction_base_left",speedArr);
+speedArr = [ 1, 0, 0, 0, 0, 0];
+direct("#direction_base_right",speedArr);
+//Base Dialog Setting
+$("#control_send_base_d").on('click',function(e){console.log(0);
+	var lx = $("#input_base_lx_d").val()/100;
+	var ly = $("#input_base_ly_d").val()/100;
+	var az = $("#input_base_az_d").val()/100;
+	if(lx >= 0 && lx <=1 && ly >= 0 && ly <=1 && az >= 0 && az <=1){
+		speedArr = [ lx, ly, 0, 0, 0, az];
+		action("Base",speedArr);
+	}
+});
