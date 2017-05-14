@@ -18,3 +18,9 @@
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# python tmp 
+*.pyc
+
+# root CMakeLists.txt
+/CMakeLists.txt
