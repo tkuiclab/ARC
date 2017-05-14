@@ -23,18 +23,25 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       
       ss1 << path << "scene_cloud" << ".pcd";
       writer1.write<pcl::PointXYZRGBA> (ss1.str (), *cloud, false);
+      
+      ROS_INFO("Save PCD to %s",ss1.str().c_str());
+
       ss1.str("");
       ss1.clear();
-
-      ROS_INFO("Save PCD to %s",ss1.str().c_str());
 #endif
       //viewer.close(); 
       //state = CALL_RCNN;
+      feedback_.msg = "Catch Point Could Finish";
+      feedback_.progress = 60;
+      as_.publishFeedback(feedback_);
+
       state = POSE_ESTIMATION;
   }
 }
 
 void ObjEstAction::poseEstimation(){
+  ROS_INFO("In poseEstimation()");
+  
   geometry_msgs::Twist pose;
   pose.linear.x = 1;
   pose.linear.y = 2;
@@ -48,6 +55,8 @@ void ObjEstAction::poseEstimation(){
   result_.object_pose = pose;
 
   as_.setSucceeded(result_);
+
+  state = NADA;
 
 }
 
@@ -249,8 +258,8 @@ void ObjEstAction::preemptCB()
 
 int main (int argc, char **argv)
 {
-  ros::init(argc, argv, "object_pose_estimator");
-  ObjEstAction ObjEst("ObjEst");
+  ros::init(argc, argv, "obj_pose");
+  ObjEstAction ObjEst("obj_pose");
   ros::Rate loop_rate(10);
   while(ros::ok())
   {

@@ -77,8 +77,12 @@ public:
     as_.registerPreemptCallback(boost::bind(&ObjEstAction::preemptCB, this));
 
     cloud_sub = nh_.subscribe("/camera/depth/points", 1, &ObjEstAction::cloudCB,this);
-    roi_client = nh_.serviceClient<fake_roi::Detect>("/detect");
+    
     as_.start();
+
+    roi_client = nh_.serviceClient<fake_roi::Detect>("/detect");
+  
+    ROS_INFO("obj_pose READY!");
   }
 
   void goalCB();
@@ -98,7 +102,7 @@ protected:
   actionlib::SimpleActionServer<obj_pose::ObjectPoseAction> as_;
   std::string action_name_;
 
-  obj_pose::ObjectPoseAction feedback_;
+  obj_pose::ObjectPoseFeedback feedback_;
   obj_pose::ObjectPoseResult result_;
 
   //--------Class Usage------//

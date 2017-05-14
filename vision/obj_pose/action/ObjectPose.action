@@ -6,3 +6,4 @@ geometry_msgs/Twist object_pose
 ---
 #feedback
 int32 progress
+string msg
