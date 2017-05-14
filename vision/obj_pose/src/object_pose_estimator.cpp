@@ -6,11 +6,11 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 {
   if(state==FOTO)
   {
-      sensor_msgs::PointCloud2 output;
+      // sensor_msgs::PointCloud2 output;
       
-      output = *input;
-      pcl::fromROSMsg(output,*cloud);
-      
+      // output = *input;
+      // pcl::fromROSMsg(output,*cloud);
+      pcl::fromROSMsg(*input,*cloud);
 #ifdef ShowCloud
       viewer.showCloud(cloud);
 #endif
@@ -22,7 +22,7 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 
       
       ss1 << path << "scene_cloud" << ".pcd";
-      writer1.write<pcl::PointXYZRGBA> (ss1.str (), *cloud, false);
+      writer1.write<PT> (ss1.str (), *cloud, false);
       
       ROS_INFO("Save PCD to %s",ss1.str().c_str());
 

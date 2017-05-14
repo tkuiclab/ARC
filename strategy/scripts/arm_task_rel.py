@@ -38,7 +38,7 @@ class ArmTask:
         self.__set_mode_pub.publish('set')
         self.__is_busy = False
         self.__obj_pose_client = actionlib.SimpleActionClient("/obj_pose", obj_pose.msg.ObjectPoseAction)
-        rospy.loginfo('Wait /ObjEst action...')
+        rospy.loginfo('Wait /obj_pose action...')
         self.__obj_pose_client.wait_for_server()
 
     def __set_pubSub(self):

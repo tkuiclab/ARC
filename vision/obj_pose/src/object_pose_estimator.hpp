@@ -30,6 +30,9 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 // Types
+typedef pcl::PointXYZ PT;           //Point Type
+typedef pcl::PointCloud<PT> PCT;    //Point Cloud Type
+
 typedef pcl::PointNormal PointNT;
 typedef pcl::PointCloud<PointNT> PointCloudT;
 typedef pcl::FPFHSignature33 FeatureT;
@@ -64,7 +67,8 @@ public:
   ObjEstAction(std::string name) :
     as_(nh_, name, false),
     action_name_(name),
-    cloud (new pcl::PointCloud<pcl::PointXYZRGBA>)
+    cloud (new PCT)
+    //cloud(new pcl::PCLPointCloud2)
   {
     //foto = false;
     //ya_foto = false;
@@ -76,7 +80,7 @@ public:
     as_.registerGoalCallback(boost::bind(&ObjEstAction::goalCB, this));
     as_.registerPreemptCallback(boost::bind(&ObjEstAction::preemptCB, this));
 
-    cloud_sub = nh_.subscribe("/camera/depth/points", 1, &ObjEstAction::cloudCB,this);
+    cloud_sub = nh_.subscribe("/camera/depth/points", 10, &ObjEstAction::cloudCB,this);
     
     as_.start();
 
@@ -124,7 +128,7 @@ protected:
   // pcl::fromPCLPointCloud2(pcl_pc2,*cloud);
 
 private:
-  pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud;
-
+  PCT::Ptr cloud;
+   //pcl::PCLPointCloud2* cloud ;
 };
 }
