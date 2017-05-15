@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Teach Mode</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<!-- mm_web -->
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  	<meta charset="utf-8">
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  	<!-- Styles -->
+	<link rel="stylesheet" href="font-awesome-4.3.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="css/starter-template.css">
+
+   	<!-- jQuery UI-->
+	<link rel="stylesheet" href="jquery-ui-1.11.4/jquery-ui.css">
+	
+	  <!-- Bootstrap -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/teach_mode.css" rel="stylesheet">
+
+	<!--for multi-tab-->
+  	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+</head>
+
+<body class="">
+
+	<nav>
+		<ul class="list-unstyled main-menu">
+			<!--Include your navigation here-->
+			<li class="text-left"><a href="http://blog.themearmada.com/demos/off-canvas-menu/#" id="nav-close">x</a></li>
+			<li><a href="teach_mode.html">Teach Mode <span class="icon"></span></a></li>
+			<li><a href="index.html">JSON Decoder <span class="icon"></span></a></li>
+			<li><a href="http://www.iarc.tku.edu.tw/APC">TKU IARC <span class="icon"></span></a></li>
+		</ul>
+	</nav>
+
+	<!--Top Bar Start-->
+	<div id="fixedTop">
+	<ul >
+		<li class="left">
+			<a id="nav-expander" class="nav-expander fixed"><i class="fa fa-bars fa-lg white"></i></a>
+		</li>
+
+		<li class="center">
+			<strong>TKU M-Bot</strong>
+			<a id="rosConnect" style="cursor:pointer">
+					<span class="fa-stack ">
+						<i class="fa fa-wifi  fa-stack-1x" id="ipNum" title=""></i>
+						<i id="wifiBanned" class=""></i>
+					</span>
+			</a>
+		</li>
+
+		<li  class="right">
+
+		</li>
+	</ul>
+	</div>
+	<BR><BR>
+	<!--Top Bar Over-->
+
+
+	<!--Multi-Tab start-->
+	<ul class="nav nav-tabs">
+
+		<li >
+			<a href="#tab1_Task_Editor" data-toggle="tab">Task Editor</a>
+		</li>
+
+		<li class="active">
+			<a href="#tab2_Robot_Control" data-toggle="tab">Robot Control</a>
+		</li>
+
+	</ul>
+
+	<!--Multi-Tab over-->
+
+
+<div class="tab-content"> <!--  tab-pane fade  -->
+
+	<div id="tab1_Task_Editor" class="tab-pane fade ">
+		<div class="TE">
+			<button name="teach_btn" class="teach_btn" style="width:8%; float:right;" onclick="teach_click(this)">
+				<span class="glyphicon glyphicon-pushpin"/>Teach</button>
+
+			<div style="text-align:left;" border-bottom:solid>
+				<button id="addbtn" 		class="Task_btn"> <span class="glyphicon glyphicon-plus" ></span> Add Task 			</button>
+				<!--<button id="set_mode_btn"   class="Task_btn"> <span class="glyphicon glyphicon-flash"></span> Set Mode 			</button>-->
+				<button id="run_btn" 		class="Task_btn"> <span class="glyphicon glyphicon-play"></span> Run Task    		</button>
+				<button id="file_save_btn"  class="Task_btn"> <span class="glyphicon glyphicon-floppy-disk"></span> Save Task  	</button>
+				<button id="file_read_btn"  class="Task_btn"> <span class="glyphicon glyphicon-folder-open"></span>  Read Task  </button>
+				<button id="Test_btn"  		class="Task_btn"> <span class="glyphicon glyphicon-wrench"></span>  Test 			</button>
+			</div><hr>
+		
+			<div id="block_lab">
+				<!--<label id="block_lab_1" class="block_lab_sty"> CmdType 	</label>-->
+				<select class="options" id="cmd_select">
+					<option value="Choose"	>Choose  	</option>
+					<option value="Joint"	>Joint 	 	</option>
+					<option value="PTP"		>PTP 		</option>
+					<option value="Line"	>Line 		</option>
+					<option value="Shift_X" >Shift_X 	</option>
+					<option value="Shift_Y" >Shift_Y 	</option>
+					<option value="Shift_Z" >Shift_Z 	</option>
+					<option value="Rotate_X">Rotate_X 	</option>
+					<option value="Rotate_Y">Rotate_Y 	</option>
+					<option value="Rotate_Z">Rotate_Z 	</option>
+					<option value="Rot_Fai">Rot_Fai 	</option>
+					<option value="Vaccum">Vaccum 		</option>
+				</select>
+
+				<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
+				<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
+				<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
+				<label id="block_lab_4" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_5" class="block_lab_sty"> Pitch 	</label> 
+				<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
+				<label id="block_lab_7" class="block_lab_sty"> Fai		</label>
+			</div>
+		
+			<div id="block" style= "display:none;">
+			<!--<div id="block">-->
+				<label id="block_lab_1" class="block_lab_sty2"> Cmd 		</label>
+				<input value="0" id="block_1" class="block_sty" type="number" step="0.01"/>
+				<input value="0" id="block_2" class="block_sty" type="number" step="0.01"/>
+				<input value="0" id="block_3" class="block_sty" type="number" step="0.01"/>
+				<input value="0" id="block_4" class="block_sty" type="number" step="0.01"/>
+				<input value="0" id="block_5" class="block_sty" type="number" step="0.01"/>
+				<input value="0" id="block_6" class="block_sty" type="number" step="0.01"/>
+				<input value="0" id="block_7" class="block_sty" type="number" step="0.01"/>
+			</div>
+
+			<div id="block_lab">
+				<label id="block_lab_1" class="block_lab_sty2"> TCP_FB 	</label>
+				<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
+				<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
+				<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
+				<label id="block_lab_4" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_5" class="block_lab_sty"> Pitch 	</label> 
+				<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
+				<label id="block_lab_7" class="block_lab_sty"> Fai		</label> 
+				<br>
+				<label id="block_lab_1" class="block_lab_sty2"> Joint_FB </label>
+				<label id="block_lab_1" class="block_lab_sty"> X 		</label> 
+				<label id="block_lab_2" class="block_lab_sty"> Y 		</label> 
+				<label id="block_lab_3" class="block_lab_sty"> Z 		</label> 
+				<label id="block_lab_4" class="block_lab_sty"> Roll 	</label> 
+				<label id="block_lab_5" class="block_lab_sty"> Pitch 	</label> 
+				<label id="block_lab_6" class="block_lab_sty"> Yaw 		</label> 
+				<label id="block_lab_7" class="block_lab_sty"> Fai		</label> 
+			</div>
+
+			<div id="vaccum_block" style= "display:none;">
+				<select class="options" id="vaccum_select">
+					<option value="On">On</option>
+					<option value="Off">Off</option>
+				</select>
+			</div>
+		
+			<div id="shift_block" style= "display:none;">
+				<input value="0" id="shift_val" class="block_lab_sty" type="number"/>
+			</div>
+		
+		</div> <!--Task Control Pad-->
+
+			<div class="borderimg">
+				<table>
+					<thead>
+						<tr class="font_black"  >
+							<th style = "width:10%" >Order<input id="move_cmd" style="margin-left:1px;" type="checkbox"></td>
+							<th style = "width:15%" >Command</td>
+							<th style = "width:60%" >Parameter</td>
+							<th style = "width:10%" >Edit</td>
+							<th style = "width:5%"  >Delete</td>
+						</tr>
+					</thead>
+					<tbody id="teach_table" style="font-size: 24px" ondrop="drop(event)" ondragover="allowDrop(event)">
+					</tbody>
+				</table>
+			</div>
+		<br>
+		
+		<div class="show_area">
+			<textarea id="test_json_data" style="display:none;" cols="40" rows="20">
+
+			</textarea>
+			<button id="show_btn" >S h o w</button>
+		</div>
+	</div>  <!--Tab1__Task Editor-->
+	
+	<div id="tab2_Robot_Control" class="tab-pane fade in active" >
+		
+	<div id="MF_TCP_Control" class="MF">
+		
+			<br> &nbsp&nbsp&nbsp&nbsp&nbsp
+			<label style="font-size:100%"> X: </label>
+			<input value="0" style="width:100px" id="MF_block_x" class="MF_block" type="number" step="0.01"/> &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp
+			<label style="font-size:100%"> Y: </label>
+			<input value="0" style="width:100px" id="MF_block_y" class="MF_block" type="number" step="0.01"/> &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp
+			<label style="font-size:100%"> Z: </label>
+			<input value="0" style="width:100px" id="MF_block_z" class="MF_block" type="number" step="0.01"/> &nbsp&nbsp &nbsp&nbsp&nbsp&nbsp
+
+			<button id="set_mode_btn" class="btn_MF_Control" style="margin-left:130px"> <span class="glyphicon glyphicon-flash"></span> Set Mode </button>
+			<label style="margin-left:30px"> Speed(%): </label>
+			<input value="0" style="margin-left:10px" id="MF_block_spd" class="MF_block" type="number" /> &nbsp&nbsp
+
+			<BR>
+			<label style="font-size:100%"> Pitch: </label>
+			<input value="0" style="width:100px" id="MF_block_pitch" class="MF_block" type="number" step="0.01"/> &nbsp&nbsp
+
+			<label style="font-size:100%"> Roll: </label>
+			<input value="0" style="width:100px" id="MF_block_roll" class="MF_block" type="number" step="0.01"/> &nbsp&nbsp
+
+			<label style="font-size:100%"> Yaw: </label>
+			<input value="0" style="width:100px" id="MF_block_yaw" class="MF_block" type="number" step="0.01"/> &nbsp&nbsp
+
+			<label style="font-size:100%"> Fai: </label>
+			<input value="0" style="width:100px" id="MF_block_fai" class="MF_block" type="number" step="0.01" /> &nbsp&nbsp
+
+			<button id="btn_PTP"     class="btn_MF_Control"> PTP  	 </button>
+			<button id="btn_Line" 	 class="btn_MF_Control"> Line 	 </button>
+			<button id="btn_InitPos" class="btn_MF_Control"> InitPos </button>
+			<button id="btn_Home" 	 class="btn_MF_Control"> Home 	 </button>
+		
+	</div>
+	<BR>
+	<!--======================== TCP Control Table Start========================-->
+	<div class="panel panel-info col-lg-4 col-md-4" style="height:515px">
+		<!-- Default panel contents -->
+		<div class="panel-heading">
+			<a id="control_edit_eef" class="control"><i class="fa fa-pencil-square-o fa-2x"></i></a>
+			<strong style="font-size:16px">&nbsp;&nbsp;TCP Control &nbsp &nbsp</strong>
+			
+			<input value="0" id="txt_Shift_Pose" class="PTP_Control_type" style="margin-left: 59px" type="number" step="0.01"/>
+			<label style="font-size:100%"> (m) &nbsp</label>
+			<br>
+			<input value="0" id="txt_Rot_Orien" class="PTP_Control_type" style="margin-left:215px" type="number" step="1">
+			<labelstyle="font-size:100%"><strong> (deg) </strong></label> 	
+		</div>		
+
+		<!-- Table --> <!--jmp-->
+		<div id="TCP_Table">
+		<table class="table" width="100%" height="70%">
+			<tbody>
+
+				<tr>
+					<td width="40%">X</td>
+					<td width="40%"><h4 id="output_lx" style="color:red"><h4></td> <!--  <span class="glyphicon glyphicon-plus"></span>  -->
+					<td width="10%"><button id="plus_lx" class="control"><i class="fa fa-plus-circle fa-2x" ></i></button></td>
+					<td width="10%"><button id="minus_lx" class="control"><i class="fa fa-minus-circle fa-2x" ></i></button></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Y</td>
+					<td width="40%"><h4 id="output_ly" style="color:red"></td>
+					<td width="10%"><button id="plus_ly" class="control"><i class="fa fa-plus-circle fa-2x" ></i></button></td>
+					<td width="10%"><button id="minus_ly" class="control"><i class="fa fa-minus-circle fa-2x" ></i></button></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Z</td>
+					<td width="40%"><h4 id="output_lz" style="color:red"></td>
+					<td width="10%"><button id="plus_lz" class="control"><i class="fa fa-plus-circle fa-2x" ></i></button></td>
+					<td width="10%"><button id="minus_lz" class="control"><i class="fa fa-minus-circle fa-2x" ></i></button></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Pitch</td>
+					<td width="40%"><h4 id="output_ax" style="color:red"></td>
+					<td width="10%"><button id="plus_ax" class="control"><i class="fa fa-plus-circle fa-2x" ></i></button></td>
+					<td width="10%"><button id="minus_ax" class="control"><i class="fa fa-minus-circle fa-2x" ></i></button></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Roll</td>
+					<td width="40%"><h4 id="output_ay" style="color:red"></td>
+					<td width="10%"><button id="plus_ay" class="control"><i class="fa fa-plus-circle fa-2x" ></i></button></td>
+					<td width="10%"><button id="minus_ay" class="control"><i class="fa fa-minus-circle fa-2x" ></i></button></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Yaw</td>
+					<td width="40%"><h4 id="output_az" style="color:red"></td>
+					<td width="10%"><button id="plus_az" class="control"><i class="fa fa-plus-circle fa-2x"></i></button></td>
+					<td width="10%"><button id="minus_az" class="control"><i class="fa fa-minus-circle fa-2x"></i></button></td>
+				</tr>
+
+				<tr>
+					<td width="40%">Fai</td>
+					<td width="40%"><h4 id="output_f" style="color:red"></td>
+					<td width="10%"><button id="plus_f" class="control"><i class="fa fa-plus-circle fa-2x"></i></button></td>
+					<td width="10%"><button id="minus_f" class="control"><i class="fa fa-minus-circle fa-2x" ></i></button></td>
+				</tr>
+
+				<tr>
+					<td width="40%" >Vaccum</td>
+					<td width="40%"><h4 id="output_lx" style="color:red"></td>
+					<td> <label class="switch">
+						<input type="checkbox" >
+						<div id="Vaccum_Control" class="slider round"></div></label> 
+					</td> <td> </td>
+				</tr>
+
+			<tbody>
+		</table>
+		</div>
+	</div>  <!--<div class="panel panel-info col-lg-4 col-md-4" style="height:415px">  TCP  -->
+	<!--======================== TCP Control Table Over ========================-->
+
+	<!--======================== Joint Control Table Start========================-->
+	<div class="panel panel-info col-lg-4 col-md-4" style="height:515px">
+		<!-- Default panel contents -->
+		<div class="panel-heading">
+			<a id="control_edit_eef" class="control"><i class="fa fa-pencil-square-o fa-2x"></i></a>
+			<!--<strong style="font-size:16px">&nbsp;&nbsp;Joint Control&nbsp;&nbsp</strong>-->
+			<strong style="font-size:16px">&nbsp;&nbsp;Joint Control &nbsp &nbsp</strong>
+			<br>
+			<select  id="Joint_Ctrl_Typ_Sel" style="margin-left:0px">
+				<option value="none"   > none    </option>
+				<option value="Joint1"> Joint1 </option>
+				<option value="Joint2"> Joint2 </option>
+				<option value="Joint3"> Joint3 </option>
+				<option value="Joint4"> Joint4 </option>
+				<option value="Joint5"> Joint5 </option>
+				<option value="Joint6"> Joint6 </option>
+				<option value="Joint7"> Joint7 </option>
+			</select>
+			<input value="0" style="width:90px" id="txt_Joint_Rel" class="block_sty"  type="number" step="1"/>
+			<label style="font-size:100%"> (deg) </label> 
+			&nbsp;
+			<button id="btn_Joint_ABS" > Move ABS </button>	
+		</div>
+
+		<!-- Table -->
+		<div id="Joint_Table">
+			<table class="table" width="100%" height="70%">
+				<tbody>
+					<tr height="10%">
+						<td width="20%" style="text-align:center"><strong>Joint1</strong></td>
+						<td width="10%"><button id="plus_J1" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
+						<td width="60%" class="progress">
+							<!--<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j1p" class="MF_Joint_FeedBack"></h4></div>
+						</td>
+						<td width="10%" height="10px" align="right"><button id="minus_J1" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
+					</tr>
+
+					<tr height="10%">
+						<td width="20%" style="text-align:center"><strong>Joint2</strong></td>
+						<td width="10%"><button id="plus_J2" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
+						<td width="60%" class="progress">
+							<!--<div id="progress-bar_j1" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j2p" class="MF_Joint_FeedBack"></h4></div>
+						</td>
+						<td width="10%" height="10px" align="right"><button id="minus_J2" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
+					</tr>
+
+					<tr height="10%">
+						<td width="20%" style="text-align:center"><strong>Joint3</strong></td>
+						<td width="10%"><button id="plus_J3" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
+						<td width="60%" class="progress">
+							<!--<div id="progress-bar_j3" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j3p" class="MF_Joint_FeedBack"></h4></div>
+						</td>
+						<td width="10%" height="10px" align="right"><button id="minus_J3" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
+					</tr>
+
+					<tr height="10%">
+						<td width="20%" style="text-align:center"><strong>Joint4</strong></td>
+						<td width="10%"><button id="plus_J4" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
+						<td width="60%" class="progress">
+							<!--<div id="progress-bar_j4" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j4p" class="MF_Joint_FeedBack"></h4></div>
+						</td>
+						<td width="10%" height="10px" align="right"><button id="minus_J4" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
+					</tr>
+
+					<tr height="10%">
+						<td width="20%" style="text-align:center"><strong>Joint5</strong></td>
+						<td width="10%"><button id="plus_J5" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
+						<td width="60%" class="progress">
+							<!--<div id="progress-bar_j5" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j5p" class="MF_Joint_FeedBack"></h4></div>
+						</td>
+						<td width="10%" height="10px" align="right"><button id="minus_J5" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
+					</tr>
+
+					<tr height="10%">
+						<td width="20%" style="text-align:center"><strong>Joint6</strong></td>
+						<td width="10%"><button id="plus_J6" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
+						<td width="60%" class="progress">
+							<!--<div id="progress-bar_j6" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j6p" class="MF_Joint_FeedBack"></h4></div>
+						</td>
+						<td width="10%" height="10px" align="right"><button id="minus_J6" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
+					</tr>	
+
+					<tr height="10%">
+						<td width="20%" style="text-align:center"><strong>Joint7</strong></td>
+						<td width="10%"><button id="plus_J7" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
+						<td width="60%" class="progress">
+							<!--<div id="progress-bar_j7" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">-->
+							<h4 id="output_j7p" class="MF_Joint_FeedBack" ></h4></div>
+						</td>
+						<td width="10%" height="10px" align="right"><button id="minus_J7" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
+					</tr>	
+
+					<tr height="10%">
+						<td width="20%" style="text-align:center"><strong>Shift_X</strong></td>
+						<td width="10%"><button id="control_base_L" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
+						<td width="60%" class="progress">
+							<div id="progress-bar_SX" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+							<h4 id="output_SX"></h4></div>
+						</td>
+						<td width="10%" height="10px" align="right"><button id="control_base_R" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
+					</tr>	
+
+					<tr height="10%">
+						<td width="20%" style="text-align:center"><strong>Shift_Z</strong></td>
+						<td width="10%"><button id="control_base_L" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-left fa-lg"></i></button></td>
+						<td width="60%" class="progress">
+							<div id="progress-bar_SZ" class="progress-bar" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="360">
+							<h4 id="output_SZ"></h4></div>
+						</td>
+						<td width="10%" height="10px" align="right"><button id="control_base_R" class="btn_Joint_Rel_Control"><i class="glyphicon glyphicon-triangle-right fa-lg"></i></button></td>
+					</tr>	
+				<tbody>
+			</table>
+		</div> <!--Joint_Table-->
+		
+	</div>  <!--<div class="panel panel-info col-lg-4 col-md-4" style="height:415px">  TCP  -->
+	<!--======================== Joint Control Table Start========================-->
+
+	</div>   <!--Tab2_Robot COntrol-->
+
+</div> <!--tab-content-->
+
+  	<script src="js/jquery/jquery.min.js"></script>
+  	<script src="bootstrap/js/bootstrap.min.js"></script>
+	<script src="js/roslib/eventemitter2.min.js"></script>
+	<script src="js/roslib/roslib.js"></script>
+  	<script src="js/ros_init.js"></script>
+
+  	<script src="js/math/numjs.min.js"></script>
+  	<script src="js/math/Math.js"></script>
+  	<script src="js/math/euler_quaternion_converter.js"></script>
+
+	<script src="js/teach_mode.js"></script>
+
+<!-- Javascript================================================== -->
+<script src="js/roslib/eventemitter2.min.js"></script>
+<script src="js/roslib/roslib.min.js"></script>
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="js/jquery/jquery.navgoco.js"></script>
+<script src="js/bootstrap/bootstrap.min.js"></script>
+
+<script src="jquery-ui-1.11.4/external/jquery/jquery.js"></script>
+<script src="jquery-ui-1.11.4/jquery-ui.js"></script>
+
+<!--<script src="js/remote_control/index.js"></script>-->
+<!--<script src="js/remote_control/index_eef_panel.js"></script>
+<script src="js/remote_control/joint_panel.js"></script>
+<script src="js/remote_control/index_direct_panel.js"></script>-->
+
+  </body>
+</html>
+

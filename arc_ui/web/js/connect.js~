@@ -1,0 +1,7 @@
+ipAddr = "localhost";
+$('#rosConnect').bind("click touchstart",function(e){
+	ipAddr = prompt("Please enter the master's IP address.\nex: 192.168.1.1");
+});
+function ipCallBack(){
+	return ipAddr;
+}
