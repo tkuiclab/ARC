@@ -1,8 +1,0 @@
-string cmd
-float64[] float_ary
----
-float64 f
-
-
-
-
