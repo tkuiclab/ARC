@@ -25,5 +25,6 @@
 # root CMakeLists.txt
 /CMakeLists.txt
 
+
 # ignore PCD
-#*.pcd
+*.pcd
