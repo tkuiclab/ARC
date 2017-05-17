@@ -2,6 +2,7 @@
 ```bash
 $ git clone https://github.com/stephane/libmodbus.git
 $ cd libmodbus
+$ sudo apt-get install autoconf
 $ ./autogen.sh
 $ ./configure
 $ make
