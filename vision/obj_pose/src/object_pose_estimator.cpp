@@ -1,9 +1,13 @@
+
 #include "object_pose_estimator.hpp"
+#include "seg_plane_cam2obj.hpp"
+
 
 using namespace ObjEstAction_namespace;
 
 void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 {
+  
   if(state==FOTO)
   {
       // sensor_msgs::PointCloud2 output;
@@ -11,29 +15,30 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       // output = *input;
       // pcl::fromROSMsg(output,*cloud);
       pcl::fromROSMsg(*input,*cloud);
-#ifdef ShowCloud
-      viewer.showCloud(cloud);
-#endif
 
 #ifdef SaveCloud
     
       pcl::PCDWriter writer1;
       std::stringstream ss1;
-
       
+      std::string sys_str;
+      sys_str = "rm  " +  path + "*.pcd";
+      
+      std::cout << "[CMD] -> " << sys_str << std::endl;  
+
+      system(sys_str.c_str());
       ss1 << path << "scene_cloud" << ".pcd";
       writer1.write<PT> (ss1.str (), *cloud, false);
       
       ROS_INFO("Save PCD to %s",ss1.str().c_str());
 
-      ss1.str("");
-      ss1.clear();
 #endif
-      //viewer.close(); 
+
       //state = CALL_RCNN;
       feedback_.msg = "Catch Point Could Finish";
       feedback_.progress = 60;
       as_.publishFeedback(feedback_);
+
 
       state = POSE_ESTIMATION;
   }
@@ -43,20 +48,43 @@ void ObjEstAction::poseEstimation(){
   ROS_INFO("In poseEstimation()");
   
   geometry_msgs::Twist pose;
-  pose.linear.x = 1;
-  pose.linear.y = 2;
-  pose.linear.z = 3;
-  
-  pose.angular.x = 1.57;
-  pose.angular.y = 2.57;
-  pose.angular.z = 3.57;
-  
+
+  PCT::Ptr cloud_seg (new PCT);
+  PCT::Ptr cloud_seg_largest (new PCT);
+
+  if(obj_name.compare("seg_0") == 0){
+    get_seg_plane(cloud, 0, cloud_seg);
+  }else if(obj_name.compare("seg_1") == 0){
+    get_seg_plane(cloud, 1, cloud_seg);
+  }else if(obj_name.compare("seg_2") == 0){
+    get_seg_plane(cloud, 2, cloud_seg);
+  }
+   
+  //get_seg_plane(cloud,  cloud_seg);
+  get_largest_cluster(cloud_seg, cloud_seg_largest);
+
+  //get_seg_plane_near(cloud, cloud_seg);
+
+  cam_2_obj_center(cloud_seg_largest, 
+      pose.linear.x, pose.linear.y, pose.linear.z, 
+      pose.angular.x, pose.angular.y, pose.angular.z);
   
   result_.object_pose = pose;
 
   as_.setSucceeded(result_);
 
   state = NADA;
+
+#ifdef ShowCloud
+  vis_simple(viewer,cloud);
+
+
+  while (!viewer->wasStopped () && state == NADA && ros::ok())
+  {
+    viewer->spinOnce (100);
+    boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+  }
+#endif 
 
 }
 
@@ -168,13 +196,15 @@ void ObjEstAction::aligment(){
     std::cout << "Yaw=" << yaw << std::endl;
     pcl::console::print_info ("\n");
     pcl::console::print_info ("Inliers: %i/%i\n", align.getInliers ().size (), object->size ());
-    
+  
+#ifdef ShowCloud
     // Show alignment
     pcl::visualization::PCLVisualizer visu("Alignment");
     visu.addCoordinateSystem (0.1, 0);
     visu.addPointCloud (scene, ColorHandlerT (scene, 0.0, 255.0, 0.0), "scene");
     visu.addPointCloud (object_aligned, ColorHandlerT (object_aligned, 255.0, 0.0, 0.0), "object_aligned");
     visu.spin ();
+#endif
   }
   else
   {

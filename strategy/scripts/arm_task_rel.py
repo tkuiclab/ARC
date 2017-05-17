@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 
 """Use to generate arm task and run."""
 
@@ -7,22 +7,12 @@ from math import radians, degrees, sin, cos
 from numpy import multiply
 
 import rospy
-import roslib;roslib.load_manifest('obj_pose')
 import tf
 
-
-import actionlib
 from std_msgs.msg import String, Float64
 from robotis_controller_msgs.msg import StatusMsg
 from manipulator_h_base_module_msgs.msg import IK_Cmd
 from manipulator_h_base_module_msgs.srv import GetKinematicsPose, GetKinematicsPoseResponse
-
-import obj_pose.msg
-import geometry_msgs.msg
-from geometry_msgs.msg import Twist
-import json
-
-
 
 _POS = (.3, 0, .15)  # x, y, z
 _ORI = (-40, 0, 0)  # pitch, roll, yaw
@@ -34,12 +24,9 @@ class ArmTask:
     def __init__(self):
         """Inital object."""
         self.__set_pubSub()
-        rospy.on_shutdown(self.stop_task)
+        #rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
         self.__is_busy = False
-        self.__obj_pose_client = actionlib.SimpleActionClient("/obj_pose", obj_pose.msg.ObjectPoseAction)
-        rospy.loginfo('Wait /obj_pose action...')
-        self.__obj_pose_client.wait_for_server()
 
     def __set_pubSub(self):
         self.__set_mode_pub = rospy.Publisher(
@@ -178,43 +165,24 @@ class ArmTask:
 
         while self.__is_busy:
             rospy.sleep(.1)
-    
 
-
-    def obj_pose_feedback_cb(self,fb):
-        rospy.loginfo("In obj_pose_feedback_cb")
-        rospy.loginfo("msg = " + fb.msg)
-        rospy.loginfo("progress = " + str(fb.progress) + "% ")
-
-        
-    def obj_pose_done_cb(self, state, result):
-        #rospy.loginfo("In obj_pose_done_cb")
-        rospy.loginfo("object_pose = " + str(result))
-        twist = result.object_pose
-
-    #request object pose
-    def obj_pose_request(self):
-        rospy.loginfo('obj_pose_request()')
-
-        goal = obj_pose.msg.ObjectPoseGoal("Windex")
-        self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
-        self.__obj_pose_client.wait_for_result()
 
 if __name__ == '__main__':
 
     rospy.init_node('robot_arm_task', anonymous=True)
     rospy.loginfo('robot arm task running')
 
-    rospy.sleep(0.5)
-
-    rospy.loginfo('after sleep 0.,5')
-
-
     task = ArmTask()
-    task.obj_pose_request()
+    rospy.sleep(0.3)
 
-    # task.pub_ikCmd('ptp')
-    # task.relative_control(s=.1)
+    #task.pub_ikCmd('ptp')
+    #task.relative_control(s=.1)  #-y
+    #task.relative_control(a=.05) #x
+    
+    #task.relative_control(n=.05)  #cam_y
+    #task.relative_control(s=.05)  #cam_-x
+    task.relative_control(n=.04) #cam_z
+
 
 #    case ORDER_ZYX:
 #         Mx.M[0][0]=Cy*Cz;

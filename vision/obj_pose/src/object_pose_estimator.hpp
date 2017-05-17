@@ -31,7 +31,7 @@
 
 // Types
 typedef pcl::PointXYZ PT;           //Point Type
-typedef pcl::PointCloud<PT> PCT;    //Point Cloud Type
+typedef pcl::PointCloud<PT> PCT;
 
 typedef pcl::PointNormal PointNT;
 typedef pcl::PointCloud<PointNT> PointCloudT;
@@ -42,12 +42,6 @@ typedef pcl::visualization::PointCloudColorHandlerCustom<PointNT> ColorHandlerT;
 
 //#define ShowCloud
 #define SaveCloud
-
-#ifdef ShowCloud
-//  pcl::visualization::CloudViewer viewer("Cloud Viewer");
-//#else
-  pcl::visualization::PCLVisualizer visu("Alignment");
-#endif
 
 enum ProcessingState{
     NADA,

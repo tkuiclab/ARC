@@ -165,6 +165,8 @@ if __name__ == '__main__':
     task.pub_ikCmd('ptp')
     rospy.loginfo('Run relative')
 
+    return 
+
     yaw = 0.504702
     pitch = -3.24753
     roll = 17.6629
