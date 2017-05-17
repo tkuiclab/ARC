@@ -10,6 +10,7 @@ $ sudo make install
 
 * Run linear motor
 
+```bash
 $ roscore
 [New terminal]
 
@@ -24,4 +25,4 @@ $ sudo chmod 777 /dev/ttyUSB1
 $ rosrun linear_motion LM_Control.py <driver id> <$1>
 [$1 is a char from a~l, each char represents a pulse]
 [The status of linear motor will display in terminal]
-
+```
