@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <name>robotis_controller</name>
+  <version>0.2.0</version>
+  <description>
+    The main package that controls THORMANG3.
+  </description>
+  <license>BSD</license>
+  <author email="zerom@robotis.com">Zerom</author>
+  <maintainer email="pyo@robotis.com">Pyo</maintainer>
+  <url type="bugtracker">https://github.com/ROBOTIS-GIT/ROBOTIS-Framework/issues</url>
+  <url type="repository">https://github.com/ROBOTIS-GIT/ROBOTIS-Framework</url>
+  <url type="website">http://wiki.ros.org/robotis_controller</url>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>roslib</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>dynamixel_sdk</build_depend>
+  <build_depend>robotis_device</build_depend>
+  <build_depend>robotis_controller_msgs</build_depend>
+  <build_depend>robotis_framework_common</build_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>roslib</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>dynamixel_sdk</run_depend>
+  <run_depend>robotis_device</run_depend>
+  <run_depend>robotis_controller_msgs</run_depend>
+  <export></export>
+</package>
