@@ -30,12 +30,12 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       ss1.clear();
 #endif
       //viewer.close(); 
-      //state = CALL_RCNN;
+      state = CALL_RCNN;
       feedback_.msg = "Catch Point Could Finish";
       feedback_.progress = 60;
       as_.publishFeedback(feedback_);
 
-      state = POSE_ESTIMATION;
+      //state = POSE_ESTIMATION;
   }
 }
 
@@ -69,6 +69,7 @@ void ObjEstAction::aligment(){
   FeatureCloudT::Ptr scene_features (new FeatureCloudT);
   
   // Load object and scene
+  pcl::console::print_highlight ("Load PCD file!\n");
   tmp_path = path;
   tmp_path.append("Hand_Weight1.pcd");
   tmp_path2 = path;
@@ -88,15 +89,15 @@ void ObjEstAction::aligment(){
 
   std::cerr << "Scene before filtering: " << scene->width * scene->height << std::endl;
 
-  // Downsample
-  pcl::console::print_highlight ("Downsampling...\n");
-  pcl::VoxelGrid<PointNT> grid;
+  // // Downsample
+  //pcl::console::print_highlight ("Downsampling...\n");
+  //pcl::VoxelGrid<PointNT> grid;
   const float leaf = 0.005f;
-  grid.setLeafSize (leaf, leaf, leaf);
-  grid.setInputCloud (object);
-  grid.filter (*object);
-  grid.setInputCloud (scene);
-  grid.filter (*scene);
+  // grid.setLeafSize (leaf, leaf, leaf);
+  // grid.setInputCloud (object);
+  // grid.filter (*object);
+  // grid.setInputCloud (scene);
+  // grid.filter (*scene);
   
   std::cerr << "Scene after filtering: " << scene->width * scene->height << std::endl;
 
@@ -192,7 +193,7 @@ void ObjEstAction::get_roi(){
   tmp_path = path;
   tmp_path.append("Scene_with_handweight.pcd");
   pcl::console::print_highlight ("Loading point clouds...\n");
-  if (pcl::io::loadPCDFile<PointNT> ("/home/iclab-ming/ARC_ws/src/obj_pose/pcd_file/Scene_with_handweight.pcd", *scene) < 0)
+  if (pcl::io::loadPCDFile<PointNT> ("/home/iclab-giga/ARC_ws/src/ARC/vision/obj_pose/pcd_file/Scene_with_handweight.pcd", *scene) < 0)
   {
     pcl::console::print_error ("Error loading object/scene file!\n");
   }
@@ -219,6 +220,7 @@ void ObjEstAction::get_roi(){
   ROI_cloud->height = max_y-mini_y;
   ROI_cloud->is_dense = false;
   ROI_cloud->points.resize (ROI_cloud->width * ROI_cloud->height);
+  //ROS_INFO("Create a fake cloud!\n");
 
   int index;
   int index_tmp=0;
@@ -232,12 +234,14 @@ void ObjEstAction::get_roi(){
       ROI_cloud->points[index_tmp].y = scene->points[index].y;
       ROI_cloud->points[index_tmp].z = scene->points[index].z;
       index_tmp++;
+      //ROS_INFO("index_tmp=%d\n",index_tmp);
     }
   }
+  ROS_INFO("Save pint cloud in ROI!\n");
   pcl::PCDWriter writer;
   tmp_path = path;
   tmp_path.append("test_pcd.pcd");
-  // ROS_INFO("Get path=%s",tmp_path.c_str());
+  //ROS_INFO("Get path=%s",tmp_path.c_str());
   writer.write<PointNT> (tmp_path, *ROI_cloud, false);
   std::cerr << "Saved " << ROI_cloud->points.size () << " data points to test_pcd.pcd." << std::endl;
   state = ALIGMENT;
