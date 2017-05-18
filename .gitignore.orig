@@ -1,0 +1,50 @@
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
+#ignore vscode
+.vscode/*
+<<<<<<< HEAD
+#!.vscode/settings.json
+#!.vscode/tasks.json
+#!.vscode/launch.json
+#!.vscode/extensions.json
+=======
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+>>>>>>> 5d84bb53c6a9eac825387cdbbf0f79b1959c5e35
+
+# python tmp 
+*.pyc
+
+# root CMakeLists.txt
+/CMakeLists.txt
+
+<<<<<<< HEAD
+# ignore training data
+/vision/darkflow_detect/ckpt/checkpoint
+/vision/darkflow_detect/ckpt/yolo-test-60000.data-00000-of-00001
+/vision/darkflow_detect/ckpt/yolo-test-60000.index
+/vision/darkflow_detect/ckpt/yolo-test-60000.meta
+/vision/darkflow_detect/ckpt/yolo-test-60000.profile
+/vision/darkflow_detect/build/*
+/vision/darkflow_detect/bin/yolo.weights
+/vision/darkflow_detect/bin/tiny-yolo-voc.weights
+# ignore PCD
+*.pcd
+=======
+# ignore PCD
+#*.pcd
+>>>>>>> 5d84bb53c6a9eac825387cdbbf0f79b1959c5e35
