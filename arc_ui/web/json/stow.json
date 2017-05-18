@@ -1,0 +1,14 @@
+{
+  "stow_contents": ["oreo_mega_stuf","champion_copper_plus_spark_plug","expo_dry_erase_board_eraser","kong_duck_dog_toy","genuine_joe_plastic_stir_sticks"],
+  "work_order":
+  [
+    {
+      "bin": "bin_A",
+      "item": "oreo_mega_stuf"
+    },
+    {
+      "bin": "bin_B",
+      "item": "genuine_joe_plastic_stir_sticks"
+    }
+  ]
+}
