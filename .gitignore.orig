@@ -14,10 +14,17 @@
 
 #ignore vscode
 .vscode/*
+<<<<<<< HEAD
 #!.vscode/settings.json
 #!.vscode/tasks.json
 #!.vscode/launch.json
 #!.vscode/extensions.json
+=======
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+>>>>>>> 5d84bb53c6a9eac825387cdbbf0f79b1959c5e35
 
 # python tmp 
 *.pyc

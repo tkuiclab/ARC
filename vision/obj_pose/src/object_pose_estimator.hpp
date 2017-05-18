@@ -30,8 +30,8 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 // Types
-typedef pcl::PointXYZ PT;           //Point Type
-typedef pcl::PointCloud<PT> PCT;    //Point Cloud Type
+typedef pcl::PointXYZRGBA PT;           //Point Type
+typedef pcl::PointCloud<PT> PCT;
 
 typedef pcl::PointNormal PointNT;
 typedef pcl::PointCloud<PointNT> PointCloudT;
@@ -42,12 +42,6 @@ typedef pcl::visualization::PointCloudColorHandlerCustom<PointNT> ColorHandlerT;
 
 //#define ShowCloud
 #define SaveCloud
-
-#ifdef ShowCloud
-//  pcl::visualization::CloudViewer viewer("Cloud Viewer");
-//#else
-  pcl::visualization::PCLVisualizer visu("Alignment");
-#endif
 
 enum ProcessingState{
     NADA,
@@ -68,15 +62,11 @@ public:
     as_(nh_, name, false),
     action_name_(name),
     cloud (new PCT)
-    //cloud(new pcl::PCLPointCloud2)
   {
-    //foto = false;
-    //ya_foto = false;
     pcd_folder = "/pcd_file/";
     path = ros::package::getPath("obj_pose");
     path.append(pcd_folder);
     //ROS_INFO("Get path=%s",path.c_str());
-    //SetInputDirectory("/home/iclab-ming/ARC_ws/src/obj_pose/pcd_file/");
     as_.registerGoalCallback(boost::bind(&ObjEstAction::goalCB, this));
     as_.registerPreemptCallback(boost::bind(&ObjEstAction::preemptCB, this));
 
@@ -95,6 +85,7 @@ public:
   void poseEstimation();
   void aligment();
   void get_roi();
+  void segmetation();
 
 protected:
 
@@ -122,13 +113,7 @@ protected:
   std::string path;
   std::string pcd_folder;
 
-  // pcl::PCLPointCloud2 pcl_pc2;
-  // pcl_conversions::toPCL(*input,pcl_pc2);
-  // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-  // pcl::fromPCLPointCloud2(pcl_pc2,*cloud);
-
 private:
   PCT::Ptr cloud;
-   //pcl::PCLPointCloud2* cloud ;
 };
 }
