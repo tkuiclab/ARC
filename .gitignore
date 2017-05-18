@@ -25,19 +25,11 @@
 # root CMakeLists.txt
 /CMakeLists.txt
 
-<<<<<<< HEAD
 # ignore training data
-/vision/darkflow_detect/ckpt/checkpoint
-/vision/darkflow_detect/ckpt/yolo-test-60000.data-00000-of-00001
-/vision/darkflow_detect/ckpt/yolo-test-60000.index
-/vision/darkflow_detect/ckpt/yolo-test-60000.meta
-/vision/darkflow_detect/ckpt/yolo-test-60000.profile
-/vision/darkflow_detect/build/*
-/vision/darkflow_detect/bin/yolo.weights
-/vision/darkflow_detect/bin/tiny-yolo-voc.weights
+
+# ignore photo
+*.jpg
+
 # ignore PCD
 *.pcd
-=======
-# ignore PCD
-#*.pcd
->>>>>>> 5d84bb53c6a9eac825387cdbbf0f79b1959c5e35
+
