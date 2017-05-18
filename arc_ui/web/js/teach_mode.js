@@ -942,7 +942,8 @@ $("#btn_InitPos").click(function(){
 	$(this).addClass('disabled');
 	
 	// 對於Input元件來說，要用val()顯示，不能用html()
-	var tmp_num_arr = [0.3, 0, 0.2, -90, 0, 0, 0];
+	//var tmp_num_arr = [0.3, 0, 0.2, -90, 0, 0, 0];
+	var tmp_num_arr = [0.3, 0, 0.3, -60, 0, 0, 0];
 	$("#MF_block_x")	.val(tmp_num_arr[0]);
 	$("#MF_block_y")	.val(tmp_num_arr[1]);
 	$("#MF_block_z")	.val(tmp_num_arr[2]);
