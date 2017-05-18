@@ -56,8 +56,37 @@ class Strategy(threading.Thread):
 		self.state = WaitTask
 
 
+	def run_bin(self):
+		for key,value in self.bin_contents.iteritems():
+			print 'key  = ' + key
+			print 'value  = ' + str(value)
+			
+	def pick_ary(self):
+		self.pick_ary = []
+		pick_a = Pick()
+		pick_a.item = 'Windex'
+		pick_a.from_bin = 'A'
+		pick_a.to_box = Box_A1
+		self.pick_ary.append(pick_a)
+
+		b = Pick()
+		b.item = 'Sponge'
+		b.from_bin = 'B'
+		b.to_box = Box_1AD
+		self.pick_ary.append(b)
+
+		for p in self.pick_ary:
+			print "Pick " + p.item + " from " + p.from_bin + " to "+ p.to_box
+
 
 	def var_init(self):
+		self.task_name = "None"
+		self.bin_contents = {'A' : [
+                "hanes_socks",
+                "tennis_ball_container",
+                "robots_everywhere",
+                "pie_plates"
+            ],'B' : ['B_1','B_2']}
 		self.stop_robot = False
 
 	def shutdown(self):
@@ -66,12 +95,13 @@ class Strategy(threading.Thread):
 
 
 	def task_cb(self,req):
-		self.state = ParseJSON
+		self.state == ParseJSON
 		self.task_name = req.task_name
 		json = req.task_json
 		
 		rospy.loginfo("task_name = " + self.task_name)
 	
+
 
 	def core(self):
 
@@ -82,6 +112,7 @@ class Strategy(threading.Thread):
 			return
 		elif self.state == ParseJSON:	
 			# in task_cb()
+			next_state = 
 			return
 		
 		elif self.state == PickOne:	
