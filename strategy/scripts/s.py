@@ -23,7 +23,7 @@ import LM_Control
 
 # Define State
 WaitTask  	= 1		# Wait Task
-ParseJSON	= 2		# Parse Json
+ParseJSON   = 2		# Parse Json
 Down2Pick   = 3		# Move down to pick object in bin.
 Init_Pos	= 4		# Make robot arm go to the initial pos
 Go2Bin		= 5		# Make robot arm go to the specify bin
@@ -41,22 +41,6 @@ Box_1A5 = '1A5'
 Box_1B2 = '1B2'
 Box_K3 = 'K3'
 
-TargetId =      ['a',  'b',  'c',  'd',  'e',  'f',  'g',  'h',  'i',  'j',   'k',   'l']
-TargetShift_X = [  0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 50000, 50000, 60000]
-TargetShift_Z = [  1000, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 40000, 60000]
-
-def GetShift(LM_Dir, Bin):
-    """ description """
-    if Bin in TargetId:
-        if LM_Dir == 'x':
-            return TargetShift_X[TargetId.index(Bin)]
-        elif LM_Dir=='z':
-            return TargetShift_Z[TargetId.index(Bin)]
-        else:
-            print 'Error input dir'
-    else:
-        print 'Error input character'
-
 class Pick:
 	item = ""
 	from_bin = ""
@@ -71,17 +55,23 @@ class Strategy(threading.Thread):
 		rospy.Service('/task', Task, self.task_cb)
 		rospy.loginfo("Strategy Ready!!")
 
-		self.state = WaitTask
+		self.TargetId 	   = ['a',  'b',  'c',  'd',  'e',  'f',  'g',  'h',  'i',  'j',   'k',   'l']
+		self.TargetShift_X = [  60000, 50000, 40000, 30000, 20000, 10000, 0, 10000, 20000, 30000, 40000, 0]
+		self.TargetShift_Z = [  80000, 50000, 40000, 30000, 20000, 10000, 0, 10000, 20000, 30000, 40000, 0]
+		self.Bin 		   = 'a'
+		self.BinCnt = 0
+
+		self.state 		= WaitTask
 		self.next_state = WaitTask
-		self.Arm = arm_task_rel.ArmTask()
-		self.LM  = LM_Control.CLM_Control()
-		self.Is_ArmBusy = False
+		self.Arm 		= arm_task_rel.ArmTask()
+		self.LM  		= LM_Control.CLM_Control()
 
-		self.Is_LMBusy    = False
-		self.Last_LM_Busy = False
-
+		self.Is_ArmBusy    = False
+		self.Is_LMBusy     = False
+		self.Last_LM_Busy  = False
 		self.Is_LMArrive   = True
 		self.Last_LMArrive = True
+
 
 	def var_init(self):
 		self.stop_robot = False
@@ -99,11 +89,12 @@ class Strategy(threading.Thread):
 
 	def core(self):
 		""" description """
+		self.Last_LM_Busy 	= self.Is_LMBusy
+		self.Last_LMArrive 	= self.Is_LMArrive
 		self.Is_ArmBusy 	= self.Arm.busy
 		self.Is_LMBusy  	= self.LM.IsBusy
 		self.Is_LMArrive	= self.LM.IsArrive
-		self.Last_LM_Busy 	= self.Is_LMBusy
-		self.Last_LMArrive 	= self.Is_LMArrive
+		
 		
 		if self.stop_robot == True:
 			return
@@ -115,16 +106,16 @@ class Strategy(threading.Thread):
 			return
 		
 		elif self.state == LM_Test1:       # LM_test1
-			self.next_state = Init_Pos
+			self.next_state = FinishTask   # note!!!!!!
 			self.state 		= WaitRobot
-			self.LM.pub_LM_Cmd(2, 55000)
+			self.LM.pub_LM_Cmd(2, self.GetShift('x', self.Bin ))
 			rospy.sleep(0.3)
-			self.LM.pub_LM_Cmd(1, 8000)
+			self.LM.pub_LM_Cmd(1, self.GetShift('z', self.Bin ))
 			print '1'
 			return
 
-		elif self.state == LM_Test2:       # LM_test2
-			self.next_state = Init_Pos   # Init_Pos or LM_Test3
+		elif self.state == LM_Test2:     # LM_test2
+			self.next_state = LM_Test3   # Init_Pos or LM_Test3
 			self.state 		= WaitRobot
 			self.LM.pub_LM_Cmd(2, 0)
 			rospy.sleep(0.3)
@@ -135,9 +126,9 @@ class Strategy(threading.Thread):
 		elif self.state == LM_Test3:       # LM_test3
 			self.next_state = FinishTask
 			self.state 		= WaitRobot
-			self.LM.pub_LM_Cmd(2, 10010)
+			self.LM.pub_LM_Cmd(2, 10000)
 			rospy.sleep(0.3)
-			self.LM.pub_LM_Cmd(1, 10010)
+			self.LM.pub_LM_Cmd(1, 10000)
 			print '3'
 			return
 
@@ -176,38 +167,75 @@ class Strategy(threading.Thread):
 			return
 
 		elif self.state == WaitRobot:
-			if self.Is_ArmBusy == False:
-				self.state = self.next_state
-
 			if self.Last_LMArrive == False and self.Is_LMArrive == True:
 				self.state = self.next_state
 
+			if self.Is_ArmBusy == False:
+				self.state = self.next_state
+
 		elif self.state == FinishTask:
-
 			""" Recover to initial status (Constructor) """
-			self.state 		= WaitTask
-			self.next_state = WaitTask
-			self.Arm 		= arm_task_rel.ArmTask()
-			self.LM  		= LM_Control.CLM_Control()
-			self.Is_ArmBusy = False
+			# self.state 		= WaitTask
+			# self.next_state = WaitTask
+			# self.Arm 		= arm_task_rel.ArmTask()
+			# self.LM  		= LM_Control.CLM_Control()
+			# self.Is_ArmBusy = False
 
-			self.Is_LMBusy    = False
-			self.Last_LM_Busy = False
+			# self.Is_LMBusy    = False
+			# self.Last_LM_Busy = False
 
-			self.Is_LMArrive   = True
-			self.Last_LMArrive = True
+			# self.Is_LMArrive   = True
+			# self.Last_LMArrive = True
+			# print 'cc'
 
 			""" Continue exe next bin """
+			print 'self.BinCnt'
+			if self.BinCnt >= 12:
+				""" Recover to initial status (Constructor) """
+				self.state 		= WaitTask
+				self.next_state = WaitTask
+				# self.Arm 		= arm_task_rel.ArmTask()
+				# self.LM  		= LM_Control.CLM_Control()
+				self.Is_ArmBusy = False
+
+				self.Is_LMBusy    = False
+				self.Last_LM_Busy = False
+
+				self.Is_LMArrive   = True
+				self.Last_LMArrive = True
+				
+				return
+			else:
+				self.BinCnt = self.BinCnt + 1
+				self.Bin = self.TargetId[self.BinCnt]
+				self.state = LM_Test1 
+				self.next_state = WaitTask
+				print 'next'
+				print self.BinCnt
 
 		else:
 			return
-
 
 	def run(self):
 		rate = rospy.Rate(30)  # 30hz
 		while not rospy.is_shutdown():
 			self.core()
 			rate.sleep()
+
+	def SetBin(self, tmpBin):
+		self.Bin = tmpBin
+
+	def GetShift(self, LM_Dir, Bin):
+		if Bin in self.TargetId:
+			if LM_Dir == 'x':
+				return self.TargetShift_X[self.TargetId.index(Bin)]
+			elif LM_Dir=='z':
+				return self.TargetShift_Z[self.TargetId.index(Bin)]
+			else:
+				print 'Error input dir'
+				return 0
+		else:
+			print 'Error input character'
 
 if __name__ == '__main__':
 	rospy.init_node('strategy')
