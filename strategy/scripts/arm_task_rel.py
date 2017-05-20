@@ -26,7 +26,7 @@ class ArmTask:
         self.__set_pubSub()
         #rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
-        self.__is_busy = False
+        self.__is_busy = True
 
     def __set_pubSub(self):
         self.__set_mode_pub = rospy.Publisher(
@@ -54,7 +54,7 @@ class ArmTask:
             '/robotis/status',
             StatusMsg,
             self.__status_callback,
-            queue_size=10
+            queue_size=1
         )
 
     def __status_callback(self, msg):
@@ -165,6 +165,10 @@ class ArmTask:
 
         while self.__is_busy:
             rospy.sleep(.1)
+
+    @property
+    def busy(self):
+        return self.__is_busy
 
 
 if __name__ == '__main__':

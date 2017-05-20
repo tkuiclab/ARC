@@ -55,59 +55,59 @@ modbus_t* Init_Modus_RTU(bool &Is_Success, int ID, std::string Port, int BaudRat
     return ct;
 }
 
-void SendCmd(bool Is_Pub, modbus_t* ctx, int pos)
+void SendCmd(bool Is_Pub, modbus_t* ct, int pos)
 {
     int rc;
     if (pub == true)
     {
         //輸入寫入
-        rc = modbus_write_register(ctx, 125, 0);
+        rc = modbus_write_register(ct, 125, 0);
 
         //運轉方式
-        rc = modbus_write_register(ctx, 6144, 0);
-        rc = modbus_write_register(ctx, 6145, 1);
+        rc = modbus_write_register(ct, 6144, 0);
+        rc = modbus_write_register(ct, 6145, 1);
 
         //位置
         int up_pos = pos-65535;
         if(up_pos<=0)
         {
-            rc = modbus_write_register(ctx, 6146, 0);
-            rc = modbus_write_register(ctx, 6147, pos);
+            rc = modbus_write_register(ct, 6146, 0);
+            rc = modbus_write_register(ct, 6147, pos);
         }
         else
         {
-            rc = modbus_write_register(ctx, 6146, 1);
-            rc = modbus_write_register(ctx, 6147, up_pos);
+            rc = modbus_write_register(ct, 6146, 1);
+            rc = modbus_write_register(ct, 6147, up_pos);
             std::cout<<"up pos = "<<up_pos<<"\n";
         }
 
         //速度
-        rc = modbus_write_register(ctx, 6148, 0);
-        rc = modbus_write_register(ctx, 6149, 3000);
+        rc = modbus_write_register(ct, 6148, 0);
+        rc = modbus_write_register(ct, 6149, 3000);
 
         //起動
-        rc = modbus_write_register(ctx, 6150, 0);
-        rc = modbus_write_register(ctx, 6151, 700000);
+        rc = modbus_write_register(ct, 6150, 0);
+        rc = modbus_write_register(ct, 6151, 700000);
 
         //停止
-        //rc = modbus_write_register(ctx, 6152, 0);
+        //rc = modbus_write_register(ct, 6152, 0);
         //printf("6152 rc=%d\n",rc);
-        //rc = modbus_write_register(ctx, 6153, 700000);
+        //rc = modbus_write_register(ct, 6153, 700000);
         //printf("6153 rc=%d\n",rc);
 
         //運轉電流
-        rc = modbus_write_register(ctx, 6154, 0);
-        rc = modbus_write_register(ctx, 6155, 500);
+        rc = modbus_write_register(ct, 6154, 0);
+        rc = modbus_write_register(ct, 6155, 500);
 
         //結合
-        rc = modbus_write_register(ctx, 6158, 0);
-        rc = modbus_write_register(ctx, 6159, 0);
+        rc = modbus_write_register(ct, 6158, 0);
+        rc = modbus_write_register(ct, 6159, 0);
 
         //輸入啟動
-        rc = modbus_write_register(ctx, 125, 8);
+        rc = modbus_write_register(ct, 125, 8);
 
         //輸出結束
-        rc = modbus_write_register(ctx, 127, 8);
+        rc = modbus_write_register(ct, 127, 8);
 
         pub = false;
     }
@@ -125,31 +125,6 @@ int Get_CurrPos(modbus_t* ct, uint16_t * tab_rp_registers, uint16_t * tab_rq_reg
     curr_state = modbus_read_registers(ct, 291, 1, tab_rp_registers);
     return tab_rp_registers[0];
 }
-
-// linear_motion::LM_Cmd Update_LMMsg(modbus_t* ct, uint16_t * tab_rp_registers, uint16_t * tab_rq_registers, std::string &LM_state)
-// {
-//     linear_motion::LM_Cmd LM;
-//     LM.isbusy = Is_LMBusy(ct, tab_rp_registers, tab_rq_registers);
-//     LM.curr_pos = Get_CurrPos(ct, tab_rp_registers, tab_rq_registers);
-//     if (LM_state == "execute")
-//     {
-//         if (LM.isbusy == true)
-//             LM.status = "LM_busy";
-
-//         else if (LM.isbusy == false)
-//         {
-//             LM.status = "LM_complete";
-//             LM_state = "idle";
-//             LM.id = 0;
-//         }
-//     }
-//     else
-//     {
-//         LM.status = "LM_idle";
-//         LM_state = "idle";
-//     }
-//     return LM;
-// }
 
 linear_motion::LM_Cmd Update_LMMsg(uint16_t * tab_rp_registers, uint16_t * tab_rq_registers, std::string &LM_x_state, std::string &LM_z_state)
 {
@@ -210,8 +185,8 @@ int main(int argc, char **argv)
     std::string port_z;
     int  baud_rate;
 
-    nh_param.param<std::string>("port_x", port_x,"ttyUSB0");
-    nh_param.param<std::string>("port_z", port_z,"ttyUSB1");
+    nh_param.param<std::string>("port_x", port_x,"/dev/ttyUSB0");
+    nh_param.param<std::string>("port_z", port_z,"/dev/ttyUSB1");
     
     nh_param.param<int>("baud", baud_rate, 9600);
     // std::cout<<port<<"\n";
@@ -238,11 +213,19 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(10);
 
     // ============================= ROS Loop =============================
-    
+    bool is_send1 = false;
     while (ros::ok())
     {
         if(LM_Msg.id == 1)  {SendCmd(true, ctx, LM_Msg.x); LM_x_state = "execute";}
         if(LM_Msg.id == 2)  {SendCmd(true, ctz, LM_Msg.z); LM_z_state = "execute";}
+
+        if(LM_Msg.id == 3)  
+        {
+            SendCmd(true, ctx, LM_Msg.x); 
+            SendCmd(true, ctz, LM_Msg.z); 
+            LM_x_state = "execute";
+            LM_z_state = "execute";
+        }
         
         // LM_Msg = Update_LMMsg(ctx, tab_rp_registers, tab_rq_registers, LM_state);
         // LM_Msg = Update_LMMsg(ctz, tab_rp_registers, tab_rq_registers, LM_state);
