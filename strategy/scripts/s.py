@@ -41,6 +41,22 @@ Box_1A5 = '1A5'
 Box_1B2 = '1B2'
 Box_K3 = 'K3'
 
+TargetId =      ['a',  'b',  'c',  'd',  'e',  'f',  'g',  'h',  'i',  'j',   'k',   'l']
+TargetShift_X = [  0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 50000, 50000, 60000]
+TargetShift_Z = [  1000, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 40000, 60000]
+
+def GetShift(LM_Dir, Bin):
+    """ description """
+    if Bin in TargetId:
+        if LM_Dir == 'x':
+            return TargetShift_X[TargetId.index(Bin)]
+        elif LM_Dir=='z':
+            return TargetShift_Z[TargetId.index(Bin)]
+        else:
+            print 'Error input dir'
+    else:
+        print 'Error input character'
+
 class Pick:
 	item = ""
 	from_bin = ""
@@ -79,19 +95,15 @@ class Strategy(threading.Thread):
 		self.task_name = req.task_name
 		#json = req.task_json
 		rospy.loginfo("task_name = " + self.task_name)
-		self.state = LM_Test1
+		self.state = LM_Test1     # Init_Pos or LM_Test1
 
 	def core(self):
 		""" description """
-		self.Is_ArmBusy = self.Arm.busy
-
-		self.Last_LM_Busy = self.Is_LMBusy
-		self.Is_LMBusy  = self.LM.IsBusy
-
-		self.Last_LMArrive = self.Is_LMArrive
-		self.Is_LMArrive= self.LM.IsArrive
-		
-		# print self.LM.IsBusy
+		self.Is_ArmBusy 	= self.Arm.busy
+		self.Is_LMBusy  	= self.LM.IsBusy
+		self.Is_LMArrive	= self.LM.IsArrive
+		self.Last_LM_Busy 	= self.Is_LMBusy
+		self.Last_LMArrive 	= self.Is_LMArrive
 		
 		if self.stop_robot == True:
 			return
@@ -103,11 +115,11 @@ class Strategy(threading.Thread):
 			return
 		
 		elif self.state == LM_Test1:       # LM_test1
-			self.next_state = LM_Test2
+			self.next_state = Init_Pos
 			self.state 		= WaitRobot
-			self.LM.pub_LM_Cmd(2, 10000)
+			self.LM.pub_LM_Cmd(2, 55000)
 			rospy.sleep(0.3)
-			self.LM.pub_LM_Cmd(1, 10000)
+			self.LM.pub_LM_Cmd(1, 8000)
 			print '1'
 			return
 
@@ -132,7 +144,7 @@ class Strategy(threading.Thread):
 		elif self.state == Init_Pos:       # step 1
 			self.next_state = Go2Bin
 			self.state 		= WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.4, 0.1, 0.2), (-90, 0, 0) )
+			self.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.2), (-90, 0, 0) )
 			print 'Init_Pos'
 			return
 
@@ -164,21 +176,19 @@ class Strategy(threading.Thread):
 			return
 
 		elif self.state == WaitRobot:
-			# print 'waiting'
 			if self.Is_ArmBusy == False:
 				self.state = self.next_state
 
-			# if self.Last_LM_Busy == True and self.Is_LMBusy == False:
 			if self.Last_LMArrive == False and self.Is_LMArrive == True:
 				self.state = self.next_state
 
 		elif self.state == FinishTask:
 
 			""" Recover to initial status (Constructor) """
-			self.state = WaitTask
+			self.state 		= WaitTask
 			self.next_state = WaitTask
-			self.Arm = arm_task_rel.ArmTask()
-			self.LM  = LM_Control.CLM_Control()
+			self.Arm 		= arm_task_rel.ArmTask()
+			self.LM  		= LM_Control.CLM_Control()
 			self.Is_ArmBusy = False
 
 			self.Is_LMBusy    = False
