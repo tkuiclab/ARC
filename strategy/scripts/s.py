@@ -22,15 +22,15 @@ import arm_task_rel
 import LM_Control
 
 # Define State
-WaitTask  	= 1			# Wait Task
-ParseJSON	= 2			# Parse Json
-Down2Pick   = 3
-Init_Pos	= 4
-Go2Bin		= 5
-WaitRobot   = 6
-Up2LeaveBin = 7
-LeaveBin	= 8
-FinishTask  = 9
+WaitTask  	= 1		# Wait Task
+ParseJSON	= 2		# Parse Json
+Down2Pick   = 3		# Move down to pick object in bin.
+Init_Pos	= 4		# Make robot arm go to the initial pos
+Go2Bin		= 5		# Make robot arm go to the specify bin
+WaitRobot   = 6		# wait for robot complete task
+Up2LeaveBin = 7 	# Move up to leave bin (robot arm still in bin)
+LeaveBin	= 8		# Make robot arm leave bin
+FinishTask  = 9		
 LM_Test1  = 10
 LM_Test2 = 11
 LM_Test3 = 12
