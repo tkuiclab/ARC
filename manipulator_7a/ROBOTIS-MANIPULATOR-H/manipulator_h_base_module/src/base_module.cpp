@@ -295,6 +295,7 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     if (!ik_success)
     {
         ROS_INFO("PTP: IK ERR !!!");
+        publishStatusMsg("IK Failed: Joint Limit");
         return;
     }
 
@@ -566,6 +567,7 @@ void BaseModule::generateTaskTrajProcess()
         if (!ik_success)
         {
             ROS_INFO("LINE: IK WILL ERR !!!");
+            publishStatusMsg("IK Failed: Joint Limit");
             return;
         }
 
