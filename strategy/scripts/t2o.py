@@ -25,7 +25,7 @@ import json
 
 
 #[0.3, 0, 0.3, -60, 0, 0, 0];
-_POS = (.3, 0, .3)  # x, y, z
+_POS = (.2, 0, .3)  # x, y, z
 _ORI = (-70, 0, 0)  # pitch, roll, yaw
 
 
@@ -35,7 +35,7 @@ class ArmTask:
     def __init__(self):
         """Inital object."""
         self.__set_pubSub()
-        #rospy.on_shutdown(self.stop_task)
+        rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
         self.__is_busy = False
         self.__obj_pose_client = actionlib.SimpleActionClient("/obj_pose", obj_pose.msg.ObjectPoseAction)
@@ -101,6 +101,7 @@ class ArmTask:
 
     def stop_task(self):
         """Stop task running."""
+        self.__is_busy = False
         self.__set_mode_pub.publish('')
 
     def get_fb(self):
@@ -231,12 +232,12 @@ class ArmTask:
                         + str(numpy.rad2deg(p.angular.y)) + ", " 
                         + str(numpy.rad2deg(p.angular.z))  ) 
         pitch = numpy.rad2deg(p.angular.x ) *(-1)
-        rospy.loginfo('move rotation')
+        rospy.loginfo('move rotation pitch=' + str(pitch))
         self.relative_control_rotate( pitch = pitch)
         while self.__is_busy:
             rospy.sleep(.1)
         rospy.loginfo('move linear n='+str(l.y) + ', s='+str(-l.x))
-        #self.relative_control(n=l.y, s= -l.x)
+        self.relative_control(n=l.y, s= -l.x)
         
     #request object pose
     def obj_pose_request(self):
@@ -244,7 +245,7 @@ class ArmTask:
             rospy.sleep(.1)
         rospy.loginfo('obj_pose_request()')
 
-        goal = obj_pose.msg.ObjectPoseGoal("seg_1")
+        goal = obj_pose.msg.ObjectPoseGoal("seg_0")
         self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
         self.__obj_pose_client.wait_for_result()
 
