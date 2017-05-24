@@ -295,7 +295,7 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     if (!ik_success)
     {
         ROS_INFO("PTP: IK ERR !!!");
-        publishStatusMsg("IK Failed: Joint Limit");
+        publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "IK Failed: Joint Limit");
         return;
     }
 
@@ -567,7 +567,7 @@ void BaseModule::generateTaskTrajProcess()
         if (!ik_success)
         {
             ROS_INFO("LINE: IK WILL ERR !!!");
-            publishStatusMsg("IK Failed: Joint Limit");
+            publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "IK Failed: Joint Limit");
             return;
         }
 
@@ -693,7 +693,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
             else
             {
                 ROS_INFO("[end] send trajectory (ik failed)");
-                publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_INFO, "End Trajectory (IK Failed)");
+                publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "End Trajectory (IK Failed)");
 
                 robotis_->is_moving_ = false;
                 robotis_->ik_solve_ = false;
