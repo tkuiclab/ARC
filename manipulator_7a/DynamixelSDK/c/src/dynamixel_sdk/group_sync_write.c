@@ -218,10 +218,11 @@ void groupSyncWriteRemoveParam(int group_num, uint8_t id)
 
 uint8_t groupSyncWriteChangeParam(int group_num, uint8_t id, uint32_t data, uint16_t input_length, uint16_t data_pos)
 {
+  int data_num = 0;
   if (id == NOT_USED_ID)  // NOT exist
     return False;
 
-  int data_num = find(group_num, id);
+  data_num = find(group_num, id);
 
   if (data_num == groupData[group_num].data_list_length)
     return False;

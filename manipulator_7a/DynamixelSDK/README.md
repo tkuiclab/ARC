@@ -6,8 +6,9 @@
 | Dynamixel SDK Version | 1.X | 2.X | 3.X ([Download](https://github.com/ROBOTIS-GIT/DynamixelSDK/releases)) |
 | ------------- | ------------- | ------------- | ------------- |
 | Release date| 2010.05.16 | 2015.02.10 | 2016.03.08 |
-| Latest version released |||3.4.1|
+| Latest version released |||3.4.4|
 | OS | Linux | Windows | Linux + Windows |
+||||+ MacOSX (coming soon)|
 | Available Dynamixel models | All models | All models | All models |
 |||||
 | Multi Port Control <br> (Controls Dynamixels through <br> more than two ports)| X | X | O |
@@ -28,6 +29,7 @@
 | | | | Java |
 | (C++ ver. Library binded)¹| C++|  | C++|
 | | | | ROS |
+| | | | Arduino (coming soon) |
 
 #####¹ C++ ver. Library is not optimized in binding other languages. Please use C ver. Library instead.  
 ---------------------------------------------------------------------------

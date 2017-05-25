@@ -61,7 +61,7 @@ int portHandlerWindows(const char *port_name)
   int port_num;
   char buffer[15];
 
-  sprintf_s(buffer, sizeof(buffer), "\\\\.\\", port_name);
+  sprintf_s(buffer, sizeof(buffer), "\\\\.\\%s", port_name);
 
   if (portData == NULL)
   {
@@ -74,7 +74,7 @@ int portHandlerWindows(const char *port_name)
   {
     for (port_num = 0; port_num < g_used_port_num; port_num++)
     {
-      if (!strcmp(portData[port_num].port_name, port_name))
+      if (!strcmp(portData[port_num].port_name, buffer))
         break;
     }
 
@@ -107,7 +107,7 @@ int portHandlerWindows(const char *port_name)
 
   g_is_using[port_num] = False;
 
-  setPortNameWindows(port_num, port_name);
+  setPortNameWindows(port_num, buffer);
 
   return port_num;
 }

@@ -76,35 +76,35 @@ class WINDECLSPEC Protocol2PacketHandler : public PacketHandler
 
 
   int readTx          (PortHandler *port, uint8_t id, uint16_t address, uint16_t length);
-  int readRx          (PortHandler *port, uint16_t length, uint8_t *data, uint8_t *error = 0);
+  int readRx          (PortHandler *port, uint8_t id, uint16_t length, uint8_t *data, uint8_t *error = 0);
   int readTxRx        (PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data, uint8_t *error = 0);
 
   int read1ByteTx     (PortHandler *port, uint8_t id, uint16_t address);
-  int read1ByteRx     (PortHandler *port, uint8_t *data, uint8_t *error = 0);
-  int read1ByteTxRx       (PortHandler *port, uint8_t id, uint16_t address, uint8_t *data, uint8_t *error = 0);
+  int read1ByteRx     (PortHandler *port, uint8_t id, uint8_t *data, uint8_t *error = 0);
+  int read1ByteTxRx   (PortHandler *port, uint8_t id, uint16_t address, uint8_t *data, uint8_t *error = 0);
 
   int read2ByteTx     (PortHandler *port, uint8_t id, uint16_t address);
-  int read2ByteRx     (PortHandler *port, uint16_t *data, uint8_t *error = 0);
-  int read2ByteTxRx       (PortHandler *port, uint8_t id, uint16_t address, uint16_t *data, uint8_t *error = 0);
+  int read2ByteRx     (PortHandler *port, uint8_t id, uint16_t *data, uint8_t *error = 0);
+  int read2ByteTxRx   (PortHandler *port, uint8_t id, uint16_t address, uint16_t *data, uint8_t *error = 0);
 
   int read4ByteTx     (PortHandler *port, uint8_t id, uint16_t address);
-  int read4ByteRx     (PortHandler *port, uint32_t *data, uint8_t *error = 0);
-  int read4ByteTxRx       (PortHandler *port, uint8_t id, uint16_t address, uint32_t *data, uint8_t *error = 0);
+  int read4ByteRx     (PortHandler *port, uint8_t id, uint32_t *data, uint8_t *error = 0);
+  int read4ByteTxRx   (PortHandler *port, uint8_t id, uint16_t address, uint32_t *data, uint8_t *error = 0);
 
   int writeTxOnly     (PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data);
-  int writeTxRx           (PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data, uint8_t *error = 0);
+  int writeTxRx       (PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data, uint8_t *error = 0);
 
   int write1ByteTxOnly(PortHandler *port, uint8_t id, uint16_t address, uint8_t data);
-  int write1ByteTxRx      (PortHandler *port, uint8_t id, uint16_t address, uint8_t data, uint8_t *error = 0);
+  int write1ByteTxRx  (PortHandler *port, uint8_t id, uint16_t address, uint8_t data, uint8_t *error = 0);
 
   int write2ByteTxOnly(PortHandler *port, uint8_t id, uint16_t address, uint16_t data);
-  int write2ByteTxRx      (PortHandler *port, uint8_t id, uint16_t address, uint16_t data, uint8_t *error = 0);
+  int write2ByteTxRx  (PortHandler *port, uint8_t id, uint16_t address, uint16_t data, uint8_t *error = 0);
 
   int write4ByteTxOnly(PortHandler *port, uint8_t id, uint16_t address, uint32_t data);
-  int write4ByteTxRx      (PortHandler *port, uint8_t id, uint16_t address, uint32_t data, uint8_t *error = 0);
+  int write4ByteTxRx  (PortHandler *port, uint8_t id, uint16_t address, uint32_t data, uint8_t *error = 0);
 
   int regWriteTxOnly  (PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data);
-  int regWriteTxRx        (PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data, uint8_t *error = 0);
+  int regWriteTxRx    (PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data, uint8_t *error = 0);
 
   int syncReadTx      (PortHandler *port, uint16_t start_address, uint16_t data_length, uint8_t *param, uint16_t param_length);
   // SyncReadRx   -> GroupSyncRead class

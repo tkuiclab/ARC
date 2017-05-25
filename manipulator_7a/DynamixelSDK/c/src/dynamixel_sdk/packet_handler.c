@@ -69,7 +69,7 @@ void printTxRxResult(int protocol_version, int result)
   {
     printTxRxResult2(result);
   }
-};
+}
 void printRxPacketError(int protocol_version, uint8_t error)
 {
   if (protocol_version == 1)
@@ -80,7 +80,7 @@ void printRxPacketError(int protocol_version, uint8_t error)
   {
     printRxPacketError2(error);
   }
-};
+}
 
 int getLastTxRxResult(int port_num, int protocol_version)
 {
@@ -139,7 +139,7 @@ void txPacket(int port_num, int protocol_version)
   {
     txPacket2(port_num);
   }
-};
+}
 
 void rxPacket(int port_num, int protocol_version)
 {
@@ -151,7 +151,7 @@ void rxPacket(int port_num, int protocol_version)
   {
     rxPacket2(port_num);
   }
-};
+}
 
 void txRxPacket(int port_num, int protocol_version)
 {
@@ -163,7 +163,7 @@ void txRxPacket(int port_num, int protocol_version)
   {
     txRxPacket2(port_num);
   }
-};
+}
 
 void ping(int port_num, int protocol_version, uint8_t id)
 {
@@ -175,7 +175,7 @@ void ping(int port_num, int protocol_version, uint8_t id)
   {
     ping2(port_num, id);
   }
-};
+}
 
 uint16_t pingGetModelNum(int port_num, int protocol_version, uint8_t id)
 {
@@ -187,7 +187,7 @@ uint16_t pingGetModelNum(int port_num, int protocol_version, uint8_t id)
   {
     return pingGetModelNum2(port_num, id);
   }
-};
+}
 
 // broadcastPing
 void broadcastPing(int port_num, int protocol_version)
@@ -200,7 +200,7 @@ void broadcastPing(int port_num, int protocol_version)
   {
     broadcastPing2(port_num);
   }
-};
+}
 
 uint8_t getBroadcastPingResult(int port_num, int protocol_version, int id)
 {
@@ -224,7 +224,7 @@ void reboot(int port_num, int protocol_version, uint8_t id)
   {
     reboot2(port_num, id);
   }
-};
+}
 
 void factoryReset(int port_num, int protocol_version, uint8_t id, uint8_t option)
 {
@@ -236,7 +236,7 @@ void factoryReset(int port_num, int protocol_version, uint8_t id, uint8_t option
   {
     factoryReset2(port_num, id, option);
   }
-};
+}
 
 void readTx(int port_num, int protocol_version, uint8_t id, uint16_t address, uint16_t length)
 {
@@ -248,7 +248,7 @@ void readTx(int port_num, int protocol_version, uint8_t id, uint16_t address, ui
   {
     readTx2(port_num, id, address, length);
   }
-};
+}
 void readRx(int port_num, int protocol_version, uint16_t length)
 {
   if (protocol_version == 1)
@@ -259,7 +259,7 @@ void readRx(int port_num, int protocol_version, uint16_t length)
   {
     readRx2(port_num, length);
   }
-};
+}
 void readTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address, uint16_t length)
 {
   if (protocol_version == 1)
@@ -270,7 +270,7 @@ void readTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address, 
   {
     readTxRx2(port_num, id, address, length);
   }
-};
+}
 
 void read1ByteTx(int port_num, int protocol_version, uint8_t id, uint16_t address)
 {
@@ -282,7 +282,7 @@ void read1ByteTx(int port_num, int protocol_version, uint8_t id, uint16_t addres
   {
     read1ByteTx2(port_num, id, address);
   }
-};
+}
 uint8_t read1ByteRx(int port_num, int protocol_version)
 {
   if (protocol_version == 1)
@@ -293,7 +293,7 @@ uint8_t read1ByteRx(int port_num, int protocol_version)
   {
     return read1ByteRx2(port_num);
   }
-};
+}
 uint8_t read1ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address)
 {
   if (protocol_version == 1)
@@ -304,7 +304,7 @@ uint8_t read1ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t a
   {
     return read1ByteTxRx2(port_num, id, address);
   }
-};
+}
 
 void read2ByteTx(int port_num, int protocol_version, uint8_t id, uint16_t address)
 {
@@ -316,7 +316,7 @@ void read2ByteTx(int port_num, int protocol_version, uint8_t id, uint16_t addres
   {
     read2ByteTx2(port_num, id, address);
   }
-};
+}
 uint16_t read2ByteRx(int port_num, int protocol_version)
 {
   if (protocol_version == 1)
@@ -327,7 +327,7 @@ uint16_t read2ByteRx(int port_num, int protocol_version)
   {
     return read2ByteRx2(port_num);
   }
-};
+}
 uint16_t read2ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address)
 {
   if (protocol_version == 1)
@@ -338,7 +338,7 @@ uint16_t read2ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t 
   {
     return read2ByteTxRx2(port_num, id, address);
   }
-};
+}
 
 void read4ByteTx(int port_num, int protocol_version, uint8_t id, uint16_t address)
 {
@@ -350,7 +350,7 @@ void read4ByteTx(int port_num, int protocol_version, uint8_t id, uint16_t addres
   {
     read4ByteTx2(port_num, id, address);
   }
-};
+}
 uint32_t read4ByteRx(int port_num, int protocol_version)
 {
   if (protocol_version == 1)
@@ -361,7 +361,7 @@ uint32_t read4ByteRx(int port_num, int protocol_version)
   {
     return read4ByteRx2(port_num);
   }
-};
+}
 uint32_t read4ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address)
 {
   if (protocol_version == 1)
@@ -372,7 +372,7 @@ uint32_t read4ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t 
   {
     return read4ByteTxRx2(port_num, id, address);
   }
-};
+}
 
 void writeTxOnly(int port_num, int protocol_version, uint8_t id, uint16_t address, uint16_t length)
 {
@@ -384,7 +384,7 @@ void writeTxOnly(int port_num, int protocol_version, uint8_t id, uint16_t addres
   {
     writeTxOnly2(port_num, id, address, length);
   }
-};
+}
 void writeTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address, uint16_t length)
 {
   if (protocol_version == 1)
@@ -395,7 +395,7 @@ void writeTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address,
   {
     writeTxRx2(port_num, id, address, length);
   }
-};
+}
 
 void write1ByteTxOnly(int port_num, int protocol_version, uint8_t id, uint16_t address, uint8_t data)
 {
@@ -407,7 +407,7 @@ void write1ByteTxOnly(int port_num, int protocol_version, uint8_t id, uint16_t a
   {
     write1ByteTxOnly2(port_num, id, address, data);
   }
-};
+}
 void write1ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address, uint8_t data)
 {
   if (protocol_version == 1)
@@ -418,7 +418,7 @@ void write1ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t add
   {
     write1ByteTxRx2(port_num, id, address, data);
   }
-};
+}
 
 void write2ByteTxOnly(int port_num, int protocol_version, uint8_t id, uint16_t address, uint16_t data)
 {
@@ -430,7 +430,7 @@ void write2ByteTxOnly(int port_num, int protocol_version, uint8_t id, uint16_t a
   {
     write2ByteTxOnly2(port_num, id, address, data);
   }
-};
+}
 void write2ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address, uint16_t data)
 {
   if (protocol_version == 1)
@@ -441,7 +441,7 @@ void write2ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t add
   {
     write2ByteTxRx2(port_num, id, address, data);
   }
-};
+}
 
 void write4ByteTxOnly(int port_num, int protocol_version, uint8_t id, uint16_t address, uint32_t data)
 {
@@ -453,7 +453,7 @@ void write4ByteTxOnly(int port_num, int protocol_version, uint8_t id, uint16_t a
   {
     write4ByteTxOnly2(port_num, id, address, data);
   }
-};
+}
 void write4ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address, uint32_t data)
 {
   if (protocol_version == 1)
@@ -464,7 +464,7 @@ void write4ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t add
   {
     write4ByteTxRx2(port_num, id, address, data);
   }
-};
+}
 
 void regWriteTxOnly(int port_num, int protocol_version, uint8_t id, uint16_t address, uint16_t length)
 {
@@ -476,7 +476,7 @@ void regWriteTxOnly(int port_num, int protocol_version, uint8_t id, uint16_t add
   {
     regWriteTxOnly2(port_num, id, address, length);
   }
-};
+}
 void regWriteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address, uint16_t length)
 {
   if (protocol_version == 1)
@@ -487,7 +487,7 @@ void regWriteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t addre
   {
     regWriteTxRx2(port_num, id, address, length);
   }
-};
+}
 
 void syncReadTx(int port_num, int protocol_version, uint16_t start_address, uint16_t data_length, uint16_t param_length)
 {
@@ -499,7 +499,7 @@ void syncReadTx(int port_num, int protocol_version, uint16_t start_address, uint
   {
     syncReadTx2(port_num, start_address, data_length, param_length);
   }
-};
+}
 // syncReadRx   -> GroupSyncRead
 // syncReadTxRx -> GroupSyncRead
 
@@ -513,7 +513,7 @@ void syncWriteTxOnly(int port_num, int protocol_version, uint16_t start_address,
   {
     syncWriteTxOnly2(port_num, start_address, data_length, param_length);
   }
-};
+}
 
 void bulkReadTx(int port_num, int protocol_version, uint16_t param_length)
 {
@@ -525,7 +525,7 @@ void bulkReadTx(int port_num, int protocol_version, uint16_t param_length)
   {
     bulkReadTx2(port_num, param_length);
   }
-};
+}
 // bulkReadRx   -> GroupBulkRead
 // bulkReadTxRx -> GroupBulkRead
 
@@ -539,4 +539,4 @@ void bulkWriteTxOnly(int port_num, int protocol_version, uint16_t param_length)
   {
     bulkWriteTxOnly2(port_num, param_length);
   }
-};
+}

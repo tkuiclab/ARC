@@ -112,10 +112,11 @@ void printTxRxResult2(int result)
 
 void printRxPacketError2(uint8_t error)
 {
+  int not_alert_error;
   if (error & ERRBIT_ALERT)
     printf("[RxPacketError] Hardware error occurred. Check the error at Control Table (Hardware Error Status)!\n");
 
-  int not_alert_error = error & ~ERRBIT_ALERT;
+  not_alert_error = error & ~ERRBIT_ALERT;
 
   switch (not_alert_error)
   {
@@ -329,6 +330,7 @@ void txPacket2(int port_num)
 {
   uint16_t total_packet_length = 0;
   uint16_t written_packet_length = 0;
+  uint16_t crc;
 
   if (g_is_using[port_num])
   {
@@ -357,7 +359,7 @@ void txPacket2(int port_num)
   packetData[port_num].tx_packet[PKT_RESERVED] = 0x00;
 
   // add CRC16
-  uint16_t crc = updateCRC(0, packetData[port_num].tx_packet, total_packet_length - 2);    // 2: CRC16
+  crc = updateCRC(0, packetData[port_num].tx_packet, total_packet_length - 2);    // 2: CRC16
   packetData[port_num].tx_packet[total_packet_length - 2] = DXL_LOBYTE(crc);
   packetData[port_num].tx_packet[total_packet_length - 1] = DXL_HIBYTE(crc);
 
@@ -378,12 +380,12 @@ void rxPacket2(int port_num)
 {
   uint8_t s;
   uint16_t idx;
-
-  packetData[port_num].communication_result = COMM_TX_FAIL;
-
   uint16_t rx_length = 0;
   uint16_t wait_length = 11;
   // minimum length ( HEADER0 HEADER1 HEADER2 RESERVED ID LENGTH_L LENGTH_H INST ERROR CRC16_L CRC16_H )
+  uint16_t crc;
+
+  packetData[port_num].communication_result = COMM_TX_FAIL;
 
   while (True)
   {
@@ -445,7 +447,7 @@ void rxPacket2(int port_num)
         }
 
         // verify CRC16
-        uint16_t crc = DXL_MAKEWORD(packetData[port_num].rx_packet[wait_length - 2], packetData[port_num].rx_packet[wait_length - 1]);
+        crc = DXL_MAKEWORD(packetData[port_num].rx_packet[wait_length - 2], packetData[port_num].rx_packet[wait_length - 1]);
         if (updateCRC(0, packetData[port_num].rx_packet, wait_length - 2) == crc)
         {
           packetData[port_num].communication_result = COMM_SUCCESS;
@@ -566,19 +568,19 @@ void broadcastPing2(int port_num)
   uint8_t s;
   int id;
   uint16_t idx;
+  const int STATUS_LENGTH     = 14;
+  int result = COMM_TX_FAIL;
+
+  uint16_t rx_length = 0;
+  uint16_t wait_length = STATUS_LENGTH * MAX_ID;
 
   packetData[port_num].broadcast_ping_id_list = (uint8_t *)calloc(255, sizeof(uint8_t));
 
-  const int STATUS_LENGTH     = 14;
-  int result = COMM_TX_FAIL;
 
   for (id = 0; id < 255; id++)
   {
     packetData[port_num].broadcast_ping_id_list[id] = 255;
   }
-
-  uint16_t rx_length = 0;
-  uint16_t wait_length = STATUS_LENGTH * MAX_ID;
 
   packetData[port_num].tx_packet = (uint8_t *)realloc(packetData[port_num].tx_packet, 10 * sizeof(uint8_t));
   packetData[port_num].rx_packet = (uint8_t *)realloc(packetData[port_num].rx_packet, STATUS_LENGTH * MAX_ID * sizeof(uint8_t));
