@@ -8,7 +8,10 @@ TKU M-Bot for Amazon Robotics Challenge (ARC)
 ```bash
 $ sudo apt-get install ros-kinetic-qt-build
 ```
-
+* Device Rule
+```bash
+$ sudo cp dev_rule/99-manipulator.rules /etc/udev/rules.d/
+```
 
 ## Manipulator Control
 
