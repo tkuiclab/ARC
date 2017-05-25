@@ -75,3 +75,5 @@ add_executable (object_pose_estimator src/object_pose_estimator.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(object_pose_estimator fake_roi_generate_messages_cpp)
+
