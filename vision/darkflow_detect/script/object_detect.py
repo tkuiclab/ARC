@@ -89,12 +89,19 @@ options = {
     "gpu": .8
 }
 tfnet = TFNet(options)
-
-rospy.init_node('object_detect', anonymous=True)
-img_cvt = ImageConverter()
-
 _img = None
-rospy.Timer(rospy.Duration(.5), show_detection)
-rospy.Service('detect', Detect, handle_request)
-rospy.loginfo('Object detector is running.')
-rospy.spin()
+
+
+if __name__ == '__main__':
+    rospy.init_node('object_detect', anonymous=True)
+    img_topic = (
+        '/camera/color/image_raw' if len(sys.argv) < 2
+        else sys.argv[1]
+    )
+    img_cvt = ImageConverter(img_topic)
+
+    rospy.Timer(rospy.Duration(.5), show_detection)
+    rospy.Service('detect', Detect, handle_request)
+    rospy.loginfo("Topic of image is '{}'.".format(img_topic))
+    rospy.loginfo('Object detector is running.')
+    rospy.spin()

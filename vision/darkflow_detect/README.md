@@ -26,9 +26,11 @@
     ```
 
 2. Run the node
+    * arg: name of image_raw topic
+    * default topic: /camera/color/image_raw
 
     ```bash
-    rosrun darkflow_detect object_detect.py
+    rosrun darkflow_detect object_detect.py /camera/rgb/image_raw
     ```
 
 3. Using Service "/detect" to Detect the Object <br>
