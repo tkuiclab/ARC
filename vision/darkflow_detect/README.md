@@ -10,27 +10,35 @@
 
 ## Dependencies
 
-Python 2/3, tensorflow 1.0, numpy, opencv 3, cython
+* Python 2/3
+* Numpy
+* Tensorflow 1.0
+* Opencv 3
+* Cython
+* Maybe need <u>Cuda</u> and <u>Cudnn</u>
 
 ## Getting started
 
 1. Just build the Cython extensions in place
+
     ```bash
     python setup.py build_ext --inplace
     ```
 
 2. Run the node
+
     ```bash
     rosrun darkflow_detect object_detect.py
     ```
 
 3. Using Service "/detect" to Detect the Object <br>
     * the class name define in the label.txt
+
     ```bash
     rosservice call /detect "object_name: 'crayolaCrayons24'"
 
     # response
-    bound_box: [87, 274, 327, 479]
+    bound_box: [87, 274, 327, 479] # xmin, ymin, xmax, ymax
     confidence: 0.640706419945
     result: True
     ```
