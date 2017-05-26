@@ -1,4 +1,47 @@
-## Intro
+# Darkflow for Detection
+
+## Download Model and Weight
+
+* [Model](https://drive.google.com/drive/folders/0B3oSv8HKWPxrNnllRVBuRV9mS1E) <br>
+    * Place them to ckpt/ in darkflow_detect/
+* [Weight](https://drive.google.com/drive/folders/0B3oSv8HKWPxreXJyTTl6YmJHMG8) <br>
+    * Place them to bin/ in darkflow_detect/
+    * If you want to train data
+
+## Dependencies
+
+Python 2/3, tensorflow 1.0, numpy, opencv 3, cython
+
+## Getting started
+
+1. Just build the Cython extensions in place
+    ```bash
+    python setup.py build_ext --inplace
+    ```
+
+2. Run the node
+    ```bash
+    rosrun darkflow_detect object_detect.py
+    ```
+
+3. Using Service "/detect" to Detect the Object <br>
+    * the class name define in the label.txt
+    ```bash
+    rosservice call /detect "object_name: 'crayolaCrayons24'"
+
+    # response
+    bound_box: [87, 274, 327, 479]
+    confidence: 0.640706419945
+    result: True
+    ```
+
+4. The target object was detected
+
+    ![img](readme_pics/prediction.png)
+
+# Original
+
+## Introduction
 
 Real-time object detection and classification. Paper: [version 1](https://arxiv.org/pdf/1506.02640.pdf), [version 2](https://arxiv.org/pdf/1612.08242.pdf).
 
@@ -7,7 +50,7 @@ Read more about YOLO (in darknet) and download weight files [here](http://pjredd
 
 Click on this image to see demo from yolov2:
 
-[![img](preview.png)](http://i.imgur.com/EyZZKAA.gif)
+[![img](readme_pics/preview.gif)](http://i.imgur.com/EyZZKAA.gif)
 
 ## Dependencies
 
