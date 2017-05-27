@@ -81,19 +81,19 @@ void SendCmd(bool Is_Pub, modbus_t* ct, int pos)
             std::cout<<"up pos = "<<up_pos<<"\n";
         }
 
-        //速度
+        //最大速度
         rc = modbus_write_register(ct, 6148, 0);
-        rc = modbus_write_register(ct, 6149, 3000);
+        rc = modbus_write_register(ct, 6149, 7000);
 
-        //起動
+        //加速度
         rc = modbus_write_register(ct, 6150, 0);
-        rc = modbus_write_register(ct, 6151, 700000);
+        rc = modbus_write_register(ct, 6151, 70000);
 
-        //停止
-        //rc = modbus_write_register(ct, 6152, 0);
-        //printf("6152 rc=%d\n",rc);
-        //rc = modbus_write_register(ct, 6153, 700000);
-        //printf("6153 rc=%d\n",rc);
+        //減速度
+        rc = modbus_write_register(ct, 6152, 0);
+        printf("6152 rc=%d\n",rc);
+        rc = modbus_write_register(ct, 6153, 70000);
+        printf("6153 rc=%d\n",rc);
 
         //運轉電流
         rc = modbus_write_register(ct, 6154, 0);
@@ -185,8 +185,8 @@ int main(int argc, char **argv)
     std::string port_z;
     int  baud_rate;
 
-    nh_param.param<std::string>("port_x", port_x,"/dev/ttyUSB0");
-    nh_param.param<std::string>("port_z", port_z,"/dev/ttyUSB1");
+    nh_param.param<std::string>("port_x", port_x,"/dev/arc/LM1");
+    nh_param.param<std::string>("port_z", port_z,"/dev/arc/LM2");//USB1
     
     nh_param.param<int>("baud", baud_rate, 9600);
     // std::cout<<port<<"\n";
@@ -194,8 +194,8 @@ int main(int argc, char **argv)
     //========================= Initialize Modbus_RTU ============================= 
     bool Connect_X_OK = false;
     bool Connect_Z_OK = false;
-    ctx = Init_Modus_RTU(Connect_X_OK, 1, "/dev/ttyUSB0", 9600);
-    ctz = Init_Modus_RTU(Connect_Z_OK, 2, "/dev/ttyUSB1", 9600);
+    ctx = Init_Modus_RTU(Connect_X_OK, 1, "/dev/arc/LM1", 9600);
+    ctz = Init_Modus_RTU(Connect_Z_OK, 2, "/dev/arc/LM2", 9600);//USB1
     
     if((Connect_X_OK == false)||(Connect_X_OK == false))
     {
@@ -221,7 +221,17 @@ int main(int argc, char **argv)
 
         if(LM_Msg.id == 3)  
         {
+            
+            SendCmd(true, ctz, LM_Msg.z); 
+            ros::Duration(0.3);
             SendCmd(true, ctx, LM_Msg.x); 
+            LM_x_state = "execute";
+            LM_z_state = "execute";
+        }
+        if(LM_Msg.id == 4)  
+        {
+            SendCmd(true, ctx, LM_Msg.x); 
+            ros::Duration(0.3);
             SendCmd(true, ctz, LM_Msg.z); 
             LM_x_state = "execute";
             LM_z_state = "execute";

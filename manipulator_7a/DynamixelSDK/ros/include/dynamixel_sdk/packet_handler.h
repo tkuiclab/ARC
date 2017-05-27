@@ -109,19 +109,19 @@ class WINDECLSPEC PacketHandler
 
 
   virtual int readTx          (PortHandler *port, uint8_t id, uint16_t address, uint16_t length) = 0;
-  virtual int readRx          (PortHandler *port, uint16_t length, uint8_t *data, uint8_t *error = 0) = 0;
+  virtual int readRx          (PortHandler *port, uint8_t id, uint16_t length, uint8_t *data, uint8_t *error = 0) = 0;
   virtual int readTxRx        (PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data, uint8_t *error = 0) = 0;
 
   virtual int read1ByteTx     (PortHandler *port, uint8_t id, uint16_t address) = 0;
-  virtual int read1ByteRx     (PortHandler *port, uint8_t *data, uint8_t *error = 0) = 0;
+  virtual int read1ByteRx     (PortHandler *port, uint8_t id, uint8_t *data, uint8_t *error = 0) = 0;
   virtual int read1ByteTxRx   (PortHandler *port, uint8_t id, uint16_t address, uint8_t *data, uint8_t *error = 0) = 0;
 
   virtual int read2ByteTx     (PortHandler *port, uint8_t id, uint16_t address) = 0;
-  virtual int read2ByteRx     (PortHandler *port, uint16_t *data, uint8_t *error = 0) = 0;
+  virtual int read2ByteRx     (PortHandler *port, uint8_t id, uint16_t *data, uint8_t *error = 0) = 0;
   virtual int read2ByteTxRx   (PortHandler *port, uint8_t id, uint16_t address, uint16_t *data, uint8_t *error = 0) = 0;
 
   virtual int read4ByteTx     (PortHandler *port, uint8_t id, uint16_t address) = 0;
-  virtual int read4ByteRx     (PortHandler *port, uint32_t *data, uint8_t *error = 0) = 0;
+  virtual int read4ByteRx     (PortHandler *port, uint8_t id, uint32_t *data, uint8_t *error = 0) = 0;
   virtual int read4ByteTxRx   (PortHandler *port, uint8_t id, uint16_t address, uint32_t *data, uint8_t *error = 0) = 0;
 
   virtual int writeTxOnly     (PortHandler *port, uint8_t id, uint16_t address, uint16_t length, uint8_t *data) = 0;

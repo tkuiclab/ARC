@@ -309,11 +309,10 @@ uint8_t groupBulkReadIsAvailable(int group_num, uint8_t id, uint16_t address, ui
 uint32_t groupBulkReadGetData(int group_num, uint8_t id, uint16_t address, uint16_t data_length)
 {
   int data_num = find(group_num, id);
+  uint16_t start_addr = groupData[group_num].data_list[data_num].start_address;
 
   if (groupBulkReadIsAvailable(group_num, id, address, data_length) == False)
     return 0;
-
-  uint16_t start_addr = groupData[group_num].data_list[data_num].start_address;
 
   switch (data_length)
   {

@@ -167,12 +167,9 @@ int GroupBulkRead::rxPacket()
   {
     uint8_t id = id_list_[i];
 
-    result = ph_->readRx(port_, length_list_[id], data_list_[id]);
+    result = ph_->readRx(port_, id, length_list_[id], data_list_[id]);
     if (result != COMM_SUCCESS)
-    {
-      fprintf(stderr, "[GroupBulkRead::rxPacket] ID %d result : %d !!!!!!!!!!\n", id, result);
       return result;
-    }
   }
 
   if (result == COMM_SUCCESS)

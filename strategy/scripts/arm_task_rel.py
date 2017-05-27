@@ -76,9 +76,9 @@ class ArmTask:
 
         rospy.loginfo('Sent:{}'.format(cmd))
 
-        if 'line' == mode:
+        if mode == 'line':
             self.__cmd_pub.publish(cmd)
-        elif 'ptp' == mode:
+        elif mode == 'ptp':
             self.__ptp_pub.publish(cmd)
 
         self.__is_busy = True

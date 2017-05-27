@@ -622,7 +622,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     tar_position(1) = tmp;
     Eigen::Vector3d position = tar_position;
     Eigen::Matrix3d RPY_Rot; // orientation
-    Euler_Mode = e_nsa;
+    Euler_Mode = e_ICLAB;     // Decide euler angle mode!!!
     std::cout<<std::endl<<"============below============"<<std::endl;
     if(Euler_Mode == e_ICLAB)
     {

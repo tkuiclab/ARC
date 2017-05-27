@@ -1,4 +1,4 @@
-joint1 :   # H54-200-S500-R
+joint1 :   # H54-200-S500-R=
    return_delay_time     :  10    
    operating_mode        :  3     
    shutdown              :  58    
@@ -62,7 +62,7 @@ joint5 :   # H54-100-S500-R
    return_delay_time     :  10    # item name : value
    operating_mode        :  3
    shutdown              :  58
-   homing_offset         :  -250950
+   homing_offset         :  0
    torque_limit          :  310
    max_position_limit    :  250950
    min_position_limit    : -250950
