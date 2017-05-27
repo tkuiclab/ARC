@@ -3,9 +3,6 @@
 """Get realsense image from realsense node."""
 
 from __future__ import print_function
-import os
-import sys
-
 import rospy
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
