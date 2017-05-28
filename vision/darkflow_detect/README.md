@@ -37,11 +37,11 @@
     * the class name define in the label.txt
 
     ```bash
-    rosservice call /detect "object_name: 'crayolaCrayons24'"
+    rosservice call /detect "object_name: 'expoEraser'"
 
     # response
-    bound_box: [87, 274, 327, 479] # xmin, ymin, xmax, ymax
-    confidence: 0.640706419945
+    bound_box: [237, 187, 494, 292] # xmin, ymin, xmax, ymax
+    confidence: 0.470051288605
     result: True
     ```
 
