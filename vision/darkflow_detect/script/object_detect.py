@@ -38,8 +38,10 @@ def handle_request(req):
                 info['bottomright']['y']
             ]
             res.result = True
-    print()
-    mark_frame(frame, res.result, res.bound_box, info['label'], res.confidence)
+    
+    print('===========================' if len(result)
+        else 'Nothing was detected')
+    mark_frame(frame, res.bound_box, req.object_name, res.confidence)
     return res
 
 
@@ -52,13 +54,13 @@ def print_info(info):
     print(info['bottomright'])
 
 
-def mark_frame(frame, result, bbox, label='test', confidence=-0.1):
+def mark_frame(frame, bbox, label='test', confidence=-0.1):
     """Mark the image for detecting result."""
     global _img
     _img = copy.deepcopy(frame)
 
     # If the object was detected
-    if result:
+    if len(bbox) > 0:
         color = (100, 100, 255)
         thickness = 2
         cv2.rectangle(
