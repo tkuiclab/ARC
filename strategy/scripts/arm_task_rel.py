@@ -27,6 +27,7 @@ class ArmTask:
         #rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
         self.__is_busy = True
+        self.__set_vel_pub.publish(40)
 
     def __set_pubSub(self):
         self.__set_mode_pub = rospy.Publisher(
@@ -54,6 +55,13 @@ class ArmTask:
             '/robotis/status',
             StatusMsg,
             self.__status_callback,
+            queue_size=1
+        )
+
+        self.__set_vel_pub = rospy.Publisher(
+            '/robotis/base/set_velocity',
+            Float64,
+            latch=True,
             queue_size=1
         )
 
