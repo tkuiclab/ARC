@@ -9,7 +9,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 
 
-class ImageConverter:
+class ImageConverter(object):
     """Get realsense image and convert to cv image type."""
 
     def __init__(self, topic='/camera/color/image_raw', type=Image):
@@ -32,7 +32,7 @@ class ImageConverter:
             print('ImageConverter_callback:', e)
 
         # image size, type
-        (rows, cols, channels) = self.__cv_img.shape
+        #(rows, cols, channels) = self.__cv_img.shape
 
     @property
     def cv_img(self):
