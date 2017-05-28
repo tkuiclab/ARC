@@ -85,9 +85,18 @@ class CLM_Control:
         msg = LM_Cmd()
         msg.id = id
         if id == 1:
-            msg.x = pls
+            if pls > 80000 or pls < 0:
+                print 'error pls for Z-dir LM (0 ~ 80000)'
+                return
+            else:
+                msg.x = pls
+
         elif id == 2:
-            msg.z = pls
+            if pls > 60000 or pls < 0:
+                print 'error pls for Z-dir LM (0 ~ 80000)'
+                return 
+            else:
+                msg.z = pls
         elif id == 3:
             msg.z = pls
             msg.x = pls

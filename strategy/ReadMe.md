@@ -12,5 +12,5 @@ Step2.
 
 step3.
 
-   $ rosservice call /task "task_name: 'pick'"	(for pick task)<br>
-   $ rosservice call /task "task_name: 'stow'"	(for stow task)<br>
+    $ rosservice call /task "task_name: 'pick'"	(for pick task)<br>
+    $ rosservice call /task "task_name: 'stow'"	(for stow task)<br>
