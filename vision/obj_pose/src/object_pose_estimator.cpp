@@ -32,17 +32,6 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       
       ROS_INFO("Save PCD to %s",ss1.str().c_str());
 
-
-      //------------Test-----------//
-      // pcl::PointCloud<pcl::PointXYZRGB> PC;
-
-      // pcl::fromROSMsg(*input, PC); 
-
-      // std::stringstream ss2;
-      
-      // ss2 << path << "scene_cloud22222" << ".pcd";
-      // writer1.write<PT> (ss2.str (), PC, false);
-
 #endif
 
       //state = CALL_RCNN;
@@ -60,58 +49,21 @@ void ObjEstAction::poseEstimation(){
   
   geometry_msgs::Twist pose;
 
-  PCT::Ptr cloud_hsv (new PCT);
   PCT::Ptr cloud_seg (new PCT);
   PCT::Ptr cloud_seg_largest (new PCT);
 
-  // if(obj_name.compare("seg_0") == 0){
-  //   get_seg_plane(cloud, 0, cloud_seg);
-  // }else if(obj_name.compare("seg_1") == 0){
-  //   get_seg_plane(cloud, 1, cloud_seg);
-  // }else if(obj_name.compare("seg_2") == 0){
-  //   get_seg_plane(cloud, 2, cloud_seg);
-  // }
-  std::vector<int> index;
-  pcl::removeNaNFromPointCloud(*cloud, *cloud, index);
-  
-#ifdef SaveCloud
-  write_pcd_2_rospack(cloud,"_rm_NaN.pcd");
-
-#endif
-
-  //get_pass_through_points(cloud, 0.2, 1.0, cloud, index);
-
-
-  get_hsv_points(cloud, cloud_hsv,
-        0.0, 38.0, 
-        0.03, 1.0, 
-        0.29, 1.0);
-    
-#ifdef SaveCloud
-  write_pcd_2_rospack(cloud_hsv,"_hsv.pcd");
-
-#endif
-  // if(obj_name.compare("seg_0") == 0){
-  //   region_growing(cloud, 0, cloud_seg);
-  // }else if(obj_name.compare("seg_1") == 0){
-  //   region_growing(cloud, 1, cloud_seg);
-  // }else if(obj_name.compare("seg_2") == 0){
-  //   region_growing(cloud, 2, cloud_seg);
-  // }
+  if(obj_name.compare("seg_0") == 0){
+    get_seg_plane(cloud, 0, cloud_seg);
+  }else if(obj_name.compare("seg_1") == 0){
+    get_seg_plane(cloud, 1, cloud_seg);
+  }else if(obj_name.compare("seg_2") == 0){
+    get_seg_plane(cloud, 2, cloud_seg);
+  }
    
   //get_seg_plane(cloud,  cloud_seg);
-  //get_largest_cluster(cloud_seg, cloud_seg_largest);
+  get_largest_cluster(cloud_seg, cloud_seg_largest);
 
-  region_growing(cloud_hsv, 0, cloud_seg);
-
-#ifdef SaveCloud
-  write_pcd_2_rospack(cloud_seg,"_region_growing.pcd");
-
-#endif
-
-  //KNote: lots of time, have problem in this function , 
   //get_seg_plane_near(cloud, cloud_seg);
-  *cloud_seg_largest = *cloud_seg;
 
   cam_2_obj_center(cloud_seg_largest, 
       pose.linear.x, pose.linear.y, pose.linear.z, 
@@ -124,26 +76,8 @@ void ObjEstAction::poseEstimation(){
   state = NADA;
 
 #ifdef ShowCloud
-  //vis_simple(viewer,cloud);
-  //viewer->addPointCloud<PT> (cloud);
-  //viewer->addPointCloud<PT> (cloud_seg);
- 
-  get_largest_cluster(cloud_hsv, cloud_hsv);
-  viewer->addPointCloud<PT> (cloud_hsv);
+  vis_simple(viewer,cloud);
 
-  PT min_p, max_p;
-  pcl::getMinMax3D(*cloud_hsv,min_p, max_p);
-
-  std::cout << "min_p = " << min_p << std::endl;
-  std::cout << "max_p = " << max_p << std::endl;
-  
-
-  // vis_one_point(viewer, min_p, "min_p");
-  // vis_one_point(viewer, max_p, "max_p");
-  
-  viewer->addCube(min_p.x, max_p.x,
-                  min_p.y, max_p.y,  
-                  min_p.z, max_p.z);
 
   while (!viewer->wasStopped () && state == NADA && ros::ok())
   {

@@ -30,7 +30,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 // Types
-typedef pcl::PointXYZRGB PT;           //Point Type
+typedef pcl::PointXYZ PT;           //Point Type
 typedef pcl::PointCloud<PT> PCT;
 
 typedef pcl::PointNormal PointNT;
@@ -74,8 +74,7 @@ public:
     as_.registerGoalCallback(boost::bind(&ObjEstAction::goalCB, this));
     as_.registerPreemptCallback(boost::bind(&ObjEstAction::preemptCB, this));
 
-    //cloud_sub = nh_.subscribe("/camera/depth/points", 10, &ObjEstAction::cloudCB,this);
-    cloud_sub = nh_.subscribe("/camera/depth_registered/points", 10, &ObjEstAction::cloudCB,this);
+    cloud_sub = nh_.subscribe("/camera/depth/points", 10, &ObjEstAction::cloudCB,this);
     
     as_.start();
 
