@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
 )
+
 find_package(PCL 1.7 REQUIRED REQUIRED COMPONENTS 
 	io
 	registration
@@ -38,6 +39,7 @@ add_action_files(
   DIRECTORY action
   FILES ObjectPose.action
 )
+
 generate_messages(
   DEPENDENCIES actionlib_msgs std_msgs geometry_msgs
 )
@@ -54,7 +56,9 @@ catkin_package(
 ## Build ##
 ###########
 include_directories(
-  ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+  include
+  ${catkin_INCLUDE_DIRS} 
+  ${Boost_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -68,12 +72,14 @@ include_directories(
 ## Declare a C++ executable
 # add_executable(${PROJECT_NAME}_node src/object_pose_estimator_node.cpp)
 
+
 add_executable (object_pose_estimator src/object_pose_estimator.cpp)
 
 ## Add cmake target dependencies of the executable
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(object_pose_estimator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(object_pose_estimator fake_roi_generate_messages_cpp)
 
+add_dependencies(object_pose_estimator object_pose_estimator_generate_messages_cpp)
+add_dependencies(object_pose_estimator fake_roi_generate_messages_cpp)

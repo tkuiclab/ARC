@@ -14,8 +14,8 @@ from robotis_controller_msgs.msg import StatusMsg
 from manipulator_h_base_module_msgs.msg import IK_Cmd
 from manipulator_h_base_module_msgs.srv import GetKinematicsPose, GetKinematicsPoseResponse
 
-_POS = (.3, 0, .15)  # x, y, z
-_ORI = (-40, 0, 0)  # pitch, roll, yaw
+_POS = (.2, 0, .3)  # x, y, z
+_ORI = (-70, 0, 0)  # pitch, roll, yaw
 
 
 class ArmTask:
@@ -144,14 +144,13 @@ class ArmTask:
         rot = self.euler2rotation(euler)
         vec_n, vec_s, vec_a = self.rotation2vector(rot)
 
+        move = [0, 0, 0]
         if n != 0:
-            move = multiply(vec_n, n)
-        elif s != 0:
-            move = multiply(vec_s, s)
-        elif a != 0:
-            move = multiply(vec_a, a)
-        else:
-            move = [0, 0, 0]
+            move += multiply(vec_n, n)
+        if s != 0:
+            move += multiply(vec_s, s)
+        if a != 0:
+            move += multiply(vec_a, a)
 
         self.pub_ikCmd(
             mode,
@@ -175,14 +174,18 @@ if __name__ == '__main__':
     task = ArmTask()
     rospy.sleep(0.3)
 
-    #task.pub_ikCmd('ptp')
+    task.pub_ikCmd('ptp')
     #task.relative_control(s=.1)  #-y
     #task.relative_control(a=.05) #x
     
     #task.relative_control(n=.05)  #cam_y
     #task.relative_control(s=.05)  #cam_-x
-    task.relative_control(n=.04) #cam_z
+    #task.relative_control(a=.01) #cam_z
 
+    #task.relative_control(n=.05, s= .05, a =.05) #cam_z
+    # task.relative_control(n=.05) #cam_z
+    # task.relative_control(s=.05) #cam_z
+    # task.relative_control(a=.05) #cam_z
 
 #    case ORDER_ZYX:
 #         Mx.M[0][0]=Cy*Cz;
