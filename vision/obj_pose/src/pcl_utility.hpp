@@ -9,14 +9,12 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/console/parse.h>
-
 #include <pcl/point_cloud.h>
 #include <pcl/kdtree/kdtree_flann.h>
-
 #include <Eigen/Geometry>
 #include <pcl/filters/extract_indices.h>
-
 #include <pcl/point_types_conversion.h>
+#include <pcl/filters/passthrough.h>
 
 using namespace Eigen;
 
@@ -233,20 +231,20 @@ void get_hsv_points(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in,
 
 }
 void get_pass_through_points(PCT::Ptr cloud_in, 
-            float min_z, float max_z
+            float min_z, float max_z,
             PCT::Ptr cloud_out){
   
   
   pcl::IndicesPtr indices (new std::vector <int>);
   pcl::PassThrough<PT> pass;
-  pass.setInputCloud (cloud);
+  pass.setInputCloud (cloud_in);
   pass.setFilterFieldName ("z");
   pass.setFilterLimits (min_z, max_z);
   pass.filter (*indices);
 
   //PCT::Ptr cloud_cluster (new PCT);
   for (std::vector<int>::const_iterator pit = indices->begin (); pit != indices->end (); ++pit)
-    cloud_out->points.push_back (cloud->points[*pit]); //*
+    cloud_out->points.push_back (cloud_in->points[*pit]); //*
   cloud_out->width = cloud_out->points.size ();
   cloud_out->height = 1;
   cloud_out->is_dense = true;
