@@ -10,6 +10,15 @@ Mount device to /dev/arc/LM1,LM2,manipulator
 sudo cp ~/arc_ws/src/arc/install/99-arc.rules /etc/udev/rules.d/
 ```
 
+### Run 
+
+```bash
+sudo bash
+roslaunch arc control.launch 
+rosrun strategy s.py
+rosservice call /task "task_name: 'pick'"
+```
+
 ### Manipulator
 
 7-DOF Manipulator in manipulator_7a/
