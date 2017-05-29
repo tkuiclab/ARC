@@ -27,7 +27,7 @@ import json
 #[0.3, 0, 0.3, -60, 0, 0, 0];
 _POS = (.3, 0, .3)  # x, y, z
 _ORI = (-70, 0, 0)  # pitch, roll, yaw
-
+    
 
 class ArmTask:
     """Running arm task class."""

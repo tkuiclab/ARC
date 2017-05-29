@@ -187,13 +187,13 @@ if __name__ == '__main__':
     task = ArmTask()
     rospy.sleep(0.3)
 
-    #task.pub_ikCmd('ptp')
+    task.pub_ikCmd('ptp')
     #task.relative_control(s=.1)  #-y
     #task.relative_control(a=.05) #x
     
     #task.relative_control(n=.05)  #cam_y
     #task.relative_control(s=.05)  #cam_-x
-    task.relative_control(n=.04) #cam_z
+    #task.relative_control(n=.04) #cam_z
 
 
 #    case ORDER_ZYX:
