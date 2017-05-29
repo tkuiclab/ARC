@@ -1,4 +1,0 @@
-string  object_name
----
-int32[] bound_box
-bool    result

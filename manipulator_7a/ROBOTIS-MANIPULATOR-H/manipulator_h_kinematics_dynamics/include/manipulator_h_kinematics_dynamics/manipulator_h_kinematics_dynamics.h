@@ -51,6 +51,12 @@ enum TreeSelect
     ARM
 };
 
+typedef enum 
+{
+    e_ICLAB = 0,
+    e_nsa
+}teEuler_Mode;
+
 class ManipulatorKinematicsDynamics
 {
 private:
@@ -64,6 +70,9 @@ private:
     double rho2;
 
     double fai;
+
+    /*Euler rotation mode*/
+    teEuler_Mode Euler_Mode;
 
 public:
     ManipulatorKinematicsDynamics();
@@ -100,6 +109,7 @@ public:
     void gen_TFMat(int index, double theta, Eigen::Matrix4d& A);
 
     inline double get_Redundancy() { return fai; }
+    inline void Set_EulerMode(teEuler_Mode tmp_EulerMode){this->Euler_Mode = tmp_EulerMode;}
 
     /* ------------------ forward kinematics ------------------ */
     void fk();

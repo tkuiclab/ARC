@@ -28,3 +28,6 @@
 
 # ignore PCD
 *.pcd
+
+# ignore macosx
+__MACOSX/

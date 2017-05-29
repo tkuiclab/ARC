@@ -26,7 +26,8 @@ class ArmTask:
         self.__set_pubSub()
         #rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
-        self.__is_busy = False
+        self.__is_busy = True
+        self.__set_vel_pub.publish(40)
 
     def __set_pubSub(self):
         self.__set_mode_pub = rospy.Publisher(
@@ -54,7 +55,14 @@ class ArmTask:
             '/robotis/status',
             StatusMsg,
             self.__status_callback,
-            queue_size=10
+            queue_size=1
+        )
+
+        self.__set_vel_pub = rospy.Publisher(
+            '/robotis/base/set_velocity',
+            Float64,
+            latch=True,
+            queue_size=1
         )
 
     def __status_callback(self, msg):
@@ -76,9 +84,9 @@ class ArmTask:
 
         rospy.loginfo('Sent:{}'.format(cmd))
 
-        if 'line' == mode:
+        if mode == 'line':
             self.__cmd_pub.publish(cmd)
-        elif 'ptp' == mode:
+        elif mode == 'ptp':
             self.__ptp_pub.publish(cmd)
 
         self.__is_busy = True
@@ -165,6 +173,10 @@ class ArmTask:
         while self.__is_busy:
             rospy.sleep(.1)
 
+    @property
+    def busy(self):
+        return self.__is_busy
+
 
 if __name__ == '__main__':
 
@@ -180,7 +192,11 @@ if __name__ == '__main__':
     
     #task.relative_control(n=.05)  #cam_y
     #task.relative_control(s=.05)  #cam_-x
+<<<<<<< HEAD
     #task.relative_control(a=.01) #cam_z
+=======
+    #task.relative_control(n=.04) #cam_z
+>>>>>>> 727884816e8bcc2ec77130bfc45a04750ee1b022
 
     #task.relative_control(n=.05, s= .05, a =.05) #cam_z
     # task.relative_control(n=.05) #cam_z

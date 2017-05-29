@@ -29,4 +29,14 @@
         <param name = "baud" value = "57600" />
     </node>
 
+    <!-- run modbus(linear_z) -->
+    <node name="linear_z" pkg="linear_motion" type="linear_z" output="screen">
+        <param name = "port_z" value ="/dev/ttyUSB1" />
+	    <param name = "port_x" value ="/dev/ttyUSB0" />
+        <param name = "baud" value = "9600" />
+        
+    </node>
+	
+    
+
 </launch>
