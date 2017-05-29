@@ -437,11 +437,13 @@ int Protocol2PacketHandler::txRxPacket(PortHandler *port, uint8_t *txpacket, uin
   if (result != COMM_SUCCESS)
     return result;
 
-  // (ID == Broadcast ID && NOT BulkRead) == no need to wait for status packet
+  // (Instruction == BulkRead or SyncRead) == this function is not available.
+  if (txpacket[PKT_INSTRUCTION] == INST_BULK_READ || txpacket[PKT_INSTRUCTION] == INST_SYNC_READ)
+    result = COMM_NOT_AVAILABLE;
+
+  // (ID == Broadcast ID) == no need to wait for status packet or not available.
   // (Instruction == action) == no need to wait for status packet
-  if ((txpacket[PKT_ID] == BROADCAST_ID && txpacket[PKT_INSTRUCTION] != INST_BULK_READ) ||
-     (txpacket[PKT_ID] == BROADCAST_ID && txpacket[PKT_INSTRUCTION] != INST_SYNC_READ) ||
-     (txpacket[PKT_INSTRUCTION] == INST_ACTION))
+  if (txpacket[PKT_ID] == BROADCAST_ID || txpacket[PKT_INSTRUCTION] == INST_ACTION)
   {
     port->is_using_ = false;
     return result;
@@ -459,12 +461,11 @@ int Protocol2PacketHandler::txRxPacket(PortHandler *port, uint8_t *txpacket, uin
   }
 
   // rx packet
-  result = rxPacket(port, rxpacket);
-  // check txpacket ID == rxpacket ID
-  if (txpacket[PKT_ID] != rxpacket[PKT_ID])
+  do {
     result = rxPacket(port, rxpacket);
+  } while (result == COMM_SUCCESS && txpacket[PKT_ID] != rxpacket[PKT_ID]);
 
-  if (result == COMM_SUCCESS && txpacket[PKT_ID] != BROADCAST_ID)
+  if (result == COMM_SUCCESS && txpacket[PKT_ID] == rxpacket[PKT_ID])
   {
     if (error != 0)
       *error = (uint8_t)rxpacket[PKT_ERROR];
@@ -660,15 +661,18 @@ int Protocol2PacketHandler::readTx(PortHandler *port, uint8_t id, uint16_t addre
   return result;
 }
 
-int Protocol2PacketHandler::readRx(PortHandler *port, uint16_t length, uint8_t *data, uint8_t *error)
+int Protocol2PacketHandler::readRx(PortHandler *port, uint8_t id, uint16_t length, uint8_t *data, uint8_t *error)
 {
-  int result                 = COMM_TX_FAIL;
+  int result                  = COMM_TX_FAIL;
   uint8_t *rxpacket           = (uint8_t *)malloc(RXPACKET_MAX_LEN);
   //(length + 11 + (length/3));  // (length/3): consider stuffing
   //uint8_t *rxpacket           = new uint8_t[length + 11 + (length/3)];    // (length/3): consider stuffing
 
-  result = rxPacket(port, rxpacket);
-  if (result == COMM_SUCCESS)
+  do {
+    result = rxPacket(port, rxpacket);
+  } while (result == COMM_SUCCESS && rxpacket[PKT_ID] != id);
+
+  if (result == COMM_SUCCESS && rxpacket[PKT_ID] == id)
   {
     if (error != 0)
       *error = (uint8_t)rxpacket[PKT_ERROR];
@@ -721,10 +725,10 @@ int Protocol2PacketHandler::read1ByteTx(PortHandler *port, uint8_t id, uint16_t 
 {
   return readTx(port, id, address, 1);
 }
-int Protocol2PacketHandler::read1ByteRx(PortHandler *port, uint8_t *data, uint8_t *error)
+int Protocol2PacketHandler::read1ByteRx(PortHandler *port, uint8_t id, uint8_t *data, uint8_t *error)
 {
   uint8_t data_read[1] = {0};
-  int result = readRx(port, 1, data_read, error);
+  int result = readRx(port, id, 1, data_read, error);
   if (result == COMM_SUCCESS)
     *data = data_read[0];
   return result;
@@ -742,10 +746,10 @@ int Protocol2PacketHandler::read2ByteTx(PortHandler *port, uint8_t id, uint16_t 
 {
   return readTx(port, id, address, 2);
 }
-int Protocol2PacketHandler::read2ByteRx(PortHandler *port, uint16_t *data, uint8_t *error)
+int Protocol2PacketHandler::read2ByteRx(PortHandler *port, uint8_t id, uint16_t *data, uint8_t *error)
 {
   uint8_t data_read[2] = {0};
-  int result = readRx(port, 2, data_read, error);
+  int result = readRx(port, id, 2, data_read, error);
   if (result == COMM_SUCCESS)
     *data = DXL_MAKEWORD(data_read[0], data_read[1]);
   return result;
@@ -763,10 +767,10 @@ int Protocol2PacketHandler::read4ByteTx(PortHandler *port, uint8_t id, uint16_t 
 {
   return readTx(port, id, address, 4);
 }
-int Protocol2PacketHandler::read4ByteRx(PortHandler *port, uint32_t *data, uint8_t *error)
+int Protocol2PacketHandler::read4ByteRx(PortHandler *port, uint8_t id, uint32_t *data, uint8_t *error)
 {
   uint8_t data_read[4] = {0};
-  int result = readRx(port, 4, data_read, error);
+  int result = readRx(port, id, 4, data_read, error);
   if (result == COMM_SUCCESS)
     *data = DXL_MAKEDWORD(DXL_MAKEWORD(data_read[0], data_read[1]), DXL_MAKEWORD(data_read[2], data_read[3]));
   return result;

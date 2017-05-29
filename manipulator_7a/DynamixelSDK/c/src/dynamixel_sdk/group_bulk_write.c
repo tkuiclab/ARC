@@ -303,7 +303,7 @@ void groupBulkWriteTxPacket(int group_num)
 {
   if (groupData[group_num].protocol_version == 1)
   {
-    packetData[groupData[group_num].port_num].communication_result =  COMM_NOT_AVAILABLE;
+    packetData[groupData[group_num].port_num].communication_result = COMM_NOT_AVAILABLE;
     return;
   }
 

@@ -80,5 +80,10 @@ add_dependencies(object_pose_estimator ${${PROJECT_NAME}_EXPORTED_TARGETS} ${cat
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES})
+<<<<<<< HEAD
 add_dependencies(object_pose_estimator object_pose_estimator_generate_messages_cpp)
 add_dependencies(object_pose_estimator fake_roi_generate_messages_cpp)
+=======
+add_dependencies(object_pose_estimator fake_roi_generate_messages_cpp)
+
+>>>>>>> 897feb5e1680d91e2e7db022e2688bff1c8fb93e

@@ -226,12 +226,15 @@ void rxPacket1(int port_num)
 {
   uint8_t idx, s;
   int i;
+  uint8_t checksum;
+  uint8_t rx_length;
+  uint8_t wait_length;
 
   packetData[port_num].communication_result = COMM_TX_FAIL;
 
-  uint8_t checksum = 0;
-  uint8_t rx_length = 0;
-  uint8_t wait_length = 6;    // minimum length ( HEADER0 HEADER1 ID LENGTH ERROR CHKSUM )
+  checksum = 0;
+  rx_length = 0;
+  wait_length = 6;    // minimum length ( HEADER0 HEADER1 ID LENGTH ERROR CHKSUM )
 
   while (True)
   {
@@ -607,7 +610,6 @@ void writeTxOnly1(int port_num, uint8_t id, uint16_t address, uint16_t length)
 
   txPacket1(port_num);
   g_is_using[port_num] = False;
-
 }
 
 void writeTxRx1(int port_num, uint8_t id, uint16_t address, uint16_t length)
