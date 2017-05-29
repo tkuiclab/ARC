@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 joint1 :   # H54-200-S500-R
-=======
-joint1 :   # H54-200-S500-R=
->>>>>>> 727884816e8bcc2ec77130bfc45a04750ee1b022
    return_delay_time     :  10    
    operating_mode        :  3     
    shutdown              :  58    
@@ -81,11 +77,7 @@ joint6  :   # H42-20-S300-R
    return_delay_time     : 10    
    operating_mode        : 3     
    shutdown              : 58    
-<<<<<<< HEAD
    homing_offset         : 0
-=======
-   homing_offset         : 0 #-151900 #0
->>>>>>> 727884816e8bcc2ec77130bfc45a04750ee1b022
    torque_limit          : 372
    max_position_limit    : 151900
    min_position_limit    : -151900

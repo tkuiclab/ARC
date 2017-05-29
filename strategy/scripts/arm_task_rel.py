@@ -192,11 +192,6 @@ if __name__ == '__main__':
     
     #task.relative_control(n=.05)  #cam_y
     #task.relative_control(s=.05)  #cam_-x
-<<<<<<< HEAD
-    #task.relative_control(a=.01) #cam_z
-=======
-    #task.relative_control(n=.04) #cam_z
->>>>>>> 727884816e8bcc2ec77130bfc45a04750ee1b022
 
     #task.relative_control(n=.05, s= .05, a =.05) #cam_z
     # task.relative_control(n=.05) #cam_z

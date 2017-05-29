@@ -11,7 +11,3 @@ dynamixel | /dev/arc/manipulator | 4   | H54-100-S500-R | 2.0      | joint4   | 
 dynamixel | /dev/arc/manipulator | 5   | H54-100-S500-R | 2.0      | joint5   | present_position, present_voltage
 dynamixel | /dev/arc/manipulator | 6   | H42-20-S300-R  | 2.0      | joint6   | present_position, present_voltage
 dynamixel | /dev/arc/manipulator | 7   | H42-20-S300-R  | 2.0      | joint7   | present_position, present_voltage
-<<<<<<< HEAD
-=======
-
->>>>>>> 727884816e8bcc2ec77130bfc45a04750ee1b022
