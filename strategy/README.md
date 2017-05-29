@@ -2,9 +2,7 @@
 
 Step1.
 
-    $ roslaunch manipulator_h_manager b_manipulator_h_manager.launch (for version2)<br>
-    or<br>
-    $ roslaunch manipulator_h_manager manipulator_h_manager.launch (for version 1)<br>
+    $ roslaunch arc control.launch
 
 Step2.
 

@@ -17,10 +17,6 @@
     <node name="manipulator_h_manager" pkg="manipulator_h_manager" type="manipulator_h_manager"
             output="screen" />
 
-    <!-- Add gui node for test -->
-    <node name="manipulator_n_gui" pkg="manipulator_h_gui" type="manipulator_h_gui"
-            output="screen" if="$(arg en_gui)" />
-
     <include file="$(find arc_ui)/launch/ui.launch" />
 
     <!-- run rosserial -->

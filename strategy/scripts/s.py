@@ -59,16 +59,20 @@ class Strategy(threading.Thread):
 
 	def task_cb(self,req):
 		""" description """
-		self.task_name = req.task_name
+		task_name = req.task_name
 		#json = req.task_json
-		rospy.loginfo("task_name = " + self.task_name)
-		if self.task_name.lower() == 'stow':
+		rospy.loginfo("task_name = " + task_name)
+		if task_name.lower() == 'stow':
 			self.run_task_type = TaskType_Stow
-		elif self.task_name.lower() == 'pick':
+		elif task_name.lower() == 'pick':
 			self.run_task_type = TaskType_Pick    
 		else:
 			print 'Error Task Name (Please input pick or stow)'
 		
+		r = TaskResponse()
+		r.success = True
+		r.msg = task_name.upper() + " Task Ready!"
+		return r
 
 	def run(self):
 		rate = rospy.Rate(30)  # 30hz
