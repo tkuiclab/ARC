@@ -4,6 +4,8 @@ TKU M-Bot for Amazon Robotics Challenge (ARC)
 
 ### Install
 
+# For mount to /dev/arc/LM1,LM2,manipulator
+
 ```bash
 sudo cp ~/arc_ws/src/arc/install/99-arc.rules /etc/udev/rules.d/
 ```
