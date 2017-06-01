@@ -71,8 +71,9 @@ class PickTask:
 
 	
 	def var_init(self):
+		self.pick_list = None
 		# === Initialize State === 
-		self.state 			= ParseJSON
+		self.state 			= WaitTask
 		self.next_state 	= WaitTask
 		self.Is_ArmBusy    	= False
 		self.Is_LMBusy     	= False
@@ -88,6 +89,9 @@ class PickTask:
 
 		self.Box 		   	= 'a'
 		self.Tote 		   	= 'a'
+
+		self.item_location = None
+		self.order = None
         
 	def task_finish(self):
 		self.state			= WaitTask
@@ -100,7 +104,24 @@ class PickTask:
 		self.Is_BaseShiftOK = False
 		print 'Finish Task'
 
+	def save_item_location(self,item_location):
+		rospy.loginfo("[Pick] Save item_location")
 
+		self.item_location = item_location
+		self.parse_json_2_pick_list()
+		
+
+	def save_order(self,order):
+		rospy.loginfo("[Pick] Save order")
+		self.order = order
+		self.parse_json_2_pick_list()
+
+	def parse_json_2_pick_list(self):
+		if self.order==None or self.order==None:
+			return
+		rospy.loginfo("[Pick] Parse JSON of item_location and order to pick_list")
+		self.pick_list = make_pick_list(self.item_location, self.order)
+	
 	def pick_get_one(self):
 		""" Get one pick task """
 		""" Set: self.Bin, self.pick_id, self.Box """
@@ -108,96 +129,127 @@ class PickTask:
 			return False
 		
 		
-		pick = self.pick_list[self.pick_id]
-		self.Bin = pick.from_bin.lower()
+		self.now_pick = self.pick_list[self.pick_id]
+		self.Bin = self.now_pick.from_bin.lower()
+		self.Item = self.now_pick.item
 
-		if pick.to_box == 'A1':
+		if self.now_pick.to_box == 'A1':
 			self.Box = 'a'
-		elif pick.to_box == '1A5':
+		elif self.now_pick.to_box == '1A5':
 			self.Box = 'b'
-		elif pick.to_box == '1B2':
+		elif self.now_pick.to_box == '1B2':
 			self.Box = 'c'
 		else:
-			rospy.logerr('Error pick.to_box='+pick.to_box)
+			rospy.logerr('Error pick.to_box='+self.now_pick.to_box)
  
 		self.pick_id = self.pick_id + 1
 		
 		return True
 
 		
+	def run(self):
+		self.pick_id = 0
+		self.pick_get_one()
+		self.state 	= LM_Test1
+
+	def is_ready(self):
+		if self.pick_list != None:
+			return True
+		else: 
+			return False
+	
 	def pick_core(self):
 		self.update_status()
 
 		if self.state == WaitTask:			
 			return
 
-		elif self.state == ParseJSON:
-			self.pick_list = read_config_pick_task()
-			self.pick_id = 0
-			self.pick_get_one()
+		# elif self.state == ParseJSON:
+		# 	self.info = "ParseJSON"
 
-			self.state 			= LM_Test1
-			return
+		# 	self.pick_list = read_config_pick_task()
+		# 	# self.pick_id = 0
+		# 	# self.pick_get_one()
+
+		# 	#self.state 			= LM_Test1
+			
+		# 	return
 		
 		elif self.state == LM_Test1:       # LM_test1
+			self.info = "(GoBin) LM Move To Bin " + self.Bin 
+			print self.info
+
 			self.next_state = Init_Pos   # note!!!!!!
 			self.state 		= WaitRobot
-
-			print 'LM Move to Bin ' + self.Bin
 
 			self.Is_BaseShiftOK = False
 			self.LM.pub_LM_Cmd(2, self.GetShift('Bin', 'x', self.Bin ))
 			rospy.sleep(0.3)
 			self.LM.pub_LM_Cmd(1, self.GetShift('Bin', 'z', self.Bin ))
 			
-			return
-
-		elif self.state == Init_Pos:       # step 1
-			print 'Init_Pos'
-			self.next_state = Go2Bin
-			self.state 		= WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.22), (0, 0, 0) )
 			
 			return
 
+		elif self.state == Init_Pos:       # step 1
+			self.info = "(GoBin) Arm To Init_Pos" 
+			print self.info
+			self.next_state = Go2Bin
+			self.state 		= WaitRobot
+			self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.22), (0, 0, 0) )
+			return
+
 		elif self.state == Go2Bin:
+			self.info = "(Catch) Arm Put in Bin " + self.Bin 
+			print self.info
+
 			self.next_state = Down2Pick
 			self.state 		= WaitRobot
 			self.Arm.pub_ikCmd('ptp', (0.6, 0, 0.22), (0, 0, 0) )
-			print 'Go2Bin'
 			return
 		
 		elif self.state == Down2Pick:	
+			self.info = "(Catch) Arm Down to Catch "
+			print self.info
+
 			self.next_state = PickObj
 			self.state = WaitRobot
 			self.Arm.pub_ikCmd('ptp', (0.6, 0, 0.145), (0, 0, 0) )
-			print 'D2P'
+
 			return
 
 		elif self.state == PickObj:	      # Enable Vacuum 
+			self.info = "(Catch) Vacuum Enable "
+			print self.info
+
 			self.next_state = Up2LeaveBin
 			self.state = WaitRobot
 			self.LM.Vaccum_Test(True)
 			rospy.sleep(1)
-			print 'PiclObj'
-			print '========== Enable Vacuum =========='
+			
 			return
 
 		elif self.state == Up2LeaveBin:
+			self.info = "(Catch) Arm Up"
+			print self.info
+
 			self.next_state = LeaveBin
 			self.state = WaitRobot
 			self.Arm.pub_ikCmd('ptp', (0.6, 0, 0.22), (0, 0, 0) )
-			print 'U2L'
+			#print 'U2L'
 			return
 
 		elif self.state == LeaveBin: 
+			self.info = "(Catch) Arm Leave Bin  "
+			print self.info
 			self.next_state = Move2PlaceObj1
 			self.state = WaitRobot
 			self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.22), (0, 0, 0) )
-			print 'LeaveBin'
+			
 			return
 
 		elif self.state == Move2PlaceObj1:
+			self.info = "(GoBox) LM Go Box " +self.Box
+			print self.info
 			self.next_state 	= Move2PlaceObj2
 			self.state 			= WaitRobot
 			self.Is_BaseShiftOK = False
@@ -205,30 +257,35 @@ class PickTask:
 			rospy.sleep(0.3)
 			self.LM.pub_LM_Cmd(1, self.GetShift('Box', 'z', self.Box ))
 			#rospy.sleep(1)
-			print 'Move2PlaceObj1'
+			
 			return
 
 		elif self.state == Move2PlaceObj2: 		# new added 1
+			self.info = "(GoBox) Arm Go Box " +self.Box
+			print self.info
 			self.next_state = PlaceObj
 			self.state = WaitRobot
 			self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.22), (-90, 0, 0) )
-			print 'LeaveBin'
+			
 			return
 
 		elif self.state == PlaceObj:		# Disable Vacuum 
 			# self.Is_BaseShiftOK = False
+			self.info = "(GoBox) Vaccum Disable - [Success]"
+			print self.info
 			self.next_state = Recover2InitPos
 			self.state = WaitRobot
 			self.LM.Vaccum_Test(False)
-			print '========== Disable Vacuum =========='
-			print 'PlaceObj'
+			
 			return
 
 		elif self.state == Recover2InitPos: # new added 2
+			self.info = "Arm Recover2InitPos"
+			print self.info
 			self.next_state = FinishTask
 			self.state = WaitRobot
 			self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.22), (0, 0, 0) )
-			print 'LeaveBin'
+			
 			return
 
 		# ===============================================================
@@ -248,40 +305,29 @@ class PickTask:
 
 		elif self.state == FinishTask:
 			can_get_one = self.pick_get_one()
-
+			self.info = "Finish Pick One Object"
+		
 			if can_get_one :
 				self.Is_BaseShiftOK = False 
 				self.state 	= LM_Test1 
 				self.next_state 	= WaitTask
 			else: 
 				self.task_finish()
-				print 'Finish Pick Task'
+				self.info = "Finish Pick Task"
+			print self.info	
 
-		elif self.state == FinishTask2:
-			""" Continue exe next bin """
-			print 'self.BinCnt'
-			self.BinCnt = self.BinCnt + 1
-			if self.BinCnt >= 12:
-				""" Recover to initial status (Constructor) """
-				self.state			= WaitTask
-				self.next_state 	= WaitTask
-				self.Is_ArmBusy 	= False
-				self.Is_LMBusy		= False
-				self.Last_LM_Busy 	= False
-				self.Is_LMArrive   	= True
-				self.Last_LMArrive 	= True
-				self.Is_BaseShiftOK = False
-				print 'Finish Pick Task'
-				return
-			else:
-				self.Is_BaseShiftOK = False
-				self.Bin 	= BinId[self.BinCnt]
-				self.state 	= LM_Test1 
-				self.next_state 	= WaitTask
-				print 'Finish one obj in pick task' 
-				print self.BinCnt
+			return
 		else:
 			return
+
+	def get_info(self):
+		info_json = {'info': self.info, 
+				'item': self.Item, 
+				'bin': self.Bin,
+				'box': self.now_pick.to_box
+				}
+		
+		return info_json
 
 	def update_status(self):
 		""" update ARM & LM status  """

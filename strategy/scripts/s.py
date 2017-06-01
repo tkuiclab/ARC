@@ -27,6 +27,9 @@ from pick_task import PickTask
 from stow_task import StowTask
 
 
+import json
+
+TaskType_None = 0
 TaskType_Pick = 1
 TaskType_Stow = 2
 
@@ -36,7 +39,8 @@ class Strategy(threading.Thread):
 		threading.Thread.__init__(self)
 		rospy.on_shutdown(self.shutdown)
 		rospy.Service('/task', Task, self.task_cb)
-		
+		self.info_pub = rospy.Publisher('/stratege/info', String, queue_size=10)
+
 		# === Initialize All Var === 
 		self.Arm 			= arm_task_rel.ArmTask()
 		self.LM  			= LM_Control.CLM_Control()
@@ -46,7 +50,7 @@ class Strategy(threading.Thread):
 
 		self.stop_robot = False
 
-		self.run_task_type = None
+		self.run_task_type = TaskType_None
 
 		rospy.sleep(0.3)
 		rospy.loginfo("Strategy Ready!!")
@@ -60,31 +64,45 @@ class Strategy(threading.Thread):
 	def task_cb(self,req):
 		""" description """
 		task_name = req.task_name
-		#json = req.task_json
 		rospy.loginfo("task_name = " + task_name)
 		if task_name.lower() == 'stow':
 			self.run_task_type = TaskType_Stow
-		elif task_name.lower() == 'pick':
-			self.run_task_type = TaskType_Pick    
+		elif task_name.lower() == 'pick_json_item_location':
+			self.pick.save_item_location(req.task_json)
+		elif task_name.lower() == 'pick_json_order':
+			self.pick.save_order(req.task_json)
+		elif task_name.lower() == 'pick_run':
+			if self.pick.is_ready() :
+				rospy.loginfo('Pick Task Running')
+				self.run_task_type = TaskType_Pick
+				self.pick.run()  
+			else:
+				rospy.logwarn('Pick Task Not Ready!!')
 		else:
 			print 'Error Task Name (Please input pick or stow)'
 		
 		r = TaskResponse()
 		r.success = True
-		r.msg = task_name.upper() + " Task Ready!"
+		r.msg = " GET " + task_name.upper() +  "command"
 		return r
 
 	def run(self):
 		rate = rospy.Rate(30)  # 30hz
 		while not rospy.is_shutdown():
-			#self.core()
-			if self.stop_robot == True:
+			if self.stop_robot == True :
 				return
 			
-			if self.run_task_type == TaskType_Pick:
-				self.pick.pick_core()
-			elif self.run_task_type == TaskType_Stow:
-				self.stow.stow_core()
+			#print 'in core'
+
+			if  self.run_task_type != TaskType_None:
+				if self.run_task_type == TaskType_Pick:
+					self.pick.pick_core()
+					info_json = self.pick.get_info()
+				elif self.run_task_type == TaskType_Stow:
+					self.stow.stow_core()
+					#info = self.stow.get_info()
+			
+				self.info_pub.publish(json.dumps(info_json))
 			
 			rate.sleep()
 
@@ -103,7 +121,16 @@ class Strategy(threading.Thread):
 		self.LM.pub_LM_Cmd(2, self.GetShift('Box', 'x', box ))
 		rospy.sleep(0.3)
 		self.LM.pub_LM_Cmd(1, self.GetShift('Box', 'z', box ))
-		rospy.sleep(0.5)		
+		rospy.sleep(0.5)	
+
+	def test_publish_info(self):
+		info_json = {'info': "(GoBox) Vaccum Disable - [Success]", 
+				'item': 'mesh_cup', 
+				'bin': 'E',
+				'box': '1A5'
+				}
+		
+		self.info_pub.publish(json.dumps(info_json))
 
 if __name__ == '__main__':
 	rospy.init_node('strategy')
@@ -111,7 +138,8 @@ if __name__ == '__main__':
 	try:
 		s = Strategy()
 		s.start() 
-		
+		#s.test_publish_info()
+
 		#s.test_go_bin_LM('j')
 		#s.test_go_box('a')		
 

@@ -1,0 +1,108 @@
+body {
+  font: 14px "Century Gothic", Futura, sans-serif;
+
+  width:80%;
+  margin-left:auto;
+  margin-right:auto;
+
+}
+a
+ol, ul {
+  padding-left: 10px;
+}
+
+.shelf-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.status {
+  margin-bottom: 10px;
+}
+
+.order_mark {
+  font-weight: bold;
+  color : #16ad05;
+}
+
+.focus_item {
+  font-weight: bold;
+  font-size: 16px;
+  color : #ff0000;
+}
+
+.bin , .box, .task_status{
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 12px;
+  height: 100px;
+  margin-right: 0px;
+  margin-top: 0px;
+  padding: 0;
+  text-align: left;
+  width: 230px;
+}
+
+
+
+.shelf_and_box, .upload_and_status {
+  display: flex;
+  flex-direction: row;
+}
+
+.upload_area {
+  margin-left: 20px;
+  width: 450px;
+}
+
+.upload{
+  margin: 10px;
+
+}
+
+
+ol {
+  padding-left: 20px;
+}
+
+.rm_item{
+  text-decoration: line-through;
+
+}
+
+
+
+.box_area{
+  margin-left:  20px;
+  clear: both;
+  display: table;
+  width: 180px;
+}
+
+.box{
+  width: 180px;
+  height: 133px
+}
+
+
+
+.box_name{
+ 
+  margin-top:  2px;
+  margin-bottom:  2px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+}
+
+
+.task_status{
+  width: 405px;  
+  height: 60px;
+  line-height: 60px;
+  margin: 20px;
+  font-size: 20px;
+  text-align: center;
+}

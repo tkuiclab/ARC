@@ -43,10 +43,30 @@ class PickInfo:
 
 
 
-def make_pick_list(item_loc_path, order_path):
+def make_pick_list_from_path(item_loc_path, order_path):
     """Using item location file and order file to make a list for picking task."""
     item_loc_json = read_json(item_loc_path)
     order_json = read_json(order_path)
+
+    pick_list = list()
+    for order in order_json["orders"]:
+        box_id = order["size_id"]
+        for item in order["contents"]:
+            bin_id = search_item(item_loc_json, item)
+            if bin_id is not None:
+                pick_list.append(PickInfo(item, bin_id, box_id))
+    return pick_list
+
+def make_pick_list(i_item_loc_json, i_order_json):
+    """Using item location file and order file to make a list for picking task."""
+    # print 'i_item_loc_json='
+    # print i_item_loc_json
+    # print 'i_order_json='
+    # print i_order_json
+    
+
+    item_loc_json = json.loads(i_item_loc_json)
+    order_json = json.loads(i_order_json)
 
     pick_list = list()
     for order in order_json["orders"]:
@@ -75,7 +95,7 @@ def read_config_pick_task():
     item_loc_path = path.join(direcotry, ilf)
     order_path = path.join(direcotry, orf)
 
-    return make_pick_list(item_loc_path, order_path)
+    return make_pick_list_from_path(item_loc_path, order_path)
      
 
 def _test_pick():
@@ -99,5 +119,7 @@ def _test_pick():
         print("item:", info.item, "from_bin:", info.from_bin, "to_box:", info.to_box)
     
 
-# if __name__ == "__main__":
-#     _test_pick()
+if __name__ == "__main__":
+    info = {'Name': 'Zara', 'Age': 7, 'Class': 'First'}
+    print json.dumps(info)
+    #_test_pick()
