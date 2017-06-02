@@ -616,13 +616,19 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     double Cz = cos(yaw);
     double Sz = sin(yaw);
 
-    /* desired cmd */
-    double tmp = tar_position(0);
-    tar_position(0) = tar_position(1);
-    tar_position(1) = tmp;
+    /* Change desire cmd pos */
+    double tmp_x    = tar_position(0);
+    double tmp_y    = tar_position(1);
+    double tmp_z    = tar_position(2);
+    tar_position(0) = tmp_y;
+    tar_position(1) = tmp_z;
+    tar_position(2) = tmp_x;
+    tar_position(1) = -tar_position(1);
+
+    /* Assign desire cmd */
     Eigen::Vector3d position = tar_position;
     Eigen::Matrix3d RPY_Rot; // orientation
-    Euler_Mode = e_ICLAB;     // Decide euler angle mode!!!
+    Euler_Mode = e_nsa;     // Decide euler angle mode!!!
     std::cout<<std::endl<<"============below============"<<std::endl;
     if(Euler_Mode == e_ICLAB)
     {
