@@ -27,15 +27,12 @@ import json
 #[0.3, 0, 0.3, -60, 0, 0, 0];
 _POS = (.2, 0, .3)  # x, y, z
 _ORI = (-70, 0, 0)  # pitch, roll, yaw
-<<<<<<< HEAD
+
 
 cam2tool_y = -0.04  #cam axis
 #cam2tool_z = 0.195 - 0.005
 cam2tool_z = 0.195 + 0.035
-=======
-    
 
->>>>>>> 727884816e8bcc2ec77130bfc45a04750ee1b022
 class ArmTask:
     """Running arm task class."""
 
@@ -298,7 +295,7 @@ if __name__ == '__main__':
 
 
     rospy.loginfo('strategy ready')
-    task.obj_pose_request()
+    #task.obj_pose_request()
 
     r = rospy.Rate(10)
     while not rospy.is_shutdown():
