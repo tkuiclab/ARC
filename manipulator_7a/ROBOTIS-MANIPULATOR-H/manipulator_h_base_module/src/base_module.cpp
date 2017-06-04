@@ -153,6 +153,8 @@ void BaseModule::queueThread()
                                                             &BaseModule::P2PCallBack, this);
     ros::Subscriber TaskP2P_msg_sub    = ros_node.subscribe("/robotis/base/TaskP2P_msg", 5,
                                                             &BaseModule::LineCallBack, this);
+    ros::Subscriber Set_EulerMode_sub  = ros_node.subscribe("/robotis/base/Set_EulerMode", 5,
+                                                            &BaseModule::Set_EulerMode_Callback, this);
 
     while (ros_node.ok())
     {
@@ -268,7 +270,20 @@ void BaseModule::JointControlCallback(const manipulator_h_base_module_msgs::Join
         ROS_INFO("previous task is alive");
     }
 }
-
+/* ---------------------------- set euler mode ------------------------------- */
+void BaseModule::Set_EulerMode_Callback(const std_msgs::String::ConstPtr &msg)
+{
+    if(msg->data == "iclab")
+    {
+        manipulator_->Set_EulerMode(ICLAB_EULER);
+        std::cout<<"change euler mode to 'iclab' \n";
+    }
+    else
+    {
+        manipulator_->Set_EulerMode(NSA_EULER);
+        std::cout<<"change euler mode to 'nsa' \n";
+    }
+}
 /* ----------------------------------- ptp ----------------------------------- */
 void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd)
 {

@@ -167,7 +167,6 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
         manipulator_link_data_[8]->joint_limit_min_ = -100.0;
         manipulator_link_data_[8]->inertia_ = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
     }
-
     load_LinkParam();
     std::cout << "DH:\n" << DH << std::endl;
 }
@@ -596,6 +595,19 @@ void ManipulatorKinematicsDynamics::fk()
     }
 }
 
+void ManipulatorKinematicsDynamics::Set_EulerMode(int mode)
+{
+    if(mode == 1)
+        Euler_Mode = e_ICLAB;
+    else if(mode == 2)
+        Euler_Mode = e_nsa;
+    else 
+    {
+        std::cout<<"Error euler mode!!!\n";
+    }
+
+}
+
 bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::MatrixXd& tar_orientation, double tarFai /* = 0 */)
 {
     Eigen::VectorXd angle(7);
@@ -628,7 +640,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     /* Assign desire cmd */
     Eigen::Vector3d position = tar_position;
     Eigen::Matrix3d RPY_Rot; // orientation
-    Euler_Mode = e_nsa;     // Decide euler angle mode!!!
+    //Euler_Mode = e_nsa;     // Decide euler angle mode!!!
     std::cout<<std::endl<<"============below============"<<std::endl;
     if(Euler_Mode == e_ICLAB)
     {
@@ -659,6 +671,8 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     T0_7.block<3, 3>(0, 0) = RPY_Rot;
 
     Eigen::Vector3d P_w = T0_7 * P_w2;
+    if(P_w(1) < 0)
+        tarFai = M_PI - tarFai;
 
     Eigen::Vector3d P_e;
     Eigen::Vector3d P_LJ;
@@ -673,12 +687,14 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     /* Calculate Joint Angle 1, 2 */
     double a = P_LJ(2) - d_bs;
     double b = L_sl;
-
+    std::cout<<"P_LJ(z) = " <<P_LJ(2)<<"\n";
+    std::cout<<"d_bs = "    <<d_bs   <<"\n";
+    std::cout<<"L_sl = "    <<L_sl   <<"\n";
     if(P_LJ(1) >= 0)//0.0001)
     {
         if (P_w(1) < 0)//0.0001)      //(LJ, W) = (+, -)
         {
-            angle[0] = atan2(-P_LJ(0), P_LJ(1)) - M_PI;
+            angle[0] = atan2(-P_LJ(0), P_LJ(1));
             angle[1] = M_PI - asin(a / b);
         }
         else                        //(LJ, W) = (+, +)

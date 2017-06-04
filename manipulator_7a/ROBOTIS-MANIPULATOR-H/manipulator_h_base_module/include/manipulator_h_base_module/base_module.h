@@ -70,6 +70,8 @@
 #define BASE_MOVE_TIME 0.2
 #define DEFAULT_SPD    20 * 0.01
 
+#define ICLAB_EULER 1
+#define NSA_EULER   2
 namespace robotis_manipulator_h
 {
 
@@ -127,6 +129,7 @@ class BaseModule
     void P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd);
     void LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd);
     void setVelCallback(const std_msgs::Float64::ConstPtr &msg);
+    void Set_EulerMode_Callback(const std_msgs::String::ConstPtr &msg);
 
     bool getJointPoseCallback(manipulator_h_base_module_msgs::GetJointPose::Request &req,
                               manipulator_h_base_module_msgs::GetJointPose::Response &res);

@@ -43,6 +43,7 @@
 #include <ros/package.h>
 #include <yaml-cpp/yaml.h>
 
+#include <std_msgs/String.h>
 namespace robotis_manipulator_h
 {
 
@@ -116,6 +117,7 @@ public:
     double cal_Redundancy(std::vector<Eigen::Vector3d>& jointPos);
 
     /* ------------------ inverse kinematics ------------------ */
+    void Set_EulerMode(int mode);
     bool ik(Eigen::MatrixXd& tar_position, Eigen::MatrixXd& tar_orientation, double tarFai = 0);
     void cal_ElbowInfo(Eigen::Vector3d& P_s, Eigen::Vector3d& P_w, double Fai, Eigen::Vector3d& P_e,Eigen::Vector3d& P_LJ);
 
