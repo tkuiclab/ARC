@@ -943,7 +943,7 @@ $("#btn_InitPos").click(function(){
 	
 	// 對於Input元件來說，要用val()顯示，不能用html()
 	//var tmp_num_arr = [0.3, 0, 0.2, -90, 0, 0, 0];
-	var tmp_num_arr = [0.3, 0, 0.3, -60, 0, 0, 0];
+	var tmp_num_arr = [0.65, 0, -0.2, 0, 0, 0, 0];
 	$("#MF_block_x")	.val(tmp_num_arr[0]);
 	$("#MF_block_y")	.val(tmp_num_arr[1]);
 	$("#MF_block_z")	.val(tmp_num_arr[2]);
@@ -966,7 +966,7 @@ $("#btn_Home").click(function(){
 	$(this).addClass('disabled');
 	run_cmd_ind = $('#teach_table tr').length;
 	var joint_name_ary = ['joint1', 'joint2', 'joint3', 'joint4',  'joint5','joint6',  'joint7' ];
-	var float_ary = [0, 0, 0, 0, 0, 0, 0];
+	var float_ary = [0, -1.57, 0, 0, 0, 0, 0];
 
 	var cmd_msg = new ROSLIB.Message({
 		name: joint_name_ary,
