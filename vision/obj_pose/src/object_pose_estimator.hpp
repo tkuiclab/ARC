@@ -3,7 +3,8 @@
 #include <ros/package.h>
 #include <geometry_msgs/Twist.h>
 
-#include <fake_roi/Detect.h>
+//#include <fake_roi/Detect.h>
+#include <darkflow_detect/Detect.h>
 #include <boost/thread/thread.hpp>
 #include <sensor_msgs/PointCloud2.h>
 #include <actionlib/server/simple_action_server.h>
@@ -46,6 +47,7 @@ typedef pcl::visualization::PointCloudColorHandlerCustom<PointNT> ColorHandlerT;
 enum ProcessingState{
     NADA,
     FOTO,
+    SEGMETATION,
     CALL_RCNN,
     ALIGMENT,
     POSE_ESTIMATION
@@ -70,11 +72,12 @@ public:
     as_.registerGoalCallback(boost::bind(&ObjEstAction::goalCB, this));
     as_.registerPreemptCallback(boost::bind(&ObjEstAction::preemptCB, this));
 
-    cloud_sub = nh_.subscribe("/camera/depth/points", 10, &ObjEstAction::cloudCB,this);
+    segmented_pub_ =nh_.advertise<sensor_msgs::PointCloud2>("segmented_pointcloud", 1);
+    cloud_sub = nh_.subscribe("/camera/depth_registered/points", 10, &ObjEstAction::cloudCB,this);
     
     as_.start();
 
-    roi_client = nh_.serviceClient<fake_roi::Detect>("/detect");
+    roi_client = nh_.serviceClient<darkflow_detect::Detect>("/detect");
   
     ROS_INFO("obj_pose READY!");
   }
@@ -85,12 +88,15 @@ public:
   void poseEstimation();
   void aligment();
   void get_roi();
-  void segmetation();
+  void get_roi(std::string pcd_name);
+  void segmentation();
+  void cpc_segmentation();
 
 protected:
 
   //------ROS--------//
   ros::NodeHandle nh_;
+  ros::Publisher segmented_pub_;
   ros::Subscriber cloud_sub;
   ros::ServiceClient roi_client;
 
@@ -106,14 +112,16 @@ protected:
   int max_x;
   int max_y;
   
-  fake_roi::Detect roi_srv;
+  darkflow_detect::Detect roi_srv;
   std::string tmp_path;
   std::string tmp_path2;
   std::string obj_name;
   std::string path;
   std::string pcd_folder;
-
+  
+  sensor_msgs::PointCloud2 seg_msg;
 private:
   PCT::Ptr cloud;
+  pcl::PointCloud<PT>::CloudVectorType clusters;
 };
 }

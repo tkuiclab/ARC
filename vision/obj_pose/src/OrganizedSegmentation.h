@@ -14,6 +14,13 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include <algorithm>
+#include <iostream>
+#include <boost/thread/thread.hpp>
+#include <pcl/common/common_headers.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/console/parse.h>
+
 typedef pcl::PointXYZRGBA PointType;
 bool use_planar_refinement_ = true;
 
@@ -27,7 +34,26 @@ public:
 		euclidean_cluster_comparator_ = pcl::EuclideanClusterComparator<PointType, pcl::Normal, pcl::Label>::Ptr 
 										(new pcl::EuclideanClusterComparator<PointType, pcl::Normal, pcl::Label>());
 		viewer1 = boost::shared_ptr<pcl::visualization::PCLVisualizer> (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+		
 	}
+
+	boost::shared_ptr<pcl::visualization::PCLVisualizer> normalsVis (
+    	pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr cloud, pcl::PointCloud<pcl::Normal>::ConstPtr normals)
+	{
+		// --------------------------------------------------------
+		// -----Open 3D viewer and add point cloud and normals-----
+		// --------------------------------------------------------
+		boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+		viewer->setBackgroundColor (0, 0, 0);
+		pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGBA> rgb(cloud);
+		viewer->addPointCloud<pcl::PointXYZRGBA> (cloud, rgb, "sample cloud");
+		viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "sample cloud");
+		viewer->addPointCloudNormals<pcl::PointXYZRGBA, pcl::Normal> (cloud, normals, 10, 0.05, "normals");
+		viewer->addCoordinateSystem (1.0);
+		viewer->initCameraParameters ();
+		return (viewer);
+	}
+
 
 	void PlaneSegmentation(pcl::PointCloud<PointType>::Ptr &cloud)
 	{
@@ -36,14 +62,28 @@ public:
 		std::vector<pcl::ModelCoefficients> model_coefficients;
 		std::vector<pcl::PointIndices> inlier_indices;
 
-		// Estimate Normals
+		//Estimate Normals
 		pcl::IntegralImageNormalEstimation<PointType, pcl::Normal> ne;
 		ne.setNormalEstimationMethod (ne.COVARIANCE_MATRIX);
 		ne.setMaxDepthChangeFactor (0.02f);
-		ne.setNormalSmoothingSize (20.0f);
+		ne.setNormalSmoothingSize (5.0f);
 		ne.setInputCloud (cloud);
 		ne.compute (*normal_cloud);
 
+		// pcl::NormalEstimation<pcl::PointXYZRGBA, pcl::Normal> ne2;
+		// ne2.setInputCloud (cloud);
+  		// pcl::search::KdTree<pcl::PointXYZRGBA>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGBA> ());
+		// ne2.setSearchMethod (tree);
+  		// pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
+	  	// ne2.setRadiusSearch (0.1);
+  		// ne2.compute (*cloud_normals2);
+
+		viewer = normalsVis(cloud, normal_cloud);
+		while (!viewer->wasStopped ())
+		{
+			viewer->spinOnce (100);
+			boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+		}
 		// Segment planes
 		pcl::OrganizedMultiPlaneSegmentation< PointType, pcl::Normal, pcl::Label > mps;
 		mps.setMinInliers (10000);
@@ -87,22 +127,110 @@ public:
 			pcl::OrganizedConnectedComponentSegmentation<PointType,pcl::Label> euclidean_segmentation (euclidean_cluster_comparator_);
 			euclidean_segmentation.setInputCloud (cloud);
 			euclidean_segmentation.segment (euclidean_labels, euclidean_label_indices);
+			std::vector<int> m_indices;
+			std::vector<int> already_process_indices;
 
 			for (size_t i = 0; i < euclidean_label_indices.size (); i++)
 			{
 				if (euclidean_label_indices[i].indices.size () > 1000)
 				{
-					pcl::PointCloud<PointType> cluster;
-					pcl::copyPointCloud (*cloud,euclidean_label_indices[i].indices,cluster);
-					clusters.push_back (cluster);
-				}    
-			}
+					// std::vector<int>::iterator result;
+					// std::vector<int>::iterator result2;
+					// result = std::max_element(euclidean_label_indices[i].indices.begin(), euclidean_label_indices[i].indices.end());
+					// result2 = std::min_element(euclidean_label_indices[i].indices.begin(), euclidean_label_indices[i].indices.end());
+					// int max = euclidean_label_indices[i].indices[std::distance(euclidean_label_indices[i].indices.begin(), result)];
+					// int min = euclidean_label_indices[i].indices[std::distance(euclidean_label_indices[i].indices.begin(), result2)];
+					// std::cout << "max number is: " << max << '\n';
+					// std::cout << "max number is: " << min << '\n';
+					// if(max < ((max_y-1)*cloud->width+max_x-1) && min > ((mini_y-1)*cloud->width+mini_x-1))
+					// {
+					// 	PCL_INFO ("Cluster %d is in ROI!\n",i);
+					// 	pcl::PointCloud<PointType> cluster;
+					// 	pcl::copyPointCloud (*cloud,euclidean_label_indices[i].indices,cluster);
+					// 	clusters.push_back (cluster);
+					// }else{
+					// 	PCL_INFO ("Cluster %d not in ROI!\n",i);
+					// }
+					int tmp=0;
+					while(tmp<cloud->size())
+					{
+						int a = tmp/cloud->width;
+						int b = tmp%cloud->width;
+						if(a <= max_y && a >= mini_y && b <= max_x && b >= mini_x)
+						{
+							m_indices.push_back(tmp);
+						}else{
+							already_process_indices.push_back(tmp);
+						}
+						tmp++;
+					}
+					
+					
+					
+					// PCL_INFO ("The size of segmentation is %d!\n", euclidean_label_indices[i].indices.size ());
+					// //PCL_INFO ("The width of cloud is %d!\n", cloud->width);
+					// int tmp=0;
+					// while(tmp < euclidean_label_indices[i].indices.size ())
+					// {
+					// 	int b = euclidean_label_indices[i].indices[tmp]%cloud->width;
+					// 	int a = euclidean_label_indices[i].indices[tmp]/cloud->width;
+					// 	if(a <= max_y && a >= mini_y && b <= max_x && b >= mini_x)
+					// 	{
+					// 		m_indices.push_back(euclidean_label_indices[i].indices[tmp]);
+					// 	}else{
+					// 		already_process_indices.push_back(euclidean_label_indices[i].indices[tmp]);
+					// 	}
+					// 	tmp++;
+					// }
 
-			PCL_INFO ("Got %d euclidean clusters!\n", clusters.size ());
+
+
+					
+					// std::vector<int>::iterator result;
+					// result = std::max_element(euclidean_label_indices[i].indices.begin(), euclidean_label_indices[i].indices.end());
+					// int max = euclidean_label_indices[i].indices[std::distance(euclidean_label_indices[i].indices.begin(), result)];
+					// std::cout << "max number is: " << max << '\n';
+					// int a = max/cloud->width;
+					// int b = max%cloud->width;
+					// std::cout << "b = " << b << '\n';
+					// std::cout << "a = " << a << '\n';
+				}
+			}
+			pcl::PointCloud<PointType> cluster;
+			pcl::copyPointCloud (*cloud,m_indices,cluster);
+			clusters.push_back (cluster);
+			pcl::PointCloud<PointType> already_process_cluster;
+			pcl::copyPointCloud (*cloud,already_process_indices,already_process_cluster);
+			clusters.push_back (already_process_cluster);
+			PCL_INFO ("Got %d euclidean cluster!\n", clusters.size ());
+			PCL_INFO ("The size of cluster is %d!\n", cluster.size ());
 		}
 		else 
 		{
+			std::vector<int> m_indices;
+			std::vector<int> already_process_indices;
 			PCL_INFO ("Can't find euclidean clusters!\n");
+			int tmp=0;
+			while(tmp<cloud->size())
+			{
+				int a = tmp/cloud->width;
+				int b = tmp%cloud->width;
+			if(a <= max_y && a >= mini_y && b <= max_x && b >= mini_x)
+			{
+				m_indices.push_back(tmp);
+			}else{
+				already_process_indices.push_back(tmp);
+			}
+			tmp++;
+			}
+			pcl::PointCloud<PointType> cluster;
+			pcl::copyPointCloud (*cloud,m_indices,cluster);
+			clusters.push_back (cluster);
+			pcl::PointCloud<PointType> already_process_cluster;
+			pcl::copyPointCloud (*cloud,already_process_indices,already_process_cluster);
+			clusters.push_back (already_process_cluster);
+			PCL_INFO ("Got %d euclidean cluster!\n", clusters.size ());
+			PCL_INFO ("The size of cluster is %d!\n", cluster.size ());
 		}
 	}
 
@@ -142,8 +270,10 @@ public:
 			}
 			*PCD_add = *PCD_add + *PCD_src;
 		}
-
+		//viewer1->setBackgroundColor (255, 255, 255);
+		viewer1->setBackgroundColor (0, 0, 0);
 		viewer1->addPointCloud(cloud, "original_cloud");
+		viewer1->addCoordinateSystem(0.1, 0);
 		viewer1->addPointCloud(PCD_add, "cloud_");
 		viewer1->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "cloud_cluster");
 		viewer1->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.3, "cloud_cluster");
@@ -190,6 +320,18 @@ public:
 			ss.clear();
 		}
 	}
+	pcl::PointCloud<PointType>::CloudVectorType return_cluster()
+	{
+		return clusters;
+	}
+
+	void set_roi(int _mini_x, int _mini_y,int _max_x,int _max_y)
+	{
+		mini_x = _mini_x; 
+		mini_y = _mini_y; 
+		max_x = _max_x;
+		max_y = _max_y;
+	}
 
 
 private:
@@ -201,6 +343,13 @@ private:
 	pcl::PointCloud<PointType>::CloudVectorType clusters;
 	pcl::EuclideanClusterComparator<PointType, pcl::Normal, pcl::Label>::Ptr euclidean_cluster_comparator_;
 
+	//--------Class Usage------//
+	int mini_x;
+	int mini_y;
+	int max_x;
+	int max_y;
+
 public:
 	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer1;
+	boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 };
