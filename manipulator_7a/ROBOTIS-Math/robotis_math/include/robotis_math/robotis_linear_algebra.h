@@ -45,7 +45,8 @@
 
 #include <Eigen/Dense>
 #include "step_data_define.h"
-
+#include <iostream>
+using namespace std;
 namespace robotis_framework
 {
 
@@ -73,7 +74,7 @@ Eigen::MatrixXd calcCross(Eigen::MatrixXd vector3d_a, Eigen::MatrixXd vector3d_b
 double calcInner(Eigen::MatrixXd vector3d_a, Eigen::MatrixXd vector3d_b);
 
 Pose3D getPose3DfromTransformMatrix(Eigen::MatrixXd  transform);
-
+Eigen::Quaterniond convertEulerToQuaternion(double roll, double pitch, double yaw);// Added for arc
 }
 
 
