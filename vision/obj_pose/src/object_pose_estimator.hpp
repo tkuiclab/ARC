@@ -27,6 +27,7 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/common/centroid.h>
+#include <pcl/common/common.h>
 #include <pcl_ros/transforms.h>
 #include <pcl_conversions/pcl_conversions.h>
 
@@ -65,7 +66,7 @@ public:
     action_name_(name),
     cloud (new PCT)
   {
-    pcd_folder = "/pcd_file/";
+    pcd_folder = "/";
     path = ros::package::getPath("obj_pose");
     path.append(pcd_folder);
     //ROS_INFO("Get path=%s",path.c_str());
@@ -88,9 +89,12 @@ public:
   void poseEstimation();
   void aligment();
   void get_roi();
-  void get_roi(std::string pcd_name);
   void segmentation();
   void cpc_segmentation();
+  void do_ICP();
+  bool load_pcd(std::string pcd_filename);
+  void set_feedback(std::string msg,int progress);
+  void print4x4Matrix (const Eigen::Matrix4d & matrix);
 
 protected:
 
@@ -105,6 +109,7 @@ protected:
 
   obj_pose::ObjectPoseFeedback feedback_;
   obj_pose::ObjectPoseResult result_;
+  geometry_msgs::Twist obj_pose;
 
   //--------Class Usage------//
   int mini_x;
@@ -121,7 +126,12 @@ protected:
   
   sensor_msgs::PointCloud2 seg_msg;
 private:
+  PT min_p, max_p;
   PCT::Ptr cloud;
-  pcl::PointCloud<PT>::CloudVectorType clusters;
+  PCT::Ptr my_ROICloud;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr model_PCD;
+  PCT::CloudVectorType clusters;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr Max_cluster;
+  Eigen::Matrix4d transformation_matrix;
 };
 }

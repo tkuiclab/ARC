@@ -19,6 +19,7 @@
 
 // The segmentation class this example is for
 #include <pcl/segmentation/cpc_segmentation.h>
+#include <pcl/segmentation/euclidean_cluster_comparator.h>
 #include <pcl/filters/extract_indices.h>
 // VTK
 #include <vtkImageReader2Factory.h>
@@ -86,7 +87,7 @@ class CPCSegmentation
       float concavity_tolerance_threshold = 10;
       float smoothness_threshold = 0.1;
       uint32_t min_segment_size = 0;
-      bool use_extended_convexity;
+      bool use_extended_convexity=true;
       bool use_sanity_criterion;
 
       // CPCSegmentation Stuff
@@ -106,13 +107,6 @@ class CPCSegmentation
         k_factor = 1;
       
       textcolor = bg_white?0:1;
-
-      // pcl::console::print_info ("Maximum cuts: %d\n", max_cuts);
-      // pcl::console::print_info ("Minumum segment siz: %d\n", cutting_min_segments);
-      // pcl::console::print_info ("Use local constrain: %d\n", use_local_constrain);
-      // pcl::console::print_info ("Use directed weights: %d\n", use_directed_cutting);
-      // pcl::console::print_info ("Use clean cuts: %d\n", use_clean_cutting);
-      // pcl::console::print_info ("RANSAC iterations: %d\n", ransac_iterations);  
 
       pcl::SupervoxelClustering<PointT> super (voxel_resolution, seed_resolution);
       super.setInputCloud (input_cloud_ptr_);
@@ -164,29 +158,75 @@ class CPCSegmentation
       cpc.getSVAdjacencyList (sv_adjacency_list);  // Needed for visualization
       segmented_cloud_ptr_ = cpc_labeled_cloud;
 
-      // /// Creating Colored Clouds and Output
-      // if (cpc_labeled_cloud->size () == input_cloud_ptr_->size ())
-      // {
-      //   if (output_specified)
-      //   {
-      //     // if (pcl::getFieldIndex (input_pointcloud2, "label") >= 0)
-      //     //   PCL_WARN ("Input cloud already has a label field. It will be overwritten by the cpc segmentation output.\n");
-      //     pcl::PCLPointCloud2 output_label_cloud2, output_concat_cloud2;
-      //     pcl::toPCLPointCloud2 (*cpc_labeled_cloud, output_label_cloud2);
-      //     pcl::concatenateFields (input_pointcloud2, output_label_cloud2, output_concat_cloud2);
-      //     //pcl::io::savePCDFile (outputname + "_out.pcd", output_concat_cloud2, Eigen::Vector4f::Zero (), Eigen::Quaternionf::Identity (), save_binary_pcd);
-      //   }
-      //   //segmented_cloud_ptr_ = cloud_cluster1;
-      // }
-      // else
-      // {
-      //   PCL_ERROR ("ERROR:: Sizes of input cloud and labeled supervoxel cloud do not match. No output is produced.\n");
-      // }
-    }  /// END main
+      Max_cluster = pcl::PointCloud<pcl::PointXYZ>::Ptr (new pcl::PointCloud<pcl::PointXYZ>); 
+      Max_cluster->height= cpc_labeled_cloud->height; 
+      Max_cluster->width= cpc_labeled_cloud->width; 
+      Max_cluster->is_dense = false;
+      Max_cluster->points.resize(cpc_labeled_cloud->size()); 
 
+      max_label=0;
+      for(int i=0;i<cpc_labeled_cloud->size();i++)
+      {
+        if(cpc_labeled_cloud->points[i].label > max_label)
+          max_label = cpc_labeled_cloud->points[i].label;
+      }
+      std::cout << "max label: " << max_label << std::endl;
+      max_label_index=0;
+      int tmp_counter=0;
+      for(int j=1;j<max_label;j++)
+      {
+        counter=0;
+        for(int i=0;i<cpc_labeled_cloud->size();i++)
+        {
+          if(cpc_labeled_cloud->points[i].label == j)
+          {
+            counter++;
+          }
+        }
+        if(tmp_counter < counter)
+        {
+          max_label_index = j;
+          tmp_counter=counter;
+        }
+        std::cout << (j-1) << " : " << counter << std::endl;
+      }
+      for(int i=0;i<cpc_labeled_cloud->size();i++)
+      {
+        if(cpc_labeled_cloud->points[i].label == max_label_index)
+        {
+          Max_cluster->points[i].x = cpc_labeled_cloud->points[i].x;
+          Max_cluster->points[i].y = cpc_labeled_cloud->points[i].y;
+          Max_cluster->points[i].z = cpc_labeled_cloud->points[i].z;
+        }
+      }
+      // removing the extra zeroes(0,0,0) points from the point cloud 
+      pcl::IndicesPtr indices_ex (new std::vector <int>); 
+      pcl::PassThrough<pcl::PointXYZ> pass; 
+      pass.setInputCloud (Max_cluster); 
+      pass.setFilterFieldName ("z");
+      pass.setFilterLimits (0.0,0.0);
+      pass.setFilterLimitsNegative (true); 
+      pass.filter (*indices_ex); // storing the final result in as indices 
+
+      
+      pcl::ExtractIndices<pcl::PointXYZ> extract; 
+      extract.setInputCloud (Max_cluster);  // setting the color PointCloud as the input 
+      
+      extract.setIndices(indices_ex); // passing the indices that I want to extract from the colored PointCloud 
+      extract.setNegative (false); 
+      extract.filter (*Max_cluster); // extracted the wanted cluster from the color pointcloud 
+      // std::cout << "Max Label Index＝　" << max_label_index <<  std::endl;
+      //pcl::io::savePCDFile ("BIG_SEG.pcd", *Max_cluster, false);
+    } 
+    pcl::PointCloud<pcl::PointXYZ>::Ptr get_BiggestCluster(){return Max_cluster;}
     pcl::PointCloud<pcl::PointXYZL>::Ptr getSegmentedPointCloud(){return segmented_cloud_ptr_;}
 private:
+   int max_label;
+   int counter;
+   int max_label_index;
    pcl::PCLPointCloud2 input_pointcloud2;
    pcl::PointCloud<PointT>::Ptr input_cloud_ptr_;
    pcl::PointCloud<pcl::PointXYZL>::Ptr segmented_cloud_ptr_;
+   pcl::PointCloud<pcl::PointXYZ>::Ptr Max_cluster;
+   pcl::PointCloud<pcl::PointXYZ>::CloudVectorType clusters;
 };
