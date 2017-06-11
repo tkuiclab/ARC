@@ -528,12 +528,10 @@ void ManipulatorKinematicsDynamics::fk()
     double pitch, roll, yaw;
     if(Euler_Mode == e_ICLAB)
     {
-        // if(ori(2,0)>0)
-        // if(fabs(ori(2,0)) > pow(10, -5))
-        //     pitch = atan2(ori(2, 2), sqrt(1 - pow(ori(2, 2), 2))); // pitch
-        // else
-            pitch = atan2(ori(2, 2), 
-                    robotis_framework::sign(roundN(ori(2,0),4))*sqrt(1 - pow(ori(2, 2), 2))) ; // pitch
+        if(ori(2,0)>0)
+            pitch = atan2(ori(2, 2), sqrt(1 - pow(ori(2, 2), 2))); // pitch
+        else
+            pitch = atan2(ori(2, 2), -sqrt(1 - pow(ori(2, 2), 2))); // pitch
         /* pitch != +-90 deg */
         if (fabs(ori(2, 2)) <= 1.0 - pow(10, -8))
         {
@@ -543,7 +541,8 @@ void ManipulatorKinematicsDynamics::fk()
             double Cy =  ori(2, 0) / sqrt(1 - pow(ori(2, 2), 2));
             double Sy = -ori(2, 1) / sqrt(1 - pow(ori(2, 2), 2));
             
-            if(fabs(ori(2,0)) > pow(10, -5))
+            // if(fabs(ori(2,0)) > pow(10, -5))
+            if(ori(2,0)>0)
             {
                 roll = atan2(Sy, Cy);  
                 yaw  = atan2(Sz, Cz);   
