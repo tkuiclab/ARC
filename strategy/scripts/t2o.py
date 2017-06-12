@@ -346,19 +346,19 @@ if __name__ == '__main__':
     #task.pub_ikCmd('ptp')
     
     #init pose
-    task.pub_ikCmd('ptp', (0.30, 0.0 , 0.22), (0, 0, 0) )
+    # task.pub_ikCmd('ptp', (0.30, 0.0 , 0.22), (0, 0, 0) )
 		
     #stow photo pose 
     #task.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-90, 0, 0) )
     
-    #task.relative_xyz_base(y = 0.1)
+    # task.relative_xyz_base(y = 0.1)
     
     rospy.loginfo('strategy ready')
     #task.obj_pose_request()
 
     #task.relative_control(n=.05)  # -cam_y
     #task.relative_control(s=.05)  # cam_x
-    task.relative_control(a=.05)  #cam_z
+    task.relative_control(a=.035)  #cam_z
 
     #task.relative_control_rotate( pitch = -5 )
     #task.relative_control_rotate( pitch = -5 )

@@ -164,8 +164,8 @@ class ArmTask:
             mode,
             (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
             (
+                degrees(euler[1]),                
                 degrees(euler[0]),
-                degrees(euler[1]),
                 degrees(euler[2])
             )
         )
@@ -187,8 +187,8 @@ class ArmTask:
             mode,
             (pos.x + x, pos.y + y, pos.z + z),
             (
-                degrees(euler[0]),
                 degrees(euler[1]),
+                degrees(euler[0]),
                 degrees(euler[2])
             )
         )
