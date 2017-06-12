@@ -216,7 +216,6 @@ class ArmTask:
         rot   = self.euler2rotation(euler)
         vec_n, vec_s, vec_a = self.rotation2vector(rot)
 
-        # change the rank of vec_s and vec_n (needed)
         move = [0, 0, 0]
         if n != 0:
             move += multiply(vec_n, n)
