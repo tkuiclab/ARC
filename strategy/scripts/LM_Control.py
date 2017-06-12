@@ -58,21 +58,7 @@ class CLM_Control:
             queue_size=10
         )
 
-    def Vaccum_Test(self, on_off):
-        rospy.wait_for_service('/robot_cmd')
-        try:
-            get_endpos = rospy.ServiceProxy(
-                '/robot_cmd',
-                VacuumCmd
-            )
-            if on_off == True:
-                res = get_endpos('vacuumOn')
-            else:
-                res = get_endpos('vacuumOff')
-            return res
-        except rospy.ServiceException, e:
-            print "Service call (Vacuum) failed: %s" % e
-
+    
     @property
     def IsBusy(self):
         return self.__is_busy

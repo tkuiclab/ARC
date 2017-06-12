@@ -201,21 +201,34 @@ void get_hsv_points(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in,
              pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_out,
             float h_min, float h_max, 
             float s_min, float s_max,
-            float v_min, float v_max){
+            float v_min, float v_max,
+            bool negtive = false){
            
 
   
   std::vector<int> want_indices;
   
+  bool h_type = (h_min > h_max) ? true:false ;
+
+
   for(int i = 0 ;i < cloud_in->size();i++){
       pcl::PointXYZHSV p;
       pcl::PointXYZRGBtoXYZHSV(cloud_in->points[i],p);
-      if(p.h >= h_min && p.h <= h_max && 
-         p.s >= s_min && p.s <= s_max && 
-         p.v >= v_min && p.v <= v_max  ){
+      if(h_type){
+        if(p.h >= h_min || p.h <= h_max && 
+            p.s >= s_min && p.s <= s_max && 
+            p.v >= v_min && p.v <= v_max  ){
 
-          want_indices.push_back(i);
+              want_indices.push_back(i);
         }
+      }else{
+        if(p.h >= h_min && p.h <= h_max && 
+          p.s >= s_min && p.s <= s_max && 
+          p.v >= v_min && p.v <= v_max  ){
+
+            want_indices.push_back(i);
+        }
+      }
   }
   
   pcl::PointIndices::Ptr pointIndices(new pcl::PointIndices);
@@ -226,7 +239,7 @@ void get_hsv_points(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in,
   pcl::ExtractIndices<pcl::PointXYZRGB> extract;
   extract.setInputCloud (cloud_in);
   extract.setIndices (pointIndices);
-  extract.setNegative (false);
+  extract.setNegative (negtive);
   extract.filter (*cloud_out);
 
 }
@@ -240,15 +253,18 @@ void get_pass_through_points(PCT::Ptr cloud_in,
   pass.setInputCloud (cloud_in);
   pass.setFilterFieldName ("z");
   pass.setFilterLimits (min_z, max_z);
-  pass.filter (*indices);
+  pass.filter (*cloud_out);
 
+  
+  /*
+  pass.filter (*indices);
   //PCT::Ptr cloud_cluster (new PCT);
   for (std::vector<int>::const_iterator pit = indices->begin (); pit != indices->end (); ++pit)
     cloud_out->points.push_back (cloud_in->points[*pit]); //*
   cloud_out->width = cloud_out->points.size ();
   cloud_out->height = 1;
   cloud_out->is_dense = true;
-
+  */
 }
 
 #endif

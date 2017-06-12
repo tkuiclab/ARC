@@ -3,7 +3,8 @@
 #include <ros/package.h>
 #include <geometry_msgs/Twist.h>
 
-#include <fake_roi/Detect.h>
+//#include <fake_roi/Detect.h>
+#include <darkflow_detect/Detect.h>
 #include <boost/thread/thread.hpp>
 #include <sensor_msgs/PointCloud2.h>
 #include <actionlib/server/simple_action_server.h>
@@ -61,16 +62,14 @@ public:
   ObjEstAction(std::string name) :
     as_(nh_, name, false),
     action_name_(name),
-    cloud (new PCT)
-    //cloud(new pcl::PCLPointCloud2)
+    //cloud (new PCT),
+    scene_cloud(new PCT),
+    ROI_cloud(new PCT)
   {
-    //foto = false;
-    //ya_foto = false;
+
     pcd_folder = "/pcd_file/";
     path = ros::package::getPath("obj_pose");
-    path.append(pcd_folder);
-    //ROS_INFO("Get path=%s",path.c_str());
-    //SetInputDirectory("/home/iclab-ming/ARC_ws/src/obj_pose/pcd_file/");
+    path.append(pcd_folder);;
     as_.registerGoalCallback(boost::bind(&ObjEstAction::goalCB, this));
     as_.registerPreemptCallback(boost::bind(&ObjEstAction::preemptCB, this));
 
@@ -79,7 +78,7 @@ public:
     
     as_.start();
 
-    roi_client = nh_.serviceClient<fake_roi::Detect>("/detect");
+    roi_client = nh_.serviceClient<darkflow_detect::Detect>("/detect");
   
     ROS_INFO("obj_pose READY!");
   }
@@ -88,7 +87,7 @@ public:
   void preemptCB();
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
   void poseEstimation();
-  void aligment();
+  //void aligment();
   void get_roi();
 
 protected:
@@ -110,20 +109,22 @@ protected:
   int max_x;
   int max_y;
   
-  fake_roi::Detect roi_srv;
+  //fake_roi::Detect roi_srv;
+  darkflow_detect::Detect roi_srv;
   std::string tmp_path;
   std::string tmp_path2;
   std::string obj_name;
   std::string path;
   std::string pcd_folder;
 
-  // pcl::PCLPointCloud2 pcl_pc2;
-  // pcl_conversions::toPCL(*input,pcl_pc2);
-  // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-  // pcl::fromPCLPointCloud2(pcl_pc2,*cloud);
 
 private:
-  PCT::Ptr cloud;
+  //PCT::Ptr cloud;
+  PCT::Ptr scene_cloud ;
+  PCT::Ptr ROI_cloud;
+    
+
+  int call_rcnn_times = 0;
    //pcl::PCLPointCloud2* cloud ;
 };
 }
