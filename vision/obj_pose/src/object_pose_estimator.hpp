@@ -29,6 +29,7 @@
 #include <pcl/common/centroid.h>
 #include <pcl/common/common.h>
 #include <pcl_ros/transforms.h>
+#include <pcl/console/parse.h>
 #include <pcl_conversions/pcl_conversions.h>
 
 // Types
@@ -61,11 +62,12 @@ class ObjEstAction
 {
 public:
 
-  ObjEstAction(std::string name) :
+  ObjEstAction(int argc, char **argv, std::string name) :
     as_(nh_, name, false),
     action_name_(name),
     cloud (new PCT)
   {
+    scence_seg = pcl::console::find_switch (argc, argv, "-ss");
     pcd_folder = "/";
     path = ros::package::getPath("obj_pose");
     path.append(pcd_folder);
@@ -116,6 +118,8 @@ protected:
   int mini_y;
   int max_x;
   int max_y;
+
+  bool scence_seg;
   
   darkflow_detect::Detect roi_srv;
   std::string tmp_path;

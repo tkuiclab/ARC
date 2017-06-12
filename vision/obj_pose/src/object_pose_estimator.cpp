@@ -27,22 +27,16 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
   {
       pcl::fromROSMsg(*input,*cloud);
 #ifdef SaveCloud
-    
       pcl::PCDWriter writer1;
       std::stringstream ss1;
-      
       // std::string sys_str;
       // sys_str = "rm  " +  path + "*.pcd";
       //std::cout << "[CMD] -> " << sys_str << std::endl;
       //system(sys_str.c_str());
-
       ss1 << path << "pcd_file/scene_cloud" << ".pcd";
       writer1.write<PT> (ss1.str (), *cloud, false);
-      
       ROS_INFO("Save PCD to %s",ss1.str().c_str());
-
 #endif
-
       state = CALL_RCNN;
   }
 }
@@ -93,7 +87,7 @@ void ObjEstAction::get_roi(){
   tmp_path.append("pcd_file/test_pcd.pcd");
   writer.write<PT> (tmp_path, *ROI_cloud, false);
   std::cerr << "Saved " << ROI_cloud->points.size () << " data points to test_pcd.pcd." << std::endl;
-  // pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
+  pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
   // ROS_INFO("mini_x = %f",min_p.x);
   pcl::copyPointCloud(*ROI_cloud, *my_ROICloud);
   state = SEGMETATION;
@@ -104,30 +98,32 @@ void ObjEstAction::segmentation()
   ROS_INFO("Doing 3D Segmentation....");
 
   CPCSegmentation cpc_seg;
-  cpc_seg.setPointCloud(my_ROICloud);
-  cpc_seg.do_segmentation();
+  if(scence_seg)
+  {
+    cpc_seg.setPointCloud(cloud);
+    cpc_seg.do_segmentation();
+    state = NADA;
+  }else{
+    cpc_seg.setPointCloud(my_ROICloud);
+    cpc_seg.do_segmentation();
+    Max_cluster = cpc_seg.get_BiggestCluster();
+    state = ALIGMENT;
+  }
+
+  //----------------- Pub Segmentation Cloud to topic -----------------//
   pcl::PointCloud<pcl::PointXYZL>::Ptr segmented_pc_ptr = cpc_seg.getSegmentedPointCloud();
   pcl::PointCloud<pcl::PointXYZL> cloud2_;
 
   pcl::copyPointCloud(*segmented_pc_ptr, cloud2_);
   cloud2_.clear();
-
-  BOOST_FOREACH (pcl::PointXYZL point, *segmented_pc_ptr) {
+  BOOST_FOREACH (pcl::PointXYZL point, *segmented_pc_ptr) 
+  {
       if (point.label == 0) continue;
       cloud2_.push_back(point);
   }
-
   pcl::toROSMsg(cloud2_, seg_msg);
   seg_msg.header.frame_id = "camera_link";
   segmented_pub_.publish(seg_msg);
-  Max_cluster = cpc_seg.get_BiggestCluster();
-  state = ALIGMENT;
-}
-void ObjEstAction::set_feedback(std::string msg,int progress)
-{
-  feedback_.msg = msg;
-  feedback_.progress = progress;
-  as_.publishFeedback(feedback_);
 }
 
 void ObjEstAction::do_ICP()
@@ -152,6 +148,13 @@ void ObjEstAction::do_ICP()
   }else{
     state = NADA;
   }
+}
+
+void ObjEstAction::set_feedback(std::string msg,int progress)
+{
+  feedback_.msg = msg;
+  feedback_.progress = progress;
+  as_.publishFeedback(feedback_);
 }
 
 void ObjEstAction::print4x4Matrix (const Eigen::Matrix4d & matrix)
@@ -180,7 +183,7 @@ bool ObjEstAction::load_pcd(std::string pcd_filename)
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "obj_pose");
-  ObjEstAction ObjEst("obj_pose");
+  ObjEstAction ObjEst(argc, argv,"obj_pose");
   ros::Rate loop_rate(10);
   while(ros::ok())
   {
