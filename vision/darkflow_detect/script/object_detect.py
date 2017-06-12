@@ -138,7 +138,7 @@ prepare_network()
 if __name__ == '__main__':
     rospy.init_node('object_detect', anonymous=True)
     img_topic = (
-        '/camera/color/image_raw' if len(sys.argv) < 2
+        '/camera/rgb/image_raw' if len(sys.argv) < 2
         else sys.argv[1]
     )
     img_cvt = ImageConverter(img_topic)

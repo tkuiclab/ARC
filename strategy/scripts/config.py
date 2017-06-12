@@ -21,3 +21,48 @@ Box_1AD = '1AD'
 Box_1A5 = '1A5'
 Box_1B2 = '1B2'
 Box_K3 = 'K3'
+
+
+def GetShift(Target_Type, LM_Dir, Target):
+    """ Get the motion pulse of linear motor """
+    # Bin
+    if Target_Type == 'Bin':
+        if Target in BinId:
+            if LM_Dir == 'x':
+                return BinShift_X[BinId.index(Target)]
+            elif LM_Dir=='z':
+                return BinShift_Z[BinId.index(Target)]
+            else:
+                print 'Error input Bin dir'
+                return 0
+        else:
+            print 'Error input character'
+
+    # Tote
+    elif  Target_Type == 'Tote':
+        if Target in ToteId:
+            if LM_Dir == 'x':
+                return ToteShift_X[ToteId.index(Target)]
+            elif LM_Dir=='z':
+                return ToteShift_Z[ToteId.index(Target)]
+            else:
+                print 'Error input Tote dir'
+                return 0
+        else:
+            print 'Error input character'
+
+    # Box
+    elif  Target_Type == 'Box':
+        if Target in BoxId:
+            if LM_Dir == 'x':
+                return BoxShift_X[BoxId.index(Target)]
+            elif LM_Dir=='z':
+                return BoxShift_Z[BoxId.index(Target)]
+            else:
+                print 'Error input dir'
+                return 0
+        else:
+            print 'Error input Box character'
+    
+    else:
+        print 'Error input Target Type'

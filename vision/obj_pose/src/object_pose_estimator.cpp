@@ -5,53 +5,34 @@
 
 using namespace ObjEstAction_namespace;
 
+
+int g_argc;
+char **g_argv;
+
 void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 {
-  
-  if(state==FOTO)
-  {
-      // sensor_msgs::PointCloud2 output;
-      
-      // output = *input;
-      // pcl::fromROSMsg(output,*cloud);
-      pcl::fromROSMsg(*input,*cloud);
+
+  if(state==FOTO){
+      pcl::fromROSMsg(*input,*scene_cloud);
 
 #ifdef SaveCloud
-    
-      pcl::PCDWriter writer1;
-      std::stringstream ss1;
-      
+      //Remove All PCD File in [package]/pcd_file/*.pcd      
       std::string sys_str;
       sys_str = "rm  " +  path + "*.pcd";
-      
       std::cout << "[CMD] -> " << sys_str << std::endl;  
-
       system(sys_str.c_str());
-      ss1 << path << "scene_cloud" << ".pcd";
-      writer1.write<PT> (ss1.str (), *cloud, false);
-      
-      ROS_INFO("Save PCD to %s",ss1.str().c_str());
 
-
-      //------------Test-----------//
-      // pcl::PointCloud<pcl::PointXYZRGB> PC;
-
-      // pcl::fromROSMsg(*input, PC); 
-
-      // std::stringstream ss2;
-      
-      // ss2 << path << "scene_cloud22222" << ".pcd";
-      // writer1.write<PT> (ss2.str (), PC, false);
-
+      //write pcd
+      write_pcd_2_rospack(scene_cloud,"scene_cloud.pcd");
 #endif
 
-      //state = CALL_RCNN;
-      feedback_.msg = "Catch Point Could Finish";
-      feedback_.progress = 60;
+      feedback_.msg = "Raw Point Could Done (From Camera)";
+      feedback_.progress = 30;
       as_.publishFeedback(feedback_);
 
-
-      state = POSE_ESTIMATION;
+      //state = POSE_ESTIMATION;
+      state = CALL_RCNN;
+      call_rcnn_times = 0;
   }
 }
 
@@ -60,9 +41,12 @@ void ObjEstAction::poseEstimation(){
   
   geometry_msgs::Twist pose;
 
+  PCT::Ptr cloud(new PCT);
   PCT::Ptr cloud_hsv (new PCT);
   PCT::Ptr cloud_seg (new PCT);
   PCT::Ptr cloud_seg_largest (new PCT);
+
+  *cloud = *ROI_cloud;
 
   // if(obj_name.compare("seg_0") == 0){
   //   get_seg_plane(cloud, 0, cloud_seg);
@@ -76,21 +60,42 @@ void ObjEstAction::poseEstimation(){
   
 #ifdef SaveCloud
   write_pcd_2_rospack(cloud,"_rm_NaN.pcd");
-
 #endif
 
-  //get_pass_through_points(cloud, 0.2, 1.0, cloud, index);
+  float tool_z = 0.25; 
+  float pass_z_max = 0.60;
 
+  if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_max")){
+    pcl::console::parse (g_argc, g_argv, "-pass_z_max", pass_z_max);
+  }
+  ROS_INFO("Use pass_z_max = %lf",pass_z_max);
+  get_pass_through_points(cloud, tool_z, pass_z_max, cloud);
 
-  get_hsv_points(cloud, cloud_hsv,
-        0.0, 38.0, 
-        0.03, 1.0, 
-        0.29, 1.0);
-    
 #ifdef SaveCloud
-  write_pcd_2_rospack(cloud_hsv,"_hsv.pcd");
-
+  write_pcd_2_rospack(cloud,"_PassThrough.pcd");
 #endif
+
+  // get_hsv_points(cloud, cloud_hsv,
+  //       0.0, 38.0, 
+  //       0.03, 1.0, 
+  //       0.29, 1.0);
+
+// get_hsv_points(cloud, cloud_hsv,
+//         332.0, 36.0, 
+//         0.0, 1.0, 
+//         0.0, 1.0,
+//         true);
+
+  // get_hsv_points(cloud, cloud_hsv,
+  //       200.0, 45.0, 
+  //       0.0, 1.0, 
+  //       0.0, 1.0,
+  //       true);
+    
+// #ifdef SaveCloud
+//   write_pcd_2_rospack(cloud_hsv,"_hsv.pcd");
+
+// #endif
   // if(obj_name.compare("seg_0") == 0){
   //   region_growing(cloud, 0, cloud_seg);
   // }else if(obj_name.compare("seg_1") == 0){
@@ -103,18 +108,18 @@ void ObjEstAction::poseEstimation(){
   //get_seg_plane(cloud,  cloud_seg);
   //get_largest_cluster(cloud_seg, cloud_seg_largest);
 
-  region_growing(cloud_hsv, 0, cloud_seg);
+//   region_growing(cloud, 0, cloud_seg);
 
-#ifdef SaveCloud
-  write_pcd_2_rospack(cloud_seg,"_region_growing.pcd");
+// #ifdef SaveCloud
+//   write_pcd_2_rospack(cloud_seg,"_region_growing.pcd");
 
-#endif
+// #endif
 
   //KNote: lots of time, have problem in this function , 
   //get_seg_plane_near(cloud, cloud_seg);
-  *cloud_seg_largest = *cloud_seg;
+  //*cloud_seg_largest = *cloud_seg;
 
-  cam_2_obj_center(cloud_seg_largest, 
+  cam_2_obj_center(cloud, 
       pose.linear.x, pose.linear.y, pose.linear.z, 
       pose.angular.x, pose.angular.y, pose.angular.z);
   
@@ -155,163 +160,56 @@ void ObjEstAction::poseEstimation(){
 
 }
 
-void ObjEstAction::aligment(){
-    // Point clouds
-  PointCloudT::Ptr object (new PointCloudT);
-  PointCloudT::Ptr object_aligned (new PointCloudT);
-  PointCloudT::Ptr scene (new PointCloudT);
-  FeatureCloudT::Ptr object_features (new FeatureCloudT);
-  FeatureCloudT::Ptr scene_features (new FeatureCloudT);
-  
-  // Load object and scene
-  tmp_path = path;
-  tmp_path.append("Hand_Weight1.pcd");
-  tmp_path2 = path;
-  tmp_path2.append("test_pcd.pcd");
-  pcl::console::print_highlight ("Loading point clouds...\n");
-  if (pcl::io::loadPCDFile<PointNT> (tmp_path, *object) < 0 ||
-      pcl::io::loadPCDFile<PointNT> (tmp_path2, *scene) < 0)
-  {
-    pcl::console::print_error ("Error loading object/scene file!\n");
-  }
-  
-  //pcl::io::savePCDFileASCII<PointNT>("new_chef.pcd",object);
-  // pcl::PCDWriter writer;
-  // writer.write<PointNT> ("new_chef.pcd", *object, false);
-
-  // writer.write<PointNT> ("new_rs1.pcd", *scene, false);
-
-  std::cerr << "Scene before filtering: " << scene->width * scene->height << std::endl;
-
-  // Downsample
-  pcl::console::print_highlight ("Downsampling...\n");
-  pcl::VoxelGrid<PointNT> grid;
-  const float leaf = 0.005f;
-  grid.setLeafSize (leaf, leaf, leaf);
-  grid.setInputCloud (object);
-  grid.filter (*object);
-  grid.setInputCloud (scene);
-  grid.filter (*scene);
-  
-  std::cerr << "Scene after filtering: " << scene->width * scene->height << std::endl;
-
-
-  // Estimate normals for object
-  pcl::console::print_highlight ("Estimating object normals...\n");
-  pcl::NormalEstimationOMP<PointNT,PointNT> nest_obj;
-  nest_obj.setRadiusSearch (0.01);
-  nest_obj.setInputCloud (object);
-  nest_obj.compute (*object);
-
-  // Estimate normals for scene
-  pcl::console::print_highlight ("Estimating scene normals...\n");
-  pcl::NormalEstimationOMP<PointNT,PointNT> nest;
-  nest.setRadiusSearch (0.01);
-  nest.setInputCloud (scene);
-  nest.compute (*scene);
-  
-  // Estimate features
-  pcl::console::print_highlight ("Estimating features...\n");
-  FeatureEstimationT fest;
-  fest.setRadiusSearch (0.025);
-  fest.setInputCloud (object);
-  fest.setInputNormals (object);
-  fest.compute (*object_features);
-  fest.setInputCloud (scene);
-  fest.setInputNormals (scene);
-  fest.compute (*scene_features);
-  
-  // Perform alignment
-  pcl::console::print_highlight ("Starting alignment...\n");
-  pcl::SampleConsensusPrerejective<PointNT,PointNT,FeatureT> align;
-  align.setInputSource (object);
-  align.setSourceFeatures (object_features);
-  align.setInputTarget (scene);
-  align.setTargetFeatures (scene_features);
-  align.setMaximumIterations (50000*3); // Number of RANSAC iterations
-  align.setNumberOfSamples (4); // Number of points to sample for generating/prerejecting a pose
-  align.setCorrespondenceRandomness (5); // Number of nearest features to use
-  align.setSimilarityThreshold (0.9f); // Polygonal edge length similarity threshold
-  align.setMaxCorrespondenceDistance (2.5f * leaf); // Inlier threshold
-  align.setInlierFraction (0.25f); // Required inlier fraction for accepting a pose hypothesis
-  {
-    pcl::ScopeTime t("Alignment");
-    align.align (*object_aligned);
-  }
-  
-  if (align.hasConverged ())
-  {
-    // Print results
-    printf ("\n");
-    float roll,pitch,yaw;
-    Eigen::Matrix4f transformation = align.getFinalTransformation ();
-    pcl::console::print_info ("    | %6.3f %6.3f %6.3f | \n", transformation (0,0), transformation (0,1), transformation (0,2));
-    pcl::console::print_info ("R = | %6.3f %6.3f %6.3f | \n", transformation (1,0), transformation (1,1), transformation (1,2));
-    pcl::console::print_info ("    | %6.3f %6.3f %6.3f | \n", transformation (2,0), transformation (2,1), transformation (2,2));
-    pcl::console::print_info ("\n");
-    pcl::console::print_info ("t = < %0.3f, %0.3f, %0.3f >\n", transformation (0,3), transformation (1,3), transformation (2,3));
-
-    Eigen::Vector4f centroid;
-    pcl::compute3DCentroid (*scene, centroid);
-    printf("center point = < %6.3f, %6.3f, %6.3f >\n", centroid(0)*100, centroid(1)*100, centroid(2)*100);
-
-    Eigen::Affine3f transform_2 = Eigen::Affine3f::Identity();
-    transform_2 = transformation;
-    pcl::getEulerAngles(transform_2,roll,pitch,yaw);
-    std::cout << "Roll=" << roll << std::endl;
-    std::cout << "Pitch=" << pitch << std::endl;
-    std::cout << "Yaw=" << yaw << std::endl;
-    pcl::console::print_info ("\n");
-    pcl::console::print_info ("Inliers: %i/%i\n", align.getInliers ().size (), object->size ());
-  
-#ifdef ShowCloud
-    // Show alignment
-    pcl::visualization::PCLVisualizer visu("Alignment");
-    visu.addCoordinateSystem (0.1, 0);
-    visu.addPointCloud (scene, ColorHandlerT (scene, 0.0, 255.0, 0.0), "scene");
-    visu.addPointCloud (object_aligned, ColorHandlerT (object_aligned, 255.0, 0.0, 0.0), "object_aligned");
-    visu.spin ();
-#endif
-  }
-  else
-  {
-    pcl::console::print_error ("Alignment failed!\n");
-  }
-  state = NADA;
-}
-
 void ObjEstAction::get_roi(){
   // // Point clouds
-  PointCloudT::Ptr scene (new PointCloudT);
-  PointCloudT::Ptr ROI_cloud (new PointCloudT);
-        
-  // Load object and scene
-  tmp_path = path;
-  tmp_path.append("Scene_with_handweight.pcd");
-  pcl::console::print_highlight ("Loading point clouds...\n");
-  if (pcl::io::loadPCDFile<PointNT> ("/home/iclab-ming/ARC_ws/src/obj_pose/pcd_file/Scene_with_handweight.pcd", *scene) < 0)
-  {
-    pcl::console::print_error ("Error loading object/scene file!\n");
-  }
   
+  //PCT::Ptr ROI_cloud (new PCT);
+        
   //std::cerr << "Scene width: " << scene->width << std::endl;
   //std::cerr << "Scene height: " << scene->height << std::endl;
 
   roi_srv.request.object_name = obj_name;
   if(roi_client.call(roi_srv))
   {
+    ROS_INFO("Get ROI from Service (/detect) ");
+
+  
+    if(!roi_srv.response.result){
+      
+      if(call_rcnn_times < 20){
+        call_rcnn_times++;
+        
+        return;
+      }
+
+      ROS_WARN("/detect ROI result = False");
+      geometry_msgs::Twist pose;
+      pose.linear.z = -1; //ROI Fail
+      result_.object_pose = pose;
+      as_.setSucceeded(result_);
+
+      state = NADA;
+         
+
+      return;  
+    }
     mini_x = roi_srv.response.bound_box[0];
     mini_y = roi_srv.response.bound_box[1];
     max_x = roi_srv.response.bound_box[2];
     max_y = roi_srv.response.bound_box[3];
   }else{
-    // for test: min:  [263, 294]  max:  [400, 378]
-    mini_x=263;
-    mini_y=294;
-    max_x=400;
-    max_y=378;
+    ROS_WARN("CANNOT Call Service (/detect), Use Default");
+    geometry_msgs::Twist pose;
+    result_.object_pose = pose;
+    as_.setSucceeded(result_);
+    return;
+    // mini_x = 170;
+    // mini_y = 251;
+    // max_x = 337;
+    // max_y = 325;
   }
   ROS_INFO("[mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",mini_x,mini_y,max_x,max_y);
+  
   ROI_cloud->width = max_x-mini_x;
   ROI_cloud->height = max_y-mini_y;
   ROI_cloud->is_dense = false;
@@ -324,20 +222,25 @@ void ObjEstAction::get_roi(){
   {
     for(int i=mini_x;i<max_x;i++)
     {
-      index = j*scene->width+i;
-      ROI_cloud->points[index_tmp].x = scene->points[index].x;
-      ROI_cloud->points[index_tmp].y = scene->points[index].y;
-      ROI_cloud->points[index_tmp].z = scene->points[index].z;
+      index = j*scene_cloud->width+i;
+      ROI_cloud->points[index_tmp].x = scene_cloud->points[index].x;
+      ROI_cloud->points[index_tmp].y = scene_cloud->points[index].y;
+      ROI_cloud->points[index_tmp].z = scene_cloud->points[index].z;
+      ROI_cloud->points[index_tmp].rgb = scene_cloud->points[index].rgb;
+      
       index_tmp++;
     }
   }
-  pcl::PCDWriter writer;
-  tmp_path = path;
-  tmp_path.append("test_pcd.pcd");
-  // ROS_INFO("Get path=%s",tmp_path.c_str());
-  writer.write<PointNT> (tmp_path, *ROI_cloud, false);
-  std::cerr << "Saved " << ROI_cloud->points.size () << " data points to test_pcd.pcd." << std::endl;
-  state = ALIGMENT;
+
+#ifdef SaveCloud
+  write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
+#endif 
+
+  feedback_.msg = "ROI Done";
+  feedback_.progress = 60;
+  as_.publishFeedback(feedback_);
+  
+  state = POSE_ESTIMATION;
 }
 
 void ObjEstAction::goalCB()
@@ -355,6 +258,9 @@ void ObjEstAction::preemptCB()
 
 int main (int argc, char **argv)
 {
+  g_argc = argc;
+  g_argv = argv;
+  
   ros::init(argc, argv, "obj_pose");
   ObjEstAction ObjEst("obj_pose");
   ros::Rate loop_rate(10);
@@ -368,14 +274,14 @@ int main (int argc, char **argv)
         break;
 
       case CALL_RCNN:
-        ROS_INFO("Action call Goal!");
+        ROS_INFO("In case CALL_RCNN");
         ObjEst.get_roi();
         break;
 
-      case ALIGMENT:
-        ROS_INFO("Estimate the pose!");
-        ObjEst.aligment();
-        break;
+      // case ALIGMENT:
+      //   ROS_INFO("Estimate the pose!");
+      //   ObjEst.aligment();
+      //   break;
       case POSE_ESTIMATION:
         ObjEst.poseEstimation();
         break;

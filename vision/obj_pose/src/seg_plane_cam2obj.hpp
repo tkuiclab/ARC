@@ -290,6 +290,12 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   PT center =  getCenter(i_cloud);
   std::cout << "Center Point = " << center << std::endl;
 
+  x = center.x;
+  y = center.y;
+  z = center.z;
+
+  return;
+
   //get near center points
   //ouput to cloud_near_center
   //get_near_points(i_cloud, center, 30, cloud_near_center);
@@ -359,11 +365,25 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   y = after_rotate_center_with_neg[1];
   z = after_rotate_center_with_neg[2];
 
+ 
+
   std::cout << " (roll, pitch, yaw) = "  
     <<  "("  << roll << "," << pitch << "," << yaw << ") = "  
      <<  "(" <<  pcl::rad2deg(roll)  << "," 
      <<  pcl::rad2deg(pitch)  << "," 
      <<  pcl::rad2deg(yaw) << ")" << std::endl;
+    
+  // no use transform
+  // x = center.x;
+  // y = center.y;
+  // z = center.z;
+
+  // std::cout << "NO USE ROTATE  (roll, pitch, yaw) = "  
+  //   <<  "("  << roll << "," << pitch << "," << yaw << ") = "  
+  //    <<  "(" <<  pcl::rad2deg(roll)  << "," 
+  //    <<  pcl::rad2deg(pitch)  << "," 
+  //    <<  pcl::rad2deg(yaw) << ")" << std::endl;
+    
 
 //--test negtive the obj_normal-------------------------------------------------//
   /*

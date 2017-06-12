@@ -13,6 +13,8 @@ import roslaunch
 import roslib
 import rospkg
 import rospy
+
+import obj_pose.msg
 from actionlib_msgs.msg import GoalID, GoalStatusArray
 from geometry_msgs.msg import PoseStamped, Twist
 from std_msgs.msg import Bool, Char, Float64, String
@@ -22,6 +24,7 @@ import arm_task_rel
 import LM_Control
 from task_parser import *
 from config import *
+from gripper import *
 
 # Define State
 WaitTask  		= 1		# Wait Task
@@ -183,9 +186,9 @@ class PickTask:
 			self.state 		= WaitRobot
 
 			self.Is_BaseShiftOK = False
-			self.LM.pub_LM_Cmd(2, self.GetShift('Bin', 'x', self.Bin ))
+			self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.Bin ))
 			rospy.sleep(0.3)
-			self.LM.pub_LM_Cmd(1, self.GetShift('Bin', 'z', self.Bin ))
+			self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.Bin ))
 			
 			
 			return
@@ -223,7 +226,7 @@ class PickTask:
 
 			self.next_state = Up2LeaveBin
 			self.state = WaitRobot
-			self.LM.Vaccum_Test(True)
+			gripper_vaccum_on()
 			rospy.sleep(1)
 			
 			return
@@ -253,9 +256,9 @@ class PickTask:
 			self.next_state 	= Move2PlaceObj2
 			self.state 			= WaitRobot
 			self.Is_BaseShiftOK = False
-			self.LM.pub_LM_Cmd(2, self.GetShift('Box', 'x', self.Box ))
+			self.LM.pub_LM_Cmd(2, GetShift('Box', 'x', self.Box ))
 			rospy.sleep(0.3)
-			self.LM.pub_LM_Cmd(1, self.GetShift('Box', 'z', self.Box ))
+			self.LM.pub_LM_Cmd(1, GetShift('Box', 'z', self.Box ))
 			#rospy.sleep(1)
 			
 			return
@@ -275,8 +278,8 @@ class PickTask:
 			print self.info
 			self.next_state = Recover2InitPos
 			self.state = WaitRobot
-			self.LM.Vaccum_Test(False)
-			
+			gripper_vaccum_off()
+
 			return
 
 		elif self.state == Recover2InitPos: # new added 2
@@ -337,46 +340,4 @@ class PickTask:
 		self.Is_LMBusy  	= self.LM.IsBusy
 		self.Is_LMArrive	= self.LM.IsArrive
 
-	def GetShift(self, Target_Type, LM_Dir, Target):
-		""" Get the motion pulse of linear motor """
-		# Bin
-		if Target_Type == 'Bin':
-			if Target in BinId:
-				if LM_Dir == 'x':
-					return BinShift_X[BinId.index(Target)]
-				elif LM_Dir=='z':
-					return BinShift_Z[BinId.index(Target)]
-				else:
-					print 'Error input Bin dir'
-					return 0
-			else:
-				print 'Error input character'
-
-		# Tote
-		elif  Target_Type == 'Tote':
-			if Target in ToteId:
-				if LM_Dir == 'x':
-					return ToteShift_X[ToteId.index(Target)]
-				elif LM_Dir=='z':
-					return ToteShift_Z[ToteId.index(Target)]
-				else:
-					print 'Error input Tote dir'
-					return 0
-			else:
-				print 'Error input character'
-
-		# Box
-		elif  Target_Type == 'Box':
-			if Target in BoxId:
-				if LM_Dir == 'x':
-					return BoxShift_X[BoxId.index(Target)]
-				elif LM_Dir=='z':
-					return BoxShift_Z[BoxId.index(Target)]
-				else:
-					print 'Error input dir'
-					return 0
-			else:
-				print 'Error input Box character'
-		
-		else:
-			print 'Error input Target Type'
+	
