@@ -458,7 +458,7 @@ function Get_Robot_FB()
 	{
 		// Display TCP FeedBack
 		var p = res.group_pose.position;						//position
-		var o = res.group_pose.orientation;					//orientation
+		var o = res.group_pose.orientation;						//orientation
 		var e = euler_fomr_quaternion([o.x, o.y, o.z, o.w]);	//Convert quaternion to RPY
 		var f = res.group_redundancy;
 
@@ -471,8 +471,10 @@ function Get_Robot_FB()
 		fb_TCP[2] = _Math._Roundn(parseFloat(p.z),2);
 		fb_TCP[6] = _Math._Roundn(f*_Math.RAD2DEG, 2);
 
-		for(var i=0;i<3;i++)
-			fb_TCP[i+3] = _Math._Roundn(e[i]*_Math.RAD2DEG, 2);
+		fb_TCP[3] = _Math._Roundn(e[1]*_Math.RAD2DEG, 2);
+		fb_TCP[4] = _Math._Roundn(e[0]*_Math.RAD2DEG, 2);
+		fb_TCP[5] = _Math._Roundn(e[2]*_Math.RAD2DEG, 2);
+		
 		for(var i=0;i<7;i++)
 			$(fb_TCP_name[i]).html(fb_TCP[i]);
 	});
