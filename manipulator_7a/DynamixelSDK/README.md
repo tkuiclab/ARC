@@ -5,13 +5,8 @@
 --------------------------------------------------------------------------
 | Dynamixel SDK Version | 1.X | 2.X | 3.X ([Download](https://github.com/ROBOTIS-GIT/DynamixelSDK/releases)) |
 | ------------- | ------------- | ------------- | ------------- |
-<<<<<<< HEAD
-| Release date| 2010.05.16 | 2015.02.10 | 2016.03.08 |
-| Latest version released |||3.4.4|
-=======
 | Release date| 2010.05.16 | 2015.02.10 | 2017.05.23 |
 | Latest version released |||3.4.5|
->>>>>>> 727884816e8bcc2ec77130bfc45a04750ee1b022
 | OS | Linux | Windows | Linux + Windows |
 ||||+ MacOSX (coming soon)|
 | Available Dynamixel models | All models | All models | All models |

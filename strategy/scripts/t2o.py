@@ -355,7 +355,7 @@ if __name__ == '__main__':
     task.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-90, 0, 0, 0) )
     task.pub_ikCmd('ptp', (0.30, 0.1 , 0.15), (-95, 0, 0, 0) )
     
-    #task.relative_xyz_base(y = 0.1)
+    # task.relative_xyz_base(y = 0.1)
     
     rospy.loginfo('strategy ready')
     #task.obj_pose_request()
