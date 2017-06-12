@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+
+<launch>    
+
+    <arg name="en_sim" default="false" />
+    <arg name="en_gui" default="false" />
+    <arg name="en_vac" default="false" />
+
+    <param name="gazebo"                   value="$(arg en_sim)"     type="bool" />
+    <param name="gazebo_robot_name"        value="robotis_pro7a" />
+
+    <param name="offset_table"             value="$(find manipulator_h_manager)/config/offset.yaml" />
+    <param name="robot_file_path"          value="$(find manipulator_h_manager)/config/ROBOTIS_MANIPULATOR_H.robot" />
+    <param name="init_file_path"           value="$(find manipulator_h_manager)/config/dxl_init.yaml" />
+
+    <!-- Manipulator Manager -->
+    <node name="manipulator_h_manager" pkg="manipulator_h_manager" type="manipulator_h_manager"
+            output="screen" />
+
+    <!-- Add gui node for test 
+    <node name="manipulator_n_gui" pkg="manipulator_h_gui" type="manipulator_h_gui"
+            output="screen" if="$(arg en_gui)" />
+            -->
+    <include file="$(find arc_ui)/launch/ui.launch" />
+
+    <!-- run rosserial 
+
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py" if="$(arg en_vac)">
+        <param name = "port" value ="/dev/ttyACM0" />
+        <param name = "baud" value = "57600" />
+    </node>
+    -->
+
+    <!-- run modbus(linear_z) 
+    <node name="linear_z" pkg="linear_motion" type="linear_z" output="screen">
+        <param name = "port_z" value ="/dev/ttyUSB1" />
+	    <param name = "port_x" value ="/dev/ttyUSB0" />
+        <param name = "baud" value = "9600" />
+        
+    </node>
+	-->
+    
+
+</launch>

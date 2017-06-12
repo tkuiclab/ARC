@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+
+<launch>    
+
+
+   <include file="$(find realsense_camera)/launch/sr300_nodelet_rgbd.launch" />
+   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
+   <node name="web_video_server" pkg="web_video_server" type="web_video_server" output="screen" />
+   <node name="hsv_interface" pkg="hsv_vision" type="interface_node" output="screen" />
+
+   <!-- open html  
+    file:///home/iclab/arc_ws/src/vision/hsv/hsv_interface/interface_web.html
+   -->	
+  
+</launch>

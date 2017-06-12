@@ -87,4 +87,9 @@ add_executable (object_pose_estimator src/object_pose_estimator.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
+
 target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES} libpcl_search.so libpcl_visualization.so libpcl_segmentation.so libpcl_features.so libpcl_filters.so libgomp.so libpcl_keypoints.so libpcl_kdtree.so libpcl_recognition.so)
+
+#target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(object_pose_estimator obj_pose_generate_messages_cpp)
+add_dependencies(object_pose_estimator fake_roi_generate_messages_cpp)

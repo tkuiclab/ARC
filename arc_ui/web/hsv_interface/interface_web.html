@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html id="Update" lang="en" style="cursor:default;height:600px">
+
+<head>
+    <title>Vision Interface</title>
+    <meta charset="UTF-8">
+    <!-- Styles -->
+    <link rel="shortcut icon" href="img/vision.ico" />
+    <link rel="stylesheet" href="font-awesome-4.3.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/form.css">
+    <!-- jQuery UI-->
+    <link rel="stylesheet" href="jquery-ui-1.11.4/jquery-ui.css">
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="jquery-ui-1.11.4/jquery-ui.js"></script>
+    <script src="jquery-ui-1.11.4/jquery-ui.min.js"></script>
+    <script src="js/eventemitter2.min.js"></script>
+    <script src="js/roslib.js"></script>
+    <script src="topic/Topic_Publish.js"></script>
+    <!-- <script src="js/connect_Robot1.js"></script> -->
+    <!-- Front Function -->
+    <script src="js/close_right_button.js"></script>
+    <script src="js/CloseReverseOut.js"></script>
+    <script type="text/javascript" src="http://cdn.robotwebtools.org/mjpegcanvasjs/current/mjpegcanvas.min.js"></script>
+</head>
+
+<body>
+    <div>
+        <div class="modal-dialog" style="width:1125px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="exampleModalLabel">Interface</h4>
+                </div>
+                <!--Wifi-->
+                <div id="InterfaceWifi">
+                    <span><img id="Setting_Wifi" src="img/wifi.png"  data-toggle="modal" data-target="#connect_Robot"></img></span>
+                </div>
+                <!--Connection Light-->
+                <div id="WifiLight">
+                    <canvas id="Light"></canvas>
+                </div>
+                <div class="modal-body" id="InterfaceFunction">
+                    <div id="InterfaceParameter" class="form-group">
+                        <div id="ParameterButton"></div>
+                        <form id="ParameterColor">
+                            <div id="ParameterColorButton">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <div class="auto">
+                                                <input type="radio" id="HSVButton" name="radio" checked="checked" 
+                                                onclick="topicROSParameterButton(4);ParameterbuttonTransfer(4)"/>
+                                                <label id="HSVButton" for="HSVButton">HSV</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div id="ParameterHSV">
+                                <div id="HSVSlider1">
+                                    <table>
+                                        <tr>
+                                            <td rowspan="2">
+                                                <label>Hue</label>
+                                            </td>
+                                            <td>
+                                                <input id="slider_Hue_Bar_min" class="RobotRange5" name="HSVElement" type="range" min="0" max="359" oninput='sliderBarHue(this.value,"min");topicColorTransfer()' onchange="topicROSCheckButton(this.value);ParameterHSVTransfer()" ></input>
+                                            </td>
+                                            <td>
+                                                <input id="inputHue_min" class="RBS2" type="number" name="HSVElement2" oninput='inputHue(this.value,"min");topicColorTransfer()' onchange="topicROSCheckButton(this.value);" ></input>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input id="slider_Hue_Bar_Max" class="RobotRange5" name="HSVElement" type="range" min="1" max="359" oninput='sliderBarHue(this.value,"Max");topicColorTransfer()' onchange="topicROSCheckButton(this.value);ParameterHSVTransfer()" ></input>
+                                            </td>
+                                            <td>
+                                                <input id="inputHue_Max" class="RBS2" type="number" name="HSVElement2" oninput='inputHue(this.value,"Max");topicColorTransfer();topicROSCheckButton(this.value);ParameterHSVTransfer()'></input>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td rowspan="2">
+                                                <label>Saturation</label>
+                                            </td>
+                                            <td>
+                                                <input id="slider_Sat_Bar_min" class="RobotRange5" name="HSVElement" type="range" min="0" max="99" oninput='sliderBarSat(this.value,"min");topicColorTransfer()' onchange="topicROSCheckButton(this.value);ParameterHSVTransfer()" ></input>
+                                            </td>
+                                            <td>
+                                                <input id="inputSat_min" class="RBS2" type="number" name="HSVElement2" oninput='inputSat(this.value,"min");topicColorTransfer()topicROSCheckButton(this.value);ParameterHSVTransfer()'></input>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input id="slider_Sat_Bar_Max" class="RobotRange5" name="HSVElement" type="range" min="1" max="100" oninput='sliderBarSat(this.value,"Max");topicColorTransfer()' onchange="topicROSCheckButton(this.value);ParameterHSVTransfer()" ></input>
+                                            </td>
+                                            <td>
+                                                <input id="inputSat_Max" class="RBS2" type="number" name="HSVElement2" oninput='inputSat(this.value,"Max");topicColorTransfer()' onchange="topicROSCheckButton(this.value);ParameterHSVTransfer()" ></input>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td rowspan="2">
+                                                <label>Value</label>
+                                            </td>
+                                            <td>
+                                                <input id="slider_Val_Bar_min" class="RobotRange5" name="HSVElement" type="range" min="0" max="99" oninput='sliderBarVal(this.value,"min");topicColorTransfer()' onchange="topicROSCheckButton(this.value);ParameterHSVTransfer()" ></input>
+                                            </td>
+                                            <td>
+                                                <input id="inputVal_min" class="RBS2" type="number" name="HSVElement2" oninput='inputVal(this.value,"min");topicColorTransfer()' onchange="topicROSCheckButton(this.value);ParameterHSVTransfer()" ></input>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <input id="slider_Val_Bar_Max" class="RobotRange5" name="HSVElement" type="range" min="1" max="100" oninput='sliderBarVal(this.value,"Max");topicColorTransfer()' onchange="topicROSCheckButton(this.value);ParameterHSVTransfer()" ></input>
+                                            </td>
+                                            <td>
+                                                <input id="inputVal_Max" class="RBS2" type="number" name="HSVElement2" oninput='inputVal(this.value,"Max");topicColorTransfer()' onchange="topicROSCheckButton(this.value);ParameterHSVTransfer()" ></input>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div id="HSVSlider2">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <canvas id="HSVcircle" height="80%" style="border:1px solid brown"></canvas>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <canvas id="HSVrect" width="100px" height="80px" style="border:1px solid brown"></canvas>
+                                                <canvas id="colorBox" width="100px" height="80px" style="border:1px solid brown"></canvas>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div id="HSVSlider2">
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <select id="HSVSelect" onchange="ColorRecord(this.value);topicColorTransfer(this.value);showHsvColor()">
+                                                    <option value = "0">Orange</option>
+                                                    <option value = "1">Green</option>
+                                                    <option value = "2">Blue</option>
+                                                    <option value = "3">Yellow</option>
+                                                    <option value = "4">White</option>
+                                                </select>
+                                            </td>
+
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="ParameterWhite">
+                                <div id="WhiteSlider">
+                                    <table>
+                                        <tr>
+                                            <td class="Slider1Label">
+                                                <label>Gray</label>
+                                            </td>
+                                            <td class="Slider1Input">
+                                                <input name="WhiteElement" type="range" min="0" max="255" value="0" oninput="showValue(this.value,'WhiteLabel',0);topicWhiteTransfer();" onchange="topicROSCheckButton(this.value);ParameterWhite_grayTransfer"()" />
+                                            </td>
+                                            <td>
+                                                <label name="WhiteLabel">num</label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="Slider1Label">
+                                                <label>Angle</label>
+                                            </td>
+                                            <td class="Slider1Input">
+                                                <input name="WhiteElement" type="range" min="5" max="360" value="0" oninput="showValue(this.value,'WhiteLabel',1);topicWhiteTransfer()" onchange="topicROSCheckButton(this.value);ParameterWhite_angleTransfer()"  />
+                                            </td>
+                                            <td>
+                                                <label name="WhiteLabel">num</label>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="ParameterBlack">
+                                <div id="BlackSlider">
+                                    <table>
+                                        <tr>
+                                            <td class="Slider1Label">
+                                                <label>Gray</label>
+                                            </td>
+                                            <td class="Slider1Input">
+                                                <input name="BlackElement" type="range" min="0" max="255" value="0" oninput="showValue(this.value,'BlackLabel',0);topicBlackTransfer();"onchange="topicROSCheckButton(this.value);ParameterBlack_grayTransfer()" />
+                                            </td>
+                                            <td>
+                                                <label name="BlackLabel">num</label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="Slider1Label">
+                                                <label>Angle</label>
+                                            </td>
+                                            <td class="Slider1Input">
+                                                <input name="BlackElement" type="range" min="5" max="360" value="0" oninput="showValue(this.value,'BlackLabel',1);topicBlackTransfer()" onchange="topicROSCheckButton(this.value);ParameterBlack_angleTransfer()"  />
+                                            </td>
+                                            <td>
+                                                <label name="BlackLabel">num</label>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </form>
+                       
+                        <div id="InterfaceCamera" class="form-group">
+                             <img id="player" src="img/offline.png">
+							<!-- 
+                            <canvas id="player">
+                                Your browser sucks.
+                            </canvas>
+							-->
+                            <canvas id="playerfunction">
+                                Your browser sucks.
+                            </canvas>
+                        </div>
+                        <div id="InterfaceCheckCamera" class="form-group">
+                            <div>
+                                <label>
+                                    <input id="CameraSwitch" type="checkbox" onclick="CheckCamera(this.checked);"> Camera </label>
+                                &nbsp;
+                                <label>X = </label>
+                                <label id="CameraX"></label>
+                                <label>Y = </label>
+                                <label id="CameraY"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Wifi Setting-->
+    <div class="modal fade" id="connect_Robot" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="Wifimodal_content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">Connect To Robot</h4>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="RobotIPDATA" class="control-label">Robot_IP:</label>
+                            <input name="RobotIPDATA" type="text" class="form-control" id="RobotIP" value=IP.textContent>
+                        </div>
+                        <div class="form-group">
+                            <label for="RobotHostDATA" class="control-label">Robot_Host:</label>
+                            <input name="RobotHostDATA" type="text" class="form-control" id="RobotHost" value=Host.textContent>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" onclick="ros.close();">Close</button>
+                    <button type="button" class="btn btn-primary" id="send-message" onclick="RobotConnect();history.go(0);">Connect</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="js/variable.js"></script>
+    <script src="js/RobotConnect.js"></script>
+    <!-- <script src="js/dynamicTestbox.js"></script> -->
+    <script src="js/SliderControl.js"></script>
+    <script src="js/video.js"></script>
+    <script src="js/Rostopic.js"></script>
+    <script src="js/RosParameter.js"></script>
+    <script src="js/ColorRecord.js"></script>
+    <script src="js/HSV.js"></script>
+    <script>
+    $("#ColorButton").click(function() {
+        $("#ParameterColor").show();
+        $("#ParameterCamera").hide();
+        $("#ParameterCenter").hide();
+        $("#ParameterScan").hide();
+        //$("#ParameterDistance").hide();
+        $("#ParameterMonitor").hide();
+    });
+
+    $("#ParameterColorButton").buttonset();
+    $("#ParameterHSV").show();
+    $("#ParameterWhite").hide();
+    $("#ParameterBlack").hide();
+
+    $("#HSVButton").click(function() {
+        ButtonFlag = 4;
+        $("#ParameterHSV").show();
+        $("#ParameterWhite").hide();
+        $("#ParameterBlack").hide();
+    });
+    </script>
+    </head>
+</body>
+
+</html>

@@ -25,10 +25,18 @@
 # root CMakeLists.txt
 /CMakeLists.txt
 
+
 # ignore training data
 
 # ignore photo
 *.jpg
 
-# ignore PCD
-*.pcd
+
+# ignore macosx
+__MACOSX/
+
+# ignore node_modules
+node_modules/
+
+# react-build
+build/
