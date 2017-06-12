@@ -474,7 +474,7 @@ function Get_Robot_FB()
 		fb_TCP[3] = _Math._Roundn(e[1]*_Math.RAD2DEG, 2);
 		fb_TCP[4] = _Math._Roundn(e[0]*_Math.RAD2DEG, 2);
 		fb_TCP[5] = _Math._Roundn(e[2]*_Math.RAD2DEG, 2);
-		
+
 		for(var i=0;i<7;i++)
 			$(fb_TCP_name[i]).html(fb_TCP[i]);
 	});
@@ -1158,7 +1158,7 @@ function Move_TCP_Rel(cmd_mod, data)
 		var pose_msg = new ROSLIB.Message({
 			data: tmp_Cmd
 		});
-		pose_pub.publish(pose_msg);
+		Test_pub.publish(pose_msg);
 	});
 }
 
