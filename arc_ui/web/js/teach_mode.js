@@ -1133,9 +1133,9 @@ function Move_TCP_Rel(cmd_mod, data)
 		} else if (cmd_mod == CmdType.Shift_Z) {
 			p.z += val;
 		} else if (cmd_mod == CmdType.Rotate_X) {//_Math.DEG2RAD
-			e[1] += val;
-		} else if (cmd_mod == CmdType.Rotate_Y) {
 			e[0] += val;
+		} else if (cmd_mod == CmdType.Rotate_Y) {
+			e[1] += val;
 		} else if (cmd_mod == CmdType.Rotate_Z) {
 			e[2] += val;
 		} else if (cmd_mod == CmdType.Rot_Fai) {
@@ -1145,8 +1145,8 @@ function Move_TCP_Rel(cmd_mod, data)
 		var x 	  = parseFloat(p.x);
 		var y 	  = parseFloat(p.y);
 		var z 	  = parseFloat(p.z);
-		var roll  = parseFloat(e[0]);
-		var pitch = parseFloat(e[1]);
+		var roll  = parseFloat(e[1]);
+		var pitch = parseFloat(e[0]);
 		var yaw   = parseFloat(e[2]);
 		var fai   = parseFloat(f);
 		var tmp_Cmd = [x, y, z, pitch, roll, yaw, fai];

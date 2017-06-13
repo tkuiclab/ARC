@@ -352,8 +352,9 @@ if __name__ == '__main__':
     # task.pub_ikCmd('ptp', (0.30, 0.0 , 0.22), (0, 0, 0) )
 		
     #stow photo pose  
-    task.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-90, 0, 0, 0) )
-    task.pub_ikCmd('ptp', (0.30, 0.1 , 0.15), (-95, 0, 0, 0) )
+    task.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-90, 0, 0, 0) )
+    task.pub_ikCmd('ptp', (0.30, -0.01 , 0.2), (-60, 0, 0, 0) )
+    # task.pub_ikCmd('ptp', (0.30, 0.1 , 0.15), (-95, 0, 0, 0) )
     
     # task.relative_xyz_base(y = 0.1)
     
@@ -363,6 +364,11 @@ if __name__ == '__main__':
     #task.relative_control(n=.05)  # -cam_y
     #task.relative_control(s=.05)  # cam_x
     task.relative_control(a=.05)  #cam_z   jmp_stra
+    task.relative_control(a=-0.05)
+    task.relative_control(n=0.05)
+    task.relative_control(n=-0.05)
+    task.relative_control(s=0.05)
+    task.relative_control(s=-0.05)
 
     #task.relative_control_rotate( pitch = -5 )
     #task.relative_control_rotate( pitch = -5 )
