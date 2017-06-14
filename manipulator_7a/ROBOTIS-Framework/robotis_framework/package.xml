@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package>
+  <name>robotis_framework</name>
+  <version>0.2.0</version>
+  <description>ROS packages for the robotis_framework (meta package)</description>
+  <license>BSD</license>
+  <author email="zerom@robotis.com">Zerom</author>
+  <maintainer email="pyo@robotis.com">Pyo</maintainer>
+  <url type="bugtracker">https://github.com/ROBOTIS-GIT/ROBOTIS-Framework/issues</url>
+  <url type="repository">https://github.com/ROBOTIS-GIT/ROBOTIS-Framework</url>
+  <url type="website">http://wiki.ros.org/robotis_framework</url>
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>robotis_framework_common</run_depend>
+  <run_depend>robotis_device</run_depend>
+  <run_depend>robotis_controller</run_depend>
+  <export><metapackage/></export>
+</package>

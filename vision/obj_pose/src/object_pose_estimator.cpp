@@ -88,7 +88,8 @@ void ObjEstAction::get_roi(){
   writer.write<PT> (tmp_path, *ROI_cloud, false);
   std::cerr << "Saved " << ROI_cloud->points.size () << " data points to test_pcd.pcd." << std::endl;
   pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
-  // ROS_INFO("mini_x = %f",min_p.x);
+  //ROS_INFO("ROI max_x = %f, max_y = %f, max_z = %f",max_p.x, max_p.y, max_p.z);
+  //ROS_INFO("ROI min_x = %f, min_y = %f, min_z = %f",min_p.x, min_p.y, min_p.z);
   pcl::copyPointCloud(*ROI_cloud, *my_ROICloud);
   state = SEGMETATION;
 }
@@ -96,13 +97,16 @@ void ObjEstAction::get_roi(){
 void ObjEstAction::segmentation()
 {
   ROS_INFO("Doing 3D Segmentation....");
+  std::cout << "scene_seg = " << scence_seg << std::endl;
 
   CPCSegmentation cpc_seg;
   if(scence_seg)
   {
     cpc_seg.setPointCloud(cloud);
+    cpc_seg.set_3D_ROI(min_p, max_p);
     cpc_seg.do_segmentation();
-    state = NADA;
+    cloud_cluster = cpc_seg.get_cloud_cluster();
+    state = ALIGMENT;
   }else{
     cpc_seg.setPointCloud(my_ROICloud);
     cpc_seg.do_segmentation();
@@ -131,14 +135,22 @@ void ObjEstAction::do_ICP()
   ROS_INFO("Aligning....");
   ICP_alignment my_icp;
   pcl::PointCloud<pcl::PointXYZ> temp2;
-  transformation_matrix = Eigen::Matrix4d::Identity ();
+  transformation_matrix = Eigen::Matrix4f::Identity ();
 
   tmp_path = path;
-  tmp_path.append("items/Crayons/Crayons.pcd");
+  tmp_path.append("items/Hand_Weight/trans_out_trans_out_cut_Hand_Weight1.pcd");
   if(load_pcd(tmp_path))
   {
     ROS_INFO("Load Amazon Model success!");
-    my_icp.setSourceCloud(Max_cluster);
+    if(scence_seg)
+    {
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
+      std::cout << "hahahhahahahahahahahahaha!!!" << std::endl;
+      copyPointCloud(*cloud_cluster, *cloud_xyz);
+      my_icp.setSourceCloud(cloud_xyz);
+    }else{
+      my_icp.setSourceCloud(Max_cluster);
+    }
     my_icp.setTargetCloud(model_PCD);
     my_icp.align(temp2);
     transformation_matrix = my_icp.getMatrix ();
@@ -157,7 +169,7 @@ void ObjEstAction::set_feedback(std::string msg,int progress)
   as_.publishFeedback(feedback_);
 }
 
-void ObjEstAction::print4x4Matrix (const Eigen::Matrix4d & matrix)
+void ObjEstAction::print4x4Matrix (const Eigen::Matrix4f & matrix)
 {
   printf ("Rotation matrix :\n");
   printf ("    | %6.3f %6.3f %6.3f | \n", matrix (0, 0), matrix (0, 1), matrix (0, 2));
@@ -165,6 +177,12 @@ void ObjEstAction::print4x4Matrix (const Eigen::Matrix4d & matrix)
   printf ("    | %6.3f %6.3f %6.3f | \n", matrix (2, 0), matrix (2, 1), matrix (2, 2));
   printf ("Translation vector :\n");
   printf ("t = < %6.3f, %6.3f, %6.3f >\n\n", matrix (0, 3), matrix (1, 3), matrix (2, 3));
+  float roll, pitch, yaw;
+  Eigen::Affine3f transformatoin;
+  transformatoin.matrix() = matrix;
+  pcl::getEulerAngles(transformatoin,roll,pitch,yaw);
+  std::cout << "roll = " << roll << "\t pitch = " << pitch << "\t yaw = " << yaw << std::endl;
+
 }
 
 bool ObjEstAction::load_pcd(std::string pcd_filename)
@@ -174,7 +192,7 @@ bool ObjEstAction::load_pcd(std::string pcd_filename)
   if(pcl::io::loadPCDFile (pcd_filename, *model_PCD) < 0)
   {
     ROS_INFO("Error loading Amazon Model cloud");
-    return true;
+    return false;
   }else{
     return true;
   }

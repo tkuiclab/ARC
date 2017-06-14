@@ -1,5 +1,7 @@
 #! /usr/bin/env python
-
+# pylint: disable = invalid-name
+# pylint: disable = C0326, C0121, C0301
+# pylint: disable = W0105, C0303, W0312
 """Use to generate arm task and run."""
 
 import sys
@@ -92,7 +94,8 @@ class ArmTask:
 
     def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI):
         """Publish ik cmd msg to manager node."""
-        
+        while self.__is_busy:
+            rospy.sleep(.1)
         cmd = []
 
         for p in pos:
@@ -147,18 +150,18 @@ class ArmTask:
 
         return (pitch, roll, yaw)
 
-    def euler2rotation(self, euler):
-        Cx = cos(euler[0])
-        Sx = sin(euler[0])
-        Cy = cos(euler[1])
-        Sy = sin(euler[1])
+    def euler2rotation(self, euler):  # jmp_rot
+        Cx = cos(euler[1])
+        Sx = sin(euler[1])
+        Cy = cos(euler[0])
+        Sy = sin(euler[0])
         Cz = cos(euler[2])
         Sz = sin(euler[2])
 
         return [
-            [Cz * Sy + Sz * Sx * Cy,  Cz * Cy - Sz * Sx * Sy, -Sz * Cx],
-            [Sz * Sy - Cz * Sx * Cy,  Sz * Cy + Cz * Sx * Sy,  Cz * Cx],
-            [Cx * Cy, -Cx * Sy,  Sx]
+            [Cz * Sy + Sz * Sx * Cy,   Cz * Cy - Sz * Sx * Sy,  -Sz * Cx],
+            [Sz * Sy - Cz * Sx * Cy,   Sz * Cy + Cz * Sx * Sy,   Cz * Cx],
+            [               Cx * Cy,                 -Cx * Sy,        Sx]
         ]
 
     def rotation2vector(self, rot):
@@ -191,8 +194,8 @@ class ArmTask:
             mode,
             (pos.x + x, pos.y + y, pos.z + z),
             (
-                degrees(euler[0]) + pitch,
-                degrees(euler[1]) + roll,
+                degrees(euler[1]) + pitch,
+                degrees(euler[0]) + roll,
                 degrees(euler[2]) + yaw
             )
         )
@@ -205,12 +208,12 @@ class ArmTask:
         while self.__is_busy:
             rospy.sleep(.1)
 
-        #fb = task.get_fb()
-        fb = self.get_fb()
-        pos = fb.group_pose.position
-        ori = fb.group_pose.orientation
+        #fb = task.get_fb()  jmp_rel
+        fb    = self.get_fb()
+        pos   = fb.group_pose.position
+        ori   = fb.group_pose.orientation
         euler = self.quaternion2euler(ori)
-        rot = self.euler2rotation(euler)
+        rot   = self.euler2rotation(euler)
         vec_n, vec_s, vec_a = self.rotation2vector(rot)
 
         move = [0, 0, 0]
@@ -225,9 +228,9 @@ class ArmTask:
             mode,
             (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
             (
-                degrees(euler[0]),
-                degrees(euler[1]),
-                degrees(euler[2])
+                degrees(euler[1]), #pitch
+                degrees(euler[0]), #roll
+                degrees(euler[2])  #yaw
             )
         )
 
@@ -291,9 +294,8 @@ class ArmTask:
         rospy.loginfo('move rotation pitch=' + str(pitch))
 
         #return
-        #self.relative_control_rotate( pitch = pitch)
-        #task.pub_ikCmd('ptp', (0.40, 0.05 , 0.15), (-90 +pitch, 0, 0) )
-        
+        self.relative_control_rotate( pitch = pitch)
+   
         
         while self.__is_busy:
             rospy.sleep(.1)
@@ -315,9 +317,8 @@ class ArmTask:
               ', base_z='+str(-move_cam_z))
         
 
-        #self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
-        self.relative_xyz_base(x = -move_cam_y, y = move_cam_x,z = -move_cam_z)
-    
+        self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
+      
 
     #request object pose
     def obj_pose_request(self):
@@ -346,11 +347,8 @@ if __name__ == '__main__':
     #task.pub_ikCmd('ptp')
     
     #init pose
-    # task.pub_ikCmd('ptp', (0.30, 0.0 , 0.22), (0, 0, 0) )
-		
-    #stow photo pose 
-    #task.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-90, 0, 0) )
-    
+    task.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-60, 0, 0, 0) )
+ 
     # task.relative_xyz_base(y = 0.1)
     
     rospy.loginfo('strategy ready')
@@ -358,8 +356,9 @@ if __name__ == '__main__':
 
     #task.relative_control(n=.05)  # -cam_y
     #task.relative_control(s=.05)  # cam_x
-    task.relative_control(a=.035)  #cam_z
+    #task.relative_control(a=.05)  #cam_z   jmp_stra
 
+    task.relative_control(a=.05)  
     #task.relative_control_rotate( pitch = -5 )
     #task.relative_control_rotate( pitch = -5 )
     

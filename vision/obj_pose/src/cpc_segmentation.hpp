@@ -15,6 +15,7 @@
 #include <pcl_ros/point_cloud.h>
 //PCL other
 #include <pcl/filters/passthrough.h>
+#include <pcl/common/centroid.h>
 #include <pcl/segmentation/supervoxel_clustering.h>
 
 // The segmentation class this example is for
@@ -47,7 +48,14 @@ float textcolor;
 class CPCSegmentation
 {
   public:
-    CPCSegmentation(){scene_segmentation=false;}
+    CPCSegmentation()
+    {
+      std::string sys_str;
+      sys_str = "rm *.pcd";
+      std::cout << "[CMD] -> " << sys_str << std::endl;
+      system(sys_str.c_str());
+      scene_segmentation=false;
+    }
     void setPointCloud(pcl::PointCloud<PointT>::Ptr input_cloud_ptr)
     {
       input_cloud_ptr_ = input_cloud_ptr;
@@ -57,6 +65,8 @@ class CPCSegmentation
       scene_segmentation=true;
       max_points = max_p;
       min_points = min_p;
+      //std::cout << "max_x = \t" << max_p.x << "max_y = \t" << max_p.y << "max_z = " << max_p.z << std::endl;
+      //std::cout << "min_x = \t" << min_p.x << "min_y = \t" << min_p.y << "min_z = " << min_p.z << std::endl;
     }
     void do_segmentation()
     {
@@ -66,7 +76,7 @@ class CPCSegmentation
       bool show_visualization;
       bool ignore_provided_normals;
       bool add_label_field;
-      bool save_binary_pcd;
+      bool save_binary_pcd = false;
       bool output_specified = true;
 
       /// Create variables needed for preparations
@@ -173,6 +183,8 @@ class CPCSegmentation
         std::cout << "Doing Scene Segmentation!!!" << std::endl;
         pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_cluster1(new pcl::PointCloud<pcl::PointXYZRGBA>);
         pcl::PointCloud<pcl::PointXYZ>::Ptr cluster(new pcl::PointCloud<pcl::PointXYZ>); 
+        cloud_cluster = pcl::PointCloud<pcl::PointXYZRGBA>::Ptr (new pcl::PointCloud<pcl::PointXYZRGBA>);
+
         cluster->height= cpc_labeled_cloud->height; 
         cluster->width= cpc_labeled_cloud->width; 
         cluster->is_dense = false;
@@ -209,13 +221,39 @@ class CPCSegmentation
           extract.setIndices(indices_ex); // passing the indices that I want to extract from the colored PointCloud 
           extract.setNegative (false); 
           extract.filter (*cloud_cluster1); // extracted the wanted cluster from the color pointcloud 
-          clusters.push_back (*cloud_cluster1);
-          std::stringstream ss;
-          ss << "cloud_cluster_" << j << ".pcd";
-          pcl::io::savePCDFile (ss.str(), *cloud_cluster1, save_binary_pcd);
+
+          PT tmp_max_p, tmp_min_p;
+          pcl::getMinMax3D(*cloud_cluster1, tmp_min_p, tmp_max_p);
+
+          Eigen::Vector4f centroid;
+          pcl::compute3DCentroid (*cloud_cluster1, centroid);
+          if(tmp_max_p.x<=max_points.x && tmp_max_p.y<=max_points.y && tmp_max_p.z<=max_points.z &&
+                        tmp_min_p.x>=min_points.x && tmp_min_p.y>=min_points.y && tmp_min_p.z>=min_points.z)
+          {
+            //std::cout << "------------------------------------------------" << std::endl;
+            //std::cout << "cluster_" << j << " save!!!" << std::endl;
+            //ROS_INFO("Cluster_%d max_x = %f, max_y = %f, max_z = %f", j, tmp_max_p.x, tmp_max_p.y, tmp_max_p.z);
+            //ROS_INFO("Cluster_%d min_x = %f, min_y = %f, min_z = %f\n", j, tmp_min_p.x, tmp_min_p.y, tmp_min_p.z);
+            // std::cout << "The XYZ coordinates of the centroid are: ("
+            //           << centroid[0] << ", "
+            //           << centroid[1] << ", "
+            //           << centroid[2] << ")." << std::endl;
+            clusters.push_back (*cloud_cluster1);
+            for(int i=0;i<cloud_cluster1->points.size();i++)
+            {
+              cloud_cluster->points.push_back (cloud_cluster1->points[i]);
+            }
+          }
         }
+        std::stringstream ss;
+        cloud_cluster->width = cloud_cluster->points.size ();
+        cloud_cluster->height = 1;
+        cloud_cluster->is_dense = true;
+        ss << "Clusters.pcd";
+        pcl::io::savePCDFile (ss.str(), *cloud_cluster, save_binary_pcd);
       }else{
         /// -----------------------------------|  ROI Segmentation  |-----------------------------------
+        std::cout << "Doing ROI Segmentation!!!" << std::endl;
         Max_cluster = pcl::PointCloud<pcl::PointXYZ>::Ptr (new pcl::PointCloud<pcl::PointXYZ>); 
         Max_cluster->height= cpc_labeled_cloud->height; 
         Max_cluster->width= cpc_labeled_cloud->width; 
@@ -269,6 +307,7 @@ class CPCSegmentation
         //pcl::io::savePCDFile ("BIG_SEG.pcd", *Max_cluster, false);
       }
     }
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr get_cloud_cluster(){return cloud_cluster;}
     pcl::PointCloud<pcl::PointXYZ>::Ptr get_BiggestCluster(){return Max_cluster;}
     pcl::PointCloud<pcl::PointXYZL>::Ptr getSegmentedPointCloud(){return segmented_cloud_ptr_;}
 private:
@@ -282,4 +321,5 @@ private:
    pcl::PointCloud<pcl::PointXYZL>::Ptr segmented_cloud_ptr_;
    pcl::PointCloud<pcl::PointXYZ>::Ptr Max_cluster;
    pcl::PointCloud<pcl::PointXYZRGBA>::CloudVectorType clusters;
+   pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_cluster;
 };

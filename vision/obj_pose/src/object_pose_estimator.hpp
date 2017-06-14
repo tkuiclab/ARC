@@ -96,7 +96,7 @@ public:
   void do_ICP();
   bool load_pcd(std::string pcd_filename);
   void set_feedback(std::string msg,int progress);
-  void print4x4Matrix (const Eigen::Matrix4d & matrix);
+  void print4x4Matrix (const Eigen::Matrix4f & matrix);
 
 protected:
 
@@ -136,6 +136,7 @@ private:
   pcl::PointCloud<pcl::PointXYZ>::Ptr model_PCD;
   PCT::CloudVectorType clusters;
   pcl::PointCloud<pcl::PointXYZ>::Ptr Max_cluster;
-  Eigen::Matrix4d transformation_matrix;
+  pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_cluster;
+  Eigen::Matrix4f transformation_matrix;
 };
 }

@@ -30,6 +30,7 @@ class ICP_alignment
   
     void setTargetCloud (pcl::PointCloud<pcl::PointXYZ>::ConstPtr target_cloud)  
     {  
+        std::cout << "set target!" << std::endl;
         icp.setInputTarget(target_cloud);  
     }  
       
@@ -41,8 +42,8 @@ class ICP_alignment
       icp.align (temp);  
   
       fitness_score =  icp.getFitnessScore();
-      final_transformation = Eigen::Matrix4d::Identity ();
-      final_transformation = icp.getFinalTransformation ().cast<double>();  
+      final_transformation = Eigen::Matrix4f::Identity ();
+      final_transformation = icp.getFinalTransformation ();  
     }  
   
     float getScore()  
@@ -50,12 +51,12 @@ class ICP_alignment
         return fitness_score;  
     }  
   
-    Eigen::Matrix4d getMatrix()  
+    Eigen::Matrix4f getMatrix()  
     {  
         return final_transformation;  
     }  
   private:  
     pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;  
-    Eigen::Matrix4d final_transformation;  
+    Eigen::Matrix4f final_transformation;  
     float fitness_score;  
 };  
