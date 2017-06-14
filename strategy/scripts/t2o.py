@@ -1,9 +1,11 @@
 #! /usr/bin/env python
-
+# pylint: disable = invalid-name
+# pylint: disable = C0326, C0121, C0301
+# pylint: disable = W0105, C0303, W0312
 """Use to generate arm task and run."""
 
 import sys
-from math import radians, degrees, sin, cos
+from math import radians, degrees, sin, cos, pi
 from numpy import multiply
 import numpy
 
@@ -29,9 +31,12 @@ _POS = (.2, 0, .3)  # x, y, z
 _ORI = (-70, 0, 0)  # pitch, roll, yaw
 
 
-cam2tool_y = -0.04  #cam axis
-#cam2tool_z = 0.195 - 0.005
-cam2tool_z = 0.195 + 0.035
+#cam2tool_y = -0.04  #cam axis
+#cam2tool_z = 0.195 + 0.035
+
+cam2tool_y = -0.095  #cam axis
+cam2tool_z = 0.25 + 0.035
+
 
 class ArmTask:
     """Running arm task class."""
@@ -40,7 +45,7 @@ class ArmTask:
         """Inital object."""
         self.__set_pubSub()
         rospy.on_shutdown(self.stop_task)
-        self.__set_mode_pub.publish('set')
+        #self.__set_mode_pub.publish('set')
         self.__is_busy = False
         self.__obj_pose_client = actionlib.SimpleActionClient("/obj_pose", obj_pose.msg.ObjectPoseAction)
         #rospy.loginfo('Wait /obj_pose action...')
@@ -50,7 +55,7 @@ class ArmTask:
         self.__set_mode_pub = rospy.Publisher(
             '/robotis/base/set_mode_msg',
             String,
-            latch=True,
+            latch=False,
             queue_size=1
         )
 
@@ -89,7 +94,8 @@ class ArmTask:
 
     def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI):
         """Publish ik cmd msg to manager node."""
-        
+        while self.__is_busy:
+            rospy.sleep(.1)
         cmd = []
 
         for p in pos:
@@ -105,7 +111,8 @@ class ArmTask:
         elif 'ptp' == mode:
             self.__ptp_pub.publish(cmd)
 
-        
+    def set_mode(self):    
+        self.__set_mode_pub.publish('set')
 
     def stop_task(self):
         """Stop task running."""
@@ -135,20 +142,26 @@ class ArmTask:
         roll = euler[0]
         pitch = euler[1]
         yaw = euler[2]
+
+        # if degrees( abs(roll) )  > 90 and  degrees( abs(yaw) )  > 90: 
+        #     pitch = -pi/2 -(pi/2 - abs(pitch) )
+        #     roll = 0
+        #     yaw = 0
+
         return (pitch, roll, yaw)
 
-    def euler2rotation(self, euler):
-        Cx = cos(euler[0])
-        Sx = sin(euler[0])
-        Cy = cos(euler[1])
-        Sy = sin(euler[1])
+    def euler2rotation(self, euler):  # jmp_rot
+        Cx = cos(euler[1])
+        Sx = sin(euler[1])
+        Cy = cos(euler[0])
+        Sy = sin(euler[0])
         Cz = cos(euler[2])
         Sz = sin(euler[2])
 
         return [
-            [Cz * Sy + Sz * Sx * Cy,  Cz * Cy - Sz * Sx * Sy, -Sz * Cx],
-            [Sz * Sy - Cz * Sx * Cy,  Sz * Cy + Cz * Sx * Sy,  Cz * Cx],
-            [Cx * Cy, -Cx * Sy,  Sx]
+            [Cz * Sy + Sz * Sx * Cy,   Cz * Cy - Sz * Sx * Sy,  -Sz * Cx],
+            [Sz * Sy - Cz * Sx * Cy,   Sz * Cy + Cz * Sx * Sy,   Cz * Cx],
+            [               Cx * Cy,                 -Cx * Sy,        Sx]
         ]
 
     def rotation2vector(self, rot):
@@ -165,9 +178,13 @@ class ArmTask:
 
         #fb = task.get_fb()
         fb = self.get_fb()
+        
+
         pos = fb.group_pose.position
         ori = fb.group_pose.orientation
         euler = self.quaternion2euler(ori)
+
+    
 
         #print 'ori_pos = ' + str(pos)
         #print 'ori_euler = ' + str(euler)
@@ -191,12 +208,12 @@ class ArmTask:
         while self.__is_busy:
             rospy.sleep(.1)
 
-        #fb = task.get_fb()
-        fb = self.get_fb()
-        pos = fb.group_pose.position
-        ori = fb.group_pose.orientation
+        #fb = task.get_fb()  jmp_rel
+        fb    = self.get_fb()
+        pos   = fb.group_pose.position
+        ori   = fb.group_pose.orientation
         euler = self.quaternion2euler(ori)
-        rot = self.euler2rotation(euler)
+        rot   = self.euler2rotation(euler)
         vec_n, vec_s, vec_a = self.rotation2vector(rot)
 
         move = [0, 0, 0]
@@ -211,6 +228,29 @@ class ArmTask:
             mode,
             (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
             (
+                degrees(euler[1]), #pitch
+                degrees(euler[0]), #roll
+                degrees(euler[2])  #yaw
+            )
+        )
+
+        while self.__is_busy:
+            rospy.sleep(.1)
+    
+    def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0):
+        """Get euler angle and run task."""
+        while self.__is_busy:
+            rospy.sleep(.1)
+
+        fb = self.get_fb()
+        pos = fb.group_pose.position
+        ori = fb.group_pose.orientation
+        euler = self.quaternion2euler(ori)
+
+        self.pub_ikCmd(
+            mode,
+            (pos.x + x, pos.y + y, pos.z + z),
+            (
                 degrees(euler[0]),
                 degrees(euler[1]),
                 degrees(euler[2])
@@ -219,8 +259,6 @@ class ArmTask:
 
         while self.__is_busy:
             rospy.sleep(.1)
-    
-
 
     def obj_pose_feedback_cb(self,fb):
         rospy.loginfo("In obj_pose_feedback_cb")
@@ -255,31 +293,46 @@ class ArmTask:
         
         rospy.loginfo('move rotation pitch=' + str(pitch))
 
-            
         #return
-        self.relative_control_rotate( pitch = pitch)
+        #self.relative_control_rotate( pitch = pitch)
+        #task.pub_ikCmd('ptp', (0.40, 0.05 , 0.15), (-90 +pitch, 0, 0) )
         
         
         while self.__is_busy:
             rospy.sleep(.1)
 
+        
         #return
         
-        move_cam_x = -l.x
+        #cam axi, tool need to move 
+        move_cam_x = l.x
         move_cam_y = l.y - cam2tool_y
         move_cam_z = l.z - cam2tool_z
         
 
         rospy.loginfo('move linear n(cam_y)='+str(move_cam_y) + ', s(cam_x)='+str(move_cam_x)  + ', a(cam_z)='+str(move_cam_z))
-        self.relative_control(n = move_cam_y , s= move_cam_x, a = move_cam_z)
+        #self.relative_xyz_base(x = )
         
+        rospy.loginfo('move linear base_x='+str(-move_cam_y) +
+             ', base_y='+str(move_cam_x)  +
+              ', base_z='+str(-move_cam_z))
+        
+
+        #self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
+        self.relative_xyz_base(x = -move_cam_y, y = move_cam_x,z = -move_cam_z)
+    
+
     #request object pose
     def obj_pose_request(self):
         while self.__is_busy:
             rospy.sleep(.1)
         rospy.loginfo('obj_pose_request()')
 
-        goal = obj_pose.msg.ObjectPoseGoal("seg_0")
+        #goal = obj_pose.msg.ObjectPoseGoal("expoEraser")
+        #goal = obj_pose.msg.ObjectPoseGoal("irishSpring")
+        
+        goal = obj_pose.msg.ObjectPoseGoal("dvdRobots")
+
         self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
         self.__obj_pose_client.wait_for_result()
 
@@ -290,12 +343,39 @@ if __name__ == '__main__':
 
     task = ArmTask()
     rospy.sleep(0.5)
+    task.set_mode()
+    rospy.sleep(0.2)
+
+    #task.pub_ikCmd('ptp')
     
-    task.pub_ikCmd('ptp')
-
-
+    #init pose
+    # task.pub_ikCmd('ptp', (0.30, 0.0 , 0.22), (0, 0, 0) )
+		
+    #stow photo pose  
+    task.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-90, 0, 0, 0) )
+    task.pub_ikCmd('ptp', (0.30, -0.01 , 0.2), (-60, 0, 0, 0) )
+    # task.pub_ikCmd('ptp', (0.30, 0.1 , 0.15), (-95, 0, 0, 0) )
+    
+    # task.relative_xyz_base(y = 0.1)
+    
     rospy.loginfo('strategy ready')
     #task.obj_pose_request()
+
+    #task.relative_control(n=.05)  # -cam_y
+    #task.relative_control(s=.05)  # cam_x
+    task.relative_control(a=.05)  #cam_z   jmp_stra
+    task.relative_control(a=-0.05)
+    task.relative_control(n=0.05)
+    task.relative_control(n=-0.05)
+    task.relative_control(s=0.05)
+    task.relative_control(s=-0.05)
+
+    #task.relative_control_rotate( pitch = -5 )
+    #task.relative_control_rotate( pitch = -5 )
+    
+    #move 13 cm can get object
+    #tool 9.5
+    #want only base_x(cam)=-4cm
 
     r = rospy.Rate(10)
     while not rospy.is_shutdown():

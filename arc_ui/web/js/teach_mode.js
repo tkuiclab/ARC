@@ -458,7 +458,7 @@ function Get_Robot_FB()
 	{
 		// Display TCP FeedBack
 		var p = res.group_pose.position;						//position
-		var o = res.group_pose.orientation;					//orientation
+		var o = res.group_pose.orientation;						//orientation
 		var e = euler_fomr_quaternion([o.x, o.y, o.z, o.w]);	//Convert quaternion to RPY
 		var f = res.group_redundancy;
 
@@ -471,8 +471,10 @@ function Get_Robot_FB()
 		fb_TCP[2] = _Math._Roundn(parseFloat(p.z),2);
 		fb_TCP[6] = _Math._Roundn(f*_Math.RAD2DEG, 2);
 
-		for(var i=0;i<3;i++)
-			fb_TCP[i+3] = _Math._Roundn(e[i]*_Math.RAD2DEG, 2);
+		fb_TCP[3] = _Math._Roundn(e[1]*_Math.RAD2DEG, 2);
+		fb_TCP[4] = _Math._Roundn(e[0]*_Math.RAD2DEG, 2);
+		fb_TCP[5] = _Math._Roundn(e[2]*_Math.RAD2DEG, 2);
+
 		for(var i=0;i<7;i++)
 			$(fb_TCP_name[i]).html(fb_TCP[i]);
 	});
@@ -1131,9 +1133,9 @@ function Move_TCP_Rel(cmd_mod, data)
 		} else if (cmd_mod == CmdType.Shift_Z) {
 			p.z += val;
 		} else if (cmd_mod == CmdType.Rotate_X) {//_Math.DEG2RAD
-			e[1] += val;
-		} else if (cmd_mod == CmdType.Rotate_Y) {
 			e[0] += val;
+		} else if (cmd_mod == CmdType.Rotate_Y) {
+			e[1] += val;
 		} else if (cmd_mod == CmdType.Rotate_Z) {
 			e[2] += val;
 		} else if (cmd_mod == CmdType.Rot_Fai) {
@@ -1143,8 +1145,8 @@ function Move_TCP_Rel(cmd_mod, data)
 		var x 	  = parseFloat(p.x);
 		var y 	  = parseFloat(p.y);
 		var z 	  = parseFloat(p.z);
-		var roll  = parseFloat(e[0]);
-		var pitch = parseFloat(e[1]);
+		var roll  = parseFloat(e[1]);
+		var pitch = parseFloat(e[0]);
 		var yaw   = parseFloat(e[2]);
 		var fai   = parseFloat(f);
 		var tmp_Cmd = [x, y, z, pitch, roll, yaw, fai];
@@ -1156,7 +1158,7 @@ function Move_TCP_Rel(cmd_mod, data)
 		var pose_msg = new ROSLIB.Message({
 			data: tmp_Cmd
 		});
-		pose_pub.publish(pose_msg);
+		Test_pub.publish(pose_msg);
 	});
 }
 

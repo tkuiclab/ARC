@@ -145,7 +145,7 @@ class ArmTask:
         while self.__is_busy:
             rospy.sleep(.1)
 
-        fb = task.get_fb()
+        fb = self.get_fb()
         pos = fb.group_pose.position
         ori = fb.group_pose.orientation
         euler = self.quaternion2euler(ori)
@@ -164,8 +164,31 @@ class ArmTask:
             mode,
             (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
             (
+                degrees(euler[1]),                
                 degrees(euler[0]),
+                degrees(euler[2])
+            )
+        )
+
+        while self.__is_busy:
+            rospy.sleep(.1)
+
+    def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0):
+        """relative move xyz with manipulator base axis."""
+        while self.__is_busy:
+            rospy.sleep(.1)
+
+        fb = self.get_fb()
+        pos = fb.group_pose.position
+        ori = fb.group_pose.orientation
+        euler = self.quaternion2euler(ori)
+
+        self.pub_ikCmd(
+            mode,
+            (pos.x + x, pos.y + y, pos.z + z),
+            (
                 degrees(euler[1]),
+                degrees(euler[0]),
                 degrees(euler[2])
             )
         )

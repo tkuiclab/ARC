@@ -53,7 +53,8 @@ ManipulatorKinematicsDynamics::~ManipulatorKinematicsDynamics()
 ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
 {
     fai = 0;
-    Euler_Mode = e_nsa;
+    Euler_Mode = e_ICLAB;
+    // Euler_Mode = e_nsa;
     for (int id = 0; id <= ALL_JOINT_ID; id++)
         manipulator_link_data_[id] = new LinkData();
 
@@ -527,17 +528,30 @@ void ManipulatorKinematicsDynamics::fk()
     double pitch, roll, yaw;
     if(Euler_Mode == e_ICLAB)
     {
-        pitch = atan2(ori(2, 2), sqrt(1 - pow(ori(2, 2), 2))); // pitch
+        if(ori(2,0)>0)
+            pitch = atan2(ori(2, 2), sqrt(1 - pow(ori(2, 2), 2))); // pitch
+        else
+            pitch = atan2(ori(2, 2), -sqrt(1 - pow(ori(2, 2), 2))); // pitch
         /* pitch != +-90 deg */
         if (fabs(ori(2, 2)) <= 1.0 - pow(10, -8))
         {
             double Cz =  ori(1, 2) / sqrt(1 - pow(ori(2, 2), 2));
             double Sz = -ori(0, 2) / sqrt(1 - pow(ori(2, 2), 2));
-            yaw = atan2(Sz, Cz); // yaw
 
             double Cy =  ori(2, 0) / sqrt(1 - pow(ori(2, 2), 2));
             double Sy = -ori(2, 1) / sqrt(1 - pow(ori(2, 2), 2));
-            roll = atan2(Sy, Cy); // roll
+            
+            // if(fabs(ori(2,0)) > pow(10, -5))
+            if(ori(2,0)>0)
+            {
+                roll = atan2(Sy, Cy);  
+                yaw  = atan2(Sz, Cz);   
+            }
+            else //special case
+            {
+                roll = -atan2(Sy, -Cy); 
+                yaw  = -atan2(Sz, -Cz);  
+            }
         }
         else
         {
@@ -552,7 +566,7 @@ void ManipulatorKinematicsDynamics::fk()
             roll = 0;
         }
     }
-    else 
+    else // Euler_mode = nsa
     {
         if( ori(0, 2) < 1 )
         {
@@ -561,14 +575,12 @@ void ManipulatorKinematicsDynamics::fk()
                 roll  = asin ( ori(0, 2) );
                 pitch = atan2(-ori(1, 2), ori(2, 2));
                 yaw   = atan2(-ori(0, 1), ori(0, 0));
-                // std::cout<<"=== 1 ===\n";
             }
             else 
             {
                 roll  = -M_PI/2;
                 pitch = -atan2(-ori(1, 0), ori(1, 1));
                 yaw   =  0;
-                // std::cout<<"=== 2 ===\n";
             }
         }
         else 
@@ -576,22 +588,53 @@ void ManipulatorKinematicsDynamics::fk()
             roll  = M_PI/2;
             pitch = atan2(-ori(1, 0), ori(1, 1));
             yaw   = 0;
-            // std::cout<<"=== 3 ===\n";
         }
         pitch = roundN(pitch, 4);
-        roll = roundN(roll, 4);
-        yaw = roundN(yaw, 4);
+        roll  = roundN(roll , 4);
+        yaw   = roundN(yaw  , 4);
     }
     /* update matrix of rotation */
-    manipulator_link_data_[END_LINK]->orientation_ = robotis_framework::convertRPYToRotation(roll, pitch, yaw);
+    Eigen::Matrix3d     tmp_rot_matrix;
+    Eigen::Quaterniond  tmp_Quat;
+
+    // =============================================================================
+    tmp_Quat        = robotis_framework::convertEulerToQuaternion(roll, pitch, yaw);
+    manipulator_link_data_[END_LINK]->orientation_  = robotis_framework::convertQuaternionToRotation(tmp_Quat);
+    // manipulator_link_data_[END_LINK]->orientation_ = tmp_rot_matrix;
+    // =============================================================================
+
+//    manipulator_link_data_[END_LINK]->orientation_ = robotis_framework::convertRPYToRotation(roll, pitch, yaw);
 
     /* claculate redundancy for fai */
     this->fai = cal_Redundancy(jointPos);
+
+    // ======== debug observer area ==========
     static int cnt=0;
-    if(cnt++ > 1000)
+    if(cnt++ > 800)
     {
+        // std::cout<<"Qw = "<<roundN(tmp_Quat.w(), 4)<<"\n";
+        // std::cout<<"Qx = "<<roundN(tmp_Quat.x(), 4)<<"\n";
+        // std::cout<<"Qy = "<<roundN(tmp_Quat.y(), 4)<<"\n";
+        // std::cout<<"Qz = "<<roundN(tmp_Quat.z(), 4)<<"\n";
+
+        // Eigen::Quaterniond quat_f = robotis_framework::convertRotationToQuaternion(manipulator_link_data_[END_LINK]->orientation_);
+        // std::cout<<"quat_fw = "<<roundN(quat_f.w(), 4)<<"\n";
+        // std::cout<<"quat_fx = "<<roundN(quat_f.x(), 4)<<"\n";
+        // std::cout<<"quat_fy = "<<roundN(quat_f.y(), 4)<<"\n";
+        // std::cout<<"quat_fz = "<<roundN(quat_f.z(), 4)<<"\n";
+        // std::cout<<"========== rotation matrix ==========\n";
+        for(int i=0 ; i<=2;i++)
+        {
+            for(int j=0 ; j<=2 ; j++)
+            {
+                std::cout<<ori(i,j)<<"\t";
+                // std::cout<<roundN(manipulator_link_data_[END_LINK]->orientation_(i,j),4)<<"\t";
+            }
+            std::cout<<"\n";
+        }
+        std::cout<<"======================================\n";
         std::cout<<"X Y Z = "<<pos(0)<<", "<<pos(1)<<", "<<pos(2)<<std::endl;
-        std::cout<<"P R Y F = "<<pitch<<", "<<roll<<", "<<yaw<<", "<<fai<<std::endl;
+        std::cout<<"P R Y F = "<<pitch*180/M_PI<<", "<<roll*180/M_PI<<", "<<yaw*180/M_PI<<", "<<fai<<std::endl;
         cnt=0;
     }
 }
@@ -599,33 +642,33 @@ void ManipulatorKinematicsDynamics::fk()
 bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::MatrixXd& tar_orientation, double tarFai /* = 0 */)
 {
     Eigen::VectorXd angle(7);
-    Eigen::MatrixXd rpy = robotis_framework::convertRotationToRPY(tar_orientation);
-
-    double pitch = rpy(1, 0);
-    double roll  = rpy(0, 0);
-    double yaw   = rpy(2, 0);
-
-    // std::cout << "ik recv x,y,z:\n" << tar_position << std::endl;
-    // std::cout << "ik recv r,p,y:\n" << rpy * 180 / M_PI << std::endl;
-    // std::cout << "ik recv fai: " << tarFai * 180 / M_PI << std::endl;
-
-    double Cx = cos(pitch);
-    double Sx = sin(pitch);
-    double Cy = cos(roll);
-    double Sy = sin(roll);
-    double Cz = cos(yaw);
-    double Sz = sin(yaw);
+    // Eigen::MatrixXd rpy = robotis_framework::convertRotationToRPY(tar_orientation);
+    // pitch = rpy(1, 0);
+    // roll  = rpy(0, 0);
+    // yaw   = rpy(2, 0);
 
     /* desired cmd */
+    double pitch, roll, yaw;
     double tmp = tar_position(0);
     tar_position(0) = tar_position(1);
     tar_position(1) = tmp;
+    roll  = tar_orientation(0,0);
+    pitch = tar_orientation(0,1);
+    yaw   = tar_orientation(0,2);
     Eigen::Vector3d position = tar_position;
     Eigen::Matrix3d RPY_Rot; // orientation
-    Euler_Mode = e_ICLAB;     // Decide euler angle mode!!!
+    // Euler_Mode = e_ICLAB;     // Decide euler angle mode!!!
+
+    std::cout<<"pry = "<<pitch<<", "<<roll<<", "<<yaw<<"\n";
     std::cout<<std::endl<<"============below============"<<std::endl;
     if(Euler_Mode == e_ICLAB)
     {
+        double Cx = cos(pitch);
+        double Sx = sin(pitch);
+        double Cy = cos(roll);
+        double Sy = sin(roll);
+        double Cz = cos(yaw);
+        double Sz = sin(yaw);
         RPY_Rot <<  Cz*Sy + Sz*Sx*Cy,  Cz*Cy - Sz*Sx*Sy, -Sz*Cx,
                     Sz*Sy - Cz*Sx*Cy,  Sz*Cy + Cz*Sx*Sy,  Cz*Cx,
                     Cx*Cy           , -Cx*Sy           ,     Sx;
@@ -633,6 +676,12 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     }
     else
     {
+        double Cx = cos(pitch);
+        double Sx = sin(pitch);
+        double Cy = cos(yaw);
+        double Sy = sin(yaw);
+        double Cz = cos(roll);
+        double Sz = sin(roll);
         RPY_Rot <<   Cy*Cz              , -Cy*Sz            ,     Sy , 
                      Sx*Sy*Cz + Cx*Sz   , -Sx*Sy*Sz + Cx*Cz , -Sx*Cy ,
                     -Cx*Sy*Cz + Sx*Sz   , Cx*Sy*Sz + Sx*Cz  ,  Cx*Cy ;
@@ -771,9 +820,8 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
             }
         }
     }
-
-    // for (int i = 0; i < 7; i++)
-    //    std::cout << "ik angle " << i+1 << ": "<< angle[i] * 180.0 / M_PI << std::endl;
+    if(Euler_Mode == e_nsa)
+        angle[6] -= M_PI/2;
 
     for (int i = 0; i < MAX_JOINT_ID; i++)
     {
@@ -798,9 +846,6 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     angle[1] = -angle[1];
     //angle[3] -= M_PI_2;
     angle[5] = -angle[5];
-
-    // for (int i = 0; i < 7; i++)
-    //    std::cout << "cvt ik angle " << i+1 << ": "<< angle[i] * 180.0 / M_PI << std::endl;
 
     for (int i = 0; i < MAX_JOINT_ID; i++)
     {

@@ -194,6 +194,7 @@ Eigen::MatrixXd convertRotationToRPY(Eigen::MatrixXd rotation)
 
 Eigen::MatrixXd convertRPYToRotation(double roll, double pitch, double yaw)
 {
+  Eigen::MatrixXd mat_translation(3,3);
   Eigen::MatrixXd rotation = getRotationZ(yaw)*getRotationY(pitch)*getRotationX(roll);
 
   return rotation;
@@ -201,13 +202,36 @@ Eigen::MatrixXd convertRPYToRotation(double roll, double pitch, double yaw)
 
 Eigen::Quaterniond convertRPYToQuaternion(double roll, double pitch, double yaw)
 {
-  Eigen::MatrixXd rotation = convertRPYToRotation(roll,pitch,yaw);
+  Eigen::MatrixXd rotation = convertRPYToRotation(roll, pitch, yaw);
 
   Eigen::Matrix3d rotation3d;
   rotation3d = rotation.block<3,3>(0,0);
 
   Eigen::Quaterniond quaternion;
   quaternion = rotation3d;
+
+  return quaternion;
+}
+
+Eigen::Quaterniond convertEulerToQuaternion(double roll, double pitch, double yaw)
+{
+  // Added for arc
+  Eigen::Vector4d Quat_Vector ;
+
+  //========================================
+  Quat_Vector(1) = cos(pitch/2)*cos(roll/2)*cos(yaw/2) + 
+                   sin(pitch/2)*sin(roll/2)*sin(yaw/2);
+
+  Quat_Vector(2) = sin(pitch/2)*cos(roll/2)*cos(yaw/2) -
+                   cos(pitch/2)*sin(roll/2)*sin(yaw/2);
+
+  Quat_Vector(3) = cos(pitch/2)*sin(roll/2)*cos(yaw/2) + 
+                   sin(pitch/2)*cos(roll/2)*sin(yaw/2);
+
+  Quat_Vector(4) = cos(pitch/2)*cos(roll/2)*sin(yaw/2) -
+                   sin(pitch/2)*sin(roll/2)*cos(yaw/2);
+
+  Eigen::Quaterniond quaternion(Quat_Vector(1), Quat_Vector(2), Quat_Vector(3), Quat_Vector(4));
 
   return quaternion;
 }
@@ -233,7 +257,14 @@ Eigen::MatrixXd convertQuaternionToRPY(Eigen::Quaterniond quaternion)
 Eigen::MatrixXd convertQuaternionToRotation(Eigen::Quaterniond quaternion)
 {
   Eigen::MatrixXd rotation = quaternion.toRotationMatrix();
-
+  
+  for(int i=0 ; i<=2;i++)
+  {
+    for(int j=0 ; j<=2 ; j++)
+    {
+      rotation(i,j) = rotation(i,j);
+    }
+  }
   return rotation;
 }
 

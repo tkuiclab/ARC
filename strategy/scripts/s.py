@@ -11,6 +11,7 @@ import time
 import actionlib
 import roslaunch
 import roslib
+
 import rospkg
 import rospy
 from actionlib_msgs.msg import GoalID, GoalStatusArray
@@ -18,11 +19,13 @@ from geometry_msgs.msg import PoseStamped, Twist
 from std_msgs.msg import Bool, Char, Float64, String
 from strategy.srv import *
 
+
 import arm_task_rel
 import LM_Control
 #import task_parser
 from task_parser import *
 from config import *
+from gripper import *
 from pick_task import PickTask
 from stow_task import StowTask
 
@@ -40,7 +43,7 @@ class Strategy(threading.Thread):
 		rospy.on_shutdown(self.shutdown)
 		rospy.Service('/task', Task, self.task_cb)
 		self.info_pub = rospy.Publisher('/stratege/info', String, queue_size=10)
-
+		
 		# === Initialize All Var === 
 		self.Arm 			= arm_task_rel.ArmTask()
 		self.LM  			= LM_Control.CLM_Control()
@@ -78,6 +81,15 @@ class Strategy(threading.Thread):
 				self.pick.run()  
 			else:
 				rospy.logwarn('Pick Task Not Ready!!')
+		elif task_name.lower() == 'stow_run':
+			if self.stow.is_ready() :
+				rospy.loginfo('Stow Task Running')
+				self.run_task_type = TaskType_Stow
+				self.stow.run()  
+			else:
+				rospy.logwarn('Pick Task Not Ready!!')
+		elif task_name.lower() == 'stow_json_item_location':
+			self.stow.save_item_location(req.task_json)
 		else:
 			print 'Error Task Name (Please input pick or stow)'
 		
@@ -92,16 +104,14 @@ class Strategy(threading.Thread):
 			if self.stop_robot == True :
 				return
 			
-			#print 'in core'
-
 			if  self.run_task_type != TaskType_None:
 				if self.run_task_type == TaskType_Pick:
 					self.pick.pick_core()
 					info_json = self.pick.get_info()
 				elif self.run_task_type == TaskType_Stow:
 					self.stow.stow_core()
-					#info = self.stow.get_info()
-			
+					info_json = self.stow.get_info()
+					
 				self.info_pub.publish(json.dumps(info_json))
 			
 			rate.sleep()
@@ -110,17 +120,17 @@ class Strategy(threading.Thread):
 	def test_go_bin_LM(self, bin):
 		rospy.sleep(0.5)
 		print 'test_go_bin_LM bin -> ' +bin  
-		self.LM.pub_LM_Cmd(2, self.GetShift('Bin', 'x', bin ))
+		self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', bin ))
 		rospy.sleep(0.3)
-		self.LM.pub_LM_Cmd(1, self.GetShift('Bin', 'z', bin ))
+		self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', bin ))
 			
 
 	def test_go_box(self, box):
 		rospy.sleep(0.5)
 		print 'test_go_box_LM box -> ' + box  
-		self.LM.pub_LM_Cmd(2, self.GetShift('Box', 'x', box ))
+		self.LM.pub_LM_Cmd(2, GetShift('Box', 'x', box ))
 		rospy.sleep(0.3)
-		self.LM.pub_LM_Cmd(1, self.GetShift('Box', 'z', box ))
+		self.LM.pub_LM_Cmd(1, GetShift('Box', 'z', box ))
 		rospy.sleep(0.5)	
 
 	def test_publish_info(self):
@@ -132,17 +142,33 @@ class Strategy(threading.Thread):
 		
 		self.info_pub.publish(json.dumps(info_json))
 
+	def arm_go_init_pose(self):
+		rospy.loginfo('Arm go init pose')
+		self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.22), (0, 0, 0) )
+
+	def arm_bin_photo(self):
+		self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.27), (0, 0, 0) )
+
+
 if __name__ == '__main__':
 	rospy.init_node('strategy')
 
 	try:
 		s = Strategy()
-		s.start() 
-		#s.test_publish_info()
-
+		#s.arm_go_init_pose()
+		#s.start() 
+		#s.arm_go_init_pose()
+		#s.start() 
 		#s.test_go_bin_LM('j')
-		#s.test_go_box('a')		
-
+		#test_go_box('j')		
+		#s.stow.LM_2_tote()
+		#s.stow.arm_photo_pose()
+		#gripper_vaccum_off()
+		#gripper_suction_up()
+		#gripper_suctoin_down()
+		s.Arm.relative_control(a=.035)  #cam_z
+			
+		
 		rospy.spin()
 	except rospy.ROSInterruptException:
 		pass
