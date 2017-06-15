@@ -10,7 +10,7 @@ TKU M-Bot for Amazon Robotics Challenge (ARC)
 sudo cp ~/arc_ws/src/arc/install/99-arc.rules /etc/udev/rules.d/
 ```
 
-* [librealsense](./vision/installation.md)
+* [librealsense](./vision/installation_librealsense.md)
 
 ### Run 
 

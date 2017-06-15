@@ -10,22 +10,6 @@ The project requires two external dependencies, *glfw* and *libusb-1.0*. The Cma
 **Important** Several scripts below invoke `wget, git, add-apt-repository` which may be blocked by router settings or a firewall. Infrequently, apt-get mirrors or repositories may also timeout. For *librealsense* users behind an enterprise firewall, configuring the system-wide Ubuntu proxy generally resolves most timeout issues.
 
 ## Make Ubuntu Up-to-date
-1. Update Ubuntu distribution, including getting the latest stable kernel
-    * `sudo apt-get update && sudo apt-get upgrade && sudo apt-get dist-upgrade`<br />
-
-    Check the kernel version - > `uname -r`<br />
-    In case of stack Ubuntu 14 LTS with Kernel prior to 4.4.0-04 (e.g. 3.19..) the basic *apt-get upgrade* rule is not sufficient to bring the distribution to the latest baseline recommended.<br />
-    Therefore, perform the following command to promote both Kernel and FrontEnd <br />
-    * `sudo apt-get install --install-recommends linux-generic-lts-xenial xserver-xorg-core-lts-xenial xserver-xorg-lts-xenial xserver-xorg-video-all-lts-xenial xserver-xorg-input-all-lts-xenial libwayland-egl1-mesa-lts-xenial `<br />
-
-    Note the exact Kernel version being installed (4.4.0-XX) for the next step.<br />
-
-    At the end update OS Boot Menu and reboot to enforce the correct kernel selection<br />
-    * `sudo update-grub && sudo reboot`<br />
-
-    Interrupt the boot process at  Grub2 Boot Menu -> "Advanced Options for Ubuntu" -> Select the kernel version installed in the previous step.<br />
-    Complete the boot, login and verify that the required kernel version in place
-    * `uname -r`  >=  4.4.0-50
 
 2. Install the packages required for *librealsense* build: <br />
   *libusb-1.0* and *pkg-config*:<br />
@@ -74,7 +58,8 @@ Next, build the patched module for the desired machine configuration.<br />
   * **Ubuntu 14/16 LTS**
     The script will download, patch and build uvc kernel module from sources.<br />
     Then it will attempt to insert the patched module instead of the active one. If failed
-    the original uvc module will be preserved.
+    the original uvc module will be preserved.<br />
+    **If U Don't Wanna Upgrade Ur Kernel** remove the line "sudo apt-get install linux-headers-generic" in patch-realsense-ubuntu-xenial.sh
     * `./scripts/patch-realsense-ubuntu-xenial.sh`<br />
 
   * **Arch-based distributions**
