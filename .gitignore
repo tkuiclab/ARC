@@ -37,3 +37,7 @@ node_modules/
 
 # react-build
 build/
+
+# label_server_ignore
+/label_server/Image/
+/label_server/xml/
