@@ -35,8 +35,6 @@ __MACOSX/
 # ignore node_modules
 node_modules/
 
-# react-build
-build/
 
 # label_server_ignore
 /label_server/Image/
