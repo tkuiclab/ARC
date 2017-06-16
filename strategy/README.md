@@ -1,17 +1,29 @@
 * The step to execute straregy 
 
-Step1.
+# Open Control
 
-    $ roslaunch arc control.launch
+```bash
+sudo bash
+roslaunch arc control.launch
+```
 
-Step2.
+# Run Strategy 
 
-    $ rosrun strategy s.py
+```bash
+rosrun straregy s.py
+```
 
-step3.
+# Run Vison 
 
-    $ rosservice call /task "task_name: 'pick'"	(for pick task)<br>
-    $ rosservice call /task "task_name: 'stow'"	(for stow task)<br>
+```bash
+roslaunch realsense_camera sr300_nodelet_rgbd.launch
+rosrun obj_pose object_pose_estimator
+rosrun darkflow_detect object_detect.py            
+```
+
+# Open strategy Web
+
+Open arc_ui/web/strategy.html
 
 
 # About Suction
