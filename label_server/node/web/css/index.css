@@ -1,0 +1,30 @@
+.messageCheckbox {
+  height: 10px;
+  width: 10px;
+}
+.thumb {
+  height: 35px;
+  border: 1px solid #000;
+  margin: 10px 5px 0 0;
+}
+canvas {
+  /*border: 1px solid red;*/
+  margin-left: 10px;
+  margin-bottom: 20px;
+}
+#myImage {
+  border: 1px solid blue;
+}
+input[type="radio"]{
+  width: 15px; /*Desired width*/
+  height: 15px; /*Desired height*/
+  cursor: pointer;
+}
+#canvasDiv {
+  margin-left: 10px;
+  margin-bottom: 20px;
+}
+label img {
+  height: 75px;
+  margin-left: 30px;
+}
