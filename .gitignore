@@ -41,3 +41,4 @@ build/
 # label_server_ignore
 /label_server/Image/
 /label_server/xml/
+/label_server/node/log/*.log
