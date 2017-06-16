@@ -243,16 +243,32 @@ void get_hsv_points(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in,
   extract.filter (*cloud_out);
 
 }
-void get_pass_through_points(PCT::Ptr cloud_in, 
-            float min_z, float max_z,
-            PCT::Ptr cloud_out){
+void get_pass_through_points(PCT::Ptr cloud_in,
+            PCT::Ptr cloud_out,
+            float min_x, float max_x,
+            float min_y, float max_y,
+            float min_z, float max_z
+            ){
   
   
   pcl::IndicesPtr indices (new std::vector <int>);
   pcl::PassThrough<PT> pass;
   pass.setInputCloud (cloud_in);
-  pass.setFilterFieldName ("z");
-  pass.setFilterLimits (min_z, max_z);
+
+  if(min_z!=0 || max_z!=0){
+    pass.setFilterFieldName ("z");
+    pass.setFilterLimits (min_z, max_z);
+  }
+  if(min_y!=0 || max_y!=0){
+    pass.setFilterFieldName ("y");
+    pass.setFilterLimits (min_y, max_y);
+  }
+
+  if(min_x!=0 || max_x!=0){
+    pass.setFilterFieldName ("x");
+    pass.setFilterLimits (min_x, max_x);
+  }
+
   pass.filter (*cloud_out);
 
   

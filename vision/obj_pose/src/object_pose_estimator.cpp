@@ -65,11 +65,44 @@ void ObjEstAction::poseEstimation(){
   float tool_z = 0.25; 
   float pass_z_max = 0.60;
 
+  float pass_x_min, pass_x_max, pass_y_min, pass_y_max;
+  pass_x_min = pass_x_max = pass_y_min = pass_y_max = 0;
+
+
+
+  if (pcl::console::find_switch (g_argc, g_argv, "-pass_x_min")){
+    pcl::console::parse (g_argc, g_argv, "-pass_x_min", pass_x_min);
+    ROS_INFO("Use pass_x_min = %lf",pass_x_min);
+  }
+
+  if (pcl::console::find_switch (g_argc, g_argv, "-pass_x_max")){
+    pcl::console::parse (g_argc, g_argv, "-pass_x_max", pass_x_max);
+    ROS_INFO("Use pass_x_max = %lf",pass_x_max);
+  }
+
+  if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_min")){
+    pcl::console::parse (g_argc, g_argv, "-pass_y_min", pass_y_min);
+    ROS_INFO("Use pass_y_min = %lf",pass_y_min);
+  }
+  
+  if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_max")){
+    pcl::console::parse (g_argc, g_argv, "-pass_y_max", pass_y_max);
+    ROS_INFO("Use pass_y_max = %lf",pass_y_max);
+  }
+
   if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_max")){
     pcl::console::parse (g_argc, g_argv, "-pass_z_max", pass_z_max);
+    
   }
   ROS_INFO("Use pass_z_max = %lf",pass_z_max);
-  get_pass_through_points(cloud, tool_z, pass_z_max, cloud);
+
+
+  get_pass_through_points(cloud,  cloud,
+                        pass_x_min, pass_x_max,
+                        pass_y_min, pass_y_max,
+                        tool_z, pass_z_max
+                        
+                        );
 
 #ifdef SaveCloud
   write_pcd_2_rospack(cloud,"_PassThrough.pcd");
