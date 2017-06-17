@@ -445,3 +445,22 @@ class StowTask:
 		self.Is_ArmBusy 	= self.Arm.busy
 		self.Is_LMBusy  	= self.LM.IsBusy
 		self.Is_LMArrive	= self.LM.IsArrive
+
+	def test_obj_pose_done(self,result):
+		self.obj_pose = result.object_pose
+		if result.object_pose.linear.z == -1:
+			rospy.logwarn('ROI Fail!! obj -> ' + self.now_stow_info.item)
+			self.state = WaitTask
+			return 
+		else:
+			self.obj_pose = result.object_pose
+			
+			
+
+	def test_obj_pose(self,want_item):
+		goal = obj_pose.msg.ObjectPoseGoal(want_item)
+
+		self.obj_pose_client.send_goal(
+					goal,
+					feedback_cb = self.obj_pose_feedback_cb, 
+					done_cb=self.test_obj_pose_done )
