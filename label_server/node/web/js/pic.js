@@ -125,7 +125,7 @@ function draw()
     console.log("no Image");
     ctxArr[0].clearRect(0,0,canvasArr[0].width,canvasArr[0].height);
     ctxArr[0].fillStyle = 'black';
-    ctxArr[0].globalAlpha = 0.7;
+    ctxArr[0].globalAlpha = 0.5;
     ctxArr[0].fillRect(rect.startX, rect.startY, rect.w, rect.h);
   }else {
     for(var i=0; inputElements[i]; ++i){
@@ -137,7 +137,7 @@ function draw()
     }
     ctxArr[checkedValue].clearRect(0,0,canvasArr[0].width,canvasArr[0].height);
     ctxArr[checkedValue].fillStyle = rectColor[checkedValue];
-    ctxArr[checkedValue].globalAlpha = 0.7;
+    ctxArr[checkedValue].globalAlpha = 0.5;
     ctxArr[checkedValue].fillRect(rect.startX, rect.startY, rect.w, rect.h);
   }
 }
