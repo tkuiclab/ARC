@@ -195,7 +195,7 @@ class StowTask:
 		elif self.state == PhotoPose:    
 			self.arm_photo_pose()
 			gripper_suction_up()
-			return
+			return`
 
 		elif self.state == VisionProcess:    
 			self.info = "(Catch) Request  Vision Process "  
