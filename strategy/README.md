@@ -21,6 +21,9 @@ rosrun obj_pose object_pose_estimator
 rosrun darkflow_detect object_detect.py            
 ```
 
+# See obj_pose result 
+pcl_viewer -multiview 1 ~/arc_ws/src/vision/obj_pose/pcd_file/*
+
 # Open strategy Web
 
 Open arc_ui/web/strategy.html
