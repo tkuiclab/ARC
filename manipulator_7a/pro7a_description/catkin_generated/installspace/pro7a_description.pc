@@ -1,8 +1,0 @@
-prefix=/usr/local
-
-Name: pro7a_description
-Description: Description of pro7a_description
-Version: 0.0.0
-Cflags: 
-Libs: -L/usr/local/lib 
-Requires: 

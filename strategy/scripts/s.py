@@ -167,7 +167,7 @@ if __name__ == '__main__':
 		#gripper_suction_up()
 		#gripper_suctoin_down()
 		#s.Arm.relative_control(a=.035)  #cam_z
-		s.stow.test_obj_pose('dvdRobots')  #expoEraser
+		s.stow.test_obj_pose('expoEraser')  #expoEraser
 		
 		rospy.spin()
 	except rospy.ROSInterruptException:
