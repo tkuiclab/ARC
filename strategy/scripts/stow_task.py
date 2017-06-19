@@ -195,7 +195,7 @@ class StowTask:
 		elif self.state == PhotoPose:    
 			self.arm_photo_pose()
 			gripper_suction_up()
-			return`
+			return
 
 		elif self.state == VisionProcess:    
 			self.info = "(Catch) Request  Vision Process "  
@@ -216,7 +216,6 @@ class StowTask:
 		elif self.state == Rotate2Obj:
 			self.info = "(Catch) Arm Rotate2Obj "  
 			print self.info
-
 
 			pitch = numpy.rad2deg(p.angular.x ) 
 			pitch = (pitch - 180) if pitch > 90  else pitch
@@ -248,7 +247,7 @@ class StowTask:
 			
 
 			#self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
-			self.Arm.relative_xyz_base(x = -move_cam_y, y = move_cam_x,z = -move_cam_z)
+			self.Arm.relative_xyz_base(x = -move_cam_y, y = move_cam_x, z = -move_cam_z)
 		
 
 			self.next_state = Arm_Down_2_Obj #PickObj
@@ -446,7 +445,7 @@ class StowTask:
 		self.Is_LMBusy  	= self.LM.IsBusy
 		self.Is_LMArrive	= self.LM.IsArrive
 
-	def test_obj_pose_done(self,result):
+	def test_obj_pose_done(self,state,result):
 		self.obj_pose = result.object_pose
 		if result.object_pose.linear.z == -1:
 			rospy.logwarn('ROI Fail!! obj -> ' + self.now_stow_info.item)
@@ -454,6 +453,7 @@ class StowTask:
 			return 
 		else:
 			self.obj_pose = result.object_pose
+			print '(x, y , z) = ' + '(' + str(self.obj_pose.linear.x) + ', ' + str(self.obj_pose.linear.y) + ', ' + str(self.obj_pose.linear.z) + ')'
 			
 			
 

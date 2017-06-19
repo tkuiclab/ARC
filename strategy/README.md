@@ -21,8 +21,19 @@ rosrun obj_pose object_pose_estimator
 rosrun darkflow_detect object_detect.py            
 ```
 
+# obj_pose 
+
+rosrun obj_pose object_pose_estimator -pass_z_max 0.57   
+-pass_x_min 
+-pass_x_max
+-pass_y_min 
+-pass_y_max
+-pass_z_min 
+-pass_z_max
+
 # See obj_pose result 
-pcl_viewer -multiview 1 ~/arc_ws/src/vision/obj_pose/pcd_file/*
+# in pcd_file/ directory
+pcl_viewer -multiview 1 *.pcd
 
 # Open strategy Web
 
