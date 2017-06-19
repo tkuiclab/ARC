@@ -22,7 +22,8 @@ using namespace Eigen;
 typedef pcl::PointXYZRGB PT;       //point type
 typedef pcl::PointCloud<PT> PCT;
 
-
+typedef pcl::PointNormal PNormal;       //point type
+typedef pcl::PointCloud<PNormal> PC_Normal;
 
 std::string path;
 
@@ -179,7 +180,9 @@ void get_near_points(PCT::Ptr cloud_in,
 
 
 //-----------Get mean normal--------------//
-Vector3f get_normal_mean(pcl::PointCloud<pcl::Normal>::Ptr cloud_normal){
+//Vector3f get_normal_mean(pcl::PointCloud<pcl::Normal>::Ptr cloud_normal){
+Vector3f get_normal_mean(pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal){
+ 
   Vector3f obj_normal ;
 
   obj_normal[0] = obj_normal[1] = obj_normal[2] = 0.0f;
@@ -250,29 +253,39 @@ void get_pass_through_points(PCT::Ptr cloud_in,
             float min_z, float max_z
             ){
   
-  
+  PCT::Ptr now_cloud  (new PCT);;
+  *now_cloud = *cloud_in;
+
   pcl::IndicesPtr indices (new std::vector <int>);
   pcl::PassThrough<PT> pass;
-  pass.setInputCloud (cloud_in);
 
   if(min_z!=0 || max_z!=0){
     pass.setFilterFieldName ("z");
     pass.setFilterLimits (min_z, max_z);
+
+    pass.setInputCloud (now_cloud);
+    pass.filter (*now_cloud);
+
   }
   if(min_y!=0 || max_y!=0){
     pass.setFilterFieldName ("y");
     pass.setFilterLimits (min_y, max_y);
+
+    pass.setInputCloud (now_cloud);
+    pass.filter (*now_cloud);
   }
 
   if(min_x!=0 || max_x!=0){
     pass.setFilterFieldName ("x");
     pass.setFilterLimits (min_x, max_x);
+
+    pass.setInputCloud (now_cloud);
+    pass.filter (*now_cloud);
   }
 
-  pass.filter (*cloud_out);
-
   
-  /*
+  *cloud_out = *now_cloud;
+  /* for backup point cloud
   pass.filter (*indices);
   //PCT::Ptr cloud_cluster (new PCT);
   for (std::vector<int>::const_iterator pit = indices->begin (); pit != indices->end (); ++pit)

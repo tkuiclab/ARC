@@ -78,4 +78,3 @@ target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES
 add_dependencies(object_pose_estimator obj_pose_generate_messages_cpp)
 add_dependencies(object_pose_estimator fake_roi_generate_messages_cpp)
 
-

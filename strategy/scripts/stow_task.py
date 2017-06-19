@@ -446,7 +446,7 @@ class StowTask:
 		self.Is_LMBusy  	= self.LM.IsBusy
 		self.Is_LMArrive	= self.LM.IsArrive
 
-	def test_obj_pose_done(self,result):
+	def test_obj_pose_done(self, status, result):
 		self.obj_pose = result.object_pose
 		if result.object_pose.linear.z == -1:
 			rospy.logwarn('ROI Fail!! obj -> ' + self.now_stow_info.item)
@@ -455,7 +455,7 @@ class StowTask:
 		else:
 			self.obj_pose = result.object_pose
 			
-			
+		print(str(self.obj_pose))
 
 	def test_obj_pose(self,want_item):
 		goal = obj_pose.msg.ObjectPoseGoal(want_item)

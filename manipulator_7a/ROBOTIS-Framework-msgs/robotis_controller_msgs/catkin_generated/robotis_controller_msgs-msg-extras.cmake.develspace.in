@@ -1,0 +1,2 @@
+set(robotis_controller_msgs_MESSAGE_FILES "/home/iclab/arc_ws/src/manipulator_7a/ROBOTIS-Framework-msgs/robotis_controller_msgs/msg/SyncWriteItem.msg;/home/iclab/arc_ws/src/manipulator_7a/ROBOTIS-Framework-msgs/robotis_controller_msgs/msg/JointCtrlModule.msg;/home/iclab/arc_ws/src/manipulator_7a/ROBOTIS-Framework-msgs/robotis_controller_msgs/msg/StatusMsg.msg")
+set(robotis_controller_msgs_SERVICE_FILES "/home/iclab/arc_ws/src/manipulator_7a/ROBOTIS-Framework-msgs/robotis_controller_msgs/srv/GetJointModule.srv")

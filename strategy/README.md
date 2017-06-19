@@ -41,5 +41,3 @@ $ rosservice call /robot_cmd "cmd: 'calibration'"
 $ rosservice call /robot_cmd "cmd: 'setMaxPos'"
 $ rosservice call /robot_cmd "cmd: 'setMinPos'"
 
-
- 
