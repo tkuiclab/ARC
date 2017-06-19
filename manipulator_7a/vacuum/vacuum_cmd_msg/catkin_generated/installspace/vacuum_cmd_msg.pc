@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: vacuum_cmd_msg
+Description: Description of vacuum_cmd_msg
+Version: 0.0.0
+Cflags: -I/usr/local/include
+Libs: -L/usr/local/lib 
+Requires: 

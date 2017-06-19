@@ -17,7 +17,7 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/segmentation/region_growing.h>
 #include <pcl/common/common.h>
-
+#include <pcl/surface/mls.h>
 
 void write_pcd_2_rospack(PCT::Ptr cloud, std::string f_name){
     std::string path = ros::package::getPath("obj_pose");
@@ -27,10 +27,20 @@ void write_pcd_2_rospack(PCT::Ptr cloud, std::string f_name){
     pcl::PCDWriter writer;
     writer.write<PT> (path, *cloud, false);
 
-
     std::cout << "Save PCD -> " << path << std::endl;
 }
 
+
+void write_pcd_2_rospack_normals(PC_Normal::Ptr cloud, std::string f_name){
+    std::string path = ros::package::getPath("obj_pose");
+    path.append("/pcd_file/");
+    path.append(f_name);
+
+    pcl::PCDWriter writer;
+    writer.write<PNormal> (path, *cloud, false);
+
+    std::cout << "Save PCD -> " << path << std::endl;
+}
 
 void get_largest_cluster( PCT::Ptr i_cloud ,PCT::Ptr o_cloud ){
   pcl::search::KdTree<PT>::Ptr tree (new pcl::search::KdTree<PT>);
@@ -305,20 +315,61 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   // PT min_p, max_p;
   // pcl::getMinMax3D(*i_cloud,min_p, max_p);
   
+  std::cout << "cam_2_obj_center() say Points = " << i_cloud->size() << std::endl;
+
+  
+  if(i_cloud->size() > 1000){
+    float leaf = 0.01;
+    // if (pcl::console::find_switch (argc, argv, "-leaf")){
+    //   pcl::console::parse (argc, argv, "-leaf", leaf);
+    // }
+
+    pcl::VoxelGrid<PT> vg;
+    vg.setInputCloud (i_cloud);
+    vg.setLeafSize (leaf, leaf, leaf);
+    vg.filter (*i_cloud);
+
+    std::cout << "cam_2_obj_center() say After VoxelGrid Points = " << i_cloud->size() << std::endl;
+
+  }
+
   // ----------------------------------------------------------------
   // -----Calculate surface normals with a search radius of 0.05-----
   // ----------------------------------------------------------------
-  pcl::NormalEstimation<PT, pcl::Normal> ne;
+  pcl::NormalEstimation<PT, PNormal> ne;
   //ne.setInputCloud (cloud_near_center);
   ne.setInputCloud (i_cloud);
   //option
   //pcl::search::KdTree<PT>::Ptr tree (new pcl::search::KdTree<PT> ());
   //ne.setSearchMethod (tree);
-  pcl::PointCloud<pcl::Normal>::Ptr cloud_normal (new pcl::PointCloud<pcl::Normal>);
+  
+  //pcl::PointCloud<pcl::Normal>::Ptr cloud_normal (new pcl::PointCloud<pcl::Normal>);
+  pcl::PointCloud<PNormal>::Ptr cloud_normal (new pcl::PointCloud<PNormal>);
+  
   ne.setRadiusSearch (0.3);
   ne.compute (*cloud_normal);
 
+#ifdef SaveCloud    
+  write_pcd_2_rospack_normals(cloud_normal,"_NormalEstimation.pcd");
+
+#endif
+
+  //------------------MovingLeastSquares----------------//
+   // Create a KD-Tree
+  pcl::search::KdTree<PT>::Ptr tree (new pcl::search::KdTree<PT>);
+  pcl::PointCloud<pcl::PointNormal> mls_points;
+  pcl::MovingLeastSquares<PT, pcl::PointNormal> mls;
+  mls.setComputeNormals (true);
+  mls.setInputCloud (i_cloud);
+  mls.setPolynomialFit (true);
+  mls.setSearchMethod (tree);
+  mls.setSearchRadius (0.03);
+  mls.process (*cloud_normal);
   
+
+#ifdef SaveCloud    
+  write_pcd_2_rospack_normals(cloud_normal,"_mls.pcd");
+#endif
   //getNormal_Near_Point(cloud_normal, center);
 
   std::cout << "cloud_normal width*height = " << cloud_normal->width * cloud_normal->height << std::endl;
