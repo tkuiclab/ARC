@@ -19,7 +19,6 @@ from geometry_msgs.msg import PoseStamped, Twist
 from std_msgs.msg import Bool, Char, Float64, String
 from strategy.srv import *
 
-
 import arm_task_rel
 import LM_Control
 #import task_parser
@@ -29,12 +28,12 @@ from gripper import *
 from pick_task import PickTask
 from stow_task import StowTask
 
-
 import json
 
 TaskType_None = 0
 TaskType_Pick = 1
 TaskType_Stow = 2
+
 
 class Strategy(threading.Thread):
 	""" description """
@@ -58,17 +57,7 @@ class Strategy(threading.Thread):
 		rospy.sleep(0.3)
 		rospy.loginfo("Strategy Ready!!")
 		
-
-	def shutdown(self): pick_run_cb(){
-    l('pick_run_cb()');
-
-    var request = new ROSLIB.ServiceRequest({
-        task_name : 'pick_run',
-        task_json : ''
-    });
-    task_client.callService(request);
-
-  }
+	def shutdown(self):
 		""" description """
 		self.stop_robot = True
 		rospy.loginfo("Strategy Exit & Stop Robot")
@@ -125,14 +114,12 @@ class Strategy(threading.Thread):
 			
 			rate.sleep()
 
-
 	def test_go_bin_LM(self, bin):
 		rospy.sleep(0.5)
 		print 'test_go_bin_LM bin -> ' +bin  
 		self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', bin ))
 		rospy.sleep(0.3)
 		self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', bin ))
-			
 
 	def test_go_box(self, box):
 		rospy.sleep(0.5)
@@ -148,7 +135,6 @@ class Strategy(threading.Thread):
 				'bin': 'E',
 				'box': '1A5'
 				}
-		
 		self.info_pub.publish(json.dumps(info_json))
 
 	def arm_go_init_pose(self):
@@ -159,6 +145,9 @@ class Strategy(threading.Thread):
 		self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.27), (0, 0, 0) )
 
 
+	def safe_pose(self):
+		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-90, 0, 0) )
+
 if __name__ == '__main__':
 	rospy.init_node('strategy')
 
@@ -167,16 +156,18 @@ if __name__ == '__main__':
 		#s.arm_go_init_pose()
 		#s.start() 
 		#s.arm_go_init_pose()
-		s.start() 
+		#s.start() 
 		#s.test_go_bin_LM('j')
 		#test_go_box('j')		
 		# s.stow.LM_2_tote()			# -
-		# s.stow.arm_photo_pose()		# -
+		#s.stow.arm_photo_pose()		# -
+
+		s.safe_pose()
 		#gripper_vaccum_off()
 		#gripper_suction_up()
 		#gripper_suctoin_down()
 		#s.Arm.relative_control(a=.035)  #cam_z
-		s.stow.test_obj_pose('expoEraser')
+		s.stow.test_obj_pose('avery1BinderWhite')
 		
 		rospy.spin()
 	except rospy.ROSInterruptException:
