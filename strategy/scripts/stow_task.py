@@ -7,6 +7,7 @@
 import math
 import threading
 import time
+import numpy
 
 import actionlib
 import roslaunch
@@ -455,7 +456,14 @@ class StowTask:
 			self.obj_pose = result.object_pose
 			print '(x, y , z) = ' + '(' + str(self.obj_pose.linear.x) + ', ' + str(self.obj_pose.linear.y) + ', ' + str(self.obj_pose.linear.z) + ')'
 			
-		print(str(self.obj_pose))
+			p = self.obj_pose
+			#print(str(self.obj_pose))
+			rospy.loginfo("(x,y,z)= (" + str(p.linear.x) + ", " + str(p.linear.y)+ ", " + str(p.linear.z)) 
+			rospy.loginfo("(roll,pitch,yaw)= (" 
+							+ str(numpy.rad2deg(p.angular.x)) + ", " 
+							+ str(numpy.rad2deg(p.angular.y)) + ", " 
+							+ str(numpy.rad2deg(p.angular.z))  ) 
+        
 
 	def test_obj_pose(self,want_item):
 		goal = obj_pose.msg.ObjectPoseGoal(want_item)
