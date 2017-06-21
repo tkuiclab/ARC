@@ -26,8 +26,8 @@ class ArmTask:
         self.__set_pubSub()
         #rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
-        self.__is_busy = True
-        self.__set_vel_pub.publish(40)
+        self.__is_busy = False
+        self.__set_vel_pub.publish(20)
 
     def __set_pubSub(self):
         self.__set_mode_pub = rospy.Publisher(
@@ -75,6 +75,8 @@ class ArmTask:
 
     def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI):
         """Publish ik cmd msg to manager node."""
+        # while self.__is_busy:
+        #     rospy.sleep(.1)
         cmd = []
 
         for p in pos:
@@ -120,18 +122,18 @@ class ArmTask:
         yaw = euler[2]
         return (pitch, roll, yaw)
 
-    def euler2rotation(self, euler):
-        Cx = cos(euler[0])
-        Sx = sin(euler[0])
-        Cy = cos(euler[1])
-        Sy = sin(euler[1])
+    def euler2rotation(self, euler):  # jmp_rot
+        Cx = cos(euler[1])   # 1 0 2     
+        Sx = sin(euler[1])
+        Cy = cos(euler[0])
+        Sy = sin(euler[0])
         Cz = cos(euler[2])
         Sz = sin(euler[2])
 
         return [
-            [Cz * Sy + Sz * Sx * Cy,  Cz * Cy - Sz * Sx * Sy, -Sz * Cx],
-            [Sz * Sy - Cz * Sx * Cy,  Sz * Cy + Cz * Sx * Sy,  Cz * Cx],
-            [Cx * Cy, -Cx * Sy,  Sx]
+            [Cz * Sy + Sz * Sx * Cy,   Cz * Cy - Sz * Sx * Sy,  -Sz * Cx],
+            [Sz * Sy - Cz * Sx * Cy,   Sz * Cy + Cz * Sx * Sy,   Cz * Cx],
+            [               Cx * Cy,                 -Cx * Sy,        Sx]
         ]
 
     def rotation2vector(self, rot):
@@ -164,7 +166,7 @@ class ArmTask:
             mode,
             (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
             (
-                degrees(euler[1]),                
+                degrees(euler[1]),   # 1 0 2             
                 degrees(euler[0]),
                 degrees(euler[2])
             )
@@ -209,26 +211,26 @@ if __name__ == '__main__':
     task = ArmTask()
     rospy.sleep(0.3)
 
-    task.pub_ikCmd('ptp')
-    #task.relative_control(s=.1)  #-y
-    #task.relative_control(a=.05) #x
+
+    # # task.pub_ikCmd('ptp')
+    # task.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-95, 0, 0, 0) )
+    # rospy.sleep(0.3)
+
+    # task.relative_control(a=.05) #x
+    # rospy.sleep(0.3)
+
+    # task.relative_control(a=-0.05) #x
+    # rospy.sleep(0.3)
+
+    # task.relative_control(n=-0.05) #x
+    # rospy.sleep(0.3)
+
+    # task.relative_control(n=0.05) #x
+    # rospy.sleep(0.3)
+
+    # task.relative_control(s=.05) #x
+    # rospy.sleep(0.3)
+
+    # task.relative_control(s=-0.05) #x
+    # rospy.sleep(0.3)
     
-    #task.relative_control(n=.05)  #cam_y
-    #task.relative_control(s=.05)  #cam_-x
-
-    #task.relative_control(n=.05, s= .05, a =.05) #cam_z
-    # task.relative_control(n=.05) #cam_z
-    # task.relative_control(s=.05) #cam_z
-    # task.relative_control(a=.05) #cam_z
-
-#    case ORDER_ZYX:
-#         Mx.M[0][0]=Cy*Cz;
-#         Mx.M[0][1]=Cz*Sx*Sy-Cx*Sz;
-#         Mx.M[0][2]=Cx*Cz*Sy+Sx*Sz;
-#         Mx.M[1][0]=Cy*Sz;
-#         Mx.M[1][1]=Cx*Cz+Sx*Sy*Sz;
-#         Mx.M[1][2]=-Cz*Sx+Cx*Sy*Sz;
-#         Mx.M[2][0]=-Sy;
-#         Mx.M[2][1]=Cy*Sx;
-#         Mx.M[2][2]=Cx*Cy;
-#         break;

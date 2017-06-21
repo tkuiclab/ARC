@@ -1,17 +1,43 @@
 * The step to execute straregy 
 
-Step1.
+# Open Control
 
-    $ roslaunch arc control.launch
+```bash
+sudo bash
+roslaunch arc control.launch
+```
 
-Step2.
+# Run Strategy 
 
-    $ rosrun strategy s.py
+```bash
+rosrun straregy s.py
+```
 
-step3.
+# Run Vison 
 
-    $ rosservice call /task "task_name: 'pick'"	(for pick task)<br>
-    $ rosservice call /task "task_name: 'stow'"	(for stow task)<br>
+```bash
+roslaunch realsense_camera sr300_nodelet_rgbd.launch
+rosrun obj_pose object_pose_estimator
+rosrun darkflow_detect object_detect.py            
+```
+
+# obj_pose 
+
+rosrun obj_pose object_pose_estimator -pass_z_max 0.57   
+-pass_x_min 
+-pass_x_max
+-pass_y_min 
+-pass_y_max
+-pass_z_min 
+-pass_z_max
+
+# See obj_pose result 
+# in pcd_file/ directory
+pcl_viewer -multiview 1 *.pcd
+
+# Open strategy Web
+
+Open arc_ui/web/strategy.html
 
 
 # About Suction
@@ -26,5 +52,3 @@ $ rosservice call /robot_cmd "cmd: 'calibration'"
 $ rosservice call /robot_cmd "cmd: 'setMaxPos'"
 $ rosservice call /robot_cmd "cmd: 'setMinPos'"
 
-
- 

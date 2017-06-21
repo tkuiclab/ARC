@@ -15,11 +15,19 @@ sudo cp ~/arc_ws/src/arc/install/99-arc.rules /etc/udev/rules.d/
 ### Run 
 
 ```bash
+# Open Control 
 sudo bash
 roslaunch arc control.launch 
+# Open Vision 
+roslaunch realsense_camera sr300_nodelet_rgbd.launch
+rosrun obj_pose object_pose_estimator
+rosrun darkflow_detect object_detect.py 
+# Open Strategy
 rosrun strategy s.py
-rosservice call /task "task_name: 'pick'"
 ```
+
+Open arc_ui/web/strategy.html
+
 
 ### Manipulator
 

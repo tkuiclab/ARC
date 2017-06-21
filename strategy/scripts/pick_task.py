@@ -120,7 +120,7 @@ class PickTask:
 		self.parse_json_2_pick_list()
 
 	def parse_json_2_pick_list(self):
-		if self.order==None or self.order==None:
+		if self.item_location==None or self.order==None:
 			return
 		rospy.loginfo("[Pick] Parse JSON of item_location and order to pick_list")
 		self.pick_list = make_pick_list(self.item_location, self.order)
