@@ -300,11 +300,11 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   PT center =  getCenter(i_cloud);
   std::cout << "Center Point = " << center << std::endl;
 
-  // x = center.x;
-  // y = center.y;
-  // z = center.z;
+  x = center.x;
+  y = center.y;
+  z = center.z;
 
-  // return;
+  return;
 
   //get near center points
   //ouput to cloud_near_center
