@@ -42,3 +42,6 @@ build/
 /label_server/Image/
 /label_server/xml/
 /label_server/node/log/*.log
+
+# ignore PCL_Test
+/PCL_Test/
