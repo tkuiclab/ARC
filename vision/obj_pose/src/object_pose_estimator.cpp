@@ -1,7 +1,6 @@
 
 #include "object_pose_estimator.hpp"
 //#include "seg_plane_cam2obj.hpp"
-#include "OrganizedSegmentation.h"
 #include "cpc_segmentation.hpp"
 #include "ICP_alignment.hpp"
 
@@ -43,159 +42,159 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 
 
 void ObjEstAction::poseEstimation(){
-  ROS_INFO("In poseEstimation()");
+//   ROS_INFO("In poseEstimation()");
   
-  geometry_msgs::Twist pose;
+//   geometry_msgs::Twist pose;
 
-  PCT::Ptr cloud(new PCT);
-  PCT::Ptr cloud_hsv (new PCT);
-  PCT::Ptr cloud_seg (new PCT);
-  PCT::Ptr cloud_seg_largest (new PCT);
+//   PCT::Ptr cloud(new PCT);
+//   PCT::Ptr cloud_hsv (new PCT);
+//   PCT::Ptr cloud_seg (new PCT);
+//   PCT::Ptr cloud_seg_largest (new PCT);
 
-  *cloud = *ROI_cloud;
+//   *cloud = *ROI_cloud;
 
-  // if(obj_name.compare("seg_0") == 0){
-  //   get_seg_plane(cloud, 0, cloud_seg);
-  // }else if(obj_name.compare("seg_1") == 0){
-  //   get_seg_plane(cloud, 1, cloud_seg);
-  // }else if(obj_name.compare("seg_2") == 0){
-  //   get_seg_plane(cloud, 2, cloud_seg);
-  // }
-  std::vector<int> index;
-  pcl::removeNaNFromPointCloud(*cloud, *cloud, index);
+//   // if(obj_name.compare("seg_0") == 0){
+//   //   get_seg_plane(cloud, 0, cloud_seg);
+//   // }else if(obj_name.compare("seg_1") == 0){
+//   //   get_seg_plane(cloud, 1, cloud_seg);
+//   // }else if(obj_name.compare("seg_2") == 0){
+//   //   get_seg_plane(cloud, 2, cloud_seg);
+//   // }
+//   std::vector<int> index;
+//   pcl::removeNaNFromPointCloud(*cloud, *cloud, index);
   
-#ifdef SaveCloud
-  write_pcd_2_rospack(cloud,"_rm_NaN.pcd");
-#endif
+// #ifdef SaveCloud
+//   write_pcd_2_rospack(cloud,"_rm_NaN.pcd");
+// #endif
 
-  float tool_z = 0.25; 
-  float pass_z_max = 0.60;
+//   float tool_z = 0.25; 
+//   float pass_z_max = 0.60;
 
-  float pass_x_min, pass_x_max, pass_y_min, pass_y_max;
-  pass_x_min = pass_x_max = pass_y_min = pass_y_max = 0;
+//   float pass_x_min, pass_x_max, pass_y_min, pass_y_max;
+//   pass_x_min = pass_x_max = pass_y_min = pass_y_max = 0;
 
 
 
-  if (pcl::console::find_switch (g_argc, g_argv, "-pass_x_min")){
-    pcl::console::parse (g_argc, g_argv, "-pass_x_min", pass_x_min);
-    ROS_INFO("Use pass_x_min = %lf",pass_x_min);
-  }
+//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_x_min")){
+//     pcl::console::parse (g_argc, g_argv, "-pass_x_min", pass_x_min);
+//     ROS_INFO("Use pass_x_min = %lf",pass_x_min);
+//   }
 
-  if (pcl::console::find_switch (g_argc, g_argv, "-pass_x_max")){
-    pcl::console::parse (g_argc, g_argv, "-pass_x_max", pass_x_max);
-    ROS_INFO("Use pass_x_max = %lf",pass_x_max);
-  }
+//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_x_max")){
+//     pcl::console::parse (g_argc, g_argv, "-pass_x_max", pass_x_max);
+//     ROS_INFO("Use pass_x_max = %lf",pass_x_max);
+//   }
 
-  if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_min")){
-    pcl::console::parse (g_argc, g_argv, "-pass_y_min", pass_y_min);
-    ROS_INFO("Use pass_y_min = %lf",pass_y_min);
-  }
+//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_min")){
+//     pcl::console::parse (g_argc, g_argv, "-pass_y_min", pass_y_min);
+//     ROS_INFO("Use pass_y_min = %lf",pass_y_min);
+//   }
   
-  if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_max")){
-    pcl::console::parse (g_argc, g_argv, "-pass_y_max", pass_y_max);
-    ROS_INFO("Use pass_y_max = %lf",pass_y_max);
-  }
+//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_max")){
+//     pcl::console::parse (g_argc, g_argv, "-pass_y_max", pass_y_max);
+//     ROS_INFO("Use pass_y_max = %lf",pass_y_max);
+//   }
 
-  if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_max")){
-    pcl::console::parse (g_argc, g_argv, "-pass_z_max", pass_z_max);
+//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_max")){
+//     pcl::console::parse (g_argc, g_argv, "-pass_z_max", pass_z_max);
     
-  }
-  ROS_INFO("Use pass_z_max = %lf",pass_z_max);
+//   }
+//   ROS_INFO("Use pass_z_max = %lf",pass_z_max);
 
 
-  get_pass_through_points(cloud,  cloud,
-                        pass_x_min, pass_x_max,
-                        pass_y_min, pass_y_max,
-                        tool_z, pass_z_max
+//   get_pass_through_points(cloud,  cloud,
+//                         pass_x_min, pass_x_max,
+//                         pass_y_min, pass_y_max,
+//                         tool_z, pass_z_max
                         
-                        );
+//                         );
 
-#ifdef SaveCloud
-  write_pcd_2_rospack(cloud,"_PassThrough.pcd");
-#endif
+// #ifdef SaveCloud
+//   write_pcd_2_rospack(cloud,"_PassThrough.pcd");
+// #endif
 
-  // get_hsv_points(cloud, cloud_hsv,
-  //       0.0, 38.0, 
-  //       0.03, 1.0, 
-  //       0.29, 1.0);
+//   // get_hsv_points(cloud, cloud_hsv,
+//   //       0.0, 38.0, 
+//   //       0.03, 1.0, 
+//   //       0.29, 1.0);
 
-// get_hsv_points(cloud, cloud_hsv,
-//         332.0, 36.0, 
-//         0.0, 1.0, 
-//         0.0, 1.0,
-//         true);
+// // get_hsv_points(cloud, cloud_hsv,
+// //         332.0, 36.0, 
+// //         0.0, 1.0, 
+// //         0.0, 1.0,
+// //         true);
 
-  // get_hsv_points(cloud, cloud_hsv,
-  //       200.0, 45.0, 
-  //       0.0, 1.0, 
-  //       0.0, 1.0,
-  //       true);
+//   // get_hsv_points(cloud, cloud_hsv,
+//   //       200.0, 45.0, 
+//   //       0.0, 1.0, 
+//   //       0.0, 1.0,
+//   //       true);
     
-// #ifdef SaveCloud
-//   write_pcd_2_rospack(cloud_hsv,"_hsv.pcd");
+// // #ifdef SaveCloud
+// //   write_pcd_2_rospack(cloud_hsv,"_hsv.pcd");
 
-// #endif
-  // if(obj_name.compare("seg_0") == 0){
-  //   region_growing(cloud, 0, cloud_seg);
-  // }else if(obj_name.compare("seg_1") == 0){
-  //   region_growing(cloud, 1, cloud_seg);
-  // }else if(obj_name.compare("seg_2") == 0){
-  //   region_growing(cloud, 2, cloud_seg);
-  // }
+// // #endif
+//   // if(obj_name.compare("seg_0") == 0){
+//   //   region_growing(cloud, 0, cloud_seg);
+//   // }else if(obj_name.compare("seg_1") == 0){
+//   //   region_growing(cloud, 1, cloud_seg);
+//   // }else if(obj_name.compare("seg_2") == 0){
+//   //   region_growing(cloud, 2, cloud_seg);
+//   // }
    
    
-  //get_seg_plane(cloud,  cloud_seg);
-  //get_largest_cluster(cloud_seg, cloud_seg_largest);
+//   //get_seg_plane(cloud,  cloud_seg);
+//   //get_largest_cluster(cloud_seg, cloud_seg_largest);
 
-//   region_growing(cloud, 0, cloud_seg);
+// //   region_growing(cloud, 0, cloud_seg);
 
-// #ifdef SaveCloud
-//   write_pcd_2_rospack(cloud_seg,"_region_growing.pcd");
+// // #ifdef SaveCloud
+// //   write_pcd_2_rospack(cloud_seg,"_region_growing.pcd");
 
-// #endif
+// // #endif
 
-  //KNote: lots of time, have problem in this function , 
-  //get_seg_plane_near(cloud, cloud_seg);
-  //*cloud_seg_largest = *cloud_seg;
+//   //KNote: lots of time, have problem in this function , 
+//   //get_seg_plane_near(cloud, cloud_seg);
+//   //*cloud_seg_largest = *cloud_seg;
 
-  cam_2_obj_center(cloud, 
-      pose.linear.x, pose.linear.y, pose.linear.z, 
-      pose.angular.x, pose.angular.y, pose.angular.z);
+//   cam_2_obj_center(cloud, 
+//       pose.linear.x, pose.linear.y, pose.linear.z, 
+//       pose.angular.x, pose.angular.y, pose.angular.z);
   
-  result_.object_pose = pose;
+//   result_.object_pose = pose;
 
-  as_.setSucceeded(result_);
+//   as_.setSucceeded(result_);
 
-  state = NADA;
+//   state = NADA;
 
-#ifdef ShowCloud
-  //vis_simple(viewer,cloud);
-  //viewer->addPointCloud<PT> (cloud);
-  //viewer->addPointCloud<PT> (cloud_seg);
+// #ifdef ShowCloud
+//   //vis_simple(viewer,cloud);
+//   //viewer->addPointCloud<PT> (cloud);
+//   //viewer->addPointCloud<PT> (cloud_seg);
  
-  get_largest_cluster(cloud_hsv, cloud_hsv);
-  viewer->addPointCloud<PT> (cloud_hsv);
+//   get_largest_cluster(cloud_hsv, cloud_hsv);
+//   viewer->addPointCloud<PT> (cloud_hsv);
 
-  PT min_p, max_p;
-  pcl::getMinMax3D(*cloud_hsv,min_p, max_p);
+//   PT min_p, max_p;
+//   pcl::getMinMax3D(*cloud_hsv,min_p, max_p);
 
-  std::cout << "min_p = " << min_p << std::endl;
-  std::cout << "max_p = " << max_p << std::endl;
+//   std::cout << "min_p = " << min_p << std::endl;
+//   std::cout << "max_p = " << max_p << std::endl;
   
 
-  // vis_one_point(viewer, min_p, "min_p");
-  // vis_one_point(viewer, max_p, "max_p");
+//   // vis_one_point(viewer, min_p, "min_p");
+//   // vis_one_point(viewer, max_p, "max_p");
   
-  viewer->addCube(min_p.x, max_p.x,
-                  min_p.y, max_p.y,  
-                  min_p.z, max_p.z);
+//   viewer->addCube(min_p.x, max_p.x,
+//                   min_p.y, max_p.y,  
+//                   min_p.z, max_p.z);
 
-  while (!viewer->wasStopped () && state == NADA && ros::ok())
-  {
-    viewer->spinOnce (100);
-    boost::this_thread::sleep (boost::posix_time::microseconds (100000));
-  }
-#endif 
+//   while (!viewer->wasStopped () && state == NADA && ros::ok())
+//   {
+//     viewer->spinOnce (100);
+//     boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+//   }
+// #endif 
 
 }
 
