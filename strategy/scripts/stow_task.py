@@ -26,7 +26,6 @@ import LM_Control
 from task_parser import *
 from config import *
 from gripper import *
-
 # Define State
 WaitTask  		= 1		# Wait Task
 ParseJSON   	= 2		# Parse Json
@@ -263,7 +262,7 @@ class StowTask:
 			self.next_state = PickObj
 			self.state 		= WaitRobot
 			
-			self.Arm.relative_control(a=.035)  #cam_z
+			self.Arm.relative_control(a=0.05)  #cam_z
 			
 			return
 

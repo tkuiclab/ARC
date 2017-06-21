@@ -154,21 +154,21 @@ if __name__ == '__main__':
 	try:
 		s = Strategy()
 		#s.arm_go_init_pose()
-		#s.start() 
+		# s.start() 
 		#s.arm_go_init_pose()
-		#s.start() 
+		s.start() 
 		#s.test_go_bin_LM('j')
 		#test_go_box('j')		
 		# s.stow.LM_2_tote()			# -
 		#s.stow.arm_photo_pose()		# -
 
-		s.safe_pose()
+		# s.safe_pose()
 		#gripper_vaccum_off()
 		#gripper_suction_up()
 		#gripper_suctoin_down()
 		#s.Arm.relative_control(a=.035)  #cam_z
 
-		s.stow.test_obj_pose('expoEraser')  #expoEraser
+		# s.stow.test_obj_pose('expoEraser')  #expoEraser
 
 		rospy.spin()
 	except rospy.ROSInterruptException:
