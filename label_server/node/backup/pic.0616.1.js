@@ -16,20 +16,28 @@ var rectColor = ['#000',
                 '#008baf', '#c25f2a', '#cc9c1d', '#542a00', '#6d6d6d'];
 var canvasArr = [];
 var ctxArr = [];
-var canvasImg, ctxImg;
-var canvasMouse, ctxMouse;
+var canvas_mouse;
+var ctx_mouse;
 
 var currentIndex = 0;
 
+l = console.log;
+
 document.addEventListener("DOMContentLoaded", function(event) {
-  canvasImg = document.getElementById('canvasImg');
-  ctxImg = canvasImg.getContext('2d');
-  canvasMouse = document.getElementById('canvasMouse');
-  ctxMouse = canvasMouse.getContext('2d');
-  for (var i = 0; i < document.getElementsByTagName('canvas').length-2; i++) {
-    canvasArr.push(document.getElementById('canvas'+(i+1)));
-    ctxArr.push(canvasArr[i].getContext('2d'));
+  var canvas_ary = document.getElementsByTagName('canvas');
+  for (var i = 0; i < canvas_ary.length; i++) {
+    //l('push canvas_ary[' + i + '].id= '  +  canvas_ary[i].id);
+    if(canvas_ary[i].id == 'canvas_mouse_move') 
+          continue;
+    // canvasArr.push(document.getElementById('canvas'+i));
+    // ctxArr.push(canvasArr[i].getContext('2d'));
+    canvasArr.push(canvas_ary[i]);
+    ctxArr.push(canvas_ary[i].getContext('2d'));
   }
+
+  canvas_mouse = document.getElementById('canvas_mouse_move');
+  ctx_mouse = canvas_mouse.getContext('2d');
+
   init();
 });
 
@@ -37,8 +45,9 @@ var img = new Image();
 
 function init()
 {
-  canvasMouse.addEventListener('mousedown', MouseDown, false);
-  canvasMouse.addEventListener('mousemove', MouseMove, false);
+  canvas_mouse.addEventListener('mousedown', MouseDown, false);
+//  canvas_mouse.addEventListener('mouseup', MouseUp, false);
+  canvas_mouse.addEventListener('mousemove', MouseMove, false);
   document.addEventListener('mouseup', MouseUp, false);
 }
 
@@ -61,13 +70,16 @@ function MouseUp()
     for(var i=0; inputElements[i]; ++i){
       if(inputElements[i].checked){
         checkedValue = inputElements[i].value;
-        checkedValue -= 1;
-        //console.log(checkedValue);
+        // console.log(checkedValue);
         break;
       }
     }
     ctxArr[checkedValue].font = "15px Arial";
-    ctxArr[checkedValue].fillText(document.getElementsByClassName('messageLabel')[checkedValue].innerText, xMin, yMin);
+
+    //console.log('innerText = ' + document.getElementsByClassName('messageLabel')[checkedValue-1].innerText);
+    l('checkedValue = ' + checkedValue);
+
+    ctxArr[checkedValue].fillText(document.getElementsByClassName('messageLabel')[checkedValue-1].innerText, xMin, yMin);
 
     console.log("Position: "+xMin+", "+yMin+", "+xMax+", "+yMax);
     document.getElementById('objXmin').value = xMin;
@@ -85,17 +97,17 @@ function MouseUp()
 
 function MouseMove(e)
 {
-    ctxMouse.clearRect(0,0,canvasMouse.width,canvasMouse.height);
-    ctxMouse.beginPath();
-    ctxMouse.moveTo(0, (e.pageY - this.offsetTop));
-    ctxMouse.lineTo(this.width, (e.pageY - this.offsetTop));
-    ctxMouse.moveTo((e.pageX - this.offsetLeft), 0);
-    ctxMouse.lineTo((e.pageX - this.offsetLeft), this.height);
-    ctxMouse.strokeStyle = '#CAF4D3';
-    ctxMouse.stroke();
-    ctxMouse.font = "12px Arial";
-    ctxMouse.fillStyle = '#CAF4D3';
-    ctxMouse.fillText("("+(e.pageX - this.offsetLeft)+","+(e.pageY - this.offsetTop)+")",
+    ctx_mouse.clearRect(0,0,canvas_mouse.width,canvas_mouse.height);
+    ctx_mouse.beginPath();
+    ctx_mouse.moveTo(0, (e.pageY - this.offsetTop));
+    ctx_mouse.lineTo(this.width, (e.pageY - this.offsetTop));
+    ctx_mouse.moveTo((e.pageX - this.offsetLeft), 0);
+    ctx_mouse.lineTo((e.pageX - this.offsetLeft), this.height);
+    ctx_mouse.strokeStyle = '#CAF4D3';
+    ctx_mouse.stroke();
+    ctx_mouse.font = "12px Arial";
+    ctx_mouse.fillStyle = '#CAF4D3';
+    ctx_mouse.fillText("("+(e.pageX - this.offsetLeft)+","+(e.pageY - this.offsetTop)+")",
                         (e.pageX - this.offsetLeft),
                         (e.pageY - this.offsetTop));
   if (drag) {
@@ -111,22 +123,21 @@ function draw()
 {
   if (picTmp == '') {
     console.log("no Image");
-    ctxImg.clearRect(0,0,canvasImg.width,canvasImg.height);
-    ctxImg.fillStyle = 'black';
-    ctxImg.globalAlpha = 0.7;
-    ctxImg.fillRect(rect.startX, rect.startY, rect.w, rect.h);
+    ctxArr[0].clearRect(0,0,canvasArr[0].width,canvasArr[0].height);
+    ctxArr[0].fillStyle = 'black';
+    ctxArr[0].globalAlpha = 0.7;
+    ctxArr[0].fillRect(rect.startX, rect.startY, rect.w, rect.h);
   }else {
     for(var i=0; inputElements[i]; ++i){
       if(inputElements[i].checked){
         checkedValue = inputElements[i].value;
-        checkedValue -= 1;
-        //console.log(checkedValue);
+        // console.log(checkedValue);
         break;
       }
     }
-    ctxArr[checkedValue].clearRect(0,0,canvasImg.width,canvasImg.height);
+    ctxArr[checkedValue].clearRect(0,0,canvasArr[0].width,canvasArr[0].height);
     ctxArr[checkedValue].fillStyle = rectColor[checkedValue];
-    ctxArr[checkedValue].globalAlpha = 0.5;
+    ctxArr[checkedValue].globalAlpha = 0.7;
     ctxArr[checkedValue].fillRect(rect.startX, rect.startY, rect.w, rect.h);
   }
 }
@@ -143,7 +154,7 @@ function PicFunc(e, index)
       canvas.width = img.width;
       canvas.height = img.height;
     }
-    ctxImg.drawImage(img, 0, 0, img.width, img.height);
+    ctxArr[0].drawImage(img, 0, 0, img.width, img.height);
   };
   img.src = e.src;
   document.getElementById('canvasDiv').style.height = img.height + 20;
@@ -161,16 +172,15 @@ function Remove(type)
     for(var i=0; inputElements[i]; ++i){
       if(inputElements[i].checked){
         checkedValue = inputElements[i].value;
-        checkedValue -= 1;
         // console.log(checkedValue);
         break;
       }
     }
-    ctxArr[checkedValue].clearRect(0,0,canvasImg.width,canvasImg.height);
+    ctxArr[checkedValue].clearRect(0,0,canvasArr[0].width,canvasArr[0].height);
 
   }else if (type == -9) {
     for (var i = 1; i < ctxArr.length; i++) {
-      ctxArr[i].clearRect(0,0,canvasImg.width,canvasImg.height);
+      ctxArr[i].clearRect(0,0,canvasArr[0].width,canvasArr[0].height);
     }
   }
   document.getElementById('objXmin').value = type;
@@ -191,7 +201,7 @@ function NextPicture()
       canvas.width = img.width;
       canvas.height = img.height;
     }
-    ctxImg.drawImage(img, 0, 0, img.width, img.height);
+    ctxArr[0].drawImage(img, 0, 0, img.width, img.height);
   };
   img.src = x[currentIndex].src;
 

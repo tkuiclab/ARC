@@ -19,10 +19,12 @@ var log4js = require('log4js');
 log4js.configure('log/log4js.json');
 var logger = log4js.getLogger('Server');
 
-//var imageDir = process.env.HOME+'/NODEJS/web/Image/';
-//var xmlDir = process.env.HOME+'/NODEJS/web/xml/';
+// var imageDir = process.env.HOME+'/NODEJS/web/Image/';
+// var xmlDir = process.env.HOME+'/NODEJS/web/xml/';
 var imageDir = __dirname+'/../Image/';
 var xmlDir = __dirname+'/../xml/';
+
+l = console.log;
 
 app.get('/', function (req, res) {
   // Load __dirname/web/js directory -> /js
@@ -86,8 +88,9 @@ app.post('/upload', function (req, res) {
 
   req.addListener("end", function()
   {
+    l("******in  req.addListener(end) *****************");
     handlers.upload(res, postData);
-    console.log("***********************");
+    l("******in  req.addListener(end) 2*****************")
     logger.info("***********************");
   });
 });
@@ -126,6 +129,8 @@ function getImages(imageDir, filter, start, end, callback) {
   var fileType = '.jpg',
       files = [], i;
   var show = '<output id="list">';
+
+  l('imageDir = ' + imageDir);
   
   fs.readdir(imageDir, function (err, list) {
     var index = 0;

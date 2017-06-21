@@ -43,9 +43,9 @@
     <button id="removeAll" onclick="Remove(-9)">Remove All Objects</button>
     <h3>Step 3 : Use mouse to select object</h4><button id="nextPicture" onclick="NextPicture()" autofocus>Next Picture</button>
     <div id="canvasDiv">
-      <canvas id="canvasImg" style="position: absolute; left: 0; mergin-top: 50px; z-index: 0;"></canvas><!-- Image layer -->
-      <!--<canvas id="canvas1" style="position: absolute; left: 0; mergin-top: 50px; z-index: 1;"></canvas>--><!-- Cross hair arrow -->
-      <canvas id="canvasMouse" style="position: absolute; left: 0; mergin-top: 50px; z-index: 2;"></canvas><!-- Listen mouse event layer -->
+      <canvas id="canvas0" style="position: absolute; left: 0; mergin-top: 50px; z-index: 0;"></canvas><!-- Image layer -->
+      <!--<canvas id="canvas1" style="position: absolute; left: 0; mergin-top: 50px; z-index: 1;"></canvas><!-- Cross hair arrow -->
+      <canvas id="canvas_mouse_move" style="position: absolute; left: 0; mergin-top: 50px; z-index: 2;"></canvas><!-- Listen mouse event layer -->
     </div>
     <span id="goToBottom"></span>
 <!--  </section> -->
@@ -87,7 +87,7 @@
       checkboxChild.value = i*colsLength + j + 1;
       checkboxChild.name = "mailId[]";
       checkboxLabel.className = "messageLabel";
-      checkboxImg.src = "label/"+objs[i*colsLength + j]+".png";
+      checkboxImg.src = "label/"+objs[i*colsLength +j]+".png";
       checkboxTxt.innerHTML = objs[i*colsLength + j];
       // checkboxDiv.appendChild(checkboxChild);
       // checkboxDiv.appendChild(checkboxLabel);
@@ -100,7 +100,8 @@
     }
   }
   checkboxDiv.appendChild(table);
-  for (var i = 1; i <= objs.length; i++) {
+  for (var i = 0; i <= objs.length; i++) {
+    //if (i >= 2) {
     if (i >= 1) {
       var canvasChild = document.createElement('canvas');
       canvasChild.id = 'canvas'+i;
