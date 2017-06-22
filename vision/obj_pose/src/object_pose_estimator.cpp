@@ -296,14 +296,13 @@ void ObjEstAction::do_ICP()
   transformation_matrix = Eigen::Matrix4f::Identity ();
 
   tmp_path = path;
-  tmp_path.append("items/Hand_Weight/trans_out_trans_out_cut_Hand_Weight1.pcd");
+  tmp_path.append("items/Crayons/Crayons.pcd");
   if(load_pcd(tmp_path))
   {
     ROS_INFO("Load Amazon Model success!");
     if(scence_seg)
     {
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
-      std::cout << "hahahhahahahahahahahahaha!!!" << std::endl;
       copyPointCloud(*cloud_cluster, *cloud_xyz);
       my_icp.setSourceCloud(cloud_xyz);
     }else{
@@ -313,7 +312,7 @@ void ObjEstAction::do_ICP()
     my_icp.align(temp2);
     transformation_matrix = my_icp.getMatrix ();
     print4x4Matrix (transformation_matrix);
-    //pcl::io::savePCDFile ("BIG_SEG.pcd", temp2, false);
+    pcl::io::savePCDFile ("BIG_SEG.pcd", temp2, false);
     state = NADA;
   }else{
     state = NADA;

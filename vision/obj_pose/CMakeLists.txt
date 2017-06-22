@@ -55,12 +55,12 @@ catkin_package(
 ## Build ##
 ###########
 # -- For pcl-1.8
-set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen3")
+#set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen3")
 set(PCL_INCLUDE_DIRS "/usr/local/include/pcl-1.8")
 set(PCL_LIBRARY_DIRS "/usr/local/lib")
 
 # -- For pcl-1.7 
-#set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
+set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
 #set(PCL_INCLUDE_DIRS "/usr/include/pcl-1.7")
 #set(PCL_LIBRARY_DIRS "/usr/lib")
 
@@ -89,7 +89,7 @@ add_executable (object_pose_estimator src/object_pose_estimator.cpp)
 ## Specify libraries to link a library or executable target against
 
 
-# target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES} libpcl_search.so libpcl_visualization.so libpcl_segmentation.so libpcl_features.so libpcl_filters.so libgomp.so libpcl_keypoints.so libpcl_kdtree.so libpcl_recognition.so)
+target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES} libpcl_search.so libpcl_visualization.so libpcl_segmentation.so libpcl_features.so libpcl_filters.so libgomp.so libpcl_keypoints.so libpcl_kdtree.so libpcl_recognition.so)
 
 # #target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES})
 # add_dependencies(object_pose_estimator obj_pose_generate_messages_cpp)
