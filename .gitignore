@@ -43,3 +43,7 @@ node_modules/
 
 # ignore PCL_Test
 /PCL_Test/
+
+
+# catkin ignore
+CATKIN_IGNORE
