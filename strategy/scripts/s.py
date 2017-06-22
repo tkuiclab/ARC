@@ -142,7 +142,7 @@ class Strategy(threading.Thread):
 		self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.22), (0, 0, 0) )
 
 	def arm_bin_photo(self):
-		self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.27), (0, 0, 0) )
+		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (0, 0, 0) )
 
 
 	def safe_pose(self):
@@ -166,7 +166,11 @@ if __name__ == '__main__':
 		# s.stow.LM_2_tote()			# -
 		#s.stow.arm_photo_pose()		# -
 
+<<<<<<< HEAD
 		# s.safe_pose()
+=======
+		s.arm_bin_photo()
+>>>>>>> 991bb0abd8144ccca23ff838e76ba02b77427584
 		#gripper_vaccum_off()
 		#gripper_suction_up()
 		#gripper_suctoin_down()

@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import copy
 import rospy
-from faster_rcnn.srv import Detect, DetectResponse
+from fake_roi.srv import Detect, DetectResponse
 
 _MASK_SIZE = 5
 _OBJ_AREA_MIN = 3000
@@ -179,8 +179,8 @@ def detect_obj(src, mask):
     return src, res
 
 def handle_request(req):
-    bg = cv2.imread('/home/iclab-ming/Scene_empty.jpg')
-    fg = cv2.imread('/home/iclab-ming/Scene_with_handweight.jpg')
+    bg = cv2.imread('/home/iclab-giga/empty.jpg')
+    fg = cv2.imread('/home/iclab-giga/crayons.jpg')
 
     frame, res, fg_mask ,min, max = detect_KNN(copy.copy(bg), copy.copy(fg))
     return DetectResponse([min[0], min[1], max[0], max[1]], True)
@@ -207,8 +207,8 @@ if __name__ == '__main__':
         #fg = cv2.imread(expanduser(
         #    join(fg_folder, '{}-{:05}.jpg'.format(fb_name, filename))))
 
-        bg = cv2.imread('/home/iclab-ming/Scene_empty.jpg')
-        fg = cv2.imread('/home/iclab-ming/Scene_with_handweight.jpg')
+        bg = cv2.imread('/home/iclab-giga/Scene_empty.jpg')
+        fg = cv2.imread('/home/iclab-giga/Scene_with_handweight.jpg')
 
         frame, res, fg_mask ,min, max = detect_KNN(copy.copy(bg), copy.copy(fg))
         # print ''

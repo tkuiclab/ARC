@@ -170,7 +170,11 @@ options = {
     "backup": "ckpt/",              # directory of ckpt (training result)
     "load": -1,                     # which ckpt will be loaded. -1 represent the last ckpt
     "threshold": -0.1,              # threshold for confidence
+
     "gpu": 1.0                       # gpu using rate
+
+   # "gpu": 0.5                       # gpu using rate
+
 }
 tfnet = TFNet(options)
 prepare_network()

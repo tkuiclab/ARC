@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8.3)
 project(obj_pose)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
-# add_definitions(-std=c++11)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -18,11 +18,12 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
 )
-find_package(PCL 1.7 REQUIRED REQUIRED COMPONENTS 
+find_package(PCL 1.8 REQUIRED REQUIRED COMPONENTS 
 	io
 	registration
 	segmentation
 	visualization
+	common
 )
 
 ## System dependencies are found with CMake's conventions
@@ -53,9 +54,21 @@ catkin_package(
 ###########
 ## Build ##
 ###########
+# -- For pcl-1.8
+#set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen3")
+set(PCL_INCLUDE_DIRS "/usr/local/include/pcl-1.8")
+set(PCL_LIBRARY_DIRS "/usr/local/lib")
+
+# -- For pcl-1.7 
+set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
+#set(PCL_INCLUDE_DIRS "/usr/include/pcl-1.7")
+#set(PCL_LIBRARY_DIRS "/usr/lib")
+
 include_directories(
-  ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR}
 )
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -74,7 +87,10 @@ add_executable (object_pose_estimator src/object_pose_estimator.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(object_pose_estimator obj_pose_generate_messages_cpp)
-add_dependencies(object_pose_estimator fake_roi_generate_messages_cpp)
 
+
+target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES} libpcl_search.so libpcl_visualization.so libpcl_segmentation.so libpcl_features.so libpcl_filters.so libgomp.so libpcl_keypoints.so libpcl_kdtree.so libpcl_recognition.so)
+
+# #target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES})
+# add_dependencies(object_pose_estimator obj_pose_generate_messages_cpp)
+# add_dependencies(object_pose_estimator fake_roi_generate_messages_cpp)
