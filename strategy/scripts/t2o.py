@@ -194,8 +194,8 @@ class ArmTask:
             mode,
             (pos.x + x, pos.y + y, pos.z + z),
             (
-                degrees(euler[0]) + pitch,
-                degrees(euler[1]) + roll,
+                degrees(euler[1]) + pitch,
+                degrees(euler[0]) + roll,
                 degrees(euler[2]) + yaw
             )
         )
@@ -294,9 +294,8 @@ class ArmTask:
         rospy.loginfo('move rotation pitch=' + str(pitch))
 
         #return
-        #self.relative_control_rotate( pitch = pitch)
-        #task.pub_ikCmd('ptp', (0.40, 0.05 , 0.15), (-90 +pitch, 0, 0) )
-        
+        self.relative_control_rotate( pitch = pitch)
+   
         
         while self.__is_busy:
             rospy.sleep(.1)
@@ -318,9 +317,8 @@ class ArmTask:
               ', base_z='+str(-move_cam_z))
         
 
-        #self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
-        self.relative_xyz_base(x = -move_cam_y, y = move_cam_x,z = -move_cam_z)
-    
+        self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
+      
 
     #request object pose
     def obj_pose_request(self):
@@ -349,6 +347,7 @@ if __name__ == '__main__':
     #task.pub_ikCmd('ptp')
     
     #init pose
+<<<<<<< HEAD
     # task.pub_ikCmd('ptp', (0.30, 0.0 , 0.22), (0, 0, 0) )
 		
     #stow photo pose  
@@ -356,6 +355,10 @@ if __name__ == '__main__':
     task.pub_ikCmd('ptp', (0.30, 0 , 0.2), (-90, 0, 0, 0) )
     # task.pub_ikCmd('ptp', (0.30, 0.1 , 0.15), (-95, 0, 0, 0) )
     
+=======
+    task.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-60, 0, 0, 0) )
+ 
+>>>>>>> 114d847b21ab27fcbcd3f927bcb708c7606ba231
     # task.relative_xyz_base(y = 0.1)
     
     rospy.loginfo('strategy ready')
@@ -363,13 +366,18 @@ if __name__ == '__main__':
 
     #task.relative_control(n=.05)  # -cam_y
     #task.relative_control(s=.05)  # cam_x
+<<<<<<< HEAD
     task.relative_control(a=.05)  #cam_z   jmp_stra
     # task.relative_control(a=-0.05)
     # task.relative_control(n=0.05)
     # task.relative_control(n=-0.05)
     # task.relative_control(s=0.05)
     # task.relative_control(s=-0.05)
+=======
+    #task.relative_control(a=.05)  #cam_z   jmp_stra
+>>>>>>> 114d847b21ab27fcbcd3f927bcb708c7606ba231
 
+    task.relative_control(a=.05)  
     #task.relative_control_rotate( pitch = -5 )
     #task.relative_control_rotate( pitch = -5 )
     
