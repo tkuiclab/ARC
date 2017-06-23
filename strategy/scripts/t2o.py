@@ -262,7 +262,7 @@ class ArmTask:
 
 
     #request object pose
-    def obj_pose_request(self):
+    def obj_pose_request(self, obj):
         while self.__is_busy:
             rospy.sleep(.1)
         rospy.loginfo('obj_pose_request()')
@@ -270,7 +270,7 @@ class ArmTask:
         #goal = obj_pose.msg.ObjectPoseGoal("expoEraser")
         #goal = obj_pose.msg.ObjectPoseGoal("irishSpring")
         
-        goal = obj_pose.msg.ObjectPoseGoal("dvdRobots")
+        goal = obj_pose.msg.ObjectPoseGoal(obj)
 
         self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
         self.__obj_pose_client.wait_for_result()
@@ -356,11 +356,27 @@ if __name__ == '__main__':
     rospy.sleep(0.2)
 
 
-    #stow photo pose  
-    task.pub_ikCmd('ptp', (0.30, 0 , 0.2), (-90, 0, 0, 0) )
+    #task.relative_control(n=.05)
+    #task.relative_control(n=.05)  # -cam_y
+    #task.relative_control(s=-.15)  # cam_x
+    #task.relative_control(a=.05)  #cam_z   jmp_str
 
-    rospy.loginfo('strategy ready')
-    task.obj_pose_request()
+    #pitch , cam_roll 
+    #task.relative_control_rotate(pitch=5, roll=0, yaw=0)   
+    
+    #roll, cam_yaw
+    #task.relative_control_rotate(pitch=0, roll=5, yaw=0)   
+
+    #roll, cam_pitch
+    task.relative_control_rotate(pitch=0, roll=0, yaw=5)   
+
+
+    #task.desk_photo_pose()
+    #stow photo pose  
+    #task.pub_ikCmd('ptp', (0.30, 0 , 0.2), (-90, 0, 0, 0) )
+
+    #rospy.loginfo('strategy ready')
+    #task.obj_pose_request("dvdRobots")
     
 
     r = rospy.Rate(10)
