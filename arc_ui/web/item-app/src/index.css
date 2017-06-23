@@ -1,0 +1,103 @@
+body {
+  font: 14px "Century Gothic", Futura, sans-serif;
+
+  width:95%;
+  margin-left:auto;
+  margin-right:auto;
+
+}
+
+input{
+  width: 45px;
+  height:45px;
+  font-size: 40px;
+  text-align: center;
+  
+}
+
+
+img{
+  width: 45px;
+  height:45px;
+
+}
+
+.main_row {
+  display: flex;
+  flex-direction: row;
+}
+
+.item_area {
+  margin-left: 30px;
+}
+
+.bin:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+
+
+.bin_name, .bin_length, .bin_width, 
+.bin_height, .bin_vol, .bin_sum_vol{
+  border: 1px solid #999;
+  font-size: 40px;
+  margin-right: 0px;
+  margin-top: 0px;
+  padding: 2px;
+  text-align: center;
+  
+  float: left;
+  height:55px;
+}
+
+
+
+.bin_name,.bin_length, .bin_width, .bin_height{
+  width: 50px;
+}
+
+.bin_vol{
+  width: 130px;
+}
+
+.bin_sum_vol{
+  width : 355px;
+}
+
+.item_pic, .item_name,.item_type, .item_dims,.item_fix_box {
+  border: 1px solid #999;
+  margin-right: 0px;
+  margin-top: 0px;
+  padding: 2px;
+  text-align: center;
+
+  float: left;
+  font-size: 16px;
+  height:45px;
+
+  display: table-cell;
+  vertical-align: middle;
+  flex-direction: row;
+}
+
+.item_pic{
+  width : 50px;
+}
+
+.item_name{
+  width : 200px;
+}
+
+.item_type{
+  width : 80px;
+}
+
+.item_dims{
+  width : 120px;
+}
+
+.item_fix_box{
+  width : 120px;
+}

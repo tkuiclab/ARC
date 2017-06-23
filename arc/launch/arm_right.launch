@@ -11,13 +11,15 @@
 
     <param name="offset_table"             value="$(find manipulator_h_manager)/config/offset.yaml" />
     <param name="robot_file_path"          value="$(find manipulator_h_manager)/config/ROBOTIS_MANIPULATOR_H.robot" />
-    <param name="init_file_path"           value="$(find manipulator_h_manager)/config/dxl_init_n.yaml" />
+    <param name="init_file_path"           value="$(find manipulator_h_manager)/config/dxl_init.yaml" />
+
+    <include file="$(find arc_ui)/launch/ui.launch" />
+    
 
     <!-- Manipulator Manager -->
     <node name="manipulator_h_manager" pkg="manipulator_h_manager" type="manipulator_h_manager"
             output="screen" />
 
-    <include file="$(find arc_ui)/launch/ui.launch" />
-
-
+    
+    
 </launch>
