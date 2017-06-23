@@ -31,6 +31,7 @@
 
 # ignore macosx
 __MACOSX/
+.DS_Store
 
 # ignore node_modules
 node_modules/
@@ -40,4 +41,7 @@ node_modules/
 /label_server/Image/
 /label_server/xml/
 
+/vision/obj_pose/pcd_file/
 /PCL_Test/
+/arc_ui/web/item-app/public/arc_items/
+/vision/test_data/
