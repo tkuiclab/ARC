@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="css/index.css">
+<body>
+<!--	<section style="position: fixed; mergin-top: 50px; right: 100px;"> -->
+    <!-- unused -->
+    <br>
+    <input type="file" id="files" name="files[]" multiple style="display: none;"></input>
+    <br>
+    <!--<form action="/upload" method="post">-->
+    <!--<form>-->
+      <input id="fileName" type="text" name="fileName" style="display: none;" />
+      <input id="fileWidth" type="text" name="fileWidth" style="display: none;" />
+      <input id="fileHeight" type="text" name="fileHeight" style="display: none;" />
+      <!--<label for="objName">Object Name: </label>-->
+      <!--<input id="objName" type="text" name="objName" value="robot" />-->
+      <input id="objXmin" type="number" name="objXmin" style="display: none;" />
+      <input id="objYmin" type="number" name="objYmin" style="display: none;" />
+      <input id="objXmax" type="number" name="objXmax" style="display: none;" />
+      <input id="objYmax" type="number" name="objYmax" style="display: none;" />
+      <!--<input type="submit" value="Send" onclick="Send()" />-->
+    <!--</form>-->
+    <br>
+    <h3>Step 1 : Enter 'object name' and 'range of pictures' then Click "Chang List" button</h4>
+    <form action="/" method="GET">
+      <label for="objName">Object Name: </label>
+      <input id="objName" type="text" name="name" value="" />
+      <input type="submit" value="Change List" onclick="ChangeList()" />
+      <br>
+      <label for="start">Start</label>
+      <input id="startNum" type="number" name="start" value="0" /> to 
+      <input id="endNum" type="number" name="end" value="99999" />
+    </form>
+    <button id="btn" onclick="UpdateList()" style="display: none;">Update</button>
+    <output id="list" style="display: none;"></output>
+<!--  </section> -->
+<!--	<section style="position: fixed; mergin-top: 50px; left: 0px; z-index: 7;"> -->
+    <h1 id="fileNameShow"></h1>
+    <h3>Step 2 : Select object name of Picture</h4>
+    <div id="checkboxDiv">
+    </div>
+    <button id="removeObj" onclick="Remove(-1)">Remove Selected Object</button>
+    <button id="removeAll" onclick="Remove(-9)">Remove All Objects</button>
+    <h3>Step 3 : Use mouse to select object</h4><button id="nextPicture" onclick="NextPicture()" autofocus>Next Picture</button>
+    <div id="canvasDiv">
+      <canvas id="canvas0" style="position: absolute; left: 0; mergin-top: 50px; z-index: 0;"></canvas><!-- Image layer -->
+      <!--<canvas id="canvas1" style="position: absolute; left: 0; mergin-top: 50px; z-index: 1;"></canvas><!-- Cross hair arrow -->
+      <canvas id="canvas_mouse_move" style="position: absolute; left: 0; mergin-top: 50px; z-index: 2;"></canvas><!-- Listen mouse event layer -->
+    </div>
+    <span id="goToBottom"></span>
+<!--  </section> -->
+
+<script src="js/jquery/jquery.min.js"></script>
+<script src="js/jquery/jquery.navgoco.js"></script>
+<script src="js/bootstrap/bootstrap.min.js"></script>
+<script src="js/jquery-ui-1.11.4/external/jquery/jquery.js"></script>
+<script src="js/jquery-ui-1.11.4/jquery-ui.js"></script>
+<script type="text/javascript" src="./js/pic.js"></script>
+<script>
+  var objs =[ 'avery1BinderWhite','bagOfBalloons','burtsBeesBabyWipes','cloroxToiletBrush','colgateToothbrushs',
+              'crayolaCrayons24','drtealsEpsomSalts','dvdRobots','elmersGlueSticks6Ct','expoEraser',
+              'fiskarScissors','greenCompositionBook','hanesWhitteSocks','irishSpring','johnsonjohnsonPaperTape',
+              'kleenexCoolTouchTissues','knitGlovesBlack','laughOutLoundJokesForKids','meshPencilCup','miniMarblesClearLustre',
+              'neopreneWeightPink','plasticWineGlasses','polandSpringsWaterBottle','reynoldsPiePans2ct','reynoldsWrap85Sqft',
+              'robotsEverywhere','scotchClothDuctTape','scotchSponges','speedStick2Pack','spiralIndexCards',
+              'steriliteIceCubeTray','tableCover','targetBrandMeasuringSpoons','theBatheryDelicateBathSponge','ticonderogaPencils',
+              'tomcatMousetraps','whiteFaceCloth','wilsonTennisBalls','windexSprayBottle23oz','arFlashlihgts'];
+
+  var table = document.createElement('TABLE');
+  table.border='1';
+  var tableBody = document.createElement('TBODY');
+  table.appendChild(tableBody);
+  var colsLength = 5;
+  var rowsLength = objs.length / colsLength;
+  for (var i = 0; i < rowsLength; i++){
+    var tr = document.createElement('TR');
+    tableBody.appendChild(tr);
+    for (var j = 0; j < colsLength; j++){
+      var td = document.createElement('TD');
+      var checkboxChild = document.createElement('Input');
+      var checkboxLabel = document.createElement('Label');
+      var checkboxImg = document.createElement('Img');
+      var checkboxTxt = document.createElement('Span');
+      var br = document.createElement('BR');
+      checkboxChild.className = "messageCheckbox";
+      checkboxChild.type = "radio"
+      checkboxChild.value = i*colsLength + j + 1;
+      checkboxChild.name = "mailId[]";
+      checkboxLabel.className = "messageLabel";
+      checkboxImg.src = "label/"+objs[i*colsLength +j]+".png";
+      checkboxTxt.innerHTML = objs[i*colsLength + j];
+      // checkboxDiv.appendChild(checkboxChild);
+      // checkboxDiv.appendChild(checkboxLabel);
+      checkboxLabel.appendChild(checkboxChild);
+      checkboxLabel.appendChild(checkboxTxt);
+      checkboxLabel.appendChild(br);
+      checkboxLabel.appendChild(checkboxImg);
+      td.appendChild(checkboxLabel);
+      tr.appendChild(td);
+    }
+  }
+  checkboxDiv.appendChild(table);
+  for (var i = 0; i <= objs.length; i++) {
+    //if (i >= 2) {
+    if (i >= 1) {
+      var canvasChild = document.createElement('canvas');
+      canvasChild.id = 'canvas'+i;
+      canvasChild.style = "position: absolute; left: 0; mergin-top: 50px; z-index: 1;";
+      canvasDiv.appendChild(canvasChild);
+    }
+  }
+  // UpdateList when dom ready
+  document.addEventListener("DOMContentLoaded", function(event) { 
+    UpdateList();
+  });
+  // Check browser support
+  if (typeof(Storage) !== "undefined") {
+    // Retrieve
+    document.getElementById("objName").value = localStorage.getItem("objName");
+    document.getElementById("startNum").value = localStorage.getItem("startNum");
+    document.getElementById("endNum").value = localStorage.getItem("endNum");
+  } else {
+    alert("Sorry, your browser does not support Web Storage...");
+  }
+  function ChangeList()
+  {
+    localStorage.setItem("objName", document.getElementById('objName').value);
+    localStorage.setItem("startNum", document.getElementById('startNum').value);
+    localStorage.setItem("endNum", document.getElementById('endNum').value);
+  }
+
+  function UpdateList()
+  {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        //XMLResponse(this);
+        var resArr = this.responseText.split(',');
+        for (i = 0; i < resArr.length; i++) {
+          if (resArr[i].substr(-1) == '~')  resArr.splice(i, 1);
+          for (j = 0; j < document.getElementById('list').getElementsByTagName('span').length; j++) {
+            var node = document.getElementById('list').childNodes[j].childNodes[0].title;
+            if (node.substring(0, node.indexOf('.')) == resArr[i].substring(0, resArr[i].indexOf('.'))) {
+              document.getElementById('list').childNodes[j].childNodes[0].style.opacity = 0.2;
+            }
+          }
+        }
+      }
+    };
+    xhttp.open("GET", "done.xml", true);
+    xhttp.send();
+  }
+
+//  function XMLResponse(xml)
+//  {
+//    var xmlDoc = xml.responseXML;
+//    for (i = 0; i < xmlDoc.getElementsByTagName('file').length; i++) {
+//      for (j = 0; j < document.getElementById('list').getElementsByTagName('span').length; j++) {
+//        if (document.getElementById('list').childNodes[j].childNodes[0].title == xmlDoc.getElementsByTagName("file")[i].childNodes[0].nodeValue) {
+//          document.getElementById('list').childNodes[j].childNodes[0].style.opacity = 0.2;
+//        }
+//      }
+//    }
+//  }
+  function checkServerStatus()
+  {
+//    var socket = io.connect();
+//   socket.on('connect', function () {
+//      alert('Socket is connected.');
+//    });
+//    socket.on('disconnect', function () {
+//      alert('Socket is disconnected.');
+//    });
+    var img = new Image();
+    img.onload = function()
+    {
+      //alert("Server is online");
+    };
+    img.onerror = function()
+    {
+      alert("Server is down");
+      location.reload(true);
+    };
+    img.src = "http://163.13.164.122:8000/connect.png";
+  }
+  function Send()
+  {
+    checkServerStatus();
+    var checkedValue;
+    for(var i=0; document.getElementsByClassName('messageCheckbox')[i]; ++i){
+      if(document.getElementsByClassName('messageCheckbox')[i].checked){
+        checkedValue = document.getElementsByClassName('messageCheckbox')[i].value;
+        // console.log(checkedValue);
+        console.log("Object Label: "+document.getElementsByClassName('messageLabel')[checkedValue-1].innerText);
+        break;
+      }
+    }
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        // alert(xhttp.responseText);
+        document.getElementById('responseText').innerHTML = xhttp.responseText;
+      }
+    };
+    xhttp.open("POST", "/upload", true);
+    xhttp.send("fileName="+document.getElementById('fileName').value +
+               "&fileWidth="+document.getElementById('fileWidth').value +
+               "&fileHeight="+document.getElementById('fileHeight').value +
+               //"&objName="+document.getElementById('objName').value +
+               "&objName="+document.getElementsByClassName('messageLabel')[checkedValue-1].innerText +
+               "&objXmin="+document.getElementById('objXmin').value +
+               "&objYmin="+document.getElementById('objYmin').value +
+               "&objXmax="+document.getElementById('objXmax').value +
+               "&objYmax="+document.getElementById('objYmax').value
+               );
+    UpdateList();
+  }
+
+  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+  function handleFileSelect(evt)
+  {
+    // Remove the last pictures of list
+    while (document.getElementById('list').hasChildNodes()) {
+      document.getElementById('list').removeChild(document.getElementById('list').firstChild);
+    }
+    
+    var files = evt.target.files; // FileList object
+
+    // Loop through the FileList and render image files as thumbnails.
+    for (var i = 0, f; f = files[i]; i++) {
+
+      // Only process image files.
+      if (!f.type.match('image.*')) {
+        continue;
+      }
+
+      var reader = new FileReader();
+
+      // Closure to capture the file information.
+      reader.onload = (function(theFile) {
+        return function(e) {
+          // Render thumbnail.
+          var span = document.createElement('span');
+          span.innerHTML = ['<img class="thumb" src="', e.target.result,
+                            '" title="', escape(theFile.name), '" onclick="PicFunc(this)"/>'].join('');
+          document.getElementById('list').insertBefore(span, null);
+        };
+      })(f);
+
+      // Read in the image file as a data URL.
+      reader.readAsDataURL(f);
+    }
+  }
+</script>
+</body>
+<footer><h1 id="responseText" style="color:red;"></h1></footer>
+</html>

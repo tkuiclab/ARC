@@ -1,0 +1,23 @@
+{
+  "name": "node",
+  "version": "0.1.0",
+  "description": "Learning Node.js",
+  "main": "node.js",
+  "dependencies": {
+    "jquery": "latest",
+    "formidable": "latest",
+    "express": "latest",
+    "xmlbuilder": "latest",
+    "xmldom": "latest",
+    "connect": "latest",
+    "log4js": "latest"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "preinstall": "forever",
+    "start": "node pic.js"
+  },
+  "author": "NEET",
+  "license": "ISC"
+}
