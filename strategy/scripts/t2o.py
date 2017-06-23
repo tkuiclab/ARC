@@ -355,20 +355,18 @@ if __name__ == '__main__':
     task.set_mode()
     rospy.sleep(0.2)
 
-
-    #task.relative_control(n=.05)
-    #task.relative_control(n=.05)  # -cam_y
-    #task.relative_control(s=-.15)  # cam_x
-    #task.relative_control(a=.05)  #cam_z   jmp_str
-
-    #pitch , cam_roll 
-    #task.relative_control_rotate(pitch=5, roll=0, yaw=0)   
     
+    # X, Z, Y  
     #roll, cam_yaw
-    #task.relative_control_rotate(pitch=0, roll=5, yaw=0)   
-
-    #roll, cam_pitch
-    task.relative_control_rotate(pitch=0, roll=0, yaw=5)   
+    #task.relative_control_rotate(pitch=0, roll=-4.07, yaw=0) 
+    #yaw, cam_pitch
+    #task.relative_control_rotate(pitch=0, roll=0, yaw=-5.28)  
+    #pitch , cam_roll 
+    #task.relative_control_rotate(pitch=-49.35, roll=0, yaw=0)  
+    
+    #task.relative_control(n=-0.098)  # -cam_y
+    #task.relative_control(s=-0.06)  # cam_x
+    task.relative_control(a=.398)  #cam_z   jmp_str
 
 
     #task.desk_photo_pose()
