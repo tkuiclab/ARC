@@ -85,7 +85,7 @@ class Strategy(threading.Thread):
 				self.run_task_type = TaskType_Stow
 				self.stow.run()  
 			else:
-				rospy.logwarn('Pick Task Not Ready!!')
+				rospy.logwarn('Stow Task Not Ready!!')
 		elif task_name.lower() == 'stow_json_item_location':
 			self.stow.save_item_location(req.task_json)
 		else:
@@ -166,13 +166,13 @@ if __name__ == '__main__':
 		# s.stow.LM_2_tote()			# -
 		#s.stow.arm_photo_pose()		# -
 
-<<<<<<< HEAD
-		# s.safe_pose()
-=======
-		s.arm_bin_photo()
->>>>>>> 991bb0abd8144ccca23ff838e76ba02b77427584
-		#gripper_vaccum_off()
-		#gripper_suction_up()
+# <<<<<<< HEAD
+# 		# s.safe_pose()
+# =======
+# 		s.arm_bin_photo()
+# >>>>>>> 991bb0abd8144ccca23ff838e76ba02b77427584
+# 		#gripper_vaccum_off()
+# 		#gripper_suction_up()
 		#gripper_suctoin_down()
 		#s.Arm.relative_control(a=.035)  #cam_z
 

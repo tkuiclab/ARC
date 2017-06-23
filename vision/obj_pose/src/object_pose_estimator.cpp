@@ -302,8 +302,8 @@ void ObjEstAction::do_ICP()
     {
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
       copyPointCloud(*cloud_cluster, *cloud_xyz);
-      my_icp.setSourceCloud(cloud_xyz);
-      my_icp.setTargetCloud(model_PCD);
+      my_icp.setSourceCloud(model_PCD);
+      my_icp.setTargetCloud(cloud_xyz);
     }else{
       my_icp.setSourceCloud(model_PCD);
       my_icp.setTargetCloud(Max_cluster);
@@ -313,7 +313,6 @@ void ObjEstAction::do_ICP()
     print4x4Matrix (transformation_matrix);
     //pcl::io::savePCDFile ("BIG_SEG.pcd", temp2, false);
     state = NADA;
-
     //----------------- Pub Segmentation Cloud to topic -----------------//
     pcl::toROSMsg(temp2, seg_msg);
     seg_msg.header.frame_id = "camera_rgb_optical_frame";
@@ -332,18 +331,39 @@ void ObjEstAction::set_feedback(std::string msg,int progress)
 
 void ObjEstAction::print4x4Matrix (const Eigen::Matrix4f & matrix)
 {
-  printf ("Rotation matrix :\n");
-  printf ("    | %6.3f %6.3f %6.3f | \n", matrix (0, 0), matrix (0, 1), matrix (0, 2));
-  printf ("R = | %6.3f %6.3f %6.3f | \n", matrix (1, 0), matrix (1, 1), matrix (1, 2));
-  printf ("    | %6.3f %6.3f %6.3f | \n", matrix (2, 0), matrix (2, 1), matrix (2, 2));
-  printf ("Translation vector :\n");
-  printf ("t = < %6.3f, %6.3f, %6.3f >\n\n", matrix (0, 3), matrix (1, 3), matrix (2, 3));
+  // printf ("Rotation matrix :\n");
+  // printf ("    | %6.3f %6.3f %6.3f | \n", matrix (0, 0), matrix (0, 1), matrix (0, 2));
+  // printf ("R = | %6.3f %6.3f %6.3f | \n", matrix (1, 0), matrix (1, 1), matrix (1, 2));
+  // printf ("    | %6.3f %6.3f %6.3f | \n", matrix (2, 0), matrix (2, 1), matrix (2, 2));
+  // printf ("Translation vector :\n");
+  // printf ("t = < %6.3f, %6.3f, %6.3f >\n\n", matrix (0, 3), matrix (1, 3), matrix (2, 3));
   float roll, pitch, yaw;
   Eigen::Affine3f transformatoin;
   transformatoin.matrix() = matrix;
   pcl::getEulerAngles(transformatoin,roll,pitch,yaw);
-  std::cout << "roll = " << roll << "\t pitch = " << pitch << "\t yaw = " << yaw << std::endl;
+  Eigen::Affine3f tf_neg = Eigen::Affine3f::Identity();
+  tf_neg.rotate (Eigen::AngleAxisf ( -roll,  Eigen::Vector3f::UnitX()));
+  tf_neg.rotate (Eigen::AngleAxisf ( -pitch, Eigen::Vector3f::UnitY()));
+  tf_neg.rotate (Eigen::AngleAxisf ( -yaw,   Eigen::Vector3f::UnitZ()));
+  Eigen::Vector3f center_vec(matrix (0, 3), matrix (1, 3), matrix (2, 3));
+  Eigen::Vector3f after_rotate_center_with_neg;
 
+  after_rotate_center_with_neg = tf_neg * center_vec;
+
+  roll = roll/3.14159*180;
+  pitch = pitch/3.14159*180;
+  yaw = yaw/3.14159*180;
+  std::cout << "roll = " << roll << "\t pitch = " << pitch << "\t yaw = " << yaw << std::endl;
+  geometry_msgs::Twist pose;
+  pose.linear.x = after_rotate_center_with_neg[0];
+  pose.linear.y = after_rotate_center_with_neg[1];
+  pose.linear.z = after_rotate_center_with_neg[2];
+  pose.angular.x = roll;
+  pose.angular.y = pitch;
+  pose.angular.z = yaw;
+  result_.object_pose = pose;
+  std::cout << "X = " << pose.linear.x << "\t Y = " << pose.linear.y << "\t Z = " << pose.linear.z << std::endl;
+  //as_.setSucceeded(result_);
 }
 
 bool ObjEstAction::load_pcd(std::string pcd_filename)
@@ -366,6 +386,10 @@ bool ObjEstAction::load_pcd(std::string pcd_filename)
     ROS_ERROR("Error loading Amazon Model cloud");
     return false;
   }else{
+    pcl::VoxelGrid<pcl::PointXYZ> sor;
+    sor.setInputCloud (model_PCD);
+    sor.setLeafSize (0.005f, 0.005f, 0.005f);
+    sor.filter (*model_PCD);
     return true;
   }
 }

@@ -260,6 +260,26 @@ class ArmTask:
         while self.__is_busy:
             rospy.sleep(.1)
 
+
+    #request object pose
+    def obj_pose_request(self, obj):
+        while self.__is_busy:
+            rospy.sleep(.1)
+        rospy.loginfo('obj_pose_request()')
+
+        #goal = obj_pose.msg.ObjectPoseGoal("expoEraser")
+        #goal = obj_pose.msg.ObjectPoseGoal("irishSpring")
+        
+        goal = obj_pose.msg.ObjectPoseGoal(obj)
+
+        self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
+        self.__obj_pose_client.wait_for_result()
+
+    def desk_photo_pose(self):
+        self.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-60, 0, 0) )
+        #self.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-90, 0, 0) )
+
+
     def obj_pose_feedback_cb(self,fb):
         rospy.loginfo("In obj_pose_feedback_cb")
         rospy.loginfo("msg = " + fb.msg)
@@ -267,19 +287,23 @@ class ArmTask:
 
         
     def obj_pose_done_cb(self, state, result):
-        p = result.object_pose
+        self.arm_2_obj(result.object_pose)
+
+    def arm_2_obj(self, obj_pose):
+        p = object_pose
+        a = p.angular
         l = p.linear
 
         #rospy.loginfo("object_pose = " + str(p))
         rospy.loginfo("object_pose")
-        rospy.loginfo("(x,y,z)= (" + str(p.linear.x) + ", " + str(p.linear.y)+ ", " + str(p.linear.z)) 
+        rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z)) 
         rospy.loginfo("(roll,pitch,yaw)= (" 
-                        + str(numpy.rad2deg(p.angular.x)) + ", " 
-                        + str(numpy.rad2deg(p.angular.y)) + ", " 
-                        + str(numpy.rad2deg(p.angular.z))  ) 
+                        + str(numpy.rad2deg(a.x)) + ", " 
+                        + str(numpy.rad2deg(a.y)) + ", " 
+                        + str(numpy.rad2deg(a.z))  ) 
         
                         
-        pitch = numpy.rad2deg(p.angular.x ) 
+        pitch = numpy.rad2deg(a.x ) 
         
         pitch = (pitch - 180) if pitch > 90  else pitch
         pitch = (pitch + 180) if pitch < -90  else pitch
@@ -320,23 +344,10 @@ class ArmTask:
         self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
       
 
-    #request object pose
-    def obj_pose_request(self):
-        while self.__is_busy:
-            rospy.sleep(.1)
-        rospy.loginfo('obj_pose_request()')
-
-        #goal = obj_pose.msg.ObjectPoseGoal("expoEraser")
-        #goal = obj_pose.msg.ObjectPoseGoal("irishSpring")
-        
-        goal = obj_pose.msg.ObjectPoseGoal("dvdRobots")
-
-        self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
-        self.__obj_pose_client.wait_for_result()
 
 if __name__ == '__main__':
 
-    rospy.init_node('robot_arm_task', anonymous=True)
+    rospy.init_node('t2o', anonymous=True)
 
 
     task = ArmTask()
@@ -344,65 +355,36 @@ if __name__ == '__main__':
     task.set_mode()
     rospy.sleep(0.2)
 
-    #task.pub_ikCmd('ptp')
     
-    #init pose
-<<<<<<< HEAD
-    # task.pub_ikCmd('ptp', (0.30, 0.0 , 0.22), (0, 0, 0) )
-		
+    # X, Z, Y  
+    #roll, cam_yaw
+    #task.relative_control_rotate(pitch=0, roll=-4.07, yaw=0) 
+    #yaw, cam_pitch
+    #task.relative_control_rotate(pitch=0, roll=0, yaw=-5.28)  
+    #pitch , cam_roll 
+    #task.relative_control_rotate(pitch=-49.35, roll=0, yaw=0)  
+    
+    #task.relative_control(n=-0.098)  # -cam_y
+    #task.relative_control(s=-0.06)  # cam_x
+    task.relative_control(a=.398)  #cam_z   jmp_str
+
+
+    #task.desk_photo_pose()
     #stow photo pose  
-    # task.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-90, 0, 0, 0) )
-    task.pub_ikCmd('ptp', (0.30, 0 , 0.2), (-90, 0, 0, 0) )
-    # task.pub_ikCmd('ptp', (0.30, 0.1 , 0.15), (-95, 0, 0, 0) )
-    
-=======
-    task.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-60, 0, 0, 0) )
- 
->>>>>>> 114d847b21ab27fcbcd3f927bcb708c7606ba231
-    # task.relative_xyz_base(y = 0.1)
-    
-    rospy.loginfo('strategy ready')
-    #task.obj_pose_request()
+    #task.pub_ikCmd('ptp', (0.30, 0 , 0.2), (-90, 0, 0, 0) )
 
-    #task.relative_control(n=.05)  # -cam_y
-    #task.relative_control(s=.05)  # cam_x
-<<<<<<< HEAD
-    task.relative_control(a=.05)  #cam_z   jmp_stra
-    # task.relative_control(a=-0.05)
-    # task.relative_control(n=0.05)
-    # task.relative_control(n=-0.05)
-    # task.relative_control(s=0.05)
-    # task.relative_control(s=-0.05)
-=======
-    #task.relative_control(a=.05)  #cam_z   jmp_stra
->>>>>>> 114d847b21ab27fcbcd3f927bcb708c7606ba231
-
-    task.relative_control(a=.05)  
-    #task.relative_control_rotate( pitch = -5 )
-    #task.relative_control_rotate( pitch = -5 )
+    #rospy.loginfo('strategy ready')
+    #task.obj_pose_request("dvdRobots")
     
-    #move 13 cm can get object
-    #tool 9.5
-    #want only base_x(cam)=-4cm
 
     r = rospy.Rate(10)
     while not rospy.is_shutdown():
         #print 'ok...'
         r.sleep()
 
-    #want height 24cm, but 28cm
-    #task.relative_control(s=.05)  #-y
-    #task.relative_control(a=.05)   # cam_z
-    #task.relative_control_rotate( pitch = roll )
- 
-#    case ORDER_ZYX:
-#         Mx.M[0][0]=Cy*Cz;
-#         Mx.M[0][1]=Cz*Sx*Sy-Cx*Sz;
-#         Mx.M[0][2]=Cx*Cz*Sy+Sx*Sz;
-#         Mx.M[1][0]=Cy*Sz;
-#         Mx.M[1][1]=Cx*Cz+Sx*Sy*Sz;
-#         Mx.M[1][2]=-Cz*Sx+Cx*Sy*Sz;0.5
-#         Mx.M[2][0]=-Sy;
-#         Mx.M[2][1]=Cy*Sx;
-#         Mx.M[2][2]=Cx*Cy;
-#         break;
+    #task.relative_control(n=.05)  # -cam_y
+    #task.relative_control(s=.05)  # cam_x
+    #task.relative_control(a=.05)  #cam_z   jmp_stra
+
+    #task.desk_photo_pose()
+    #task.pub_ikCmd('ptp')
