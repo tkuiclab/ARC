@@ -12,6 +12,9 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   roscpp
   sensor_msgs
+  cv_bridge
+  image_transport
+	message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,9 +108,9 @@ find_package(Boost REQUIRED COMPONENTS system)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES pcl_saver
-#  CATKIN_DEPENDS pcl_conversions pcl_ros roscpp sensor_msgs
-#  DEPENDS system_lib
+  LIBRARIES pcl_saver
+  CATKIN_DEPENDS pcl_conversions pcl_ros roscpp sensor_msgs cv_bridge image_transport roscpp rospy std_msgs message_runtime
+  DEPENDS system_lib
 )
 
 ###########
@@ -135,6 +138,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(pcl_saver_node src/pcl_saver_node.cpp)
+add_executable(pcd_reader src/pcd_reader.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -148,6 +152,7 @@ add_executable(pcl_saver_node src/pcl_saver_node.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(pcl_saver_node ${catkin_LIBRARIES})
+target_link_libraries(pcd_reader ${catkin_LIBRARIES})
 
 #############
 ## Install ##
