@@ -153,10 +153,10 @@ if __name__ == '__main__':
 
 	try:
 		s = Strategy()
-		s.start() 
+		# s.start() 
 
-
-
+		# ========== TEST ===========
+		s.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.25), (0, 0, 0) )
 		#s.arm_go_init_pose()
 
 		#s.arm_go_init_pose()
