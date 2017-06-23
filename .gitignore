@@ -33,9 +33,9 @@
 __MACOSX/
 .DS_Store
 
-# ignore node_modules
+# ignore for nodejs
 node_modules/
-
+npm-debug.log
 
 # label_server_ignore
 /label_server/Image/
@@ -45,3 +45,4 @@ node_modules/
 /PCL_Test/
 /arc_ui/web/item-app/public/arc_items/
 /vision/test_data/
+
