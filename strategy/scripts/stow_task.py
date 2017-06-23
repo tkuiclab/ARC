@@ -26,7 +26,6 @@ import LM_Control
 from task_parser import *
 from config import *
 from gripper import *
-
 # Define State
 WaitTask  		= 1		# Wait Task
 ParseJSON   	= 2		# Parse Json
@@ -218,7 +217,6 @@ class StowTask:
 			self.info = "(Catch) Arm Rotate2Obj "  
 			print self.info
 
-
 			pitch = numpy.rad2deg(p.angular.x ) 
 			pitch = (pitch - 180) if pitch > 90  else pitch
 			pitch = (pitch + 180) if pitch < -90  else pitch
@@ -249,7 +247,7 @@ class StowTask:
 			
 
 			#self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
-			self.Arm.relative_xyz_base(x = -move_cam_y, y = move_cam_x,z = -move_cam_z)
+			self.Arm.relative_xyz_base(x = -move_cam_y, y = move_cam_x, z = -move_cam_z)
 		
 
 			self.next_state = Arm_Down_2_Obj #PickObj
@@ -264,7 +262,7 @@ class StowTask:
 			self.next_state = PickObj
 			self.state 		= WaitRobot
 			
-			self.Arm.relative_control(a=.035)  #cam_z
+			self.Arm.relative_control(a=0.05)  #cam_z
 			
 			return
 
@@ -455,6 +453,7 @@ class StowTask:
 			return 
 		else:
 			self.obj_pose = result.object_pose
+			print '(x, y , z) = ' + '(' + str(self.obj_pose.linear.x) + ', ' + str(self.obj_pose.linear.y) + ', ' + str(self.obj_pose.linear.z) + ')'
 			
 			p = self.obj_pose
 			#print(str(self.obj_pose))
@@ -472,5 +471,3 @@ class StowTask:
 					goal,
 					feedback_cb = self.obj_pose_feedback_cb, 
 					done_cb=self.test_obj_pose_done )
-
-			

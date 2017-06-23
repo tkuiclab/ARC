@@ -194,8 +194,8 @@ class ArmTask:
             mode,
             (pos.x + x, pos.y + y, pos.z + z),
             (
-                degrees(euler[0]) + pitch,
-                degrees(euler[1]) + roll,
+                degrees(euler[1]) + pitch,
+                degrees(euler[0]) + roll,
                 degrees(euler[2]) + yaw
             )
         )
@@ -318,9 +318,8 @@ class ArmTask:
         rospy.loginfo('move rotation pitch=' + str(pitch))
 
         #return
-        #self.relative_control_rotate( pitch = pitch)
-        #task.pub_ikCmd('ptp', (0.40, 0.05 , 0.15), (-90 +pitch, 0, 0) )
-        
+        self.relative_control_rotate( pitch = pitch)
+   
         
         while self.__is_busy:
             rospy.sleep(.1)
@@ -342,14 +341,13 @@ class ArmTask:
               ', base_z='+str(-move_cam_z))
         
 
-        #self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
-        self.relative_xyz_base(x = -move_cam_y, y = move_cam_x,z = -move_cam_z)
-    
+        self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
+      
 
 
 if __name__ == '__main__':
 
-    rospy.init_node('robot_arm_task', anonymous=True)
+    rospy.init_node('t2o', anonymous=True)
 
 
     task = ArmTask()
@@ -358,56 +356,21 @@ if __name__ == '__main__':
     rospy.sleep(0.2)
 
 
-    task.desk_photo_pose()
-    #task.pub_ikCmd('ptp')
-    
-    #init pose
-    # task.pub_ikCmd('ptp', (0.30, 0.0 , 0.22), (0, 0, 0) )
-		
     #stow photo pose  
-    #task.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-90, 0, 0, 0) )
-    #task.pub_ikCmd('ptp', (0.30, -0.01 , 0.2), (-60, 0, 0, 0) )
-    # task.pub_ikCmd('ptp', (0.30, 0.1 , 0.15), (-95, 0, 0, 0) )
-    
-    # task.relative_xyz_base(y = 0.1)
-    
+    task.pub_ikCmd('ptp', (0.30, 0 , 0.2), (-90, 0, 0, 0) )
+
     rospy.loginfo('strategy ready')
     task.obj_pose_request()
-
-    #task.relative_control(n=.05)  # -cam_y
-    #task.relative_control(s=.05)  # cam_x
-    #task.relative_control(a=.05)  #cam_z   jmp_stra
-    #task.relative_control(a=-0.05)
-    #task.relative_control(n=0.05)
-    #task.relative_control(n=-0.05)
-    #task.relative_control(s=0.05)
-    #task.relative_control(s=-0.05)
-
-    #task.relative_control_rotate( pitch = -5 )
-    #task.relative_control_rotate( pitch = -5 )
     
-    #move 13 cm can get object
-    #tool 9.5
-    #want only base_x(cam)=-4cm
 
     r = rospy.Rate(10)
     while not rospy.is_shutdown():
         #print 'ok...'
         r.sleep()
 
-    #want height 24cm, but 28cm
-    #task.relative_control(s=.05)  #-y
-    #task.relative_control(a=.05)   # cam_z
-    #task.relative_control_rotate( pitch = roll )
- 
-#    case ORDER_ZYX:
-#         Mx.M[0][0]=Cy*Cz;
-#         Mx.M[0][1]=Cz*Sx*Sy-Cx*Sz;
-#         Mx.M[0][2]=Cx*Cz*Sy+Sx*Sz;
-#         Mx.M[1][0]=Cy*Sz;
-#         Mx.M[1][1]=Cx*Cz+Sx*Sy*Sz;
-#         Mx.M[1][2]=-Cz*Sx+Cx*Sy*Sz;0.5
-#         Mx.M[2][0]=-Sy;
-#         Mx.M[2][1]=Cy*Sx;
-#         Mx.M[2][2]=Cx*Cy;
-#         break;
+    #task.relative_control(n=.05)  # -cam_y
+    #task.relative_control(s=.05)  # cam_x
+    #task.relative_control(a=.05)  #cam_z   jmp_stra
+
+    #task.desk_photo_pose()
+    #task.pub_ikCmd('ptp')

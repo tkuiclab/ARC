@@ -26,8 +26,11 @@
 /CMakeLists.txt
 
 
-# ignore PCD
-*.pcd
+# ignore training data
+
+# ignore photo
+*.jpg
+
 
 # ignore macosx
 __MACOSX/

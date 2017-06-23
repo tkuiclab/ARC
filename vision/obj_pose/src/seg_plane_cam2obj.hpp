@@ -300,11 +300,11 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   PT center =  getCenter(i_cloud);
   std::cout << "Center Point = " << center << std::endl;
 
-  // x = center.x;
-  // y = center.y;
-  // z = center.z;
+  x = center.x;
+  y = center.y;
+  z = center.z;
 
-  // return;
+  return;
 
   //get near center points
   //ouput to cloud_near_center
@@ -450,15 +450,12 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   /*
   Matrix3f  R2;
   obj_normal = obj_normal * (-1);
-
   //KNote: a rotation between the two "arbitrary" vectors
   // I think only 0 ~ 180
   R2 = Quaternionf().setFromTwoVectors(cam_normal,obj_normal);
  
-
   euler = R2.eulerAngles(0, 1, 2);
   yaw = euler[2]; pitch = euler[1]; roll = euler[0]; 
-
   std::cout << " test again (roll, pitch, yaw) = "  
      <<  "("  << roll <<  "," << pitch << "," << yaw << ") = "  
      <<  "(" <<  pcl::rad2deg(roll)  << "," 
