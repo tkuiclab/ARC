@@ -6,7 +6,6 @@ from __future__ import print_function
 import os
 import sys
 import copy
-import time
 
 import rospy
 import rospkg
@@ -16,6 +15,7 @@ os.chdir(pkg_path)
 
 import cv2
 from image_convert import ImageConverter
+from image_convert import save_img, get_now
 from darkflow_detect.srv import Detect, DetectResponse
 from darkflow.net.build import TFNet
 
@@ -89,24 +89,6 @@ def mark_frame(frame, bbox, label='test', confidence=-0.1):
     _img.predi = frame
 
 
-def get_now(arg='d'):
-    import datetime
-    now = datetime.datetime.now()
-    if arg == 'd':
-        return (
-            '{:04d}'.format(now.year)+
-            '{:02d}'.format(now.month)+
-            '{:02d}'.format(now.day)
-        )
-    elif arg == 't':
-        return (
-            '{:02d}'.format(now.hour)+
-            '{:02d}'.format(now.minute)+
-            '{:02d}'.format(now.second)+
-            '{:02d}'.format(now.microsecond)
-        )
-
-
 def show_detection(event):
     """Show result of image for timer using."""
     if _img.refresh:
@@ -114,10 +96,7 @@ def show_detection(event):
     
     # Pressing <space> key
     if cv2.waitKey(10) == 32:
-        _path = os.path.expanduser(os.path.join('~', get_now()))
-        if not os.path.exists(_path):
-            os.makedirs(_path)
-        cv2.imwrite(os.path.join(_path, '{}.jpg'.format(get_now('t'))), _img.frame)
+        save_img(_img.frame)
 
 
 def prepare_network():
@@ -135,13 +114,13 @@ class Image(object):
 
     @property
     def frame(self):
-        """Frame getter: cv_image."""
+        """Original frame getter: cv_image."""
         self._refresh = False
         return self._frame
 
     @frame.setter
     def frame(self, img):
-        """Frame setter: cv_image."""
+        """Original frame setter: cv_image."""
         self._frame = img
         self._refresh = True
 
@@ -152,13 +131,13 @@ class Image(object):
 
     @property
     def predi(self):
-        """Frame getter: cv_image."""
+        """Frame of predication getter: cv_image."""
         self._refresh = False
         return self._predi
 
     @predi.setter
     def predi(self, img):
-        """Frame setter: cv_image."""
+        """Frame of predication setter: cv_image."""
         self._predi = img
         self._refresh = True
 
@@ -166,15 +145,11 @@ _img = Image()
 
 # Options for net building
 options = {
-    "model": "cfg/yolo-new.cfg",   # model of net
+    "model": "cfg/yolo-new.cfg",    # model of net
     "backup": "ckpt/",              # directory of ckpt (training result)
     "load": -1,                     # which ckpt will be loaded. -1 represent the last ckpt
     "threshold": -0.1,              # threshold for confidence
-
-    "gpu": 1.0                       # gpu using rate
-
-   # "gpu": 0.5                       # gpu using rate
-
+    "gpu": 1.0                      # gpu using rate
 }
 tfnet = TFNet(options)
 prepare_network()
