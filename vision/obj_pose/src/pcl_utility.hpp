@@ -246,54 +246,7 @@ void get_hsv_points(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in,
   extract.filter (*cloud_out);
 
 }
-void get_pass_through_points(PCT::Ptr cloud_in,
-            PCT::Ptr cloud_out,
-            float min_x, float max_x,
-            float min_y, float max_y,
-            float min_z, float max_z
-            ){
-  
-  PCT::Ptr now_cloud  (new PCT);;
-  *now_cloud = *cloud_in;
 
-  pcl::IndicesPtr indices (new std::vector <int>);
-  pcl::PassThrough<PT> pass;
 
-  if(min_z!=0 || max_z!=0){
-    pass.setFilterFieldName ("z");
-    pass.setFilterLimits (min_z, max_z);
-
-    pass.setInputCloud (now_cloud);
-    pass.filter (*now_cloud);
-
-  }
-  if(min_y!=0 || max_y!=0){
-    pass.setFilterFieldName ("y");
-    pass.setFilterLimits (min_y, max_y);
-
-    pass.setInputCloud (now_cloud);
-    pass.filter (*now_cloud);
-  }
-
-  if(min_x!=0 || max_x!=0){
-    pass.setFilterFieldName ("x");
-    pass.setFilterLimits (min_x, max_x);
-
-    pass.setInputCloud (now_cloud);
-    pass.filter (*now_cloud);
-  }
-
-  
-  *cloud_out = *now_cloud;
-  /* for backup point cloud
-  pass.filter (*indices);
-  //PCT::Ptr cloud_cluster (new PCT);
-  for (std::vector<int>::const_iterator pit = indices->begin (); pit != indices->end (); ++pit)
-    cloud_out->points.push_back (cloud_in->points[*pit]); //*
-  cloud_out->width = cloud_out->points.size ();
-  cloud_out->height = 1;
-  cloud_out->is_dense = true;
-  */
-}
 
 #endif

@@ -19,28 +19,8 @@
 #include <pcl/common/common.h>
 #include <pcl/surface/mls.h>
 
-void write_pcd_2_rospack(PCT::Ptr cloud, std::string f_name){
-    std::string path = ros::package::getPath("obj_pose");
-    path.append("/pcd_file/");
-    path.append(f_name);
-
-    pcl::PCDWriter writer;
-    writer.write<PT> (path, *cloud, true);
-
-    std::cout << "Save PCD -> " << path << std::endl;
-}
 
 
-void write_pcd_2_rospack_normals(PC_Normal::Ptr cloud, std::string f_name){
-    std::string path = ros::package::getPath("obj_pose");
-    path.append("/pcd_file/");
-    path.append(f_name);
-
-    pcl::PCDWriter writer;
-    writer.write<PNormal> (path, *cloud, false);
-
-    std::cout << "Save PCD -> " << path << std::endl;
-}
 
 void get_largest_cluster( PCT::Ptr i_cloud ,PCT::Ptr o_cloud ){
   pcl::search::KdTree<PT>::Ptr tree (new pcl::search::KdTree<PT>);
@@ -636,4 +616,104 @@ void region_growing(PCT::Ptr i_cloud, int want_seg_ind ,PCT::Ptr o_cloud){
   std::cout << "region_growing FINISH" << std::endl;
     
 
+}
+
+
+void get_pass_through_points(PCT::Ptr cloud_in,
+            PCT::Ptr cloud_out,
+            float min_x, float max_x,
+            float min_y, float max_y,
+            float min_z, float max_z
+            ){
+  
+  PCT::Ptr now_cloud  (new PCT);;
+  *now_cloud = *cloud_in;
+
+  pcl::IndicesPtr indices (new std::vector <int>);
+  pcl::PassThrough<PT> pass;
+
+  if(min_z!=0 || max_z!=0){
+    pass.setFilterFieldName ("z");
+    pass.setFilterLimits (min_z, max_z);
+
+    pass.setInputCloud (now_cloud);
+    pass.filter (*now_cloud);
+
+  }
+  if(min_y!=0 || max_y!=0){
+    pass.setFilterFieldName ("y");
+    pass.setFilterLimits (min_y, max_y);
+
+    pass.setInputCloud (now_cloud);
+    pass.filter (*now_cloud);
+  }
+
+  if(min_x!=0 || max_x!=0){
+    pass.setFilterFieldName ("x");
+    pass.setFilterLimits (min_x, max_x);
+
+    pass.setInputCloud (now_cloud);
+    pass.filter (*now_cloud);
+  }
+
+  
+  *cloud_out = *now_cloud;
+}
+
+
+void pass_through_from_arg(PCT::Ptr cloud_in, 
+            int argc,  char **argv,
+            PCT::Ptr cloud_out){
+
+  float tool_z = 0.26; 
+  float pass_z_max = 0.60;
+
+  float pass_z_min = tool_z;
+  float pass_x_min, pass_x_max, pass_y_min, pass_y_max;
+  pass_x_min = pass_x_max = pass_y_min = pass_y_max = 0;
+
+
+  if (pcl::console::find_switch (argc, argv, "-pass_x_min")){
+    pcl::console::parse (argc, argv, "-pass_x_min", pass_x_min);
+    std::cout << "Use pass_x_min =" << pass_x_min << std::endl;
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_x_max")){
+    pcl::console::parse (argc, argv, "-pass_x_max", pass_x_max);
+   
+    std::cout << "Use pass_x_max =" << pass_x_max << std::endl;
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_y_min")){
+    pcl::console::parse (argc, argv, "-pass_y_min", pass_y_min);
+    // ROS_INFO("Use pass_y_min = %lf",pass_y_min);
+    std::cout << "Use pass_y_min =" << pass_y_min << std::endl;
+  }
+  
+  if (pcl::console::find_switch (argc, argv, "-pass_y_max")){
+    pcl::console::parse (argc, argv, "-pass_y_max", pass_y_max);
+    //ROS_INFO("Use pass_y_max = %lf",pass_y_max);
+
+    std::cout << "Use pass_y_max =" << pass_y_max << std::endl;
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_z_min")){
+    pcl::console::parse (argc, argv, "-pass_z_min", pass_z_min);
+
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_z_max")){
+    pcl::console::parse (argc, argv, "-pass_z_max", pass_z_max);
+    
+  }
+  //ROS_INFO("Use pass_z_max = %lf",pass_z_max);
+  std::cout << "Use pass_z_min =" << pass_z_min << std::endl;
+  std::cout << "Use pass_z_max =" << pass_z_max << std::endl;
+
+  get_pass_through_points(cloud_in,  cloud_out,
+                        pass_x_min, pass_x_max,
+                        pass_y_min, pass_y_max,
+                        tool_z, pass_z_max
+                     
+                        );
 }
