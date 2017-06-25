@@ -40,7 +40,6 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       feedback_.progress = 30;
       as_.publishFeedback(feedback_);
 
-      //state = POSE_ESTIMATION;
       state = CALL_RCNN;
       call_rcnn_times = 0;
   }
