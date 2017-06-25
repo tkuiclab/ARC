@@ -54,7 +54,7 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
 {
     fai = 0;
     Euler_Mode = e_ICLAB;
-    // Euler_Mode = e_nsa;
+    Euler_Mode = e_nsa;
     for (int id = 0; id <= ALL_JOINT_ID; id++)
         manipulator_link_data_[id] = new LinkData();
 

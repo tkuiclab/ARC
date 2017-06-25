@@ -45,17 +45,13 @@ npm-debug.log
 /label_server/xml/
 /label_server/node/log/*.log
 
-<<<<<<< HEAD
-# ignore PCL_Test
-/PCL_Test/
-
 
 # catkin ignore
 CATKIN_IGNORE
-=======
+
+# ignore PCL_Test
+/PCL_Test/
 /vision/obj_pose/pcd_file/
 /PCL_Test/
 /arc_ui/web/item-app/public/arc_items/
 /vision/test_data/
-
->>>>>>> 834ac18ea1a08ece5e774c41cf47e25c3ef5f9dd
