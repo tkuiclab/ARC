@@ -269,7 +269,7 @@ void BaseModule::JointControlCallback(const manipulator_h_base_module_msgs::Join
     }
 }
 
-/* ----------------------------------- ptp ----------------------------------- */
+/* ----------------------------------- ptp ----------------------------------- *///jmp p2p
 void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr &cmd)
 {
     if (enable_ == false)
@@ -294,6 +294,8 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     // robotis_->ik_target_rotation_ = robotis_framework::convertRPYToRotation(roll, pitch, yaw);
 
     /* calc ik */
+    manipulator_->Euler_Mode = e_nsa;
+    // manipulator_->Euler_Mode = e_ICLAB;
     bool ik_success = manipulator_->ik(robotis_->ik_target_position_,
                                        robotis_->ik_target_rotation_,
                                        robotis_->ik_cmd_fai);

@@ -157,13 +157,20 @@ class StowTask:
 		rospy.sleep(0.3)
 		self.LM.pub_LM_Cmd(1, GetShift('Tote', 'z', self.Tote ))
 
-	def arm_photo_pose(self):
+	def arm_photo_pose(self, pose=0):
 		self.info = "(Catch) Go PhotoPose "  
 		print self.info
 
 		self.next_state = VisionProcess
 		self.state 		= WaitRobot
-		self.Arm.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-90, 0, 0) )
+		
+		self.Arm.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-180, 0, 0))
+		
+		# if not pose:
+		# 	self.Arm.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-90, 0, 0))
+		# else:
+		# 	self.Arm.pub_ikCmd('ptp', (0.48, 0.00 , 0.15), (-60, 0, 0))
+
 
 	def stow_core(self):
 		self.update_status()
@@ -246,8 +253,8 @@ class StowTask:
 				', base_z='+str(-move_cam_z))
 			
 
-			#self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
-			self.Arm.relative_xyz_base(x = -move_cam_y, y = move_cam_x, z = -move_cam_z)
+			self.Arm.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
+			#self.Arm.relative_xyz_base(x = -move_cam_y, y = move_cam_x, z = -move_cam_z)
 		
 
 			self.next_state = Arm_Down_2_Obj #PickObj
@@ -457,11 +464,12 @@ class StowTask:
 			
 			p = self.obj_pose
 			#print(str(self.obj_pose))
-			rospy.loginfo("(x,y,z)= (" + str(p.linear.x) + ", " + str(p.linear.y)+ ", " + str(p.linear.z)) 
+			rospy.loginfo("(x,y,z)= (" + str(p.linear.x) + ", " + str(p.linear.y)+ ", " + str(p.linear.z)  + ')' )
 			rospy.loginfo("(roll,pitch,yaw)= (" 
 							+ str(numpy.rad2deg(p.angular.x)) + ", " 
 							+ str(numpy.rad2deg(p.angular.y)) + ", " 
-							+ str(numpy.rad2deg(p.angular.z))  ) 
+							+ str(numpy.rad2deg(p.angular.z))    + ")"  
+			)
         
 
 	def test_obj_pose(self,want_item):
@@ -471,3 +479,17 @@ class StowTask:
 					goal,
 					feedback_cb = self.obj_pose_feedback_cb, 
 					done_cb=self.test_obj_pose_done )
+
+	def test_run_with_obj_pose(self, cam_x, cam_y, cam_z):
+		move_cam_x = cam_x
+		move_cam_y = cam_y - cam2tool_y
+		move_cam_z = cam_z - cam2tool_z
+
+		rospy.loginfo('move linear n(cam_y)='+str(move_cam_y) + ', s(cam_x)='+str(move_cam_x)  + ', a(cam_z)='+str(move_cam_z))
+
+
+		self.Arm.relative_control(a=.05)
+
+
+		#self.Arm.relative_control(a=move_cam_z)
+

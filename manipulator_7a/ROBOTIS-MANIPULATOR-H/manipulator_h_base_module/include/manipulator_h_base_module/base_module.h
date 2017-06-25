@@ -151,6 +151,7 @@ class BaseModule
     ManipulatorKinematicsDynamics *manipulator_;
 
     double vel_percent;
+    // teEuler_Mode ss;
 };
 }
 

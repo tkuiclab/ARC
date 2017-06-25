@@ -40,7 +40,6 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       feedback_.progress = 30;
       as_.publishFeedback(feedback_);
 
-      //state = POSE_ESTIMATION;
       state = CALL_RCNN;
       call_rcnn_times = 0;
   }
@@ -303,6 +302,9 @@ int main (int argc, char **argv)
       case ALIGMENT:
         ObjEst.set_feedback("Alignment....",80);
         ObjEst.do_ICP();
+        break;
+      case POSE_ESTIMATION:
+        ObjEst.poseEstimation();
         break;
       default:
         ROS_INFO("Que!?");
