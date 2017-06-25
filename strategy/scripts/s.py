@@ -139,14 +139,14 @@ class Strategy(threading.Thread):
 
 	def arm_go_init_pose(self):
 		rospy.loginfo('Arm go init pose')
-		self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.22), (0, 0, 0) )
+		self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.22), (0, 0, 0))
 
 	def arm_bin_photo(self):
-		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (0, 0, 0) )
+		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.34), (0, 0, 0))
 
 
 	def safe_pose(self):
-		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-90, 0, 0) )
+		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-90, 0, 0))
 
 if __name__ == '__main__':
 	rospy.init_node('strategy')
@@ -156,14 +156,15 @@ if __name__ == '__main__':
 		# s.start() 
 
 		# ========== TEST ===========
-		s.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.25), (0, 0, 0) )
+		#s.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.25), (0, 0, 0) )
 		#s.arm_go_init_pose()
 
 		#s.arm_go_init_pose()
 		
-		#s.test_go_bin_LM('d')
+		#s.test_go_bin_LM('e')
+		#s.arm_bin_photo()
 		#test_go_box('j')		
-		# s.stow.LM_2_tote()			# -
+		#s.stow.LM_2_tote()			    # -
 		#s.stow.arm_photo_pose()		# -
 
 # <<<<<<< HEAD

@@ -157,13 +157,17 @@ class StowTask:
 		rospy.sleep(0.3)
 		self.LM.pub_LM_Cmd(1, GetShift('Tote', 'z', self.Tote ))
 
-	def arm_photo_pose(self):
+	def arm_photo_pose(self, pose=0):
 		self.info = "(Catch) Go PhotoPose "  
 		print self.info
 
 		self.next_state = VisionProcess
 		self.state 		= WaitRobot
-		self.Arm.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-90, 0, 0) )
+		if not pose:
+			self.Arm.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-90, 0, 0))
+		else:
+			self.Arm.pub_ikCmd('ptp', (0.48, 0.00 , 0.15), (-60, 0, 0))
+
 
 	def stow_core(self):
 		self.update_status()
