@@ -10,7 +10,7 @@ from numpy import multiply
 import numpy
 
 import rospy
-import roslib;roslib.load_manifest('obj_pose')
+import roslib; #roslib.load_manifest('obj_pose')
 import tf
 
 
@@ -276,7 +276,7 @@ class ArmTask:
         self.__obj_pose_client.wait_for_result()
 
     def desk_photo_pose(self):
-        self.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-60, 0, 0) )
+        self.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-180, 0, 0) )
         #self.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-90, 0, 0) )
 
 
@@ -355,25 +355,31 @@ if __name__ == '__main__':
     task.set_mode()
     rospy.sleep(0.2)
 
+    task.desk_photo_pose()
 
+
+    #task.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-89, 0, 0) )
+        
     #task.relative_control(n=.05)
     #task.relative_control(n=.05)  # -cam_y
     #task.relative_control(s=-.15)  # cam_x
     #task.relative_control(a=.05)  #cam_z   jmp_str
 
+    task.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-180, 0, 30) )
+
     #pitch , cam_roll 
-    #task.relative_control_rotate(pitch=5, roll=0, yaw=0)   
+    #task.relative_control_rotate(pitch=0, roll=0, yaw=0)   
     
     #roll, cam_yaw
-    #task.relative_control_rotate(pitch=0, roll=5, yaw=0)   
+    #task.relative_control_rotate(pitch=0, roll=15, yaw=0)   
 
     #roll, cam_pitch
-    task.relative_control_rotate(pitch=0, roll=0, yaw=5)   
+    #task.relative_control_rotate(pitch=0, roll=0, yaw=5)   
 
 
-    #task.desk_photo_pose()
+    
     #stow photo pose  
-    #task.pub_ikCmd('ptp', (0.30, 0 , 0.2), (-90, 0, 0, 0) )
+    #task.pub_ikCmd('ptp', (0.30, 0 , 0.2), (-60, 90, -90, 0) )
 
     #rospy.loginfo('strategy ready')
     #task.obj_pose_request("dvdRobots")
