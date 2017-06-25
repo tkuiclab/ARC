@@ -108,7 +108,6 @@ void ObjEstAction::get_roi(){
 
       state = NADA;
          
-
       return;  
     }
     mini_x = roi_srv.response.bound_box[0];

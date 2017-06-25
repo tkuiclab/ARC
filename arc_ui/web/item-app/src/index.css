@@ -1,7 +1,7 @@
 body {
   font: 14px "Century Gothic", Futura, sans-serif;
 
-  width:95%;
+  width:98%;
   margin-left:auto;
   margin-right:auto;
 
@@ -40,7 +40,7 @@ img{
 
 
 .bin_name, .bin_length, .bin_width, 
-.bin_height, .bin_vol, .bin_sum_vol{
+.bin_height, .bin_vol, .bin_sum_vol,.bin_fit_items_num{
   border: 1px solid #999;
   font-size: 40px;
   margin-right: 0px;
@@ -54,7 +54,7 @@ img{
 
 
 
-.bin_name,.bin_length, .bin_width, .bin_height{
+.bin_name,.bin_length, .bin_width, .bin_height,.bin_fit_items_num{
   width: 50px;
 }
 
@@ -63,7 +63,7 @@ img{
 }
 
 .bin_sum_vol{
-  width : 355px;
+  width : 408px;
 }
 
 .item_pic, .item_name,.item_type, .item_dims,.item_fix_box {
