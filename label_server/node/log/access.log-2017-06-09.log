@@ -1,0 +1,91 @@
+[2017-06-09 18:43:20.900] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 18:43:29.027] [INFO] Server - ***********************
+Handler '/upload' is started.
+[2017-06-09 18:43:29.029] [INFO] Server - Received POST data chunk 'fileName=arFlashlihgts-00002.jpg&fileWidth=1280&fileHeight=720&objName=arFlashlihgts&objXmin=183&objYmin=464&objXmax=378&objYmax=594'.
+[2017-06-09 18:43:29.031] [INFO] File - Request handler 'upload' was called.
+[2017-06-09 18:43:29.031] [INFO] File - FILE EXISTS
+[2017-06-09 18:43:29.035] [INFO] Server - ***********************
+[2017-06-09 18:43:29.048] [INFO] File - The object is already exist
+[2017-06-09 18:43:29.048] [INFO] File - 184 -> 183
+[2017-06-09 18:43:29.048] [INFO] File - 466 -> 464
+[2017-06-09 18:43:29.048] [INFO] File - 379 -> 378
+[2017-06-09 18:43:29.048] [INFO] File - 594 -> 594
+[2017-06-09 18:43:57.496] [INFO] Server - ***********************
+Handler '/upload' is started.
+[2017-06-09 18:43:57.497] [INFO] Server - Received POST data chunk 'fileName=arFlashlihgts-00003.jpg&fileWidth=1280&fileHeight=720&objName=arFlashlihgts&objXmin=204&objYmin=497&objXmax=377&objYmax=637'.
+[2017-06-09 18:43:57.498] [INFO] File - Request handler 'upload' was called.
+[2017-06-09 18:43:57.498] [INFO] File - FILE EXISTS
+[2017-06-09 18:43:57.500] [INFO] Server - ***********************
+[2017-06-09 18:43:57.518] [INFO] File - The object is already exist
+[2017-06-09 18:43:57.519] [INFO] File - 199 -> 204
+[2017-06-09 18:43:57.519] [INFO] File - 494 -> 497
+[2017-06-09 18:43:57.519] [INFO] File - 378 -> 377
+[2017-06-09 18:43:57.519] [INFO] File - 636 -> 637
+[2017-06-09 18:48:04.805] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 18:52:31.596] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 18:56:41.481] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 18:58:35.543] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 20:03:46.234] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 20:18:22.427] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 20:23:03.290] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 20:23:27.732] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 20:23:44.408] [INFO] Server - ***********************
+Handler '/upload' is started.
+[2017-06-09 20:23:44.412] [INFO] Server - Received POST data chunk ' fileName=arFlashlihgts-00001.jpg&fileWidth=1280&fileHeight=720&objName=arFlashlihgts&objXmin=193&objYmin=451&objXmax=397&objYmax=565'.
+[2017-06-09 20:23:44.413] [INFO] File - Request handler 'upload' was called.
+[2017-06-09 20:23:44.414] [INFO] File - FILE EXISTS
+[2017-06-09 20:23:44.414] [INFO] Server - ***********************
+[2017-06-09 20:23:44.433] [INFO] File - The object is already exist
+[2017-06-09 20:23:44.434] [INFO] File - 194 -> 193
+[2017-06-09 20:23:44.434] [INFO] File - 454 -> 451
+[2017-06-09 20:23:44.434] [INFO] File - 398 -> 397
+[2017-06-09 20:23:44.434] [INFO] File - 566 -> 565
+[2017-06-09 20:24:30.599] [INFO] Server - ***********************
+Handler '/upload' is started.
+[2017-06-09 20:24:30.600] [INFO] Server - Received POST data chunk ' fileName=arFlashlihgts-00001.jpg&fileWidth=1280&fileHeight=720&objName=arFlashlihgts&objXmin=193&objYmin=454&objXmax=400&objYmax=568'.
+[2017-06-09 20:24:30.600] [INFO] File - Request handler 'upload' was called.
+[2017-06-09 20:24:30.600] [INFO] File - FILE EXISTS
+[2017-06-09 20:24:30.601] [INFO] Server - ***********************
+[2017-06-09 20:24:30.629] [INFO] File - The object is already exist
+[2017-06-09 20:24:30.630] [INFO] File - 193 -> 193
+[2017-06-09 20:24:30.630] [INFO] File - 451 -> 454
+[2017-06-09 20:24:30.630] [INFO] File - 397 -> 400
+[2017-06-09 20:24:30.630] [INFO] File - 565 -> 568
+[2017-06-09 20:24:37.575] [INFO] Server - ***********************
+Handler '/upload' is started.
+[2017-06-09 20:24:37.575] [INFO] Server - Received POST data chunk ' fileName=arFlashlihgts-00002.jpg&fileWidth=1280&fileHeight=720&objName=arFlashlihgts&objXmin=183&objYmin=468&objXmax=378&objYmax=592'.
+[2017-06-09 20:24:37.576] [INFO] File - Request handler 'upload' was called.
+[2017-06-09 20:24:37.576] [INFO] File - FILE EXISTS
+[2017-06-09 20:24:37.577] [INFO] Server - ***********************
+[2017-06-09 20:24:37.600] [INFO] File - The object is already exist
+[2017-06-09 20:24:37.600] [INFO] File - 183 -> 183
+[2017-06-09 20:24:37.600] [INFO] File - 464 -> 468
+[2017-06-09 20:24:37.600] [INFO] File - 378 -> 378
+[2017-06-09 20:24:37.600] [INFO] File - 594 -> 592
+[2017-06-09 20:26:18.253] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 20:26:27.511] [INFO] Server - ***********************
+Handler '/upload' is started.
+[2017-06-09 20:26:27.515] [INFO] Server - Received POST data chunk ' fileName=arFlashlihgts-00003.jpg&fileWidth=1280&fileHeight=720&objName=arFlashlihgts&objXmin=207&objYmin=497&objXmax=376&objYmax=641'.
+[2017-06-09 20:26:27.518] [INFO] File - Request handler 'upload' was called.
+[2017-06-09 20:26:27.518] [INFO] File - FILE EXISTS
+[2017-06-09 20:26:27.524] [INFO] Server - ***********************
+[2017-06-09 20:26:27.543] [INFO] File - The object is already exist
+[2017-06-09 20:26:27.544] [INFO] File - 204 -> 207
+[2017-06-09 20:26:27.544] [INFO] File - 497 -> 497
+[2017-06-09 20:26:27.544] [INFO] File - 377 -> 376
+[2017-06-09 20:26:27.544] [INFO] File - 637 -> 641
+[2017-06-09 20:28:27.397] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 20:28:43.821] [INFO] Server - ***********************
+Handler '/upload' is started.
+[2017-06-09 20:28:43.825] [INFO] Server - Received POST data chunk ' fileName=arFlashlihgts-00001.jpg&fileWidth=1280&fileHeight=720&objName=arFlashlihgts&objXmin=193&objYmin=453&objXmax=399&objYmax=569'.
+[2017-06-09 20:28:43.827] [INFO] File - Request handler 'upload' was called.
+[2017-06-09 20:28:43.828] [INFO] File - FILE EXISTS
+[2017-06-09 20:28:43.829] [INFO] Server - ***********************
+[2017-06-09 20:28:43.844] [INFO] File - The object is already exist
+[2017-06-09 20:28:43.844] [INFO] File - 193 -> 193
+[2017-06-09 20:28:43.845] [INFO] File - 454 -> 453
+[2017-06-09 20:28:43.845] [INFO] File - 400 -> 399
+[2017-06-09 20:28:43.845] [INFO] File - 568 -> 569
+[2017-06-09 20:30:18.313] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 20:30:42.249] [INFO] Server - Server running at http://localhost:8000/
+[2017-06-09 20:31:15.532] [INFO] Server - Server running at http://localhost:8000/

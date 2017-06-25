@@ -153,10 +153,10 @@ if __name__ == '__main__':
 
 	try:
 		s = Strategy()
-		s.start() 
+		# s.start() 
 
-
-
+		# ========== TEST ===========
+		s.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.25), (0, 0, 0) )
 		#s.arm_go_init_pose()
 
 		#s.arm_go_init_pose()
@@ -166,13 +166,11 @@ if __name__ == '__main__':
 		# s.stow.LM_2_tote()			# -
 		#s.stow.arm_photo_pose()		# -
 
-# <<<<<<< HEAD
-# 		# s.safe_pose()
-# =======
-# 		s.arm_bin_photo()
-# >>>>>>> 991bb0abd8144ccca23ff838e76ba02b77427584
-# 		#gripper_vaccum_off()
-# 		#gripper_suction_up()
+		# s.safe_pose()
+
+		#s.arm_bin_photo()
+		#gripper_vaccum_off()
+		#gripper_suction_up()
 		#gripper_suctoin_down()
 		#s.Arm.relative_control(a=.035)  #cam_z
 

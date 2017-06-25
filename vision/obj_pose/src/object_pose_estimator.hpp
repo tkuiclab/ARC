@@ -31,6 +31,7 @@
 #include <pcl_ros/transforms.h>
 #include <pcl/console/parse.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/filters/voxel_grid.h>
 
 // Types
 typedef pcl::PointXYZRGBA PT;           //Point Type

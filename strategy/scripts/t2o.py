@@ -355,8 +355,8 @@ if __name__ == '__main__':
     task.set_mode()
     rospy.sleep(0.2)
 
-    task.desk_photo_pose()
 
+    task.desk_photo_pose()
 
     #task.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-89, 0, 0) )
         
@@ -369,12 +369,15 @@ if __name__ == '__main__':
 
     #pitch , cam_roll 
     #task.relative_control_rotate(pitch=0, roll=0, yaw=0)   
-    
+ 
+    # X, Z, Y  
     #roll, cam_yaw
+
     #task.relative_control_rotate(pitch=0, roll=15, yaw=0)   
 
     #roll, cam_pitch
     #task.relative_control_rotate(pitch=0, roll=0, yaw=5)   
+
 
 
     
