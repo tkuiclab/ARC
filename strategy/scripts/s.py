@@ -153,7 +153,7 @@ if __name__ == '__main__':
 
 	try:
 		s = Strategy()
-		# s.start() 
+		#s.start() 
 
 		# ========== TEST ===========
 		#s.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.25), (0, 0, 0) )
@@ -165,18 +165,40 @@ if __name__ == '__main__':
 		#s.arm_bin_photo()
 		#test_go_box('j')		
 		#s.stow.LM_2_tote()			    # -
-		#s.stow.arm_photo_pose()		# -
+		
 
-		# s.safe_pose()
+		#s.safe_pose()
 
 		#s.arm_bin_photo()
 		#gripper_vaccum_off()
 		#gripper_suction_up()
 		#gripper_suctoin_down()
-		#s.Arm.relative_control(a=.035)  #cam_z
+		
+		
+		
+		#s.Arm.relative_control(a=.1)  
+		#s.Arm.relative_control(s=.1)  
+		# s.Arm.relative_control(a=0.05)  
+		
+		# nsa test area start
+		dis = 0.05
+		s.Arm.relative_nsa(n = -dis)
+		s.Arm.relative_nsa(n =  dis)
+		s.Arm.relative_nsa(s = -dis)
+		s.Arm.relative_nsa(s =  dis)
+		s.Arm.relative_nsa(a =  dis)
+		s.Arm.relative_nsa(a = -dis)
+		# nsa test area over
 
-		#s.stow.test_obj_pose('dvdRobots')  #expoEraser
+		# s.Arm.relative_control(n =  0.05)
+		# s.Arm.relative_control(n = -0.05)
 
+		#s.stow.arm_photo_pose()		
+		#s.stow.test_obj_pose('dvdRobots')  
+
+		
+		#s.stow.test_run_with_obj_pose(-0.052098851651, -0.0093888239935, 0.554290473461)
+		
 		rospy.spin()
 	except rospy.ROSInterruptException:
 		pass

@@ -304,6 +304,9 @@ int main (int argc, char **argv)
         ObjEst.set_feedback("Alignment....",80);
         ObjEst.do_ICP();
         break;
+      case POSE_ESTIMATION:
+        ObjEst.poseEstimation();
+        break;
       default:
         ROS_INFO("Que!?");
         state = NADA;

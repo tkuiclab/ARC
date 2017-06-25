@@ -18,7 +18,7 @@ from image_convert import ImageConverter
 from image_convert import save_img, get_now
 from darkflow_detect.srv import Detect, DetectResponse
 from darkflow.net.build import TFNet
-
+import time
 
 def handle_request(req):
     """Service request callback."""
