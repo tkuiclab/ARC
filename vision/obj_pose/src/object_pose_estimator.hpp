@@ -136,9 +136,11 @@ protected:
 private:
   PT min_p, max_p;
   PCT::Ptr cloud;
-  PCT::Ptr my_ROICloud;
+  //PCT::Ptr my_ROICloud;
   PCT::Ptr scene_cloud ;
   PCT::Ptr ROI_cloud;
+
+
 
 
   int g_argc;

@@ -11,6 +11,7 @@ typedef pcl::PointCloud<PT> PCT;
 
 typedef pcl::PointNormal PointNT;
 typedef pcl::PointCloud<PointNT> PC_NT;
+
 typedef pcl::FPFHSignature33 FeatureT;
 typedef pcl::FPFHEstimationOMP<PointNT,PointNT,FeatureT> FeatureEstimationT;
 typedef pcl::PointCloud<FeatureT> FeatureCloudT;
@@ -143,7 +144,7 @@ bool load_amazon_pcd_model(std::string pcd_filename, pcl::PointCloud<pcl::PointX
   }
 
   std::string path = ros::package::getPath("obj_pose");
-  ss1 << path << "items/" << AmazonModelList[index] << "/" << AmazonModelList[index] << "1.pcd";
+  ss1 << path << "/items/" << AmazonModelList[index] << "/" << AmazonModelList[index] << "1.pcd";
   out_model_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr (new pcl::PointCloud<pcl::PointXYZ> ());
   ROS_INFO("Loading PCD....");
   ROS_INFO("PCD at %s",ss1.str().c_str());

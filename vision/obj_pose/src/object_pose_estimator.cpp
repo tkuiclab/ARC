@@ -150,9 +150,8 @@ void ObjEstAction::get_roi(){
   write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
 #endif 
 
-  feedback_.msg = "ROI Done";
-  feedback_.progress = 60;
-  as_.publishFeedback(feedback_);
+
+  set_feedback("ROI Done",60);
   
   state = POSE_ESTIMATION;
 }
@@ -166,13 +165,13 @@ void ObjEstAction::segmentation()
   CPCSegmentation cpc_seg;
   if(scence_seg)
   {
-    cpc_seg.setPointCloud(cloud);
+    cpc_seg.setPointCloud(scene_cloud);
     cpc_seg.set_3D_ROI(min_p, max_p);
     cpc_seg.do_segmentation();
     cloud_cluster = cpc_seg.get_cloud_cluster();
     state = ALIGMENT;
   }else{
-    cpc_seg.setPointCloud(my_ROICloud);
+    cpc_seg.setPointCloud(ROI_cloud);
     cpc_seg.do_segmentation();
     Max_cluster = cpc_seg.get_BiggestCluster();
     state = ALIGMENT;
