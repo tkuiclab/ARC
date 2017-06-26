@@ -141,8 +141,6 @@ private:
   PCT::Ptr ROI_cloud;
 
 
-
-
   int g_argc;
   char** g_argv;
 

@@ -269,14 +269,8 @@ void get_seg_plane_near( PCT::Ptr i_cloud ,PCT::Ptr o_cloud ){
 
 }
 
-//get camera center to object center transform
-//assume camera
-void cam_2_obj_center(PCT::Ptr i_cloud,
-          double &x, double &y, double &z,
-          double &roll, double &pitch, double &yaw){
-  PCT::Ptr cloud_near_center (new PCT);
-
-  //get center of colud
+void only_obj_center(PCT::Ptr i_cloud,
+          double &x, double &y, double &z){
   PT center =  getCenter(i_cloud);
   std::cout << "Center Point = " << center << std::endl;
 
@@ -286,81 +280,73 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
 
   return;
 
+}
+
+//get camera center to object center transform
+void cam_2_obj_center(PCT::Ptr i_cloud, 
+          double &x, double &y, double &z,
+          double &roll, double &pitch, double &yaw, 
+          float near_points_percent = 0.1){
+  PCT::Ptr cloud (new PCT);
+  PCT::Ptr cloud_near_center (new PCT);
+  PC_Normal::Ptr cloud_normal (new PC_Normal);
+
+  std::cout << "cam_2_obj_center() say Original Points = " << i_cloud->size() << std::endl;
+
+  //get center of colud
+  PT center =  getCenter(i_cloud);
+  std::cout << "Center Point = " << center << std::endl;
+
+
   //get near center points
-  //ouput to cloud_near_center
-  //get_near_points(i_cloud, center, 30, cloud_near_center);
-  //get_near_points(i_cloud, center, i_cloud->size() * 0.5f, cloud_near_center);
-
-  //get bounding box
-  // PT min_p, max_p;
-  // pcl::getMinMax3D(*i_cloud,min_p, max_p);
+  //float near_points_percent = 0.1;
+  //------------------get_near_points----------------//
   
-  std::cout << "cam_2_obj_center() say Points = " << i_cloud->size() << std::endl;
-
-   pcl::PointCloud<PNormal>::Ptr cloud_normal (new pcl::PointCloud<PNormal>);
+  std::cout << "Use Near Points Percent = " << (near_points_percent*100) << "%" << std::endl;
+  get_near_points(i_cloud, center, i_cloud->size() * near_points_percent, cloud);
   
+  std::cout << "cam_2_obj_center() say After get_near_points() Points = " << cloud->size() << std::endl;
   
-
-  // ----------------------------------------------------------------
-  // -----Calculate surface normals with a search radius of 0.05-----
-  // ----------------------------------------------------------------
-  // pcl::NormalEstimation<PT, PNormal> ne;
-  // //ne.setInputCloud (cloud_near_center);
-  // ne.setInputCloud (i_cloud);
-  // //option
-  // //pcl::search::KdTree<PT>::Ptr tree (new pcl::search::KdTree<PT> ());
-  // //ne.setSearchMethod (tree);
-  
-  // //pcl::PointCloud<pcl::Normal>::Ptr cloud_normal (new pcl::PointCloud<pcl::Normal>);
-  // //pcl::PointCloud<PNormal>::Ptr cloud_normal (new pcl::PointCloud<PNormal>);
-  
-  // ne.setRadiusSearch (0.3);
-  // ne.compute (*cloud_normal);
-
-// #ifdef SaveCloud    
-//   write_pcd_2_rospack_normals(cloud_normal,"_NormalEstimation.pcd");
-
-// #endif
-
-  //------------------MovingLeastSquares----------------//
-   // Create a KD-Tree
-  pcl::search::KdTree<PT>::Ptr tree (new pcl::search::KdTree<PT>);
-  pcl::PointCloud<pcl::PointNormal> mls_points;
-  pcl::MovingLeastSquares<PT, pcl::PointNormal> mls;
-  mls.setComputeNormals (true);
-  mls.setInputCloud (i_cloud);
-  mls.setPolynomialFit (true);
-  mls.setSearchMethod (tree);
-  mls.setSearchRadius (0.03);
-  mls.process (*cloud_normal);
-  
-
-#ifdef SaveCloud    
-  write_pcd_2_rospack_normals(cloud_normal,"_mls.pcd");
+#ifdef SaveCloud
+  write_pcd_2_rospack(cloud,"_near_points.pcd");
 #endif
 
-  if(i_cloud->size() > 1000){
+  //------------------VoxelGrid (>3000)----------------//
+  
+  if(cloud->size() > 3000){
     float leaf = 0.01;
     // if (pcl::console::find_switch (argc, argv, "-leaf")){
     //   pcl::console::parse (argc, argv, "-leaf", leaf);
     // }
 
     pcl::VoxelGrid<PT> vg;
-    vg.setInputCloud (i_cloud);
+    vg.setInputCloud (cloud);
     vg.setLeafSize (leaf, leaf, leaf);
-    vg.filter (*i_cloud);
-    std::cout << "cam_2_obj_center() say After VoxelGrid Points = " << i_cloud->size() << std::endl;
+    vg.filter (*cloud);
+    std::cout << "cam_2_obj_center() say After VoxelGrid Points = " << cloud->size() << std::endl;
+  
+#ifdef SaveCloud
+  write_pcd_2_rospack(cloud,"_vg.pcd");
+#endif
+  
   }
+  
 
-   mls.setInputCloud (i_cloud);
-   mls.process (*cloud_normal);
-
+  //------------------MovingLeastSquares----------------//
+   // Create a KD-Tree
+  pcl::search::KdTree<PT>::Ptr tree (new pcl::search::KdTree<PT>);
+  pcl::PointCloud<PNormal> mls_points;
+  pcl::MovingLeastSquares<PT, PNormal> mls;
+  mls.setComputeNormals (true);
+  mls.setPolynomialFit (true);
+  mls.setSearchMethod (tree);
+  mls.setSearchRadius (0.03);
+  mls.setInputCloud (cloud);
+  mls.process (*cloud_normal);
 
 #ifdef SaveCloud    
-  write_pcd_2_rospack_normals(cloud_normal,"_mls_voxelgrid.pcd");
+  write_pcd_2_rospack_normals(cloud_normal,"_mls.pcd");
 #endif
-
-  //getNormal_Near_Point(cloud_normal, center);
 
   std::cout << "cloud_normal width*height = " << cloud_normal->width * cloud_normal->height << std::endl;
   std::cout << "cloud_normal size = " << cloud_normal->size() << std::endl;
@@ -414,36 +400,6 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
      <<  pcl::rad2deg(pitch)  << "," 
      <<  pcl::rad2deg(yaw) << ")" << std::endl;
     
-  // no use transform
-  // x = center.x;
-  // y = center.y;
-  // z = center.z;
-
-  // std::cout << "NO USE ROTATE  (roll, pitch, yaw) = "  
-  //   <<  "("  << roll << "," << pitch << "," << yaw << ") = "  
-  //    <<  "(" <<  pcl::rad2deg(roll)  << "," 
-  //    <<  pcl::rad2deg(pitch)  << "," 
-  //    <<  pcl::rad2deg(yaw) << ")" << std::endl;
-    
-
-//--test negtive the obj_normal-------------------------------------------------//
-  /*
-  Matrix3f  R2;
-  obj_normal = obj_normal * (-1);
-  //KNote: a rotation between the two "arbitrary" vectors
-  // I think only 0 ~ 180
-  R2 = Quaternionf().setFromTwoVectors(cam_normal,obj_normal);
- 
-  euler = R2.eulerAngles(0, 1, 2);
-  yaw = euler[2]; pitch = euler[1]; roll = euler[0]; 
-  std::cout << " test again (roll, pitch, yaw) = "  
-     <<  "("  << roll <<  "," << pitch << "," << yaw << ") = "  
-     <<  "(" <<  pcl::rad2deg(roll)  << "," 
-     <<  pcl::rad2deg(pitch)  << "," 
-     <<  pcl::rad2deg(yaw) << ")" << std::endl;
-     */
-//end  ---test negtive the obj_normal------------------------------------//
-
 
   std::cout << " center (x, y, z) = "  
   <<  "(" <<  center.x  << ","  <<  center.y  << "," <<  center.z << ")" << std::endl;
@@ -451,68 +407,7 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   std::cout << " (x, y, z) = "  
   <<  "(" <<  x  << ","  <<  y  << "," <<  z << ")" << std::endl;
 
-  
-#ifdef ShowCloud
-  // --------------------------------------------
-  // -----Open 3D viewer and add point cloud-----
-  // --------------------------------------------
-  return ;
-  Vector3f  new_vec;
-  new_vec = R * cam_normal;
-
-  vis_normal(viewer, cloud_near_center, cloud_normal);
-  vis_one_point(viewer, center);
-  //vis_cloud(viewer, cloud_near_center);
-  
-  // viewer->addCube(min_p.x, min_p.y, min_p.z, 
-  //                 max_p.x, max_p.y, max_p.z);
-  //viewer->addLine (PT(0, 0, 0),
-  //PT(new_vec[0],new_vec[1],new_vec[2])          );
-  PT p_new;
-  p_new.x = center.x + new_vec[0];
-  p_new.y = center.y + new_vec[1];
-  p_new.z = center.z + new_vec[2];
-
-  PT obj_new;
-  obj_new.x = center.x + obj_normal[0];
-  obj_new.y = center.y + obj_normal[1];
-  obj_new.z = center.z + obj_normal[2];
-
-
-//-----------------TEST-------------------//
-  std::cout << " ==============Test=============="  << std::endl;
-
-  Eigen::Affine3f tf = Eigen::Affine3f::Identity();
-  tf.rotate (Eigen::AngleAxisf ( yaw,   Eigen::Vector3f::UnitZ()));
-  tf.rotate (Eigen::AngleAxisf ( pitch, Eigen::Vector3f::UnitY()));
-  tf.rotate (Eigen::AngleAxisf ( roll,  Eigen::Vector3f::UnitX()));
-
-  std::cout << " obj_normal = " <<  obj_normal << std::endl;
-  std::cout << " new_vec = " <<  new_vec << std::endl;
-
-  Vector3f  back_vec;
-  back_vec = tf * new_vec;
-  std::cout << "back_vec = " << std::endl << back_vec << std::endl;
-  back_vec = tf_neg * new_vec;
-  std::cout << "back_vec_with_negtf = " << std::endl << back_vec << std::endl;
-  
-  std::cout << " R = " << std::endl <<  tf.matrix()  << std::endl;
-  //R same as tf
-  std::cout << " tf = " << std::endl <<  tf.matrix()  << std::endl;
-  std::cout << " tf_neg = " << std::endl <<  tf_neg.matrix()  << std::endl;
-
-
-  //!!!Sumary =  Rotate * ori_point + center;
-  viewer->addLine (center,   p_new ,255.0, 0, 0);
-  viewer->addLine (center,   obj_new , 0, 255.0, 0);
-
-  std::cout << " center = " <<  center_vec << std::endl;
-  std::cout << " after_rotate_center_with_neg= " <<  after_rotate_center_with_neg << std::endl;
-
-#endif 
 }
-
-
 
 void region_growing(PCT::Ptr i_cloud, int want_seg_ind ,PCT::Ptr o_cloud){
   PCT::Ptr cloud (new PCT);
