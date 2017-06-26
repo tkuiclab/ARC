@@ -75,6 +75,7 @@ class ArmTask:
 
     def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI):
         """Publish ik cmd msg to manager node."""
+        # pub_ikCmd('ptp', (x, y , z), (pitch, roll, yaw) )
         # while self.__is_busy:
         #     rospy.sleep(.1)
         cmd = []
@@ -140,22 +141,11 @@ class ArmTask:
         print 'euler = ' + str(euler[1]*180/3.1415926)+ ', ' + str(euler[0]*180/3.1415926)+ ', ' + str(euler[2]*180/3.1415926)
         Cx = cos(euler[1])   # 1 0 2 rpy     
         Sx = sin(euler[1])
-        Cy = cos(euler[2]+(90*3.1416/180))
-        Sy = sin(euler[2]+(90*3.1416/180))
-        Cz = cos(euler[0]+(0*3.14156/180))
-        Sz = sin(euler[0]+(0*3.14156/180))
-        #
+        
         Cy = cos(euler[0]+(0*3.14156/180))
         Sy = sin(euler[0]+(0*3.14156/180))
         Cz = cos(euler[2]+(90*3.1416/180))
         Sz = sin(euler[2]+(90*3.1416/180))
-
-        # a=[
-        #         [Cy*Cz              , -Cy*Sz            ,     Sy],
-        #         [Sx*Sy*Cz + Cx*Sz   , -Sx*Sy*Sz + Cx*Cz , -Sx*Cy],
-        #         [-Cx*Sy*Cz + Sx*Sz  , Cx*Sy*Sz + Sx*Cz  ,  Cx*Cy]
-        # ]
-        # print 'a = ' + str(a)
 
         return [
                 [Cy*Cz              , -Cy*Sz            ,     Sy],
@@ -167,16 +157,11 @@ class ArmTask:
         vec_n = [rot[0][0], rot[1][0], rot[2][0]]
         vec_s = [rot[0][1], rot[1][1], rot[2][1]]
         vec_a = [rot[0][2], rot[1][2], rot[2][2]]
-
-        # vec_n = [rot[0][0], rot[2][0], rot[1][0]]
-        # vec_s = [rot[0][1], rot[2][1], rot[1][1]]
-        # vec_a = [rot[0][2], rot[2][2], rot[1][2]]
-        print 'vec-n = ' + str(vec_n)
-        print 'vec-s = ' + str(vec_s)
-        print 'vec-a = ' + str(vec_a)
         return vec_n, vec_s, vec_a
 
-    def relative_nsa(self, mode='ptp', n=0, s=0, a=0):
+    
+
+    def relative_move_nsa(self, mode='ptp', n=0, s=0, a=0):
         """Get euler angle and run task."""
         # note:for nsa rotation only
         while self.__is_busy:
@@ -186,10 +171,8 @@ class ArmTask:
         pos = fb.group_pose.position
         ori = fb.group_pose.orientation
         euler = self.quaternion2euler(ori)
-        # rot = self.euler2rotation(euler)
         rot = self.nsa2rotation(euler)
         vec_s, vec_n, vec_a = self.rotation2vector(rot)
-        # vec_a, vec_n, vec_s = self.rotation2vector(rot)
         
         move = [0, 0, 0]
 
@@ -199,18 +182,46 @@ class ArmTask:
             move += multiply(vec_s, s)
         if a != 0:
             move += multiply(vec_a, a)
-        # print 'nsa = ' + str(n) + ', ' + str(s) + ', ' + str(a)
-        print 'pos = ' + str(pos)
-        print 'move = ' + str(move)
-        print 'final = ' + str([pos.x + move[0], pos.y + move[1], pos.z + move[2]])
-
+        
+        # print 'pos = ' + str(pos)
+        # print 'move = ' + str(move)
+        # print 'final = ' + str([pos.x + move[0], pos.y + move[1], pos.z + move[2]]))
         self.pub_ikCmd(
             mode,
             (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
             (
                 degrees(euler[1]),              
                 degrees(euler[2]+(90*3.14156/180)),
-                degrees(euler[0]+(0*3.14156/180))
+                degrees(euler[0])
+            )
+        )
+
+        while self.__is_busy:
+            rospy.sleep(.1)
+
+    def relative_rot_nsa(self, mode='ptp', n=0, s=0, a=0):
+        """Get euler angle and run task."""
+        # note:for nsa rotation only
+        # euler[0~2] = [r p y] = [a s n]
+        while self.__is_busy:
+            rospy.sleep(.1)
+
+        fb    = self.get_fb()
+        pos   = fb.group_pose.position
+        ori   = fb.group_pose.orientation
+        euler = self.quaternion2euler(ori)
+
+        if s!=0 and abs(euler[0]) > 0.0001:
+            s = 0
+            print'err, yaw(n) is not equal to 0, pitch(s) cannot do relative motion'
+            # return 
+        self.pub_ikCmd(
+            mode,
+            (pos.x, pos.y, pos.z),
+            (
+                degrees(euler[1]+(s*3.14156/180)),              
+                degrees(euler[2]+((a+90)*3.14156/180)),
+                degrees(euler[0]+(n*3.14156/180))
             )
         )
 
@@ -262,13 +273,24 @@ class ArmTask:
         ori = fb.group_pose.orientation
         euler = self.quaternion2euler(ori)
 
+        # self.pub_ikCmd(
+        #     mode,
+        #     (pos.x + x, pos.y + y, pos.z + z),
+        #     (
+        #         degrees(euler[1]),
+        #         degrees(euler[0]),
+        #         degrees(euler[2])
+        #     )
+        # )
+        
+        # for nsa
         self.pub_ikCmd(
             mode,
             (pos.x + x, pos.y + y, pos.z + z),
             (
                 degrees(euler[1]),
-                degrees(euler[0]),
-                degrees(euler[2])
+                degrees(euler[2]+(90*3.14156/180)),
+                degrees(euler[0])
             )
         )
 

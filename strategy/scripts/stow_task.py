@@ -253,9 +253,12 @@ class StowTask:
 				', base_z='+str(-move_cam_z))
 			
 
-			self.Arm.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
+			#self.Arm.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
 			#self.Arm.relative_xyz_base(x = -move_cam_y, y = move_cam_x, z = -move_cam_z)
-		
+			#self.Arm.relative_move_nsa(n =  dis)
+			#self.Arm.relative_move_nsa(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
+
+			self.Arm.relative_move_nsa(n= move_cam_y, s = move_cam_x, a = move_cam_z -0.05)
 
 			self.next_state = Arm_Down_2_Obj #PickObj
 			self.state 		= WaitRobot
@@ -269,8 +272,9 @@ class StowTask:
 			self.next_state = PickObj
 			self.state 		= WaitRobot
 			
-			self.Arm.relative_control(a=0.05)  #cam_z
-			
+			#self.Arm.relative_control(a=0.05)  #cam_z
+			self.Arm.relative_move_nsa(a = 0.05)
+
 			return
 
 		elif self.state == Go2Tote:    
@@ -328,7 +332,7 @@ class StowTask:
 			
 			self.next_state = Go2Bin
 			self.state 		= WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (0, 0, 0) )
+			#self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (0, 0, 0) )
 
 			#-------Note----------#
 			gripper_suction_down()
@@ -355,8 +359,8 @@ class StowTask:
 
 			self.next_state = StowObj
 			self.state 		= WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.6, 0.0 , 0.2), (0, 0, 0) )
-
+			#self.Arm.pub_ikCmd('ptp', (0.6, 0.0 , 0.2), (0, 0, 0) )
+			self.Arm.relative_move_nsa(a = 0.15) 
 			return
 
 		elif self.state == StowObj or self.state == DelObj:				# Disable Vacuum 
@@ -381,7 +385,8 @@ class StowTask:
 
 			self.next_state = Recover2InitPos
 			self.state 		= WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (0, 0, 0) )
+			#self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (0, 0, 0) )
+			self.Arm.relative_move_nsa(a = -0.15) 
 
 			return
 
@@ -485,10 +490,11 @@ class StowTask:
 		move_cam_y = cam_y - cam2tool_y
 		move_cam_z = cam_z - cam2tool_z
 
+		rospy.loginfo("cam2tool_y = " + str(cam2tool_y) +", cam2tool_z=" + str(cam2tool_z))
 		rospy.loginfo('move linear n(cam_y)='+str(move_cam_y) + ', s(cam_x)='+str(move_cam_x)  + ', a(cam_z)='+str(move_cam_z))
 
-
-		self.Arm.relative_control(a=.05)
+		#n = move_cam_y , s= -move_cam_x, a = move_cam_z
+		self.Arm.relative_move_nsa(n= move_cam_y, s = move_cam_x, a = move_cam_z)
 
 
 		#self.Arm.relative_control(a=move_cam_z)
