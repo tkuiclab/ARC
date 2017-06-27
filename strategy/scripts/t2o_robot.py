@@ -67,11 +67,20 @@ class T2O:
         self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
         self.__obj_pose_client.wait_for_result()
 
-    def desk_photo_pose(self):
-        self.Arm.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-180, 0, 0) )
     
-    def desk_photo_pose(self):
-        self.Arm.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-180, 0, 0) )
+    def safe_pose(self):
+        self.Arm.pub_ikCmd('ptp', (0.30, 0.00 , 0.3), (-180, 0, 0))
+        rospy.sleep(.5)
+        while self.Arm.busy:
+            rospy.sleep(.1)
+
+
+    def robot_photo_pose(self):
+        
+        self.Arm.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-180, 0, 0))
+        rospy.sleep(.5)
+        while self.Arm.busy:
+            rospy.sleep(.1)
 
 
     def obj_pose_feedback_cb(self,fb):
@@ -143,8 +152,13 @@ if __name__ == '__main__':
     rospy.init_node('t2o', anonymous=True)
 
     task = T2O()
-    #rospy.sleep(0.5)
-    #task.desk_photo_pose()
+    rospy.sleep(0.5)
+    #task.safe_pose()
+
+
+    task.robot_photo_pose()
+    # print 'robot finish'
+
 
     #self.Arm.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-180, 0, 0) )
 
