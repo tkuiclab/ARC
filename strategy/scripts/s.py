@@ -146,7 +146,7 @@ class Strategy(threading.Thread):
 
 
 	def safe_pose(self):
-		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-90, 0, 0))
+		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-180, 0, 0))
 
 if __name__ == '__main__':
 	rospy.init_node('strategy')
@@ -176,7 +176,7 @@ if __name__ == '__main__':
 		#s.stow.LM_2_tote()			    # -
 		
 
-		#s.safe_pose()
+		s.safe_pose()
 
 		#s.arm_bin_photo()
 		#gripper_vaccum_off()

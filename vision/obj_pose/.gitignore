@@ -14,16 +14,11 @@
 
 #ignore vscode
 .vscode/*
-#!.vscode/settings.json
-#!.vscode/tasks.json
-#!.vscode/launch.json
-#!.vscode/extensions.json
+
 
 # python tmp 
 *.pyc
 
-# root CMakeLists.txt
-/CMakeLists.txt
 
 
 # ignore training data
