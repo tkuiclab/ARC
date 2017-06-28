@@ -62,7 +62,7 @@ def handle_request(req):
 def detectedInfoToMsg(info):
     """Convert detected infomations to message type."""
     msg = Detected()
-    msg.object_name = ['label']
+    msg.object_name = info['label']
     msg.confidence = info['confidence']
     msg.bound_box = [
         info['topleft']['x'],
@@ -104,7 +104,7 @@ def mark_frame(frame, detected):
     _img.frame = copy.deepcopy(frame)
     # Drawing all of bbox
     for result in detected:
-        draw_bbox(frame, result.bound_box, result.object_name, confidence)
+        draw_bbox(frame, result.bound_box, result.object_name, result.confidence)
     # Assign frame of prediction to global _img object
     _img.predi = frame
 
