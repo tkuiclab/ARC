@@ -20,11 +20,13 @@ from image_convert import save_img, get_now
 from darkflow_detect.srv import Detect, DetectResponse
 from darkflow_detect.msg import Detected
 from darkflow.net.build import TFNet
+from convert_label.convert import offical2Our, our2Offical
 
 
 def handle_request(req):
     """Service request callback."""
     frame = img_cvt.cv_img
+    cvted_name = offical2Our(req.object_name)
 
     # Calculate time of detection
     start_time = time.time()
@@ -36,10 +38,10 @@ def handle_request(req):
         print_info(info)
 
         # Checking detected object
-        if (req.object_name == 'all' and
+        if (cvted_name == 'all' and
                 info['confidence'] > 0.0):
             detectedList.append(detectedInfoToMsg(info))
-        elif (req.object_name == info['label'] and
+        elif (cvted_name == info['label'] and
                 info['confidence'] > 0.0):
             if len(detectedList) > 0:
                 if info['confidence'] > detectedList[0].confidence:
@@ -62,7 +64,7 @@ def handle_request(req):
 def detectedInfoToMsg(info):
     """Convert detected infomations to message type."""
     msg = Detected()
-    msg.object_name = info['label']
+    msg.object_name = our2Offical(info['label'])
     msg.confidence = info['confidence']
     msg.bound_box = [
         info['topleft']['x'],
@@ -112,7 +114,7 @@ def mark_frame(frame, detected):
 def print_info(info):
     """Print infomation of detecting result."""
     print('---------------------------')
-    print(info['label'])
+    print(our2Offical(info['label']))
     print(info['confidence'])
     print(info['topleft'])
     print(info['bottomright'])
