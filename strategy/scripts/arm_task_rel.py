@@ -66,6 +66,8 @@ class ArmTask:
             self.__status_callback,
             queue_size=1
         )
+        # Waiting for topic enable
+        rospy.sleep(0.3)
 
     def __status_callback(self, msg):
         if 'IK Failed' in msg.status_msg:
