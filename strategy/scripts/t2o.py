@@ -139,8 +139,8 @@ if __name__ == '__main__':
     rospy.init_node('t2o', anonymous=True)
 
     task = T2O()
-    #rospy.sleep(0.5)
-    task.desk_photo_pose()
+    rospy.sleep(0.5)
+    # task.desk_photo_pose()
 
     #self.Arm.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-180, 0, 0) )
 
@@ -148,11 +148,11 @@ if __name__ == '__main__':
 
     # task.Arm.relative_move_nsa(n =  0.05) # cam_y
     # task.Arm.relative_move_nsa(s = -0.05) # cam_x
-    # task.Arm.relative_move_nsa(a =  0.05)
+    task.Arm.relative_move_nsa(a = -0.05) # cam_z
 
-    #task.Arm.relative_rot_nsa(s =  30)     # pitch -> cam_x
-    #task.Arm.relative_rot_nsa(a =  10)     # cam_z
-    #task.Arm.relative_rot_nsa(n = 10)     # cam_y
+    # task.Arm.relative_rot_nsa(s = 30)     # pitch -> cam_x
+    # task.Arm.relative_rot_nsa(a = 10)     # cam_z
+    # task.Arm.relative_rot_nsa(n = 10)     # cam_y
 
     r = rospy.Rate(10)
     while not rospy.is_shutdown():

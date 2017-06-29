@@ -7,6 +7,7 @@
 #include <std_msgs/String.h>
 #include <iostream>
 #include <iomanip>
+#include <ctime>
 #include <ros/package.h>
 //pcl::toROSMsg
 #include <pcl/io/pcd_io.h>
@@ -31,24 +32,24 @@ public:
   PointCloud()
   {
     ROS_INFO("initialize...");
+    tm *ltm = localtime(&now);
 
     cloud = PCT::Ptr (new PCT);
 
     point_sub_ = nh_.subscribe("/camera/depth_registered/points", 1, &PointCloud::PointCallback, this);
     image_sub_ = nh_.subscribe("/camera/rgb/image_color", 1, &PointCloud::ImageCallback, this);
-    // image_pub_ = nh_.advertise<sensor_msgs::Image> ("/pcl_saver/viewer", 30);
-    // point_pub_ = nh_.advertise<sensor_msgs::PointCloud2> ("/pcl_saver/points_viewer", 30);
     savePcd_ = nh_.subscribe("/pcl_saver/save", 1, &PointCloud::SavePcd, this);
 
     tmpString_ = "";
     tmpCount_ = 1;
 
-    // cv::namedWindow("view");
+    cv::namedWindow("view");
+    ROS_INFO("OK");
   }
 
   ~PointCloud()
   {
-    // cv::destroyWindow("view");
+    cv::destroyWindow("view");
   }
 
   void ImageCallback(const sensor_msgs::ImageConstPtr& msg)
@@ -57,8 +58,9 @@ public:
     try
     {
       cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-      // cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8")->image);
-      // cv::waitKey(30);
+      
+      cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8")->image);
+      cv::waitKey(30);
     }
     catch (cv_bridge::Exception& e)
     {
@@ -74,12 +76,8 @@ public:
       return; //return if the cloud is not dense!
     try
     {
-      // pcl::toROSMsg (*msg, image_); //convert the cloud
-      // image_pub_.publish(image_);
       pcl::fromROSMsg(*msg, *cloud);
-      //pcl::toROSMsg(cloud, pc2);
-      //pc2.header.frame_id = "camera_rgb_optical_frame";
-      //point_pub_.publish(pc2);
+      std::cout << "\tGet Cloud : " << TimeCallback() << '\r';
     }
     catch (std::runtime_error e)
     {
@@ -115,6 +113,20 @@ public:
     tmpCount_++;
   }
 
+  std::string TimeCallback()
+  {
+    std::stringstream ts;
+  
+    time_t now = time(0);
+    tm *ltm = localtime(&now);
+    ts << 1900+ltm->tm_year << "/" << 1+ltm->tm_mon << "/" << ltm->tm_mday
+       << "-" << std::setfill('0') << std::setw(2) << ltm->tm_hour
+       << ":" << std::setfill('0') << std::setw(2) << ltm->tm_min
+       << ":" << std::setfill('0') << std::setw(2) << ltm->tm_sec;
+    return ts.str();
+  }
+
+
 private:
   ros::NodeHandle nh_;
   ros::Subscriber point_sub_;
@@ -133,6 +145,8 @@ private:
 
   std::string tmpString_;
   int tmpCount_;
+
+  time_t now;
 };
 
 int main(int argc, char** argv)
