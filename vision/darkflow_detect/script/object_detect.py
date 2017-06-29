@@ -27,6 +27,11 @@ def handle_request(req):
     """Service request callback."""
     frame = img_cvt.cv_img
     cvted_name = offical2Our(req.object_name)
+    # Checking converted name
+    if not cvted_name:
+        global _img
+        _img.predi = frame
+        return DetectResponse([], False)
 
     # Calculate time of detection
     start_time = time.time()
@@ -177,7 +182,7 @@ _img = Image()
 options = {
     "model": "cfg/yolo-new.cfg",    # model of net
     "backup": "ckpt/",              # directory of ckpt (training result)
-    "load": 64000,                     # which ckpt will be loaded. -1 represent the last ckpt
+    "load": -1,                     # which ckpt will be loaded. -1 represent the last ckpt
     "threshold": -0.1,              # threshold for confidence
     "gpu": 1.0                      # gpu using rate
 }
