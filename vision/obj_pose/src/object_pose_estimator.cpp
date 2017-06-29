@@ -40,7 +40,8 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       feedback_.progress = 30;
       as_.publishFeedback(feedback_);
 
-      state = CALL_RCNN;
+      //state = CALL_RCNN;
+      state = POSE_ESTIMATION;
       call_rcnn_times = 0;
   }
 }
@@ -116,10 +117,25 @@ void ObjEstAction::get_roi(){
          
       return;  
     }
-    mini_x = roi_srv.response.bound_box[0];
-    mini_y = roi_srv.response.bound_box[1];
-    max_x = roi_srv.response.bound_box[2];
-    max_y = roi_srv.response.bound_box[3];
+    //darkflow_detect::Detected::ConstPtr detected_msg;
+    //const darkflow_detect::Detected all_detect = roi_srv.response.detected;
+
+    for(int i =0;i < roi_srv.response.detected.size();i++){
+      darkflow_detect::Detected detected = roi_srv.response.detected[i];
+
+      if(detected.object_name.compare(obj_name)==0){
+        mini_x = detected.bound_box[0];
+        mini_y = detected.bound_box[1];
+        max_x =  detected.bound_box[2];
+        max_y =  detected.bound_box[3];
+
+        break;
+
+      }
+
+    }
+
+    
   }else{
     ROS_WARN("CANNOT Call Service (/detect)");
     geometry_msgs::Twist pose;

@@ -4,6 +4,7 @@
 #include <geometry_msgs/Twist.h>
 
 //#include <fake_roi/Detect.h>
+#include <darkflow_detect/Detected.h>
 #include <darkflow_detect/Detect.h>
 #include <boost/thread/thread.hpp>
 #include <sensor_msgs/PointCloud2.h>
