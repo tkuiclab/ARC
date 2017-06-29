@@ -478,6 +478,7 @@ class StowTask:
         
 
 	def test_obj_pose(self,want_item):
+		rospy.loginfo("Request " + want_item)
 		goal = obj_pose.msg.ObjectPoseGoal(want_item)
 
 		self.obj_pose_client.send_goal(

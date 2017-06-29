@@ -139,8 +139,9 @@ if __name__ == '__main__':
     rospy.init_node('t2o', anonymous=True)
 
     task = T2O()
-    rospy.sleep(0.5)
-    # task.desk_photo_pose()
+
+    #rospy.sleep(0.5)
+    task.desk_photo_pose()
 
     #self.Arm.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-180, 0, 0) )
 

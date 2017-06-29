@@ -36,7 +36,7 @@ class ImageConverter(object):
         except CvBridgeError as e:
             print('ImageConverter_callback:', e)
         # image size, type
-        #(rows, cols, channels) = self.__cv_img.shape
+        # (rows, cols, channels) = self.__cv_img.shape
 
     @property
     def cv_img(self):
@@ -66,15 +66,15 @@ def get_now(arg):
     now = datetime.datetime.now()
     if arg == 'd':
         return (
-            '{:04d}'.format(now.year)+
-            '{:02d}'.format(now.month)+
+            '{:04d}'.format(now.year) +
+            '{:02d}'.format(now.month) +
             '{:02d}'.format(now.day)
         )
     elif arg == 't':
         return (
-            '{:02d}'.format(now.hour)+
-            '{:02d}'.format(now.minute)+
-            '{:02d}'.format(now.second)+
+            '{:02d}'.format(now.hour) +
+            '{:02d}'.format(now.minute) +
+            '{:02d}'.format(now.second) +
             '{:02d}'.format(now.microsecond)
         )
 
