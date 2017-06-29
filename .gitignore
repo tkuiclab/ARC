@@ -62,3 +62,6 @@ CATKIN_IGNORE
 
 # ignore for pcd
 *.pcd
+
+# ignore cam2obj/build
+/vision/cam2obj/build/

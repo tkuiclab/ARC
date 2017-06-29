@@ -1,3 +1,0 @@
-/home/neet/ROS/ARC/src/ARC/vision/cam2obj/build/CMakeFiles/rebuild_cache.dir
-/home/neet/ROS/ARC/src/ARC/vision/cam2obj/build/CMakeFiles/edit_cache.dir
-/home/neet/ROS/ARC/src/ARC/vision/cam2obj/build/CMakeFiles/cam2obj.dir
