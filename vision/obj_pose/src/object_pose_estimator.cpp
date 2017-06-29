@@ -40,8 +40,8 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       feedback_.progress = 30;
       as_.publishFeedback(feedback_);
 
-      //state = CALL_RCNN;
-      state = POSE_ESTIMATION;
+      state = CALL_RCNN;
+      //state = POSE_ESTIMATION;
       call_rcnn_times = 0;
   }
 }
@@ -174,7 +174,8 @@ void ObjEstAction::get_roi(){
 
   set_feedback("ROI Done",60);
   
-  state = SEGMETATION;
+  //state = SEGMETATION;
+  state = POSE_ESTIMATION;
 }
 
 void ObjEstAction::segmentation()
@@ -327,7 +328,9 @@ int main (int argc, char **argv)
         ObjEst.do_ICP();
         break;
       case POSE_ESTIMATION:
+        ObjEst.set_feedback("POSE_ESTIMATION....",60);
         ObjEst.poseEstimation();
+        
         break;
       default:
         ROS_INFO("Que!?");

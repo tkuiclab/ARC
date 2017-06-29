@@ -88,6 +88,9 @@ class ArmTask:
         self.__joint_pub.publish(JointPose(name, value))
         self.__is_busy = True
 
+    def home(self):
+        self.pub_jointCmd([0,0,0,0, 0,0,0])
+
     def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI):
         """Publish msg of ik cmd (deg) to manager node."""
         # pub_ikCmd('ptp', (x, y , z), (pitch, roll, yaw) )

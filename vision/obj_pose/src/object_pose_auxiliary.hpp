@@ -113,7 +113,7 @@ void write_pcd_2_rospack(PCT::Ptr cloud, std::string f_name){
     path.append(f_name);
 
     pcl::PCDWriter writer;
-    writer.write<PT> (path, *cloud, false);
+    writer.write<PT> (path, *cloud, true);
 
     std::cout << "Save PCD -> " << path << std::endl;
 }
@@ -126,7 +126,7 @@ void write_pcd_2_rospack_normals(PC_NT::Ptr cloud, std::string f_name){
     path.append(f_name);
 
     pcl::PCDWriter writer;
-    writer.write<PointNT> (path, *cloud, false);
+    writer.write<PointNT> (path, *cloud, true);
 
     std::cout << "Save PCD -> " << path << std::endl;
 }

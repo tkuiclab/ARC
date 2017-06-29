@@ -171,22 +171,24 @@ if __name__ == '__main__':
 		#s.test_go_bin_LM('j')
 
 
-		s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.5), (-120, 0, 0) )
+
+		#s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.5), (-120, 0, 0) )
 			
 		#s.arm_bin_photo()
 			
 		#s.stow.LM_2_tote()			    # -
 		
-		#s.safe_pose()
+		# s.safe_pose()
 
 		#s.arm_bin_photo()
 		#gripper_vaccum_off()
 		#gripper_suction_up()
 		#gripper_suctoin_down()
 		
-		#s.stow.arm_photo_pose()	
+		s.stow.arm_photo_pose()	
 
-		#s.stow.test_obj_pose('dvdRobots')  
+		#s.Arm.home()
+		#s.stow.test_obj_pose('robots_dvd')  
 
 		
 		#s.stow.test_run_with_obj_pose(-0.052098851651, -0.0093888239935, 0.554290473461)
