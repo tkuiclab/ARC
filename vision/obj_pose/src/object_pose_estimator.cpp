@@ -158,7 +158,7 @@ void ObjEstAction::get_roi(){
 
   set_feedback("ROI Done",60);
   
-  state = POSE_ESTIMATION;
+  state = SEGMETATION;
 }
 
 void ObjEstAction::segmentation()

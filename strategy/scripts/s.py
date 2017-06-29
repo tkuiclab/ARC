@@ -155,8 +155,6 @@ if __name__ == '__main__':
 		s = Strategy()
 		#s.start() 
 
-
-
 		# ========== TEST ===========
 		# Error pose
 		#s.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-90, 0, 0) )
@@ -170,20 +168,23 @@ if __name__ == '__main__':
 
 		#s.arm_go_init_pose()
 		
-		#s.test_go_bin_LM('e')
+		#s.test_go_bin_LM('j')
+
+
+		s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.5), (-120, 0, 0) )
+			
 		#s.arm_bin_photo()
-		#test_go_box('j')		
+			
 		#s.stow.LM_2_tote()			    # -
 		
-
-		s.safe_pose()
+		#s.safe_pose()
 
 		#s.arm_bin_photo()
 		#gripper_vaccum_off()
 		#gripper_suction_up()
 		#gripper_suctoin_down()
 		
-		s.stow.arm_photo_pose()	
+		#s.stow.arm_photo_pose()	
 
 		#s.stow.test_obj_pose('dvdRobots')  
 
@@ -200,8 +201,8 @@ if __name__ == '__main__':
 		# s.Arm.relative_move_nsa(a = 0.1)   #a= move_cam_z
 		
 
-		dis = 0.05
-		rot = 10
+		#dis = 0.05
+		#rot = 10
 		#s.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.3), (-150, 0, 0) )
 
 		# move nsa with a specify dis (safe when euler mode is 'nsa' mode)
@@ -231,7 +232,6 @@ if __name__ == '__main__':
 		# s.Arm.relative_xyz_base(z = -dis)
 		# ============ rel motion test area over ============
 
-		
 		rospy.spin()
 	except rospy.ROSInterruptException:
 		pass
