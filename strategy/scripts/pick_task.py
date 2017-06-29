@@ -26,22 +26,27 @@ from task_parser import *
 from config import *
 from gripper import *
 
-# Define State
+# Define State jmp
 WaitTask  		= 1		# Wait Task
 ParseJSON   	= 2		# Parse Json
 Down2Pick   	= 3		# Move down to pick object in bin.
-Init_Pos		= 4		# Make robot arm go to the initial pos
+Init_Pos		= 4		# Make robot arm go to the initial pos()
 Go2Bin			= 5		# Make robot arm go to the specify bin
 WaitRobot   	= 6		# wait for robot complete task
 Up2LeaveBin 	= 7 	# Move up to leave bin (robot arm still in bin)
 LeaveBin		= 8		# Make robot arm leave bin
 FinishTask  	= 9		
-LM_Test1  		= 10
+Shift2Bin  		= 10
 PickObj 		= 11
 PlaceObj		= 12
 Move2PlaceObj1 	= 13
 Move2PlaceObj2 	= 14
 Recover2InitPos = 15
+
+PhotoPose		  = 26
+VisionProcess	  = 27
+Rotate2PickPosOri = 28
+WaitVision 		  = 29
 
 # Stow_Task
 Shift2Tote		= 16
@@ -67,6 +72,7 @@ class PickTask:
 
 		self.Arm = i_arm
 		self.LM = i_LM
+		self.obj_pose_client = actionlib.SimpleActionClient("/obj_pose", obj_pose.msg.ObjectPoseAction)
 
 		self.var_init()		
         
@@ -86,7 +92,7 @@ class PickTask:
 		self.Is_BaseShiftOK = False 
 		self.Is_ArmMoveOK 	= False
 
-		self.Bin 		   	= 'a'
+		self.Bin 		   	= 'e'
 		self.BinCnt 	   	= 0
 
 
@@ -120,7 +126,7 @@ class PickTask:
 		self.parse_json_2_pick_list()
 
 	def parse_json_2_pick_list(self):
-		if self.order==None or self.order==None:
+		if self.item_location==None or self.order==None:
 			return
 		rospy.loginfo("[Pick] Parse JSON of item_location and order to pick_list")
 		self.pick_list = make_pick_list(self.item_location, self.order)
@@ -153,18 +159,36 @@ class PickTask:
 	def run(self):
 		self.pick_id = 0
 		self.pick_get_one()
-		self.state 	= LM_Test1
+		self.state 	= Shift2Bin
 
 	def is_ready(self):
 		if self.pick_list != None:
 			return True
 		else: 
 			return False
-	
+
+	def obj_pose_done_cb(self, state, result):
+		self.obj_pose = result.object_pose
+		if result.object_pose.linear.z == -1:
+			rospy.logwarn('ROI Fail!! obj -> ' + self.now_pick.item)
+			self.state = WaitTask
+			return 
+		else:
+			self.obj_pose = result.object_pose
+			print 'obj_pose' + str(obj_pose)
+			self.state 	  = Rotate2PickPosOri
+
+	def obj_pose_feedback_cb(self,fb):
+		rospy.loginfo("In obj_pose_feedback_cb")
+		rospy.loginfo("msg = " + fb.msg)
+		rospy.loginfo("progress = " + str(fb.progress) + "% ")
+
 	def pick_core(self):
 		self.update_status()
 
 		if self.state == WaitTask:			
+			return
+		if self.state == WaitVision:
 			return
 
 		# elif self.state == ParseJSON:
@@ -174,40 +198,71 @@ class PickTask:
 		# 	# self.pick_id = 0
 		# 	# self.pick_get_one()
 
-		# 	#self.state 			= LM_Test1
+		# 	#self.state 			= Shift2Bin
 			
 		# 	return
 		
-		elif self.state == LM_Test1:       # LM_test1
+		elif self.state == Shift2Bin:      
 			self.info = "(GoBin) LM Move To Bin " + self.Bin 
 			print self.info
 
-			self.next_state = Init_Pos   # note!!!!!!
+			self.next_state = Init_Pos   
 			self.state 		= WaitRobot
 
 			self.Is_BaseShiftOK = False
 			self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.Bin ))
 			rospy.sleep(0.3)
 			self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.Bin ))
-			
-			
 			return
 
-		elif self.state == Init_Pos:       # step 1
+		elif self.state == Init_Pos:     
 			self.info = "(GoBin) Arm To Init_Pos" 
 			print self.info
-			self.next_state = Go2Bin
+			self.next_state = PhotoPose
 			self.state 		= WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.22), (0, 0, 0) )
+			self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (0, 0, 0) )
 			return
 
-		elif self.state == Go2Bin:
+		elif self.state == PhotoPose:       
+			self.info = "(GoBin) Arm To PhotoPose" 
+			print self.info
+			self.next_state = VisionProcess
+			self.state 		= WaitRobot
+			self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.4), (-15, 0, 0) )
+			return
+
+		elif self.state == VisionProcess:    
+			self.info = "(Catch) Request  Vision Process "  
+			print self.info
+
+			goal = obj_pose.msg.ObjectPoseGoal(self.now_pick.item)
+
+			self.obj_pose_client.send_goal(
+					goal,
+					feedback_cb = self.obj_pose_feedback_cb, 
+					done_cb     = self.obj_pose_done_cb )
+
+			self.next_state = Rotate2PickPosOri
+			self.state 		= WaitVision
+			
+			return
+
+		elif self.state == Rotate2PickPosOri:  # read img info, trans to catch ori and move xyz relatively
+			self.info = "(Catch) Arm Rotate 2 Pick Pos and Ori "
+			print self.info
+
+			self.next_state = Go2Bin
+			self.state 		= WaitRobot
+			self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (0, 0, 0) )  # tmp
+			return
+
+		elif self.state == Go2Bin:				# using nsa motion to pick obj.
 			self.info = "(Catch) Arm Put in Bin " + self.Bin 
 			print self.info
 
-			self.next_state = Down2Pick
+			self.next_state = PickObj
 			self.state 		= WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.6, 0, 0.22), (0, 0, 0) )
+			self.Arm.relative_control(a=0.05)  
 			return
 		
 		elif self.state == Down2Pick:	
@@ -237,7 +292,7 @@ class PickTask:
 
 			self.next_state = LeaveBin
 			self.state = WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.6, 0, 0.22), (0, 0, 0) )
+			self.Arm.relative_xyz_base(0, 0, 0.05)
 			#print 'U2L'
 			return
 
@@ -246,14 +301,14 @@ class PickTask:
 			print self.info
 			self.next_state = Move2PlaceObj1
 			self.state = WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.22), (0, 0, 0) )
+			self.Arm.relative_xyz_base(-0.05, 0, 0)
 			
 			return
 
-		elif self.state == Move2PlaceObj1:
+		elif self.state == Move2PlaceObj1:			# shift LM 2 go to tote
 			self.info = "(GoBox) LM Go Box " +self.Box
 			print self.info
-			self.next_state 	= Move2PlaceObj2
+			self.next_state 	= PlaceObj
 			self.state 			= WaitRobot
 			self.Is_BaseShiftOK = False
 			self.LM.pub_LM_Cmd(2, GetShift('Box', 'x', self.Box ))
@@ -276,7 +331,7 @@ class PickTask:
 			# self.Is_BaseShiftOK = False
 			self.info = "(GoBox) Vaccum Disable - [Success]"
 			print self.info
-			self.next_state = Recover2InitPos
+			self.next_state = FinishTask
 			self.state = WaitRobot
 			gripper_vaccum_off()
 
@@ -312,7 +367,7 @@ class PickTask:
 		
 			if can_get_one :
 				self.Is_BaseShiftOK = False 
-				self.state 	= LM_Test1 
+				self.state 	= Shift2Bin 
 				self.next_state 	= WaitTask
 			else: 
 				self.task_finish()

@@ -7,6 +7,7 @@
 import math
 import threading
 import time
+import numpy
 
 import actionlib
 import roslaunch
@@ -25,7 +26,6 @@ import LM_Control
 from task_parser import *
 from config import *
 from gripper import *
-
 # Define State
 WaitTask  		= 1		# Wait Task
 ParseJSON   	= 2		# Parse Json
@@ -36,7 +36,7 @@ WaitRobot   	= 6		# wait for robot complete task
 Up2LeaveBin 	= 7 	# Move up to leave bin (robot arm still in bin)
 LeaveBin		= 8		# Make robot arm leave bin
 FinishTask  	= 9		
-LM_Test1  		= 10
+Shift2Bin  		= 10
 PickObj 		= 11
 PlaceObj		= 12
 Move2PlaceObj1 	= 13
@@ -217,7 +217,6 @@ class StowTask:
 			self.info = "(Catch) Arm Rotate2Obj "  
 			print self.info
 
-
 			pitch = numpy.rad2deg(p.angular.x ) 
 			pitch = (pitch - 180) if pitch > 90  else pitch
 			pitch = (pitch + 180) if pitch < -90  else pitch
@@ -248,7 +247,7 @@ class StowTask:
 			
 
 			#self.relative_control(n = move_cam_y , s= -move_cam_x, a = move_cam_z)
-			self.Arm.relative_xyz_base(x = -move_cam_y, y = move_cam_x,z = -move_cam_z)
+			self.Arm.relative_xyz_base(x = -move_cam_y, y = move_cam_x, z = -move_cam_z)
 		
 
 			self.next_state = Arm_Down_2_Obj #PickObj
@@ -263,7 +262,7 @@ class StowTask:
 			self.next_state = PickObj
 			self.state 		= WaitRobot
 			
-			self.Arm.relative_control(a=.035)  #cam_z
+			self.Arm.relative_control(a=0.05)  #cam_z
 			
 			return
 
@@ -445,3 +444,30 @@ class StowTask:
 		self.Is_ArmBusy 	= self.Arm.busy
 		self.Is_LMBusy  	= self.LM.IsBusy
 		self.Is_LMArrive	= self.LM.IsArrive
+
+	def test_obj_pose_done(self, status, result):
+		self.obj_pose = result.object_pose
+		if result.object_pose.linear.z == -1:
+			rospy.logwarn('ROI Fail!! obj -> ' + self.now_stow_info.item)
+			self.state = WaitTask
+			return 
+		else:
+			self.obj_pose = result.object_pose
+			print '(x, y , z) = ' + '(' + str(self.obj_pose.linear.x) + ', ' + str(self.obj_pose.linear.y) + ', ' + str(self.obj_pose.linear.z) + ')'
+			
+			p = self.obj_pose
+			#print(str(self.obj_pose))
+			rospy.loginfo("(x,y,z)= (" + str(p.linear.x) + ", " + str(p.linear.y)+ ", " + str(p.linear.z)) 
+			rospy.loginfo("(roll,pitch,yaw)= (" 
+							+ str(numpy.rad2deg(p.angular.x)) + ", " 
+							+ str(numpy.rad2deg(p.angular.y)) + ", " 
+							+ str(numpy.rad2deg(p.angular.z))  ) 
+        
+
+	def test_obj_pose(self,want_item):
+		goal = obj_pose.msg.ObjectPoseGoal(want_item)
+
+		self.obj_pose_client.send_goal(
+					goal,
+					feedback_cb = self.obj_pose_feedback_cb, 
+					done_cb=self.test_obj_pose_done )

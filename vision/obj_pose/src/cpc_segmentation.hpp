@@ -304,7 +304,7 @@ class CPCSegmentation
         extract.setNegative (false); 
         extract.filter (*Max_cluster); // extracted the wanted cluster from the color pointcloud 
         // std::cout << "Max Label Index＝　" << max_label_index <<  std::endl;
-        //pcl::io::savePCDFile ("BIG_SEG.pcd", *Max_cluster, false);
+        pcl::io::savePCDFile ("BIG_SEG.pcd", *Max_cluster, false);
       }
     }
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr get_cloud_cluster(){return cloud_cluster;}

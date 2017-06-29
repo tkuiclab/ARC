@@ -7,7 +7,7 @@
 4 verbose stack Error: ENOENT: no such file or directory, open '/home/iclab/arc_ws/src/arc_ui/web/react_index/package.json'
 4 verbose stack     at Error (native)
 5 verbose cwd /home/iclab/arc_ws/src/arc_ui/web/react_index
-6 error Linux 4.4.0-78-generic
+6 error Linux 4.4.0-79-generic
 7 error argv "/home/iclab/.nvm/v6.10.1/bin/node" "/home/iclab/.nvm/v6.10.1/bin/npm" "start"
 8 error node v6.10.1
 9 error npm  v3.10.10

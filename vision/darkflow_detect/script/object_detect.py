@@ -5,6 +5,7 @@
 from __future__ import print_function
 import os
 import sys
+import copy
 import time
 
 import rospy
@@ -60,6 +61,10 @@ def print_info(info):
 
 def mark_frame(frame, bbox, label='test', confidence=-0.1):
     """Mark the image for detecting result."""
+    # Assign frame to global _img object
+    global _img
+    _img.frame = copy.deepcopy(frame)
+
     # If the object was detected
     if len(bbox) > 0:
         color = (100, 100, 255)
@@ -81,15 +86,38 @@ def mark_frame(frame, bbox, label='test', confidence=-0.1):
             thickness=thickness
         )
     # Assign frame to global _img object
-    global _img
-    _img.frame = frame
+    _img.predi = frame
+
+
+def get_now(arg='d'):
+    import datetime
+    now = datetime.datetime.now()
+    if arg == 'd':
+        return (
+            '{:04d}'.format(now.year)+
+            '{:02d}'.format(now.month)+
+            '{:02d}'.format(now.day)
+        )
+    elif arg == 't':
+        return (
+            '{:02d}'.format(now.hour)+
+            '{:02d}'.format(now.minute)+
+            '{:02d}'.format(now.second)+
+            '{:02d}'.format(now.microsecond)
+        )
 
 
 def show_detection(event):
     """Show result of image for timer using."""
     if _img.refresh:
-        cv2.imshow('Prediction', _img.frame)
-    cv2.waitKey(10)
+        cv2.imshow('Prediction', _img.predi)
+    
+    # Pressing <space> key
+    if cv2.waitKey(10) == 32:
+        _path = os.path.expanduser(os.path.join('~', get_now()))
+        if not os.path.exists(_path):
+            os.makedirs(_path)
+        cv2.imwrite(os.path.join(_path, '{}.jpg'.format(get_now('t'))), _img.frame)
 
 
 def prepare_network():
@@ -102,6 +130,7 @@ def prepare_network():
 class Image(object):
     """For checking the frame is newest."""
     _frame = None
+    _predi = None
     _refresh = False
 
     @property
@@ -121,6 +150,18 @@ class Image(object):
         """Refresh getter."""
         return self._refresh
 
+    @property
+    def predi(self):
+        """Frame getter: cv_image."""
+        self._refresh = False
+        return self._predi
+
+    @predi.setter
+    def predi(self, img):
+        """Frame setter: cv_image."""
+        self._predi = img
+        self._refresh = True
+
 _img = Image()
 
 # Options for net building
@@ -129,7 +170,11 @@ options = {
     "backup": "ckpt/",              # directory of ckpt (training result)
     "load": -1,                     # which ckpt will be loaded. -1 represent the last ckpt
     "threshold": -0.1,              # threshold for confidence
-    "gpu": 0.5                       # gpu using rate
+
+    "gpu": 1.0                       # gpu using rate
+
+   # "gpu": 0.5                       # gpu using rate
+
 }
 tfnet = TFNet(options)
 prepare_network()

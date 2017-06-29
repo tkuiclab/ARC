@@ -31,6 +31,7 @@
 #include <pcl_ros/transforms.h>
 #include <pcl/console/parse.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/filters/voxel_grid.h>
 
 // Types
 typedef pcl::PointXYZRGBA PT;           //Point Type
@@ -45,6 +46,93 @@ typedef pcl::visualization::PointCloudColorHandlerCustom<PointNT> ColorHandlerT;
 
 //#define ShowCloud
 #define SaveCloud
+std::string AmazonModelList[40] =
+{
+  "Avery_Binder",
+  "Ballons",
+  "Band_Aid_Tape",
+  "Bath_Sponge",
+  "Black_Fashion_Gloves",
+  "Burls_Bees_Baby_Wipes",
+  "Colgate_Toothbrush_4PK",
+  "Composition_Book",
+  "Crayons",
+  "Duct_Tape",
+  "Epsom_Salts",
+  "Expo_Eraser",
+  "Fiskars_Scissors",
+  "Flashlight",
+  "Glue_Sticks",
+  "Hand_Weight",
+  "Hanes_Socks",
+  "Hinged_Ruled_Index_Cards",
+  "Ics_Cube_Tray",
+  "Irish_Spring_Soap",
+  "Laugh_Out_Loud_Jokes",
+  "Marbles",
+  "Measuring_Spoons",
+  "Mesh_Cup",
+  "Mouse_Traps",
+  "Pie_Plates",
+  "Plastic_Wine_Glass",
+  "Poland_Spring_Water",
+  "Reynolds_Wrap",
+  "Robots_DVD",
+  "Robots_Everywhere",
+  "Scotch_Sponges",
+  "Speed_Stick",
+  "Table_Cloth",
+  "Tennis_Ball_Container",
+  "Ticonderoga_Pencils",
+  "Tissue_Box",
+  "Toilet_Brush",
+  "White_Facecloth",
+  "Windex"
+};
+
+std::string LabelList[40] =
+{
+  "avery1BinderWhite",
+  "bagOfBalloons",
+  "johnsonjohnsonPaperTape",
+  "theBatheryDelicateBathSponge",
+  "knitGlovesBlack",
+  "burtsBeesBabyWipes",
+  "colgateToothbrushs",
+  "greenCompositionBook",
+  "crayolaCrayons24",
+  "scotchClothDuctTape",
+  "drtealsEpsomSalts",  
+  "expoEraser",  
+  "fiskarScissors",  
+  "arFlashlihgts",
+  "elmersGlueSticks6Ct",  
+  "neopreneWeightPink",
+  "hanesWhitteSocks",  
+  "spiralIndexCards",
+  "steriliteIceCubeTray",
+  "irishSpring",
+  "laughOutLoundJokesForKids",
+  "miniMarblesClearLustre",
+  "targetBrandMeasuringSpoons",
+  "meshPencilCup",
+  "tomcatMousetraps",
+  "reynoldsPiePans2ct",
+  "plasticWineGlasses",
+  "polandSpringsWaterBottle",
+  "reynoldsWrap85Sqft",
+  "dvdRobots",
+  "robotsEverywhere",
+  "scotchSponges",
+  "speedStick2Pack",
+  "tableCover",
+  "wilsonTennisBalls",
+  "ticonderogaPencils",
+  "kleenexCoolTouchTissues",
+  "cloroxToiletBrush",
+  "whiteFaceCloth",
+  "windexSprayBottle23oz"
+};
 
 enum ProcessingState{
     NADA,
@@ -76,6 +164,7 @@ public:
     as_.registerPreemptCallback(boost::bind(&ObjEstAction::preemptCB, this));
 
     segmented_pub_ =nh_.advertise<sensor_msgs::PointCloud2>("segmented_pointcloud", 1);
+    align_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("align_pointcloud", 1);
     cloud_sub = nh_.subscribe("/camera/depth_registered/points", 10, &ObjEstAction::cloudCB,this);
     
     as_.start();
@@ -103,6 +192,7 @@ protected:
   //------ROS--------//
   ros::NodeHandle nh_;
   ros::Publisher segmented_pub_;
+  ros::Publisher align_pub_;
   ros::Subscriber cloud_sub;
   ros::ServiceClient roi_client;
 

@@ -9,20 +9,21 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/console/parse.h>
-
 #include <pcl/point_cloud.h>
 #include <pcl/kdtree/kdtree_flann.h>
-
 #include <Eigen/Geometry>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/point_types_conversion.h>
+#include <pcl/filters/passthrough.h>
 
 using namespace Eigen;
 
 // Types
-typedef pcl::PointXYZ PT;       //point type
+typedef pcl::PointXYZRGB PT;       //point type
 typedef pcl::PointCloud<PT> PCT;
 
-
+typedef pcl::PointNormal PNormal;       //point type
+typedef pcl::PointCloud<PNormal> PC_Normal;
 
 std::string path;
 
@@ -53,8 +54,8 @@ void vis_simple( boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer,
 ){
 
   viewer->setBackgroundColor (0, 0, 0);
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(cloud, 255, 255, 255);
-  viewer->addPointCloud<pcl::PointXYZ> (cloud, single_color, "sample cloud");
+  pcl::visualization::PointCloudColorHandlerCustom<PT> single_color(cloud, 255, 255, 255);
+  viewer->addPointCloud<PT> (cloud, single_color, "sample cloud");
   viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "sample cloud");
   viewer->addCoordinateSystem (1.0);
   viewer->initCameraParameters ();
@@ -63,7 +64,8 @@ void vis_simple( boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer,
 
 
 void vis_one_point(boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer,
-                pcl::PointXYZ p ){
+                PT p , 
+                std::string name = "red"){
   pcl::PointCloud<PT>::Ptr cloud (new pcl::PointCloud<PT>);
   
   //cloud_center
@@ -75,15 +77,15 @@ void vis_one_point(boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer,
   cloud->points[0].y = p.y;
   cloud->points[0].z = p.z;
   
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(cloud, 255, 0, 0);
-  viewer->addPointCloud<PT> (cloud, single_color, "red");
-  viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, "red");
+  pcl::visualization::PointCloudColorHandlerCustom<PT> single_color(cloud, 255, 0, 0);
+  viewer->addPointCloud<PT> (cloud, single_color, name);
+  viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 10, name);
   
 } 
 
 void vis_cloud(boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer,
                 pcl::PointCloud<PT>::ConstPtr cloud ){
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(cloud, 255, 0, 255);
+  pcl::visualization::PointCloudColorHandlerCustom<PT> single_color(cloud, 255, 0, 255);
   viewer->addPointCloud<PT> (cloud, single_color, "purple");
   viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "purple");
   
@@ -114,11 +116,11 @@ void vis_normal (boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer,
   //viewer->initCameraParameters ();
 }
 
-pcl::PointXYZ getCenter( PCT::Ptr cloud){
+PT getCenter( PCT::Ptr cloud){
   Eigen::Vector4f centroid;
   pcl::compute3DCentroid (*cloud, centroid);
   
-  pcl::PointXYZ p;
+  PT p;
   p.x = centroid[0];
   p.y = centroid[1];
   p.z = centroid[2];
@@ -128,13 +130,13 @@ pcl::PointXYZ getCenter( PCT::Ptr cloud){
 }
 
 
-void get_near_points(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_in, 
-            pcl::PointXYZ searchPoint,
+void get_near_points(PCT::Ptr cloud_in, 
+            PT searchPoint,
             int K ,
-            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out){
+            PCT::Ptr cloud_out){
 
   //-----------Get near pointS --------------//
-  pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+  pcl::KdTreeFLANN<PT> kdtree;
   kdtree.setInputCloud (cloud_in);
 
 
@@ -148,11 +150,12 @@ void get_near_points(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_in,
 
   if ( kdtree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
   {
-    // for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
-    //   std::cout << "    "  <<   cloud_in->points[ pointIdxNKNSearch[i] ].x 
-    //             << " " << cloud_in->points[ pointIdxNKNSearch[i] ].y 
-    //             << " " << cloud_in->points[ pointIdxNKNSearch[i] ].z 
-    //             << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
+      std::cout << "    "  <<   cloud_in->points[ pointIdxNKNSearch[i] ].x 
+                << " " << cloud_in->points[ pointIdxNKNSearch[i] ].y 
+                << " " << cloud_in->points[ pointIdxNKNSearch[i] ].z 
+                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+    
   }else{
     std::cout << "kdtree.nearestKSearch  ERROR!!!!!!!!!" << std::endl;
 
@@ -177,7 +180,9 @@ void get_near_points(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_in,
 
 
 //-----------Get mean normal--------------//
-Vector3f get_normal_mean(pcl::PointCloud<pcl::Normal>::Ptr cloud_normal){
+//Vector3f get_normal_mean(pcl::PointCloud<pcl::Normal>::Ptr cloud_normal){
+Vector3f get_normal_mean(pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal){
+ 
   Vector3f obj_normal ;
 
   obj_normal[0] = obj_normal[1] = obj_normal[2] = 0.0f;
@@ -195,8 +200,100 @@ Vector3f get_normal_mean(pcl::PointCloud<pcl::Normal>::Ptr cloud_normal){
   return obj_normal;
 }
 
+void get_hsv_points(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in, 
+             pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_out,
+            float h_min, float h_max, 
+            float s_min, float s_max,
+            float v_min, float v_max,
+            bool negtive = false){
+           
+
+  
+  std::vector<int> want_indices;
+  
+  bool h_type = (h_min > h_max) ? true:false ;
 
 
+  for(int i = 0 ;i < cloud_in->size();i++){
+      pcl::PointXYZHSV p;
+      pcl::PointXYZRGBtoXYZHSV(cloud_in->points[i],p);
+      if(h_type){
+        if(p.h >= h_min || p.h <= h_max && 
+            p.s >= s_min && p.s <= s_max && 
+            p.v >= v_min && p.v <= v_max  ){
 
+              want_indices.push_back(i);
+        }
+      }else{
+        if(p.h >= h_min && p.h <= h_max && 
+          p.s >= s_min && p.s <= s_max && 
+          p.v >= v_min && p.v <= v_max  ){
+
+            want_indices.push_back(i);
+        }
+      }
+  }
+  
+  pcl::PointIndices::Ptr pointIndices(new pcl::PointIndices);
+  pointIndices->indices=want_indices;
+
+
+  //extract
+  pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+  extract.setInputCloud (cloud_in);
+  extract.setIndices (pointIndices);
+  extract.setNegative (negtive);
+  extract.filter (*cloud_out);
+
+}
+void get_pass_through_points(PCT::Ptr cloud_in,
+            PCT::Ptr cloud_out,
+            float min_x, float max_x,
+            float min_y, float max_y,
+            float min_z, float max_z
+            ){
+  
+  PCT::Ptr now_cloud  (new PCT);;
+  *now_cloud = *cloud_in;
+
+  pcl::IndicesPtr indices (new std::vector <int>);
+  pcl::PassThrough<PT> pass;
+
+  if(min_z!=0 || max_z!=0){
+    pass.setFilterFieldName ("z");
+    pass.setFilterLimits (min_z, max_z);
+
+    pass.setInputCloud (now_cloud);
+    pass.filter (*now_cloud);
+
+  }
+  if(min_y!=0 || max_y!=0){
+    pass.setFilterFieldName ("y");
+    pass.setFilterLimits (min_y, max_y);
+
+    pass.setInputCloud (now_cloud);
+    pass.filter (*now_cloud);
+  }
+
+  if(min_x!=0 || max_x!=0){
+    pass.setFilterFieldName ("x");
+    pass.setFilterLimits (min_x, max_x);
+
+    pass.setInputCloud (now_cloud);
+    pass.filter (*now_cloud);
+  }
+
+  
+  *cloud_out = *now_cloud;
+  /* for backup point cloud
+  pass.filter (*indices);
+  //PCT::Ptr cloud_cluster (new PCT);
+  for (std::vector<int>::const_iterator pit = indices->begin (); pit != indices->end (); ++pit)
+    cloud_out->points.push_back (cloud_in->points[*pit]); //*
+  cloud_out->width = cloud_out->points.size ();
+  cloud_out->height = 1;
+  cloud_out->is_dense = true;
+  */
+}
 
 #endif

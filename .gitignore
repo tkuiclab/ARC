@@ -34,9 +34,18 @@
 
 # ignore macosx
 __MACOSX/
+.DS_Store
 
-# ignore node_modules
+# ignore for nodejs
 node_modules/
+npm-debug.log
 
-# react-build
-build/
+# label_server_ignore
+/label_server/Image/
+/label_server/xml/
+
+/vision/obj_pose/pcd_file/
+/PCL_Test/
+/arc_ui/web/item-app/public/arc_items/
+/vision/test_data/
+

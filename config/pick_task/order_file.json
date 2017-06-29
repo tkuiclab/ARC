@@ -3,13 +3,13 @@
         {
             "size_id": "1A5",
             "contents": [
-                "tennis_ball_container"
+                "mesh_cup"
             ]
         },
          {
             "size_id": "A1",
             "contents": [
-                "mesh_cup"
+                "tennis_ball_container"
             ]
          }
     ]

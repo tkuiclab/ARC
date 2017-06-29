@@ -1,7 +1,6 @@
 
 #include "object_pose_estimator.hpp"
 //#include "seg_plane_cam2obj.hpp"
-#include "OrganizedSegmentation.h"
 #include "cpc_segmentation.hpp"
 #include "ICP_alignment.hpp"
 
@@ -40,6 +39,165 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       state = CALL_RCNN;
   }
 }
+
+
+void ObjEstAction::poseEstimation(){
+//   ROS_INFO("In poseEstimation()");
+  
+//   geometry_msgs::Twist pose;
+
+//   PCT::Ptr cloud(new PCT);
+//   PCT::Ptr cloud_hsv (new PCT);
+//   PCT::Ptr cloud_seg (new PCT);
+//   PCT::Ptr cloud_seg_largest (new PCT);
+
+//   *cloud = *ROI_cloud;
+
+//   // if(obj_name.compare("seg_0") == 0){
+//   //   get_seg_plane(cloud, 0, cloud_seg);
+//   // }else if(obj_name.compare("seg_1") == 0){
+//   //   get_seg_plane(cloud, 1, cloud_seg);
+//   // }else if(obj_name.compare("seg_2") == 0){
+//   //   get_seg_plane(cloud, 2, cloud_seg);
+//   // }
+//   std::vector<int> index;
+//   pcl::removeNaNFromPointCloud(*cloud, *cloud, index);
+  
+// #ifdef SaveCloud
+//   write_pcd_2_rospack(cloud,"_rm_NaN.pcd");
+// #endif
+
+//   float tool_z = 0.25; 
+//   float pass_z_max = 0.60;
+
+//   float pass_x_min, pass_x_max, pass_y_min, pass_y_max;
+//   pass_x_min = pass_x_max = pass_y_min = pass_y_max = 0;
+
+
+
+//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_x_min")){
+//     pcl::console::parse (g_argc, g_argv, "-pass_x_min", pass_x_min);
+//     ROS_INFO("Use pass_x_min = %lf",pass_x_min);
+//   }
+
+//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_x_max")){
+//     pcl::console::parse (g_argc, g_argv, "-pass_x_max", pass_x_max);
+//     ROS_INFO("Use pass_x_max = %lf",pass_x_max);
+//   }
+
+//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_min")){
+//     pcl::console::parse (g_argc, g_argv, "-pass_y_min", pass_y_min);
+//     ROS_INFO("Use pass_y_min = %lf",pass_y_min);
+//   }
+  
+//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_max")){
+//     pcl::console::parse (g_argc, g_argv, "-pass_y_max", pass_y_max);
+//     ROS_INFO("Use pass_y_max = %lf",pass_y_max);
+//   }
+
+//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_max")){
+//     pcl::console::parse (g_argc, g_argv, "-pass_z_max", pass_z_max);
+    
+//   }
+//   ROS_INFO("Use pass_z_max = %lf",pass_z_max);
+
+
+//   get_pass_through_points(cloud,  cloud,
+//                         pass_x_min, pass_x_max,
+//                         pass_y_min, pass_y_max,
+//                         tool_z, pass_z_max
+                        
+//                         );
+
+// #ifdef SaveCloud
+//   write_pcd_2_rospack(cloud,"_PassThrough.pcd");
+// #endif
+
+//   // get_hsv_points(cloud, cloud_hsv,
+//   //       0.0, 38.0, 
+//   //       0.03, 1.0, 
+//   //       0.29, 1.0);
+
+// // get_hsv_points(cloud, cloud_hsv,
+// //         332.0, 36.0, 
+// //         0.0, 1.0, 
+// //         0.0, 1.0,
+// //         true);
+
+//   // get_hsv_points(cloud, cloud_hsv,
+//   //       200.0, 45.0, 
+//   //       0.0, 1.0, 
+//   //       0.0, 1.0,
+//   //       true);
+    
+// // #ifdef SaveCloud
+// //   write_pcd_2_rospack(cloud_hsv,"_hsv.pcd");
+
+// // #endif
+//   // if(obj_name.compare("seg_0") == 0){
+//   //   region_growing(cloud, 0, cloud_seg);
+//   // }else if(obj_name.compare("seg_1") == 0){
+//   //   region_growing(cloud, 1, cloud_seg);
+//   // }else if(obj_name.compare("seg_2") == 0){
+//   //   region_growing(cloud, 2, cloud_seg);
+//   // }
+   
+   
+//   //get_seg_plane(cloud,  cloud_seg);
+//   //get_largest_cluster(cloud_seg, cloud_seg_largest);
+
+// //   region_growing(cloud, 0, cloud_seg);
+
+// // #ifdef SaveCloud
+// //   write_pcd_2_rospack(cloud_seg,"_region_growing.pcd");
+
+// // #endif
+
+//   //KNote: lots of time, have problem in this function , 
+//   //get_seg_plane_near(cloud, cloud_seg);
+//   //*cloud_seg_largest = *cloud_seg;
+
+//   cam_2_obj_center(cloud, 
+//       pose.linear.x, pose.linear.y, pose.linear.z, 
+//       pose.angular.x, pose.angular.y, pose.angular.z);
+  
+//   result_.object_pose = pose;
+
+//   as_.setSucceeded(result_);
+
+//   state = NADA;
+
+// #ifdef ShowCloud
+//   //vis_simple(viewer,cloud);
+//   //viewer->addPointCloud<PT> (cloud);
+//   //viewer->addPointCloud<PT> (cloud_seg);
+ 
+//   get_largest_cluster(cloud_hsv, cloud_hsv);
+//   viewer->addPointCloud<PT> (cloud_hsv);
+
+//   PT min_p, max_p;
+//   pcl::getMinMax3D(*cloud_hsv,min_p, max_p);
+
+//   std::cout << "min_p = " << min_p << std::endl;
+//   std::cout << "max_p = " << max_p << std::endl;
+  
+
+//   // vis_one_point(viewer, min_p, "min_p");
+//   // vis_one_point(viewer, max_p, "max_p");
+  
+//   viewer->addCube(min_p.x, max_p.x,
+//                   min_p.y, max_p.y,  
+//                   min_p.z, max_p.z);
+
+//   while (!viewer->wasStopped () && state == NADA && ros::ok())
+//   {
+//     viewer->spinOnce (100);
+//     boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+//   }
+// #endif 
+
+}
+
 
 void ObjEstAction::get_roi(){
   // // Point clouds
@@ -126,7 +284,7 @@ void ObjEstAction::segmentation()
       cloud2_.push_back(point);
   }
   pcl::toROSMsg(cloud2_, seg_msg);
-  seg_msg.header.frame_id = "camera_link";
+  seg_msg.header.frame_id = "camera_rgb_optical_frame";
   segmented_pub_.publish(seg_msg);
 }
 
@@ -137,26 +295,28 @@ void ObjEstAction::do_ICP()
   pcl::PointCloud<pcl::PointXYZ> temp2;
   transformation_matrix = Eigen::Matrix4f::Identity ();
 
-  tmp_path = path;
-  tmp_path.append("items/Hand_Weight/trans_out_trans_out_cut_Hand_Weight1.pcd");
-  if(load_pcd(tmp_path))
+  if(load_pcd(obj_name))
   {
     ROS_INFO("Load Amazon Model success!");
     if(scence_seg)
     {
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
-      std::cout << "hahahhahahahahahahahahaha!!!" << std::endl;
       copyPointCloud(*cloud_cluster, *cloud_xyz);
-      my_icp.setSourceCloud(cloud_xyz);
+      my_icp.setSourceCloud(model_PCD);
+      my_icp.setTargetCloud(cloud_xyz);
     }else{
-      my_icp.setSourceCloud(Max_cluster);
+      my_icp.setSourceCloud(model_PCD);
+      my_icp.setTargetCloud(Max_cluster);
     }
-    my_icp.setTargetCloud(model_PCD);
     my_icp.align(temp2);
     transformation_matrix = my_icp.getMatrix ();
     print4x4Matrix (transformation_matrix);
     //pcl::io::savePCDFile ("BIG_SEG.pcd", temp2, false);
     state = NADA;
+    //----------------- Pub Segmentation Cloud to topic -----------------//
+    pcl::toROSMsg(temp2, seg_msg);
+    seg_msg.header.frame_id = "camera_rgb_optical_frame";
+    align_pub_.publish(seg_msg);
   }else{
     state = NADA;
   }
@@ -171,29 +331,65 @@ void ObjEstAction::set_feedback(std::string msg,int progress)
 
 void ObjEstAction::print4x4Matrix (const Eigen::Matrix4f & matrix)
 {
-  printf ("Rotation matrix :\n");
-  printf ("    | %6.3f %6.3f %6.3f | \n", matrix (0, 0), matrix (0, 1), matrix (0, 2));
-  printf ("R = | %6.3f %6.3f %6.3f | \n", matrix (1, 0), matrix (1, 1), matrix (1, 2));
-  printf ("    | %6.3f %6.3f %6.3f | \n", matrix (2, 0), matrix (2, 1), matrix (2, 2));
-  printf ("Translation vector :\n");
-  printf ("t = < %6.3f, %6.3f, %6.3f >\n\n", matrix (0, 3), matrix (1, 3), matrix (2, 3));
+  // printf ("Rotation matrix :\n");
+  // printf ("    | %6.3f %6.3f %6.3f | \n", matrix (0, 0), matrix (0, 1), matrix (0, 2));
+  // printf ("R = | %6.3f %6.3f %6.3f | \n", matrix (1, 0), matrix (1, 1), matrix (1, 2));
+  // printf ("    | %6.3f %6.3f %6.3f | \n", matrix (2, 0), matrix (2, 1), matrix (2, 2));
+  // printf ("Translation vector :\n");
+  // printf ("t = < %6.3f, %6.3f, %6.3f >\n\n", matrix (0, 3), matrix (1, 3), matrix (2, 3));
   float roll, pitch, yaw;
   Eigen::Affine3f transformatoin;
   transformatoin.matrix() = matrix;
   pcl::getEulerAngles(transformatoin,roll,pitch,yaw);
-  std::cout << "roll = " << roll << "\t pitch = " << pitch << "\t yaw = " << yaw << std::endl;
+  Eigen::Affine3f tf_neg = Eigen::Affine3f::Identity();
+  tf_neg.rotate (Eigen::AngleAxisf ( -roll,  Eigen::Vector3f::UnitX()));
+  tf_neg.rotate (Eigen::AngleAxisf ( -pitch, Eigen::Vector3f::UnitY()));
+  tf_neg.rotate (Eigen::AngleAxisf ( -yaw,   Eigen::Vector3f::UnitZ()));
+  Eigen::Vector3f center_vec(matrix (0, 3), matrix (1, 3), matrix (2, 3));
+  Eigen::Vector3f after_rotate_center_with_neg;
 
+  after_rotate_center_with_neg = tf_neg * center_vec;
+
+  roll = roll/3.14159*180;
+  pitch = pitch/3.14159*180;
+  yaw = yaw/3.14159*180;
+  std::cout << "roll = " << roll << "\t pitch = " << pitch << "\t yaw = " << yaw << std::endl;
+  geometry_msgs::Twist pose;
+  pose.linear.x = after_rotate_center_with_neg[0];
+  pose.linear.y = after_rotate_center_with_neg[1];
+  pose.linear.z = after_rotate_center_with_neg[2];
+  pose.angular.x = roll;
+  pose.angular.y = pitch;
+  pose.angular.z = yaw;
+  result_.object_pose = pose;
+  std::cout << "X = " << pose.linear.x << "\t Y = " << pose.linear.y << "\t Z = " << pose.linear.z << std::endl;
+  //as_.setSucceeded(result_);
 }
 
 bool ObjEstAction::load_pcd(std::string pcd_filename)
 {
+  int index=0;
+  std::stringstream ss1;
+  for(int i =0;i<40;i++)
+  {
+    if(LabelList[i]==pcd_filename)
+    {
+      index = i;
+    }
+  }
+  ss1 << path << "items/" << AmazonModelList[index] << "/" << AmazonModelList[index] << "1.pcd";
   model_PCD = pcl::PointCloud<pcl::PointXYZ>::Ptr (new pcl::PointCloud<pcl::PointXYZ> ());
   ROS_INFO("Loading PCD....");
-  if(pcl::io::loadPCDFile (pcd_filename, *model_PCD) < 0)
+  ROS_INFO("PCD at %s",ss1.str().c_str());
+  if(pcl::io::loadPCDFile (ss1.str(), *model_PCD) < 0)
   {
-    ROS_INFO("Error loading Amazon Model cloud");
+    ROS_ERROR("Error loading Amazon Model cloud");
     return false;
   }else{
+    pcl::VoxelGrid<pcl::PointXYZ> sor;
+    sor.setInputCloud (model_PCD);
+    sor.setLeafSize (0.005f, 0.005f, 0.005f);
+    sor.filter (*model_PCD);
     return true;
   }
 }
