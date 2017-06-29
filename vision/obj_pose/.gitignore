@@ -31,7 +31,8 @@
 # ignore photo
 *.jpg
 *.png
-*.pcd
+pcd_file/*.pcd
+items/*
 
 
 # ignore macosx
