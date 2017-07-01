@@ -152,8 +152,10 @@ if __name__ == '__main__':
 	rospy.init_node('strategy')
 
 	try:
-		s = Strategy()
-		#s.start() 
+		# s = Strategy()
+		# s.start() 
+
+		write_PickInfo_2_JSON()
 
 		# ========== TEST ===========
 		# Error pose
@@ -168,7 +170,7 @@ if __name__ == '__main__':
 
 		#s.arm_go_init_pose()
 		
-		#s.test_go_bin_LM('j')
+		# s.test_go_bin_LM('g')
 
 
 
@@ -185,7 +187,7 @@ if __name__ == '__main__':
 		#gripper_suction_up()
 		#gripper_suctoin_down()
 		
-		s.stow.arm_photo_pose()	
+		#s.stow.arm_photo_pose()	
 
 		#s.Arm.home()
 		#s.stow.test_obj_pose('robots_dvd')  
@@ -197,11 +199,14 @@ if __name__ == '__main__':
 		
 		#s.Arm.relative_move_nsa(n = 0.04, s = -0.06, a = 0.1)  
 		#s.Arm.relative_move_nsa(s = -0.06)  #s= move_cam_x
+
+
+
+
 		# ============ rel motion test area start ============
 		# s.Arm.relative_move_nsa(n = 0.04)  #n = move_cam_y
 		# s.Arm.relative_move_nsa(s = -0.06) #s= move_cam_x
 		# s.Arm.relative_move_nsa(a = 0.1)   #a= move_cam_z
-		
 
 		#dis = 0.05
 		#rot = 10
