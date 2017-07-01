@@ -73,9 +73,9 @@
     ```
 
 4. Show the prediction in window
-    * Specify the object
-    ![img](readme_pics/prediction_spec.png) <br><br>
-    * All
+    * Specify the object<br>
+    ![img](readme_pics/prediction_spec.png) <br>
+    * All<br>
     ![img](readme_pics/prediction_all.png)
 
 
