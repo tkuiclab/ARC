@@ -22,32 +22,62 @@
 1. Just build the Cython extensions in place
 
     ```bash
+    # in python2
     python setup.py build_ext --inplace
     ```
 
 2. Run the node
     * arg: name of image_raw topic
-    * default topic: /camera/color/image_raw
+    * default topic: /camera/rgb/image_raw
 
     ```bash
     rosrun darkflow_detect object_detect.py /camera/rgb/image_raw
     ```
 
 3. Using Service "/detect" to Detect the Object <br>
-    * the class name define in the label.txt
+    * the class name define in script/convert_label/labels.py
 
     ```bash
-    rosservice call /detect "object_name: 'expoEraser'"
+    rosservice call /detect "object_name: 'duct_tape'"
 
     # response
-    bound_box: [237, 187, 494, 292] # xmin, ymin, xmax, ymax
-    confidence: 0.470051288605
+    detected:
+    - 
+        object_name: duct_tape
+        bound_box: [167, 306, 276, 414]
+        confidence: 0.687964379787
+    result: True
+    ```
+    ```bash
+    rosservice call /detect "object_name: 'all'"
+
+    # response
+    detected: 
+      - 
+        object_name: epsom_salts
+        bound_box: [319, 153, 516, 375]
+        confidence: 0.137831568718
+      - 
+        object_name: hand_weight
+        bound_box: [255, 228, 319, 365]
+        confidence: 0.686447024345
+      - 
+        object_name: poland_spring_water
+        bound_box: [311, 276, 529, 454]
+        confidence: 0.110244885087
+      - 
+        object_name: duct_tape
+        bound_box: [141, 309, 256, 431]
+        confidence: 0.488677322865
     result: True
     ```
 
-4. The target object was detected
+4. Show the prediction in window
+    * Specify the object
+    ![img](readme_pics/prediction_spec.png) <br><br>
+    * All
+    ![img](readme_pics/prediction_all.png)
 
-    ![img](readme_pics/prediction.png)
 
 # Original
 
