@@ -139,44 +139,100 @@ class Strategy(threading.Thread):
 
 	def arm_go_init_pose(self):
 		rospy.loginfo('Arm go init pose')
-		self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.22), (0, 0, 0) )
+		self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.22), (0, 0, 0))
 
 	def arm_bin_photo(self):
-		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (0, 0, 0) )
+		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.34), (0, 0, 0))
 
 
 	def safe_pose(self):
-		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-90, 0, 0) )
+		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-180, 0, 0))
 
 if __name__ == '__main__':
 	rospy.init_node('strategy')
 
 	try:
 		s = Strategy()
-		s.start() 
+		#s.start() 
 
-
-
+		# ========== TEST ===========
+		# Error pose
+		#s.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-90, 0, 0) )
+		#s.Arm.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-180, 0, 0))
+		
+		
+		#s.Arm.relative_move_nsa(a = 0.15) 
+		# s.Arm.pub_ikCmd('ptp', (x, y , z), (pitch, roll, yaw) )
+		
 		#s.arm_go_init_pose()
 
 		#s.arm_go_init_pose()
 		
-		#s.test_go_bin_LM('d')
-		#test_go_box('j')		
-		# s.stow.LM_2_tote()			# -
-		#s.stow.arm_photo_pose()		# -
+		#s.test_go_bin_LM('j')
 
-# <<<<<<< HEAD
-# 		# s.safe_pose()
-# =======
-# 		s.arm_bin_photo()
-# >>>>>>> 991bb0abd8144ccca23ff838e76ba02b77427584
-# 		#gripper_vaccum_off()
-# 		#gripper_suction_up()
+
+
+		#s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.5), (-120, 0, 0) )
+			
+		#s.arm_bin_photo()
+			
+		#s.stow.LM_2_tote()			    # -
+		
+		# s.safe_pose()
+
+		#s.arm_bin_photo()
+		#gripper_vaccum_off()
+		#gripper_suction_up()
 		#gripper_suctoin_down()
-		#s.Arm.relative_control(a=.035)  #cam_z
+		
+		s.stow.arm_photo_pose()	
 
-		#s.stow.test_obj_pose('dvdRobots')  #expoEraser
+		#s.Arm.home()
+		#s.stow.test_obj_pose('robots_dvd')  
+
+		
+		#s.stow.test_run_with_obj_pose(-0.052098851651, -0.0093888239935, 0.554290473461)
+		#s.stow.test_run_with_obj_pose(-0.0642712190747, 0.0477893352509, 0.546670496464)	
+		
+		
+		#s.Arm.relative_move_nsa(n = 0.04, s = -0.06, a = 0.1)  
+		#s.Arm.relative_move_nsa(s = -0.06)  #s= move_cam_x
+		# ============ rel motion test area start ============
+		# s.Arm.relative_move_nsa(n = 0.04)  #n = move_cam_y
+		# s.Arm.relative_move_nsa(s = -0.06) #s= move_cam_x
+		# s.Arm.relative_move_nsa(a = 0.1)   #a= move_cam_z
+		
+
+		#dis = 0.05
+		#rot = 10
+		#s.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.3), (-150, 0, 0) )
+
+		# move nsa with a specify dis (safe when euler mode is 'nsa' mode)
+		#n = move_cam_y , s= -move_cam_x, a = move_cam_z
+		# s.Arm.relative_move_nsa(n = -dis)
+		# s.Arm.relative_move_nsa(n =  dis)
+		# s.Arm.relative_move_nsa(s = -dis)
+		# s.Arm.relative_move_nsa(s =  dis)
+		# s.Arm.relative_move_nsa(a =  dis)
+		# s.Arm.relative_move_nsa(a = -dis)
+		
+		# # relative rotate pitch roll and yaw with a specifydegree
+		# # (safe when euler mode is 'nsa' mode)
+		# # when yaw(n) is not equal to 0, pitch(s) cannot do relative motion
+		# s.Arm.relative_rot_nsa(s =  rot)  # pitch
+		# s.Arm.relative_rot_nsa(s = -rot)
+		# s.Arm.relative_rot_nsa(a =  rot)  # roll
+		# s.Arm.relative_rot_nsa(a = -rot)
+		# s.Arm.relative_rot_nsa(n =  rot)  # yaw
+		# s.Arm.relative_rot_nsa(n = -rot)
+
+		# s.Arm.relative_xyz_base(x =  dis)
+		# s.Arm.relative_xyz_base(x = -dis)
+		# s.Arm.relative_xyz_base(y = -dis)
+		# s.Arm.relative_xyz_base(y =  dis)
+		# s.Arm.relative_xyz_base(z =  dis)
+		# s.Arm.relative_xyz_base(z = -dis)
+		# ============ rel motion test area over ============
 
 		rospy.spin()
 	except rospy.ROSInterruptException:

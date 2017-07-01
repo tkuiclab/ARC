@@ -1,0 +1,12 @@
+{
+"appenders": [
+  {
+    "type": "dateFile",
+    "filename": "log/access.log",
+    "maxLogSize": 20480,
+    "backups": 3, 
+    "pattern": "-yyyy-MM-dd.log",
+    "alwaysIncludePattern": true
+  }
+]
+}

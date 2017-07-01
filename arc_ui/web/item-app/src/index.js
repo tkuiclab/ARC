@@ -40,7 +40,7 @@ function Item(props) {
     <div className="item">
         <div className="item_pic"> <img  src={props.img_src} /></div>
         <div className="item_name"> {props.name}</div>
-         <div className="item_type"> {props.type}</div>
+        <div className="item_type"> {props.type}</div>
         <div className="item_dims"> {dims_str}</div>
         <div className="item_fix_box">{fit_bins} </div>
     </div>
@@ -73,6 +73,7 @@ function Bin(props) {
         <div className="bin_width"><input  name="W" type="text" value={w} onChange={to_parent}/> </div>
         <div className="bin_height"><input name="H" type="text" value={h} onChange={to_parent}/> </div>
         <div className="bin_vol">{vol}</div>
+        <div className="bin_fit_items_num">{props.fit_items_num}</div>
     </div>
     
   );
@@ -89,6 +90,8 @@ class BinSpec extends React.Component {
     };
     //bind function
     this.input_chage = this.input_chage.bind(this);
+
+    //this.bin_can_fit_items_num = this.bin_can_fit_items_num.bind(this);
   }
 
   input_chage(bin_name,dims){
@@ -118,22 +121,42 @@ class BinSpec extends React.Component {
     return sum;
   }
 
-  
+  bin_fit_items_num(i_bin_dims){
+    var bin_dims = i_bin_dims.slice();  //slice for clone
+    bin_dims.sort();
+
+    var count = 0;
+    for(var ind in arc_items.items){
+        var it = arc_items.items[ind];
+        
+        var item_dims = it.dimensions.slice();  //slice for clone
+        
+        item_dims.sort();
+
+        if(item_dims[0] < bin_dims[0] &&
+        item_dims[1] < bin_dims[1] && 
+       item_dims[2] < bin_dims[2]  ){
+        count++;
+       } 
+    }  
+
+    return count;
+  } 
 
   render() {
-    //var vol_sum = parseInt(this.cal_sum_volume());
+    
     var vol_sum = this.cal_sum_volume();
     var show_vol_sum = parseInt(vol_sum* 1000000);
     var bin_rows = [];
     var item_rows = [];
     var bins = this.state.bin_spec.bins;
     var items = arc_items.items;
-    //this.all_item_2_item_list();
-
+    
     //get all bins
     for(var ind in bins){
         var bin = bins[ind];
-        bin_rows.push( <Bin key={ind} name={bin.id} dims={bin.dimensions} on_chage={this.input_chage}/>);
+        var fit_items_num = this.bin_fit_items_num(bin.dimensions);
+        bin_rows.push( <Bin key={ind} name={bin.id} dims={bin.dimensions} on_chage={this.input_chage}  fit_items_num={fit_items_num}/>);
     }
 
     for(var ind in items){
@@ -161,6 +184,7 @@ class BinSpec extends React.Component {
             <div className="bin_width">W </div>
             <div className="bin_height">H </div>
             <div className="bin_vol">V </div>
+            <div className="bin_fit_items_num">F </div>
         </div>
         {bin_rows}
 

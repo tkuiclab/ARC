@@ -4,7 +4,6 @@
 #include "cpc_segmentation.hpp"
 #include "ICP_alignment.hpp"
 
-
 using namespace ObjEstAction_namespace;
 
 void ObjEstAction::goalCB()
@@ -22,21 +21,46 @@ void ObjEstAction::preemptCB()
 
 void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 {
-  if(state==FOTO)
-  {
-      pcl::fromROSMsg(*input,*cloud);
+  if(state==FOTO){
+      pcl::fromROSMsg(*input,*scene_cloud);
+
+      pcl::IndicesPtr indices (new std::vector <int>);
+      pcl::PassThrough<PT> pass;
+
+      pass.setFilterFieldName ("z");
+      pass.setFilterLimits (0.25 , 0.6);
+      pass.setKeepOrganized(true);
+      pass.setInputCloud (scene_cloud);
+      pass.filter (*scene_cloud);
+
+      pcl::PointCloud<pcl::PointXYZRGBA> mls_points;
+      pcl::search::KdTree<PT>::Ptr tree (new pcl::search::KdTree<PT>);
+      pcl::MovingLeastSquares<PT, PT> mls;
+      mls.setInputCloud (scene_cloud);
+      mls.setComputeNormals (true);
+      mls.setPolynomialFit (true);
+      mls.setSearchMethod (tree);
+      mls.setSearchRadius (0.03);
+      mls.process (mls_points);
+      pcl::io::savePCDFile ("mls.pcd", mls_points);
+
 #ifdef SaveCloud
-      pcl::PCDWriter writer1;
-      std::stringstream ss1;
-      // std::string sys_str;
-      // sys_str = "rm  " +  path + "*.pcd";
-      //std::cout << "[CMD] -> " << sys_str << std::endl;
-      //system(sys_str.c_str());
-      ss1 << path << "pcd_file/scene_cloud" << ".pcd";
-      writer1.write<PT> (ss1.str (), *cloud, false);
-      ROS_INFO("Save PCD to %s",ss1.str().c_str());
+      //Remove All PCD File in [package]/pcd_file/*.pcd      
+      std::string sys_str;
+      sys_str = "rm  " +  path + "*.pcd";
+      std::cout << "[CMD] -> " << sys_str << std::endl;  
+      system(sys_str.c_str());
+
+      //write pcd
+      write_pcd_2_rospack(scene_cloud,"scene_cloud.pcd");
 #endif
+
+      feedback_.msg = "Raw Point Could Read Done (From Camera)";
+      feedback_.progress = 30;
+      as_.publishFeedback(feedback_);
+
       state = CALL_RCNN;
+      call_rcnn_times = 0;
   }
 }
 
@@ -47,19 +71,11 @@ void ObjEstAction::poseEstimation(){
 //   geometry_msgs::Twist pose;
 
 //   PCT::Ptr cloud(new PCT);
-//   PCT::Ptr cloud_hsv (new PCT);
 //   PCT::Ptr cloud_seg (new PCT);
 //   PCT::Ptr cloud_seg_largest (new PCT);
 
 //   *cloud = *ROI_cloud;
 
-//   // if(obj_name.compare("seg_0") == 0){
-//   //   get_seg_plane(cloud, 0, cloud_seg);
-//   // }else if(obj_name.compare("seg_1") == 0){
-//   //   get_seg_plane(cloud, 1, cloud_seg);
-//   // }else if(obj_name.compare("seg_2") == 0){
-//   //   get_seg_plane(cloud, 2, cloud_seg);
-//   // }
 //   std::vector<int> index;
 //   pcl::removeNaNFromPointCloud(*cloud, *cloud, index);
   
@@ -67,99 +83,22 @@ void ObjEstAction::poseEstimation(){
 //   write_pcd_2_rospack(cloud,"_rm_NaN.pcd");
 // #endif
 
-//   float tool_z = 0.25; 
-//   float pass_z_max = 0.60;
-
-//   float pass_x_min, pass_x_max, pass_y_min, pass_y_max;
-//   pass_x_min = pass_x_max = pass_y_min = pass_y_max = 0;
-
-
-
-//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_x_min")){
-//     pcl::console::parse (g_argc, g_argv, "-pass_x_min", pass_x_min);
-//     ROS_INFO("Use pass_x_min = %lf",pass_x_min);
-//   }
-
-//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_x_max")){
-//     pcl::console::parse (g_argc, g_argv, "-pass_x_max", pass_x_max);
-//     ROS_INFO("Use pass_x_max = %lf",pass_x_max);
-//   }
-
-//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_min")){
-//     pcl::console::parse (g_argc, g_argv, "-pass_y_min", pass_y_min);
-//     ROS_INFO("Use pass_y_min = %lf",pass_y_min);
-//   }
-  
-//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_max")){
-//     pcl::console::parse (g_argc, g_argv, "-pass_y_max", pass_y_max);
-//     ROS_INFO("Use pass_y_max = %lf",pass_y_max);
-//   }
-
-//   if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_max")){
-//     pcl::console::parse (g_argc, g_argv, "-pass_z_max", pass_z_max);
-    
-//   }
-//   ROS_INFO("Use pass_z_max = %lf",pass_z_max);
-
-
-//   get_pass_through_points(cloud,  cloud,
-//                         pass_x_min, pass_x_max,
-//                         pass_y_min, pass_y_max,
-//                         tool_z, pass_z_max
-                        
-//                         );
+//   pass_through_from_arg(cloud, g_argc, g_argv, cloud);
 
 // #ifdef SaveCloud
 //   write_pcd_2_rospack(cloud,"_PassThrough.pcd");
 // #endif
+//   // only_obj_center(cloud, 
+//   //   pose.linear.x, pose.linear.y, pose.linear.z);
 
-//   // get_hsv_points(cloud, cloud_hsv,
-//   //       0.0, 38.0, 
-//   //       0.03, 1.0, 
-//   //       0.29, 1.0);
-
-// // get_hsv_points(cloud, cloud_hsv,
-// //         332.0, 36.0, 
-// //         0.0, 1.0, 
-// //         0.0, 1.0,
-// //         true);
-
-//   // get_hsv_points(cloud, cloud_hsv,
-//   //       200.0, 45.0, 
-//   //       0.0, 1.0, 
-//   //       0.0, 1.0,
-//   //       true);
-    
-// // #ifdef SaveCloud
-// //   write_pcd_2_rospack(cloud_hsv,"_hsv.pcd");
-
-// // #endif
-//   // if(obj_name.compare("seg_0") == 0){
-//   //   region_growing(cloud, 0, cloud_seg);
-//   // }else if(obj_name.compare("seg_1") == 0){
-//   //   region_growing(cloud, 1, cloud_seg);
-//   // }else if(obj_name.compare("seg_2") == 0){
-//   //   region_growing(cloud, 2, cloud_seg);
-//   // }
-   
-   
-//   //get_seg_plane(cloud,  cloud_seg);
-//   //get_largest_cluster(cloud_seg, cloud_seg_largest);
-
-// //   region_growing(cloud, 0, cloud_seg);
-
-// // #ifdef SaveCloud
-// //   write_pcd_2_rospack(cloud_seg,"_region_growing.pcd");
-
-// // #endif
-
-//   //KNote: lots of time, have problem in this function , 
-//   //get_seg_plane_near(cloud, cloud_seg);
-//   //*cloud_seg_largest = *cloud_seg;
-
+//   float near_points_percent = 0.1;
+//   if (pcl::console::find_switch (g_argc, g_argv, "-near")){
+//     pcl::console::parse (g_argc, g_argv, "-near", near_points_percent);
+//   }
 //   cam_2_obj_center(cloud, 
 //       pose.linear.x, pose.linear.y, pose.linear.z, 
-//       pose.angular.x, pose.angular.y, pose.angular.z);
+//       pose.angular.x, pose.angular.y, pose.angular.z,
+//       near_points_percent);
   
 //   result_.object_pose = pose;
 
@@ -167,58 +106,63 @@ void ObjEstAction::poseEstimation(){
 
 //   state = NADA;
 
-// #ifdef ShowCloud
-//   //vis_simple(viewer,cloud);
-//   //viewer->addPointCloud<PT> (cloud);
-//   //viewer->addPointCloud<PT> (cloud_seg);
- 
-//   get_largest_cluster(cloud_hsv, cloud_hsv);
-//   viewer->addPointCloud<PT> (cloud_hsv);
-
-//   PT min_p, max_p;
-//   pcl::getMinMax3D(*cloud_hsv,min_p, max_p);
-
-//   std::cout << "min_p = " << min_p << std::endl;
-//   std::cout << "max_p = " << max_p << std::endl;
-  
-
-//   // vis_one_point(viewer, min_p, "min_p");
-//   // vis_one_point(viewer, max_p, "max_p");
-  
-//   viewer->addCube(min_p.x, max_p.x,
-//                   min_p.y, max_p.y,  
-//                   min_p.z, max_p.z);
-
-//   while (!viewer->wasStopped () && state == NADA && ros::ok())
-//   {
-//     viewer->spinOnce (100);
-//     boost::this_thread::sleep (boost::posix_time::microseconds (100000));
-//   }
-// #endif 
-
 }
 
 
 void ObjEstAction::get_roi(){
-  // // Point clouds
-  PCT::Ptr ROI_cloud (new PCT);
-  my_ROICloud = PCT::Ptr (new PCT);
+
   roi_srv.request.object_name = obj_name;
-  roi_client.call(roi_srv);
-  if(roi_srv.response.result)
+  if(roi_client.call(roi_srv))
   {
-    mini_x = roi_srv.response.bound_box[0];
-    mini_y = roi_srv.response.bound_box[1];
-    max_x = roi_srv.response.bound_box[2];
-    max_y = roi_srv.response.bound_box[3];
+    ROS_INFO("Get ROI from Service (/detect) ");
+
+  
+    if(!roi_srv.response.result){
+      
+      if(call_rcnn_times < 20){
+        call_rcnn_times++;
+        
+        return;
+      }
+
+      ROS_WARN("/detect ROI result = False");
+      geometry_msgs::Twist pose;
+      pose.linear.z = -1; //ROI Fail
+      result_.object_pose = pose;
+      as_.setSucceeded(result_);
+
+      state = NADA;
+         
+      return;  
+    }
+    //darkflow_detect::Detected::ConstPtr detected_msg;
+    //const darkflow_detect::Detected all_detect = roi_srv.response.detected;
+
+    for(int i =0;i < roi_srv.response.detected.size();i++){
+      darkflow_detect::Detected detected = roi_srv.response.detected[i];
+
+      if(detected.object_name.compare(obj_name)==0){
+        mini_x = detected.bound_box[0];
+        mini_y = detected.bound_box[1];
+        max_x =  detected.bound_box[2];
+        max_y =  detected.bound_box[3];
+
+        break;
+
+      }
+
+    }
+
+    
   }else{
-    ROS_INFO("Fail Detect!!!");
-    preemptCB();
-    state = NADA;
+    ROS_WARN("CANNOT Call Service (/detect)");
+    geometry_msgs::Twist pose;
+    result_.object_pose = pose;
+    as_.setSucceeded(result_);
     return;
   }
-  ROS_INFO("Get ROIl!");
   ROS_INFO("[mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",mini_x,mini_y,max_x,max_y);
+  
   ROI_cloud->width = max_x-mini_x;
   ROI_cloud->height = max_y-mini_y;
   ROI_cloud->is_dense = false;
@@ -231,24 +175,23 @@ void ObjEstAction::get_roi(){
   {
     for(int i=mini_x;i<max_x;i++)
     {
-      index = j*cloud->width+i;
-      ROI_cloud->points[index_tmp].x = cloud->points[index].x;
-      ROI_cloud->points[index_tmp].y = cloud->points[index].y;
-      ROI_cloud->points[index_tmp].z = cloud->points[index].z;
-      ROI_cloud->points[index_tmp].rgba = cloud->points[index].rgba;
+      index = j*scene_cloud->width+i;
+      ROI_cloud->points[index_tmp].x = scene_cloud->points[index].x;
+      ROI_cloud->points[index_tmp].y = scene_cloud->points[index].y;
+      ROI_cloud->points[index_tmp].z = scene_cloud->points[index].z;
+      ROI_cloud->points[index_tmp].rgb = scene_cloud->points[index].rgb;
+      
       index_tmp++;
     }
   }
-  ROS_INFO("Save point cloud in ROI!\n");
-  pcl::PCDWriter writer;
-  tmp_path = path;
-  tmp_path.append("pcd_file/test_pcd.pcd");
-  writer.write<PT> (tmp_path, *ROI_cloud, false);
-  std::cerr << "Saved " << ROI_cloud->points.size () << " data points to test_pcd.pcd." << std::endl;
+
+#ifdef SaveCloud
+  write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
+#endif 
+
   pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
-  //ROS_INFO("ROI max_x = %f, max_y = %f, max_z = %f",max_p.x, max_p.y, max_p.z);
-  //ROS_INFO("ROI min_x = %f, min_y = %f, min_z = %f",min_p.x, min_p.y, min_p.z);
-  pcl::copyPointCloud(*ROI_cloud, *my_ROICloud);
+  set_feedback("ROI Done",60);
+  
   state = SEGMETATION;
 }
 
@@ -260,13 +203,13 @@ void ObjEstAction::segmentation()
   CPCSegmentation cpc_seg;
   if(scence_seg)
   {
-    cpc_seg.setPointCloud(cloud);
+    cpc_seg.setPointCloud(scene_cloud);
     cpc_seg.set_3D_ROI(min_p, max_p);
     cpc_seg.do_segmentation();
     cloud_cluster = cpc_seg.get_cloud_cluster();
     state = ALIGMENT;
   }else{
-    cpc_seg.setPointCloud(my_ROICloud);
+    cpc_seg.setPointCloud(ROI_cloud);
     cpc_seg.do_segmentation();
     Max_cluster = cpc_seg.get_BiggestCluster();
     state = ALIGMENT;
@@ -295,13 +238,13 @@ void ObjEstAction::do_ICP()
   pcl::PointCloud<pcl::PointXYZ> temp2;
   transformation_matrix = Eigen::Matrix4f::Identity ();
 
-  if(load_pcd(obj_name))
+  if(load_amazon_pcd(obj_name))
   {
     ROS_INFO("Load Amazon Model success!");
     if(scence_seg)
     {
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
-      copyPointCloud(*cloud_cluster, *cloud_xyz);
+      copyPointCloud(*cloud_cluster, *cloud_xyz);   
       my_icp.setSourceCloud(model_PCD);
       my_icp.setTargetCloud(cloud_xyz);
     }else{
@@ -366,7 +309,7 @@ void ObjEstAction::print4x4Matrix (const Eigen::Matrix4f & matrix)
   //as_.setSucceeded(result_);
 }
 
-bool ObjEstAction::load_pcd(std::string pcd_filename)
+bool ObjEstAction::load_amazon_pcd(std::string pcd_filename)
 {
   int index=0;
   std::stringstream ss1;
@@ -377,7 +320,7 @@ bool ObjEstAction::load_pcd(std::string pcd_filename)
       index = i;
     }
   }
-  ss1 << path << "items/" << AmazonModelList[index] << "/" << AmazonModelList[index] << "1.pcd";
+  ss1 << "/home/iclab-giga/ARC_ws/src/ARC/vision/obj_pose/items/" << AmazonModelList[index] << "/" << AmazonModelList[index] << "1.pcd";
   model_PCD = pcl::PointCloud<pcl::PointXYZ>::Ptr (new pcl::PointCloud<pcl::PointXYZ> ());
   ROS_INFO("Loading PCD....");
   ROS_INFO("PCD at %s",ss1.str().c_str());
@@ -423,6 +366,11 @@ int main (int argc, char **argv)
       case ALIGMENT:
         ObjEst.set_feedback("Alignment....",80);
         ObjEst.do_ICP();
+        break;
+      case POSE_ESTIMATION:
+        ObjEst.set_feedback("POSE_ESTIMATION....",60);
+        ObjEst.poseEstimation();
+        
         break;
       default:
         ROS_INFO("Que!?");

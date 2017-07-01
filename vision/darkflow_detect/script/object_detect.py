@@ -16,55 +16,72 @@ os.chdir(pkg_path)
 
 import cv2
 from image_convert import ImageConverter
+from image_convert import save_img, get_now
 from darkflow_detect.srv import Detect, DetectResponse
+from darkflow_detect.msg import Detected
 from darkflow.net.build import TFNet
+from convert_label.convert import offical2Our, our2Offical
 
 
 def handle_request(req):
     """Service request callback."""
     frame = img_cvt.cv_img
+    cvted_name = offical2Our(req.object_name)
+    # Checking converted name
+    if not cvted_name:
+        global _img
+        _img.predi = frame
+        return DetectResponse([], False)
 
     # Calculate time of detection
     start_time = time.time()
     result = tfnet.return_predict(frame)
     rospy.loginfo('Prediction time: {0:.5f}'.format(time.time() - start_time))
 
-    res = DetectResponse([], 0.0, False)
+    detectedList = list()
     for info in result:
         print_info(info)
 
-        if (info['label'] == req.object_name and
-                info['confidence'] > res.confidence):
-            res.confidence = info['confidence']
-            res.bound_box = [
-                info['topleft']['x'],
-                info['topleft']['y'],
-                info['bottomright']['x'],
-                info['bottomright']['y']
-            ]
-            res.result = True
-    
+        # Checking detected object
+        if (cvted_name == 'all' and
+                info['confidence'] > 0.0):
+            detectedList.append(detectedInfoToMsg(info))
+        elif (cvted_name == info['label'] and
+                info['confidence'] > 0.0):
+            if len(detectedList) > 0:
+                if info['confidence'] > detectedList[0].confidence:
+                    detectedList[0] = detectedInfoToMsg(info)
+            else:
+                detectedList.append(detectedInfoToMsg(info))
+
+    res = DetectResponse([], False)
+    if len(detectedList) > 0:
+        res.detected = detectedList
+        res.result = True
+
+    mark_frame(frame, detectedList)
     print('===========================' if len(result)
         else 'Nothing was detected')
-    mark_frame(frame, res.bound_box, req.object_name, res.confidence)
+
     return res
 
 
-def print_info(info):
-    """Print infomation of detecting result."""
-    print('---------------------------')
-    print(info['label'])
-    print(info['confidence'])
-    print(info['topleft'])
-    print(info['bottomright'])
+def detectedInfoToMsg(info):
+    """Convert detected infomations to message type."""
+    msg = Detected()
+    msg.object_name = our2Offical(info['label'])
+    msg.confidence = info['confidence']
+    msg.bound_box = [
+        info['topleft']['x'],
+        info['topleft']['y'],
+        info['bottomright']['x'],
+        info['bottomright']['y']
+    ]
+    return msg
 
 
-def mark_frame(frame, bbox, label='test', confidence=-0.1):
-    """Mark the image for detecting result."""
-    # Assign frame to global _img object
-    global _img
-    _img.frame = copy.deepcopy(frame)
-
+def draw_bbox(frame, bbox, label='', confidence=-0.1):
+    """Drawing bbox on image."""
     # If the object was detected
     if len(bbox) > 0:
         color = (100, 100, 255)
@@ -85,39 +102,36 @@ def mark_frame(frame, bbox, label='test', confidence=-0.1):
             color=color,
             thickness=thickness
         )
-    # Assign frame to global _img object
+
+
+def mark_frame(frame, detected):
+    """Mark the image for detecting result."""
+    # Assign original frame to global _img object
+    global _img
+    _img.frame = copy.deepcopy(frame)
+    # Drawing all of bbox
+    for result in detected:
+        draw_bbox(frame, result.bound_box, result.object_name, result.confidence)
+    # Assign frame of prediction to global _img object
     _img.predi = frame
 
 
-def get_now(arg='d'):
-    import datetime
-    now = datetime.datetime.now()
-    if arg == 'd':
-        return (
-            '{:04d}'.format(now.year)+
-            '{:02d}'.format(now.month)+
-            '{:02d}'.format(now.day)
-        )
-    elif arg == 't':
-        return (
-            '{:02d}'.format(now.hour)+
-            '{:02d}'.format(now.minute)+
-            '{:02d}'.format(now.second)+
-            '{:02d}'.format(now.microsecond)
-        )
+def print_info(info):
+    """Print infomation of detecting result."""
+    print('---------------------------')
+    print(our2Offical(info['label']))
+    print(info['confidence'])
+    print(info['topleft'])
+    print(info['bottomright'])
 
 
 def show_detection(event):
     """Show result of image for timer using."""
     if _img.refresh:
         cv2.imshow('Prediction', _img.predi)
-    
     # Pressing <space> key
     if cv2.waitKey(10) == 32:
-        _path = os.path.expanduser(os.path.join('~', get_now()))
-        if not os.path.exists(_path):
-            os.makedirs(_path)
-        cv2.imwrite(os.path.join(_path, '{}.jpg'.format(get_now('t'))), _img.frame)
+        save_img(_img.frame)
 
 
 def prepare_network():
@@ -135,13 +149,13 @@ class Image(object):
 
     @property
     def frame(self):
-        """Frame getter: cv_image."""
+        """Original frame getter: cv_image."""
         self._refresh = False
         return self._frame
 
     @frame.setter
     def frame(self, img):
-        """Frame setter: cv_image."""
+        """Original frame setter: cv_image."""
         self._frame = img
         self._refresh = True
 
@@ -152,13 +166,13 @@ class Image(object):
 
     @property
     def predi(self):
-        """Frame getter: cv_image."""
+        """Frame of predication getter: cv_image."""
         self._refresh = False
         return self._predi
 
     @predi.setter
     def predi(self, img):
-        """Frame setter: cv_image."""
+        """Frame of predication setter: cv_image."""
         self._predi = img
         self._refresh = True
 
@@ -166,15 +180,11 @@ _img = Image()
 
 # Options for net building
 options = {
-    "model": "cfg/yolo-new.cfg",   # model of net
+    "model": "cfg/yolo-new.cfg",    # model of net
     "backup": "ckpt/",              # directory of ckpt (training result)
     "load": -1,                     # which ckpt will be loaded. -1 represent the last ckpt
     "threshold": -0.1,              # threshold for confidence
-
-    "gpu": 1.0                       # gpu using rate
-
-   # "gpu": 0.5                       # gpu using rate
-
+    "gpu": 0.5                      # gpu using rate
 }
 tfnet = TFNet(options)
 prepare_network()

@@ -72,9 +72,9 @@ private:
     double fai;
 
     /*Euler rotation mode*/
-    teEuler_Mode Euler_Mode;
 
 public:
+    teEuler_Mode Euler_Mode;
     ManipulatorKinematicsDynamics();
     ManipulatorKinematicsDynamics(TreeSelect tree);
     ~ManipulatorKinematicsDynamics();

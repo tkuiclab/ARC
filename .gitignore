@@ -43,9 +43,25 @@ npm-debug.log
 # label_server_ignore
 /label_server/Image/
 /label_server/xml/
+/label_server/node/log/*.log
 
+
+# catkin ignore
+CATKIN_IGNORE
+
+# ignore PCL_Test
+/PCL_Test/
 /vision/obj_pose/pcd_file/
 /PCL_Test/
 /arc_ui/web/item-app/public/arc_items/
 /vision/test_data/
 
+# pcl_saver ignore
+/vision/pcl_saver/pattern/
+!/vision/pcl_saver/pattern/README.md
+
+# ignore for pcd
+*.pcd
+
+# ignore cam2obj/build
+/vision/cam2obj/build/

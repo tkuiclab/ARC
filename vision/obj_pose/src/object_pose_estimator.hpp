@@ -4,6 +4,7 @@
 #include <geometry_msgs/Twist.h>
 
 //#include <fake_roi/Detect.h>
+#include <darkflow_detect/Detected.h>
 #include <darkflow_detect/Detect.h>
 #include <boost/thread/thread.hpp>
 #include <sensor_msgs/PointCloud2.h>
@@ -32,107 +33,13 @@
 #include <pcl/console/parse.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
-
-// Types
-typedef pcl::PointXYZRGBA PT;           //Point Type
-typedef pcl::PointCloud<PT> PCT;
-
-typedef pcl::PointNormal PointNT;
-typedef pcl::PointCloud<PointNT> PointCloudT;
-typedef pcl::FPFHSignature33 FeatureT;
-typedef pcl::FPFHEstimationOMP<PointNT,PointNT,FeatureT> FeatureEstimationT;
-typedef pcl::PointCloud<FeatureT> FeatureCloudT;
-typedef pcl::visualization::PointCloudColorHandlerCustom<PointNT> ColorHandlerT;
+#include <pcl/filters/passthrough.h>
+#include <pcl/surface/mls.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include "object_pose_auxiliary.hpp"
 
 //#define ShowCloud
 #define SaveCloud
-std::string AmazonModelList[40] =
-{
-  "Avery_Binder",
-  "Ballons",
-  "Band_Aid_Tape",
-  "Bath_Sponge",
-  "Black_Fashion_Gloves",
-  "Burls_Bees_Baby_Wipes",
-  "Colgate_Toothbrush_4PK",
-  "Composition_Book",
-  "Crayons",
-  "Duct_Tape",
-  "Epsom_Salts",
-  "Expo_Eraser",
-  "Fiskars_Scissors",
-  "Flashlight",
-  "Glue_Sticks",
-  "Hand_Weight",
-  "Hanes_Socks",
-  "Hinged_Ruled_Index_Cards",
-  "Ics_Cube_Tray",
-  "Irish_Spring_Soap",
-  "Laugh_Out_Loud_Jokes",
-  "Marbles",
-  "Measuring_Spoons",
-  "Mesh_Cup",
-  "Mouse_Traps",
-  "Pie_Plates",
-  "Plastic_Wine_Glass",
-  "Poland_Spring_Water",
-  "Reynolds_Wrap",
-  "Robots_DVD",
-  "Robots_Everywhere",
-  "Scotch_Sponges",
-  "Speed_Stick",
-  "Table_Cloth",
-  "Tennis_Ball_Container",
-  "Ticonderoga_Pencils",
-  "Tissue_Box",
-  "Toilet_Brush",
-  "White_Facecloth",
-  "Windex"
-};
-
-std::string LabelList[40] =
-{
-  "avery1BinderWhite",
-  "bagOfBalloons",
-  "johnsonjohnsonPaperTape",
-  "theBatheryDelicateBathSponge",
-  "knitGlovesBlack",
-  "burtsBeesBabyWipes",
-  "colgateToothbrushs",
-  "greenCompositionBook",
-  "crayolaCrayons24",
-  "scotchClothDuctTape",
-  "drtealsEpsomSalts",  
-  "expoEraser",  
-  "fiskarScissors",  
-  "arFlashlihgts",
-  "elmersGlueSticks6Ct",  
-  "neopreneWeightPink",
-  "hanesWhitteSocks",  
-  "spiralIndexCards",
-  "steriliteIceCubeTray",
-  "irishSpring",
-  "laughOutLoundJokesForKids",
-  "miniMarblesClearLustre",
-  "targetBrandMeasuringSpoons",
-  "meshPencilCup",
-  "tomcatMousetraps",
-  "reynoldsPiePans2ct",
-  "plasticWineGlasses",
-  "polandSpringsWaterBottle",
-  "reynoldsWrap85Sqft",
-  "dvdRobots",
-  "robotsEverywhere",
-  "scotchSponges",
-  "speedStick2Pack",
-  "tableCover",
-  "wilsonTennisBalls",
-  "ticonderogaPencils",
-  "kleenexCoolTouchTissues",
-  "cloroxToiletBrush",
-  "whiteFaceCloth",
-  "windexSprayBottle23oz"
-};
 
 enum ProcessingState{
     NADA,
@@ -153,12 +60,16 @@ public:
   ObjEstAction(int argc, char **argv, std::string name) :
     as_(nh_, name, false),
     action_name_(name),
-    cloud (new PCT)
+    scene_cloud(new PCT),
+    ROI_cloud(new PCT)
   {
+    g_argc = argc;
+    g_argv = argv;
+
     scence_seg = pcl::console::find_switch (argc, argv, "-ss");
-    pcd_folder = "/";
-    path = ros::package::getPath("obj_pose");
-    path.append(pcd_folder);
+    // pcd_folder = "/";
+    // path = ros::package::getPath("obj_pose");
+    // path.append(pcd_folder);
     //ROS_INFO("Get path=%s",path.c_str());
     as_.registerGoalCallback(boost::bind(&ObjEstAction::goalCB, this));
     as_.registerPreemptCallback(boost::bind(&ObjEstAction::preemptCB, this));
@@ -183,9 +94,10 @@ public:
   void segmentation();
   void cpc_segmentation();
   void do_ICP();
-  bool load_pcd(std::string pcd_filename);
+  bool load_amazon_pcd(std::string pcd_filename);
   void set_feedback(std::string msg,int progress);
   void print4x4Matrix (const Eigen::Matrix4f & matrix);
+
 
 protected:
 
@@ -209,20 +121,32 @@ protected:
   int max_x;
   int max_y;
 
+  int call_rcnn_times ;
+
   bool scence_seg;
   
   darkflow_detect::Detect roi_srv;
-  std::string tmp_path;
-  std::string tmp_path2;
+  // std::string tmp_path;
+  // std::string tmp_path2;
   std::string obj_name;
-  std::string path;
-  std::string pcd_folder;
+  //std::string path;
+  //std::string pcd_folder;
   
   sensor_msgs::PointCloud2 seg_msg;
+
+
+
 private:
   PT min_p, max_p;
   PCT::Ptr cloud;
-  PCT::Ptr my_ROICloud;
+  //PCT::Ptr my_ROICloud;
+  PCT::Ptr scene_cloud ;
+  PCT::Ptr ROI_cloud;
+
+
+  int g_argc;
+  char** g_argv;
+
   pcl::PointCloud<pcl::PointXYZ>::Ptr model_PCD;
   PCT::CloudVectorType clusters;
   pcl::PointCloud<pcl::PointXYZ>::Ptr Max_cluster;

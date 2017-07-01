@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<style>
+  .messageCheckbox {
+    height: 10px;
+    width: 10px;
+  }
+  .thumb {
+    height: 50px;
+    border: 1px solid #000;
+    margin: 10px 5px 0 0;
+  }
+  canvas {
+    border: 1px solid red;
+  }
+  #myImage {
+    border: 1px solid blue;
+  }
+  input[type="radio"]{
+    width: 20px; /*Desired width*/
+    height: 20px; /*Desired height*/
+    cursor: pointer;
+  }
+</style>
+
+<body>
+  <br>
+  <button id="btn" onclick="UpdateList()">Update</button>
+  <br>
+  <input type="file" id="files" name="files[]" multiple style="display: none;"></input>
+  <output id="list" style="display: none;"></output>
+  <br>
+  <!--<form action="/upload" method="post">-->
+  <!--<form>-->
+    <input id="fileName" type="text" name="fileName" style="display: none;" />
+    <input id="fileWidth" type="text" name="fileWidth" style="display: none;" />
+    <input id="fileHeight" type="text" name="fileHeight" style="display: none;" />
+    <!--<label for="objName">Object Name: </label>-->
+    <!--<input id="objName" type="text" name="objName" value="robot" />-->
+    <input id="objXmin" type="number" name="objXmin" style="display: none;" />
+    <input id="objYmin" type="number" name="objYmin" style="display: none;" />
+    <input id="objXmax" type="number" name="objXmax" style="display: none;" />
+    <input id="objYmax" type="number" name="objYmax" style="display: none;" />
+    <!--<input type="submit" value="Send" onclick="Send()" />-->
+  <!--</form>-->
+  <form action="/" method="GET">
+    <label for="objName">Object Name: </label>
+    <input id="objName" type="text" name="name" value="" />
+    <input type="submit" value="Chang List" onclick="ChangeList()" />
+  </form>
+  <h1 id="fileNameShow"></h1>
+  <div>
+    <input class="messageCheckbox" type="radio" value="1" name="mailId[]">Object 1
+    <input class="messageCheckbox" type="radio" value="2" name="mailId[]" checked>Object 2
+    <input class="messageCheckbox" type="radio" value="3" name="mailId[]">Object 3
+  </div>
+  <canvas id="myCanvas" style="position: absolute; left: 0; top: 300; z-index: 99;"></canvas>
+  <canvas id="canvas1" style="position: absolute; left: 0; top: 300; z-index: 1;"></canvas>
+  <canvas id="canvas2" style="position: absolute; left: 0; top: 300; z-index: 2;"></canvas>
+
+<!--
+<script src="js/jquery/jquery.min.js"></script>
+<script src="js/jquery/jquery.navgoco.js"></script>
+<script src="js/bootstrap/bootstrap.min.js"></script>
+<script src="js/jquery-ui-1.11.4/external/jquery/jquery.js"></script>
+<script src="js/jquery-ui-1.11.4/jquery-ui.js"></script>
+-->
+<script>
+  // UpdateList when dom ready
+  document.addEventListener("DOMContentLoaded", function(event) { 
+    UpdateList();
+  });
+  // Check browser support
+  if (typeof(Storage) !== "undefined") {
+    // Retrieve
+    document.getElementById("objName").value = localStorage.getItem("objName");
+  } else {
+    alert("Sorry, your browser does not support Web Storage...");
+  }
+  function ChangeList()
+  {
+    localStorage.setItem("objName", document.getElementById('objName').value);
+  }
+
+  function UpdateList()
+  {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        XMLResponse(this);
+      }
+    };
+    xhttp.open("GET", "done.xml", true);
+    xhttp.send();
+  }
+
+  function XMLResponse(xml)
+  {
+    var xmlDoc = xml.responseXML;
+    for (i = 0; i < xmlDoc.getElementsByTagName('file').length; i++) {
+      for (j = 0; j < document.getElementById('list').getElementsByTagName('span').length; j++) {
+        if (document.getElementById('list').childNodes[j].childNodes[0].title == xmlDoc.getElementsByTagName("file")[i].childNodes[0].nodeValue) {
+          document.getElementById('list').childNodes[j].childNodes[0].style.opacity = 0.5;
+        }
+      }
+    }
+  }
+
+  function Send()
+  {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        // alert(xhttp.responseText);
+        document.getElementById('responseText').innerHTML = xhttp.responseText;
+      }
+    };
+    xhttp.open("POST", "/upload", true);
+    xhttp.send("fileName="+document.getElementById('fileName').value +
+               "&fileWidth="+document.getElementById('fileWidth').value +
+               "&fileHeight="+document.getElementById('fileHeight').value +
+               "&objName="+document.getElementById('objName').value +
+               "&objXmin="+document.getElementById('objXmin').value +
+               "&objYmin="+document.getElementById('objYmin').value +
+               "&objXmax="+document.getElementById('objXmax').value +
+               "&objYmax="+document.getElementById('objYmax').value
+               );
+    UpdateList();
+  }
+
+  var checkedValue = null; 
+  var inputElements = document.getElementsByClassName('messageCheckbox');
+
+  var picTmp = '';
+
+  var canvas = document.getElementById('myCanvas'),
+      ctx = canvas.getContext('2d'),
+      rect = {},
+      drag = false;
+  var canvas1 = document.getElementById('canvas1'),
+      ctx1 = canvas1.getContext('2d');
+  var canvas2 = document.getElementById('canvas2'),
+      ctx2 = canvas2.getContext('2d');
+
+  var img = new Image();
+
+  function init()
+  {
+    canvas.addEventListener('mousedown', MouseDown, false);
+    canvas.addEventListener('mouseup', MouseUp, false);
+    canvas.addEventListener('mousemove', MouseMove, false);
+  }
+  function MouseDown(e)
+  {
+    rect.startX = (e.pageX - this.offsetLeft);
+    rect.startY = (e.pageY - this.offsetTop);
+    drag = true;
+  }
+  function MouseUp()
+  {
+    var xMin = (rect.startX < rect.startX + rect.w) ? rect.startX : rect.startX + rect.w;
+    var xMax = (rect.startX > rect.startX + rect.w) ? rect.startX : rect.startX + rect.w;
+    var yMin = (rect.startY < rect.startY + rect.h) ? rect.startY : rect.startY + rect.h;
+    var yMax = (rect.startY > rect.startY + rect.h) ? rect.startY : rect.startY + rect.h;
+
+    console.log("Position: "+xMin+", "+yMin+", "+xMax+", "+yMax);
+    document.getElementById('objXmin').value = xMin;
+    document.getElementById('objYmin').value = yMin;
+    document.getElementById('objXmax').value = xMax;
+    document.getElementById('objYmax').value = yMax;
+
+    drag = false;
+
+    Send();
+  }
+  function MouseMove(e)
+  {
+    if (drag) {
+      rect.w = ((e.pageX - this.offsetLeft) - rect.startX);
+      rect.h = ((e.pageY - this.offsetTop) - rect.startY);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      draw();
+    }
+  }
+  function draw()
+  {
+    if (picTmp == '') {
+      console.log("no Image");
+      // draw rect
+      ctx.fillStyle = 'yellow';
+      ctx.globalAlpha = 0.5;
+      ctx.fillRect(rect.startX, rect.startY, rect.w, rect.h);
+    }else {
+      // draw rect
+      ctx.fillStyle = 'yellow';
+      ctx.globalAlpha = 0.5;
+      ctx.fillRect(rect.startX, rect.startY, rect.w, rect.h);
+      ctx.drawImage(img, 0, 0, img.width, img.height);
+    }
+  }
+
+  init();
+
+  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+
+  function PicFunc(e)
+  {
+    picTmp = e;
+
+    img.onload = function(){
+//      document.getElementById('myCanvas').width = img.width;
+//      document.getElementById('myCanvas').height = img.height;
+      for (var i = 0; i < document.getElementsByTagName('canvas').length; i++) {
+        var canvas = document.getElementsByTagName('canvas')[i];
+        canvas.width = img.width;
+        canvas.height = img.height;
+      }
+      ctx.drawImage(img, 0, 0, img.width, img.height);
+    };
+    img.src = e.src;
+    document.getElementById('fileNameShow').innerHTML = e.title;
+    document.getElementById('fileName').value = e.title;
+    document.getElementById('fileWidth').value = img.width;
+    document.getElementById('fileHeight').value = img.height;
+
+    document.getElementById('responseText').innerHTML = '';
+  }
+
+  function handleFileSelect(evt)
+  {
+    // Remove the last pictures of list
+    while (document.getElementById('list').hasChildNodes()) {
+      document.getElementById('list').removeChild(document.getElementById('list').firstChild);
+    }
+    
+    var files = evt.target.files; // FileList object
+
+    // Loop through the FileList and render image files as thumbnails.
+    for (var i = 0, f; f = files[i]; i++) {
+
+      // Only process image files.
+      if (!f.type.match('image.*')) {
+        continue;
+      }
+
+      var reader = new FileReader();
+
+      // Closure to capture the file information.
+      reader.onload = (function(theFile) {
+        return function(e) {
+          // Render thumbnail.
+          var span = document.createElement('span');
+          span.innerHTML = ['<img class="thumb" src="', e.target.result,
+                            '" title="', escape(theFile.name), '" onclick="PicFunc(this)"/>'].join('');
+          document.getElementById('list').insertBefore(span, null);
+        };
+      })(f);
+
+      // Read in the image file as a data URL.
+      reader.readAsDataURL(f);
+    }
+  }
+</script>
+</body>
+<footer><h1 id="responseText" style="color:red;"></h1></footer>
+</html>

@@ -70,6 +70,7 @@ class CLM_Control:
     def pub_LM_Cmd(self, id, pls):
         msg = LM_Cmd()
         msg.id = id
+        # print 'LM ' + str(id) + 'send pls = ' + str(pls)
         if id == 1:
             if pls > 80000 or pls < 0:
                 print 'error pls for Z-dir LM (0 ~ 80000)'

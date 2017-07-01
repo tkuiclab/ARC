@@ -471,9 +471,18 @@ function Get_Robot_FB()
 		fb_TCP[2] = _Math._Roundn(parseFloat(p.z),2);
 		fb_TCP[6] = _Math._Roundn(f*_Math.RAD2DEG, 2);
 
+		// fb_TCP[3~5] = roll, pitch, yaw
+		// e[0~2] 	   = pitch, roll, yaw
+
+		// for ICLab euler rotation mode
 		fb_TCP[3] = _Math._Roundn(e[1]*_Math.RAD2DEG, 2);
 		fb_TCP[4] = _Math._Roundn(e[0]*_Math.RAD2DEG, 2);
 		fb_TCP[5] = _Math._Roundn(e[2]*_Math.RAD2DEG, 2);
+
+		// for nsa euler rotation mode
+		fb_TCP[3] = _Math._Roundn((e[2]+(Math.PI/2))*_Math.RAD2DEG, 2);	//roll
+		fb_TCP[4] = _Math._Roundn(e[0]*_Math.RAD2DEG, 2);				//pitch
+		fb_TCP[5] = _Math._Roundn(e[1]*_Math.RAD2DEG, 2);				//yaw
 
 		for(var i=0;i<7;i++)
 			$(fb_TCP_name[i]).html(fb_TCP[i]);
@@ -1123,7 +1132,7 @@ function Move_TCP_Rel(cmd_mod, data)
 		
 		e[0]=e[0]*180/3.1415926;
 		e[1]=e[1]*180/3.1415926;
-		e[2]=e[2]*180/3.1415926;
+		e[2]=e[2]*180/3.1415926 + 90;
 		f=f*180/3.1415926;
 
 		if (cmd_mod == CmdType.Shift_X) {
