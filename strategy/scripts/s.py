@@ -148,14 +148,71 @@ class Strategy(threading.Thread):
 	def safe_pose(self):
 		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-180, 0, 0))
 
+	def test_relative_move_nsa(self, dis = 0):
+		# =======================================================================
+		""" relative move nsa with a specify dis (safe when euler mode is 'nsa' mode) """
+		# n = move_cam_y , s= -move_cam_x, a = move_cam_z
+		# =======================================================================
+		self.Arm.relative_move_nsa(n = -dis)
+		self.Arm.relative_move_nsa(n =  dis)
+		self.Arm.relative_move_nsa(s = -dis)
+		self.Arm.relative_move_nsa(s =  dis)
+		self.Arm.relative_move_nsa(a =  dis)
+		self.Arm.relative_move_nsa(a = -dis)
+
+	def test_relative_rot_nsa(self, rot = 0):
+		# =======================================================================
+		""" relative rotate pitch roll and yaw with a specifydegree """
+		# (safe when euler mode is 'nsa' mode) 
+		# when yaw(n) is not equal to 0, pitch(s) cannot do relative motion"""
+		# =======================================================================
+		self.Arm.relative_rot_nsa(pitch =  rot)  # pitch
+		self.Arm.relative_rot_nsa(pitch = -rot)
+		self.Arm.relative_rot_nsa(roll  =  rot)  # roll
+		self.Arm.relative_rot_nsa(roll  = -rot)
+		self.Arm.relative_rot_nsa(yaw   =  rot)  # yaw
+		self.Arm.relative_rot_nsa(yaw   = -rot)
+
+	def test_relative_xyz_base(self, dis = 0):
+		self.Arm.relative_xyz_base(x =  dis)
+		self.Arm.relative_xyz_base(x = -dis)
+		self.Arm.relative_xyz_base(y = -dis)
+		self.Arm.relative_xyz_base(y =  dis)
+		self.Arm.relative_xyz_base(z =  dis)
+		self.Arm.relative_xyz_base(z = -dis)
+
+	def test_relative_move_nsa_rot_pry(self, dis = 0, rot = 0):
+		self.Arm.relative_move_nsa_rot_pry(n =  dis, pitch =  rot)
+		self.Arm.relative_move_nsa_rot_pry(n = -dis, pitch = -rot)
+
+		self.Arm.relative_move_nsa_rot_pry(s = -dis, roll =  rot)
+		self.Arm.relative_move_nsa_rot_pry(s =  dis, roll = -rot)
+
+		self.Arm.relative_move_nsa_rot_pry(a =  dis, yaw =  rot)
+		self.Arm.relative_move_nsa_rot_pry(a = -dis, yaw = -rot)
+
+	def test_relative_move_xyz_rot_pry(self, dis = 0, rot = 0):
+		self.Arm.relative_move_xyz_rot_pry(x =  dis, pitch =  rot)
+		self.Arm.relative_move_xyz_rot_pry(x = -dis, pitch = -rot)
+
+		self.Arm.relative_move_xyz_rot_pry(y = -dis, roll =  rot)
+		self.Arm.relative_move_xyz_rot_pry(y =  dis, roll = -rot)
+
+		self.Arm.relative_move_xyz_rot_pry(z = -dis, yaw =  rot)
+		self.Arm.relative_move_xyz_rot_pry(z =  dis, yaw = -rot)
+
+
 if __name__ == '__main__':
 	rospy.init_node('strategy')
 
 	try:
 		s = Strategy()
-		s.start() 
+		# s.start() 
+
+
 
 		# write_PickInfo_2_JSON()
+
 
 		# ========== TEST ===========
 		# Error pose
@@ -208,36 +265,19 @@ if __name__ == '__main__':
 		# s.Arm.relative_move_nsa(s = -0.06) #s= move_cam_x
 		# s.Arm.relative_move_nsa(a = 0.1)   #a= move_cam_z
 
-		#dis = 0.05
-		#rot = 10
-		#s.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.3), (-150, 0, 0) )
+		# ========================= rel motion test area start =============================
+		dis = 0.05
+		rot = 10
+		s.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-160, 0, 0) )
+		# s.test_relative_move_nsa(0.05)
+		# s.test_relative_rot_nsa(10)
+		# s.test_relative_xyz_base(0.05)
+		# s.test_relative_move_nsa_rot_pry(dis = 0.05, rot = 10)
+		# s.test_relative_move_xyz_rot_pry(dis = 0.05, rot = 10)
 
-		# move nsa with a specify dis (safe when euler mode is 'nsa' mode)
-		#n = move_cam_y , s= -move_cam_x, a = move_cam_z
-		# s.Arm.relative_move_nsa(n = -dis)
-		# s.Arm.relative_move_nsa(n =  dis)
-		# s.Arm.relative_move_nsa(s = -dis)
-		# s.Arm.relative_move_nsa(s =  dis)
-		# s.Arm.relative_move_nsa(a =  dis)
-		# s.Arm.relative_move_nsa(a = -dis)
+		# ========================= rel motion test area over ==============================
+
 		
-		# # relative rotate pitch roll and yaw with a specifydegree
-		# # (safe when euler mode is 'nsa' mode)
-		# # when yaw(n) is not equal to 0, pitch(s) cannot do relative motion
-		# s.Arm.relative_rot_nsa(s =  rot)  # pitch
-		# s.Arm.relative_rot_nsa(s = -rot)
-		# s.Arm.relative_rot_nsa(a =  rot)  # roll
-		# s.Arm.relative_rot_nsa(a = -rot)
-		# s.Arm.relative_rot_nsa(n =  rot)  # yaw
-		# s.Arm.relative_rot_nsa(n = -rot)
-
-		# s.Arm.relative_xyz_base(x =  dis)
-		# s.Arm.relative_xyz_base(x = -dis)
-		# s.Arm.relative_xyz_base(y = -dis)
-		# s.Arm.relative_xyz_base(y =  dis)
-		# s.Arm.relative_xyz_base(z =  dis)
-		# s.Arm.relative_xyz_base(z = -dis)
-		# ============ rel motion test area over ============
 
 		rospy.spin()
 	except rospy.ROSInterruptException:

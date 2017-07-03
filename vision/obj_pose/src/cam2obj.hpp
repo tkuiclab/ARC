@@ -134,7 +134,9 @@ void pass_through_from_arg(PCT::Ptr cloud_in,
 //cam_normal_2_obj_normal 
 //input: obj_normal
 //output: roll, pitch (degree)
-void cam_normal_2_obj_normal(Vector3f obj_normal,float& roll, float& pitch){
+void cam_normal_2_obj_normal(Vector3f obj_normal,
+float& roll, float& pitch, 
+float& cam_roll, float &cam_pitch){
 
   Vector3f cam_normal(0,0,1);
   float cam_abs = 1 ;  // sqrt( dot(cam_normal,cam_normal) )
@@ -162,8 +164,11 @@ void cam_normal_2_obj_normal(Vector3f obj_normal,float& roll, float& pitch){
 
   printf("ORI (roll,pitch)=(%lf,%lf)\n", pcl::rad2deg( r_rad), pcl::rad2deg( p_rad));
 
-  roll = (xp[1] < 0) ? (-1) * r_rad : r_rad;
-  pitch = (yp[0] > 0) ? (-1) * p_rad : p_rad;
+  roll = r_rad;
+  pitch = p_rad;
+
+  cam_roll = (xp[1] < 0) ? (-1) * r_rad : r_rad;
+  cam_pitch = (yp[0] > 0) ? (-1) * p_rad : p_rad;
 
 
 }
@@ -327,17 +332,37 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   R = Quaternionf().setFromTwoVectors(cam_normal,obj_normal);
   Vector3f euler = R.eulerAngles(0, 1, 2);
   yaw = euler[2]; pitch = euler[1]; roll = euler[0];
-  // std::cout << " (roll, pitch, yaw) = "  
-  //    <<  "(" <<  pcl::rad2deg(roll)  << "," 
-  //    <<  pcl::rad2deg(pitch)  << "," 
-  //    <<  pcl::rad2deg(yaw) << ")" << std::endl; 
+  std::cout << "Eigen (roll, pitch, yaw) = "  
+     <<  "(" <<  pcl::rad2deg(roll)  << "," 
+     <<  pcl::rad2deg(pitch)  << "," 
+     <<  pcl::rad2deg(yaw) << ")" << std::endl; 
 
+  Eigen::Affine3f  tf_neg = Eigen::Affine3f::Identity();
+  tf_neg.rotate (Eigen::AngleAxisf ( -yaw,   Eigen::Vector3f::UnitZ()));
+  tf_neg.rotate (Eigen::AngleAxisf ( -pitch, Eigen::Vector3f::UnitY()));
+  tf_neg.rotate (Eigen::AngleAxisf ( -roll,  Eigen::Vector3f::UnitX()));
+
+
+  Vector3f e_rotate;
+  Vector3f c_vec(center.x, center.y, center.z);
+  e_rotate = tf_neg * c_vec;
   
-  float r, p;
-  cam_normal_2_obj_normal(obj_normal, r ,p);
+  float e_x = e_rotate[0];
+  float e_y = e_rotate[1];
+  float e_z = e_rotate[2];
+
+  std::cout << "Eigen (x, y, z) = "  
+  <<  "(" <<  e_x  << ","  <<  e_y  << "," <<  e_z << ")" << std::endl;
+
+
+  // ----cam_normal_2_obj_normal()-------//
+  float r, p, cam_r, cam_p;
+  cam_normal_2_obj_normal(obj_normal, r ,p, cam_r, cam_p);
   std::cout << " (r, p) = "   <<  "("  << pcl::rad2deg(r) << "," << pcl::rad2deg(p) << ")"  << std::endl;
   
-  Eigen::Affine3f tf_neg = Eigen::Affine3f::Identity();
+
+  //------rotate center----------//
+  tf_neg = Eigen::Affine3f::Identity();
   //tf_neg.rotate (Eigen::AngleAxisf ( -yaw,   Eigen::Vector3f::UnitZ()));
   tf_neg.rotate (Eigen::AngleAxisf ( -p, Eigen::Vector3f::UnitY()));
   tf_neg.rotate (Eigen::AngleAxisf ( -r,  Eigen::Vector3f::UnitX()));
@@ -351,10 +376,14 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   y = after_rotate_center_with_neg[1];
   z = after_rotate_center_with_neg[2];
 
- 
-  roll = pcl::rad2deg(r);
-  pitch = pcl::rad2deg(p);
+
+  //------output rotation----------//
+  roll = cam_r;
+  pitch = cam_p;
   yaw = 0;
+
+
+  std::cout << "-------Output ------" << std::endl;  
   
   std::cout << " (roll, pitch, yaw) = "   
      <<  "(" <<  pcl::rad2deg(roll)  << "," 
@@ -362,11 +391,11 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
      <<  pcl::rad2deg(yaw) << ")" << std::endl; 
     
 
-  // std::cout << " center (x, y, z) = "  
-  // <<  "(" <<  center.x  << ","  <<  center.y  << "," <<  center.z << ")" << std::endl;
+  std::cout << " center (x, y, z) = "  
+  <<  "(" <<  center.x  << ","  <<  center.y  << "," <<  center.z << ")" << std::endl;
 
-  // std::cout << " (x, y, z) = "  
-  // <<  "(" <<  x  << ","  <<  y  << "," <<  z << ")" << std::endl;
+  std::cout << " (x, y, z) = "  
+  <<  "(" <<  x  << ","  <<  y  << "," <<  z << ")" << std::endl;
 
 }
 

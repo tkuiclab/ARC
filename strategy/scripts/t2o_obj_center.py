@@ -1,9 +1,4 @@
 #! /usr/bin/env python
-# pylint: disable = invalid-name
-# pylint: disable = C0326, C0121, C0301
-# pylint: disable = W0105, C0303, W0312
-"""Use to generate arm task and run."""
-
 import sys
 from math import radians, degrees, sin, cos, pi
 from numpy import multiply
@@ -28,6 +23,10 @@ import s
 
 
 
+# cam2tool_y = -0.095  #cam axis
+# cam2tool_z = 0.25 + 0.035
+
+
 class T2O:
     """Running arm task class."""
 
@@ -35,6 +34,7 @@ class T2O:
         """Inital object."""
         #self.__set_pubSub()
         self.Arm 			= arm_task_rel.ArmTask()
+
         rospy.on_shutdown(self.stop_task)
         self.__obj_pose_client = actionlib.SimpleActionClient("/obj_pose", obj_pose.msg.ObjectPoseAction)
         
@@ -86,61 +86,29 @@ class T2O:
 
         rospy.loginfo("object_pose")
         rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z)) 
-        rospy.loginfo("(roll,pitch,yaw)= (" 
-                        + str(numpy.rad2deg(a.x)) + ", " 
-                        + str(numpy.rad2deg(a.y)) + ", " 
-                        + str(numpy.rad2deg(a.z)) + ")" ) 
-        
-                        
-        r = numpy.rad2deg(a.x)
-        p = numpy.rad2deg(a.y)
-        
 
+        
+        
+        #cam axi, tool need to move 
         move_cam_x = l.x
-        move_cam_y = l.y + cam2tool_y
+        move_cam_y = l.y - cam2tool_y
         move_cam_z = l.z - cam2tool_z
         
-        #return
-        #----------------Rotation---------------_#
-        #self.Arm.relative_rot_nsa(pitch = -r)  #roll
-        #self.Arm.relative_rot_nsa(yaw = -p)  #pitch
-        self.Arm.relative_rot_nsa(pitch=-r, yaw = -p)  #pitch
+        rospy.loginfo('move linear  s(cam_x)='+str(move_cam_x) + ',n(cam_y)='+str(move_cam_y) + ', a(cam_z)='+str(move_cam_z)
+
+        self.Arm.relative_move_nsa(n= move_cam_y, s = move_cam_x, a = move_cam_z -0.05)
 
         while self.Arm.busy:
             rospy.sleep(.1)
 
-        
-        rospy.loginfo('Move Angle Finish')
 
-        
-        return
-        
-        #----------------Move---------------_#
-        
-
-        rospy.loginfo('move linear  s(cam_x)='+str(move_cam_x) + ',n(cam_y)='+str(move_cam_y) + ', a(cam_z)='+str(move_cam_z) )
-
-        self.Arm.relative_move_nsa(n= move_cam_y, s = move_cam_x, a = move_cam_z -0.05)
-
-        
-        #----------------Rotation+Move---------------_#
-        #rospy.loginfo('move linear  s(cam_x)='+str(move_cam_x) + ',n(cam_y)='+str(move_cam_y) + ', a(cam_z)='+str(move_cam_z) )
-        #self.Arm.relative_move_nsa_rot_pry(pitch = -r, yaw = -p, s = move_cam_x, n = move_cam_y, a = move_cam_z)
-
-        
-        # while self.Arm.busy:
-        #     rospy.sleep(.1)
-        
-        
-        #self.Arm.relative_move_nsa(a = -0.05)
-
-
-    
+        #----------- Request object pose--------#
+        task.Arm.relative_move_nsa(a = 0.03)
 
 
 if __name__ == '__main__':
 
-    rospy.init_node('t2o_robot', anonymous=True)
+    rospy.init_node('t2o_obj_center', anonymous=True)
 
     task = T2O()
     rospy.sleep(0.5)
@@ -154,33 +122,17 @@ if __name__ == '__main__':
         rospy.sleep(.1)
     rospy.loginfo("robot_photo_pose ready!")
 
-
     #----------- Request object pose--------#
     #task.obj_pose_request('robots_dvd')
 
     
 
     # -------Back 2 home------#.
-    task.safe_pose()
+    #task.safe_pose()
     # task.Arm.home()
 
 
-    # -------Relative Test------#
-    # task.Arm.relative_rot_nsa(pitch = -14.7) 
-    # while task.Arm.busy:
-    #     rospy.sleep(.1)
-    # task.Arm.relative_move_nsa(s = 0.0167663395405 ,n = 0.0226672434807, a=0.262694020271-0.05)
-    
-    # task.Arm.relative_move_nsa_rot_pry(pitch = -14.7,s = 0.0167663395405 ,n = 0.0226672434807, a=0.262694020271-0.05)
 
-    #task.Arm.relative_move_nsa(n =  0.02) # cam_y
-    #task.Arm.relative_move_nsa(s = 0.05) # cam_x
-    #task.Arm.relative_move_nsa(a =  0.01) # cam_z
-
-
-    #task.Arm.relative_rot_nsa(s =  10)     # pitch -> cam_x
-    # task.Arm.relative_rot_nsa(a =  10)     # cam_z
-    #task.Arm.relative_rot_nsa(n = 10)     # cam_y
 
     r = rospy.Rate(10)
     while not rospy.is_shutdown():
