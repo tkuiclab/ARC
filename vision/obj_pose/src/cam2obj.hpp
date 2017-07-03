@@ -422,7 +422,9 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   printf("-Tool Move -->(%lf, %lf, %lf)\n",
       tool_x,tool_y,tool_z);
 
-
+  x = tool_x;
+  y = tool_y;
+  z = tool_z;
     
 }
 
