@@ -134,7 +134,9 @@ void pass_through_from_arg(PCT::Ptr cloud_in,
 //cam_normal_2_obj_normal 
 //input: obj_normal
 //output: roll, pitch (degree)
-void cam_normal_2_obj_normal(Vector3f obj_normal,float& roll, float& pitch){
+void cam_normal_2_obj_normal(Vector3f obj_normal,
+float& roll, float& pitch){ 
+//,float& cam_roll, float &cam_pitch){
 
   Vector3f cam_normal(0,0,1);
   float cam_abs = 1 ;  // sqrt( dot(cam_normal,cam_normal) )
@@ -144,6 +146,8 @@ void cam_normal_2_obj_normal(Vector3f obj_normal,float& roll, float& pitch){
   float xp_abs = sqrt( xp.dot(xp) );
   float cos_th_xp = cam_normal.dot(xp) / xp_abs ; //* cam_abs;
   float r_rad = acos(cos_th_xp);
+
+  r_rad = (xp[1] > 0.0) ? (-1.0) * r_rad : r_rad;
 
   //------------Pitch--------------//
   //rotate obj_normal with -r_rad
@@ -155,17 +159,22 @@ void cam_normal_2_obj_normal(Vector3f obj_normal,float& roll, float& pitch){
   float yp_abs = sqrt( yp.dot(yp) );
   float cos_th_yp = cam_normal.dot(yp) / yp_abs;// * cam_abs;
   float p_rad = acos(cos_th_yp);
+  p_rad = (yp[0] < 0.0) ? (-1.0) * p_rad : p_rad;  
+ 
 
+  roll = r_rad;
+  pitch = p_rad;
+  
 
-  printf("xp=(%lf,%lf,%lf),roll=%lf\n", xp[0], xp[1], xp[2],roll);
-  printf("yp=(%lf,%lf,%lf),pitch=%lf\n", yp[0], yp[1], yp[2],pitch);
+  // cam_roll = (xp[1] < 0) ? (-1) * r_rad : r_rad;
+  // cam_pitch = (yp[0] > 0) ? (-1) * p_rad : p_rad;
+  // cam_roll = (xp[1] > 0) ? (-1) * r_rad : r_rad;
+  // cam_pitch = (yp[0] < 0) ? (-1) * p_rad : p_rad;
 
-  printf("ORI (roll,pitch)=(%lf,%lf)\n", pcl::rad2deg( r_rad), pcl::rad2deg( p_rad));
-
-  roll = (xp[1] < 0) ? (-1) * r_rad : r_rad;
-  pitch = (yp[0] > 0) ? (-1) * p_rad : p_rad;
-
-
+  printf("(roll,pitch)=(%lf,%lf)\n", pcl::rad2deg( roll), pcl::rad2deg( pitch));
+  printf("xp=(%lf,%lf,%lf),roll=%lf\n", xp[0], xp[1], xp[2],pcl::rad2deg( roll));
+  printf("yp=(%lf,%lf,%lf),pitch=%lf\n", yp[0], yp[1], yp[2],pcl::rad2deg( pitch));
+  
 }
 
 Vector3f del_out_mean_normal(PC_Normal::Ptr i_cloud, PC_Normal::Ptr o_cloud){
@@ -327,17 +336,48 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   R = Quaternionf().setFromTwoVectors(cam_normal,obj_normal);
   Vector3f euler = R.eulerAngles(0, 1, 2);
   yaw = euler[2]; pitch = euler[1]; roll = euler[0];
-  // std::cout << " (roll, pitch, yaw) = "  
-  //    <<  "(" <<  pcl::rad2deg(roll)  << "," 
-  //    <<  pcl::rad2deg(pitch)  << "," 
-  //    <<  pcl::rad2deg(yaw) << ")" << std::endl; 
+  std::cout << "Eigen (roll, pitch, yaw) = "  
+     <<  "(" <<  pcl::rad2deg(roll)  << "," 
+     <<  pcl::rad2deg(pitch)  << "," 
+     <<  pcl::rad2deg(yaw) << ")" << std::endl; 
 
+
+  // std::cout << "Eigen (x, y, z) = "  
+  // <<  "(" <<  e_x  << ","  <<  e_y  << "," <<  e_z << ")" << std::endl;
+
+
+  // ----cam_normal_2_obj_normal()-------//
+  float r, p ;//, cam_r, cam_p;
+  cam_normal_2_obj_normal(obj_normal, r ,p ); //, cam_r, cam_p);
+  //std::cout << " (r, p) = "   <<  "("  << pcl::rad2deg(r) << "," << pcl::rad2deg(p) << ")"  << std::endl;
   
-  float r, p;
-  cam_normal_2_obj_normal(obj_normal, r ,p);
-  std::cout << " (r, p) = "   <<  "("  << pcl::rad2deg(r) << "," << pcl::rad2deg(p) << ")"  << std::endl;
+  //output rotation
+  roll = r;
+  pitch = p;
+  yaw = 0;
+
+
+
+
+  std::cout << "-------Move------" << std::endl;  
+
+  //----- eigen test------
+  Eigen::Affine3f  tf_neg = Eigen::Affine3f::Identity();
+  //tf_neg.rotate (Eigen::AngleAxisf ( -yaw,   Eigen::Vector3f::UnitZ()));
+  tf_neg.rotate (Eigen::AngleAxisf ( -pitch, Eigen::Vector3f::UnitY()));
+  tf_neg.rotate (Eigen::AngleAxisf ( -roll,  Eigen::Vector3f::UnitX()));
+
+
+  Vector3f e_rotate;
+  Vector3f c_vec(center.x, center.y, center.z);
+  e_rotate = tf_neg * c_vec;
   
-  Eigen::Affine3f tf_neg = Eigen::Affine3f::Identity();
+  float e_x = e_rotate[0];
+  float e_y = e_rotate[1];
+  float e_z = e_rotate[2];
+
+  //------rotate center----------//
+  tf_neg = Eigen::Affine3f::Identity();
   //tf_neg.rotate (Eigen::AngleAxisf ( -yaw,   Eigen::Vector3f::UnitZ()));
   tf_neg.rotate (Eigen::AngleAxisf ( -p, Eigen::Vector3f::UnitY()));
   tf_neg.rotate (Eigen::AngleAxisf ( -r,  Eigen::Vector3f::UnitX()));
@@ -347,36 +387,43 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   Vector3f after_rotate_center_with_neg;
 
   after_rotate_center_with_neg = tf_neg * center_vec;
-  x = after_rotate_center_with_neg[0];
-  y = after_rotate_center_with_neg[1];
-  z = after_rotate_center_with_neg[2];
+  float c_trans_x = after_rotate_center_with_neg[0];
+  float c_trans_y = after_rotate_center_with_neg[1];
+  float c_trans_z = after_rotate_center_with_neg[2];
 
- 
-  roll = pcl::rad2deg(r);
-  pitch = pcl::rad2deg(p);
-  yaw = 0;
+  std::cout << " center (x, y, z) = "  
+  <<  "(" <<  center.x  << ","  <<  center.y  << "," <<  center.z << ")" << std::endl;
+
+  std::cout << "c_trans (x, y, z) = "  
+  <<  "(" <<  c_trans_x  << ","  <<  c_trans_y  << "," <<  c_trans_z << ")" << std::endl;
+
+  std::cout << "Eigen (x, y, z) = "  
+  <<  "(" <<  e_x  << ","  <<  e_y  << "," <<  e_z << ")" << std::endl;
+
+
+  float cam2tool_y = -0.11;  //#-0.095  #cam axis
+  float cam2tool_z = 0.23;   //# + 0.035
   
-  std::cout << " (roll, pitch, yaw) = "   
-     <<  "(" <<  pcl::rad2deg(roll)  << "," 
-     <<  pcl::rad2deg(pitch)  << "," 
-     <<  pcl::rad2deg(yaw) << ")" << std::endl; 
+  //------ORI Move -----//
+  float move_cam_x = c_trans_x;
+  float move_cam_y = c_trans_y + cam2tool_y;
+  float move_cam_z = c_trans_z - cam2tool_z;
+
+  printf("-ORI Move -->(%lf, %lf, %lf)\n",
+      move_cam_x,move_cam_y,move_cam_z);
+
+  Vector3f tool_vec(center.x, center.y + cam2tool_y, center.z - cam2tool_z);
+
+  Vector3f tool_trans = tf_neg * tool_vec;
+  float tool_x = tool_trans[0];
+  float tool_y = tool_trans[1];
+  float tool_z = tool_trans[2];
+
+  printf("-Tool Move -->(%lf, %lf, %lf)\n",
+      tool_x,tool_y,tool_z);
+
+
     
-
-  // std::cout << " center (x, y, z) = "  
-  // <<  "(" <<  center.x  << ","  <<  center.y  << "," <<  center.z << ")" << std::endl;
-
-  // std::cout << " (x, y, z) = "  
-  // <<  "(" <<  x  << ","  <<  y  << "," <<  z << ")" << std::endl;
-  //std::cout << " (x, y, z) = "  
-  // <<  "(" <<  x  << ","  <<  y  << "," <<  z << ")" << std::endl;
-
-  float cam2tool_y = -0.095 ;
-  float cam2tool_z = 0.25 + 0.035;
-   //------ORI Move 
-  printf("------ORI Move--------\n");
-  float move_cam_x = l.x;
-  float move_cam_y = l.y - cam2tool_y;
-  float move_cam_z = l.z - cam2tool_z;
 }
 
 

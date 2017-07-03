@@ -13,6 +13,8 @@ void ObjEstAction::goalCB()
   state = FOTO;
   obj_name = as_.acceptNewGoal()->object_name;
   ROS_INFO("Action calling! Goal=%s",obj_name.c_str());    
+  std::cout << "-------------" << obj_name << " ----------" << std::endl;  
+  
 }
 
 void ObjEstAction::preemptCB()
@@ -37,10 +39,11 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       write_pcd_2_rospack(scene_cloud,"scene_cloud.pcd");
 #endif
 
-      feedback_.msg = "Raw Point Could Read Done (From Camera)";
-      feedback_.progress = 30;
-      as_.publishFeedback(feedback_);
-
+      // feedback_.msg = "Raw Point Could Read Done (From Camera)";
+      // feedback_.progress = 30;
+      // as_.publishFeedback(feedback_);
+      //set_feedback("Grabbing point cloud...",20);
+      
       state = CALL_RCNN;
       //state = POSE_ESTIMATION;
       call_rcnn_times = 0;
@@ -311,7 +314,6 @@ int main (int argc, char **argv)
         break;
         
       case FOTO:
-        ObjEst.set_feedback("Grabbing point cloud...",20);
         break;
 
       case CALL_RCNN:

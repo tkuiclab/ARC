@@ -21,6 +21,7 @@ from darkflow_detect.srv import Detect, DetectResponse
 from darkflow_detect.msg import Detected
 from darkflow.net.build import TFNet
 from convert_label.convert import offical2Our, our2Offical, colors
+from get_obj_info import info_dict
 
 
 def handle_request(req):
@@ -63,7 +64,7 @@ def handle_request(req):
 
     mark_frame(frame, detectedList)
     print('===========================' if len(result)
-        else 'Nothing was detected')
+          else 'Nothing was detected')
 
     return res
 
@@ -72,6 +73,7 @@ def detectedInfoToMsg(info):
     """Convert detected infomations to message type."""
     msg = Detected()
     msg.object_name = our2Offical(info['label'])
+    msg.type = info_dict[msg.object_name].type
     msg.confidence = info['confidence']
     msg.bound_box = [
         info['topleft']['x'],
@@ -97,7 +99,8 @@ def draw_bbox(frame, bbox, label='', confidence=-0.1):
         )
         cv2.putText(
             frame,
-            label if confidence < 0 else label + ': {0:.3f}'.format(confidence),
+            label if confidence < 0 else label +
+            ': {0:.3f}'.format(confidence),
             (bbox[0], bbox[1] - 10),
             0,
             .55,
@@ -113,15 +116,18 @@ def mark_frame(frame, detected):
     _img.frame = copy.deepcopy(frame)
     # Drawing all of bbox
     for result in detected:
-        draw_bbox(frame, result.bound_box, result.object_name, result.confidence)
+        draw_bbox(frame, result.bound_box,
+                  result.object_name, result.confidence)
     # Assign frame of prediction to global _img object
     _img.predi = frame
 
 
 def print_info(info):
     """Print infomation of detecting result."""
+    label_name = our2Offical(info['label'])
     print('---------------------------')
-    print(our2Offical(info['label']))
+    print(label_name)
+    print(info_dict[label_name].type)
     print(info['confidence'])
     print(info['topleft'])
     print(info['bottomright'])
@@ -177,6 +183,7 @@ class Image(object):
         """Frame of predication setter: cv_image."""
         self._predi = img
         self._refresh = True
+
 
 _img = Image()
 

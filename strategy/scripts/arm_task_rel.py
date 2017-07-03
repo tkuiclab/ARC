@@ -175,7 +175,7 @@ class ArmTask:
         vec_n = [rot[0][0], rot[1][0], rot[2][0]]
         vec_s = [rot[0][1], rot[1][1], rot[2][1]]
         vec_a = [rot[0][2], rot[1][2], rot[2][2]]
-        return vec_n, vec_s, vec_a
+        return vec_n, vec_s, vec_a   
 
     def relative_move_nsa(self, mode='ptp', n=0, s=0, a=0):
         """Get euler angle and run task."""
@@ -215,7 +215,53 @@ class ArmTask:
         while self.__is_busy:
             rospy.sleep(.1)
 
-    def relative_rot_nsa(self, mode='ptp', n=0, s=0, a=0):
+    def relative_move_nsa_rot_pry(self, mode='ptp', n=0, s=0, a=0, yaw=0, pitch=0, roll=0):
+        """Get euler angle and run task."""
+        # ============================================================================
+        # note1: for nsa rotation only
+        # Note2: Although the fn will complete the motion simultaneously, 
+        #        however, in ik cmd, it is first get the motion dis(conv_nsa2xyz) 
+        #        and then get the pitch, roll and yaw
+        # ============================================================================
+
+        while self.__is_busy:
+            rospy.sleep(.1)
+
+        fb = self.get_fb()
+        pos = fb.group_pose.position
+        ori = fb.group_pose.orientation
+        euler = self.quaternion2euler(ori)
+        rot = self.nsa2rotation(euler)
+        vec_s, vec_n, vec_a = self.rotation2vector(rot)
+        
+        move = [0, 0, 0]
+
+        if n != 0:
+            move += multiply(vec_n, n)
+        if s != 0:
+            move += multiply(vec_s, s)
+        if a != 0:
+            move += multiply(vec_a, a)
+
+        if pitch!=0 and abs(euler[0]) > 0.0001:
+            pitch = 0
+            print'err, yaw(n) is not equal to 0, pitch(s) cannot do relative motion'
+        
+        self.pub_ikCmd(
+            mode,
+            (pos.x + move[1], pos.y + move[0], pos.z + move[2]),  #######
+            (
+                degrees(euler[1]+(pitch*3.14156/180)),              
+                degrees(euler[2]+((roll+90)*3.14156/180)),
+                degrees(euler[0]+(yaw*3.14156/180))
+            )
+        )
+
+        while self.__is_busy:
+            rospy.sleep(.1)
+
+
+    def relative_move_xyz_rot_pry(self, mode='ptp', x=0, y=0, z=0, yaw=0, pitch=0, roll=0):
         """Get euler angle and run task."""
         # note:for nsa rotation only
         # euler[0~2] = [r p y] = [a s n]
@@ -227,17 +273,46 @@ class ArmTask:
         ori   = fb.group_pose.orientation
         euler = self.quaternion2euler(ori)
 
-        if s!=0 and abs(euler[0]) > 0.0001:
-            s = 0
+        if pitch!=0 and abs(euler[0]) > 0.0001:
+            pitch = 0
+            print'err, yaw(n) is not equal to 0, pitch(s) cannot do relative motion'
+            # return 
+        self.pub_ikCmd(
+            mode,
+            (pos.x + x, pos.y + y, pos.z + z),
+            (
+                degrees(euler[1]+(pitch*3.14156/180)),              
+                degrees(euler[2]+((roll+90)*3.14156/180)),
+                degrees(euler[0]+(yaw*3.14156/180))
+            )
+        )
+
+        while self.__is_busy:
+            rospy.sleep(.1)
+
+    def relative_rot_nsa(self, mode='ptp', yaw=0, pitch=0, roll=0):
+        """Get euler angle and run task."""
+        # note:for nsa rotation only
+        # euler[0~2] = [r p y] = [a s n]
+        while self.__is_busy:
+            rospy.sleep(.1)
+
+        fb    = self.get_fb()
+        pos   = fb.group_pose.position
+        ori   = fb.group_pose.orientation
+        euler = self.quaternion2euler(ori)
+
+        if pitch!=0 and abs(euler[0]) > 0.0001:
+            pitch = 0
             print'err, yaw(n) is not equal to 0, pitch(s) cannot do relative motion'
             # return 
         self.pub_ikCmd(
             mode,
             (pos.x, pos.y, pos.z),
             (
-                degrees(euler[1]+(s*3.14156/180)),              
-                degrees(euler[2]+((a+90)*3.14156/180)),
-                degrees(euler[0]+(n*3.14156/180))
+                degrees(euler[1]+(pitch*3.14156/180)),              
+                degrees(euler[2]+((roll+90)*3.14156/180)),
+                degrees(euler[0]+(yaw*3.14156/180))
             )
         )
 
@@ -245,38 +320,38 @@ class ArmTask:
             rospy.sleep(.1)
 
     def relative_control(self, mode='ptp', n=0, s=0, a=0):
-        """Get euler angle and run task."""
-        # note:for ICLab rotation only
+        # """Get euler angle and run task."""
+        # # note:for ICLab rotation only
         while self.__is_busy:
             rospy.sleep(.1)
 
-        fb = self.get_fb()
-        pos = fb.group_pose.position
-        ori = fb.group_pose.orientation
-        euler = self.quaternion2euler(ori)
-        rot = self.euler2rotation(euler)
-        vec_n, vec_s, vec_a = self.rotation2vector(rot)
+        # fb = self.get_fb()
+        # pos = fb.group_pose.position
+        # ori = fb.group_pose.orientation
+        # euler = self.quaternion2euler(ori)
+        # rot = self.euler2rotation(euler)
+        # vec_n, vec_s, vec_a = self.rotation2vector(rot)
         
-        move = [0, 0, 0]
-        if n != 0:
-            move += multiply(vec_n, n)
-        if s != 0:
-            move += multiply(vec_s, s)
-        if a != 0:
-            move += multiply(vec_a, a)
+        # move = [0, 0, 0]
+        # if n != 0:
+        #     move += multiply(vec_n, n)
+        # if s != 0:
+        #     move += multiply(vec_s, s)
+        # if a != 0:
+        #     move += multiply(vec_a, a)
 
-        self.pub_ikCmd(
-            mode,
-            (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
-            (
-                degrees(euler[1]),   # 1 0 2             
-                degrees(euler[0]),
-                degrees(euler[2])
-            )
-        )
+        # self.pub_ikCmd(
+        #     mode,
+        #     (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
+        #     (
+        #         degrees(euler[1]),   # 1 0 2             
+        #         degrees(euler[0]),
+        #         degrees(euler[2])
+        #     )
+        # )
 
-        while self.__is_busy:
-            rospy.sleep(.1)
+        # while self.__is_busy:
+        #     rospy.sleep(.1)
 
     def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0):
         """relative move xyz with manipulator base axis."""
