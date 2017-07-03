@@ -154,7 +154,6 @@ class PickTask:
 		self.pick_id = self.pick_id + 1
 		
 		return True
-
 		
 	def run(self):
 		self.pick_id = 0
@@ -220,7 +219,7 @@ class PickTask:
 			print self.info
 			self.next_state = PhotoPose
 			self.state 		= WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (0, 0, 0) )
+			self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-90, 0, 0) )
 			return
 
 		elif self.state == PhotoPose:       
@@ -228,7 +227,7 @@ class PickTask:
 			print self.info
 			self.next_state = VisionProcess
 			self.state 		= WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.4), (-15, 0, 0) )
+			self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.4), (-105, 0, 0) )
 			return
 
 		elif self.state == VisionProcess:    
@@ -253,7 +252,7 @@ class PickTask:
 
 			self.next_state = Go2Bin
 			self.state 		= WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (0, 0, 0) )  # tmp
+			self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-90, 0, 0) )  # tmp
 			return
 
 		elif self.state == Go2Bin:				# using nsa motion to pick obj.
@@ -271,7 +270,7 @@ class PickTask:
 
 			self.next_state = PickObj
 			self.state = WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.6, 0, 0.145), (0, 0, 0) )
+			self.Arm.relative_control(n=0.05)  
 
 			return
 
@@ -292,7 +291,7 @@ class PickTask:
 
 			self.next_state = LeaveBin
 			self.state = WaitRobot
-			self.Arm.relative_xyz_base(0, 0, 0.05)
+			self.Arm.relative_control(n=-0.05)  
 			#print 'U2L'
 			return
 
@@ -301,7 +300,7 @@ class PickTask:
 			print self.info
 			self.next_state = Move2PlaceObj1
 			self.state = WaitRobot
-			self.Arm.relative_xyz_base(-0.05, 0, 0)
+			self.Arm.relative_control(a=-0.05) 
 			
 			return
 
@@ -323,7 +322,7 @@ class PickTask:
 			print self.info
 			self.next_state = PlaceObj
 			self.state = WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.22), (-90, 0, 0) )
+			self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.22), (-180, 0, 0) )
 			
 			return
 
@@ -342,7 +341,7 @@ class PickTask:
 			print self.info
 			self.next_state = FinishTask
 			self.state = WaitRobot
-			self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.22), (0, 0, 0) )
+			self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.22), (-90, 0, 0) )
 			
 			return
 

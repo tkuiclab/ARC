@@ -20,12 +20,17 @@ from image_convert import save_img, get_now
 from darkflow_detect.srv import Detect, DetectResponse
 from darkflow_detect.msg import Detected
 from darkflow.net.build import TFNet
-from convert_label.convert import offical2Our, our2Offical
+from convert_label.convert import offical2Our, our2Offical, colors
 
 
 def handle_request(req):
     """Service request callback."""
     frame = img_cvt.cv_img
+    # Checking image is coming
+    if frame is None:
+        rospy.logwarn("There is no image! Does realsense launch?")
+        return DetectResponse([], False)
+
     cvted_name = offical2Our(req.object_name)
     # Checking converted name
     if not cvted_name:
@@ -41,13 +46,10 @@ def handle_request(req):
     detectedList = list()
     for info in result:
         print_info(info)
-
         # Checking detected object
-        if (cvted_name == 'all' and
-                info['confidence'] > 0.0):
+        if cvted_name == 'all':
             detectedList.append(detectedInfoToMsg(info))
-        elif (cvted_name == info['label'] and
-                info['confidence'] > 0.0):
+        elif cvted_name == info['label']:
             if len(detectedList) > 0:
                 if info['confidence'] > detectedList[0].confidence:
                     detectedList[0] = detectedInfoToMsg(info)
@@ -55,7 +57,7 @@ def handle_request(req):
                 detectedList.append(detectedInfoToMsg(info))
 
     res = DetectResponse([], False)
-    if len(detectedList) > 0:
+    if len(detectedList):
         res.detected = detectedList
         res.result = True
 
@@ -83,8 +85,8 @@ def detectedInfoToMsg(info):
 def draw_bbox(frame, bbox, label='', confidence=-0.1):
     """Drawing bbox on image."""
     # If the object was detected
-    if len(bbox) > 0:
-        color = (100, 100, 255)
+    if len(bbox):
+        color = colors[label] if label != '' else (100, 100, 255)
         thickness = 2
         cv2.rectangle(
             frame,
@@ -98,7 +100,7 @@ def draw_bbox(frame, bbox, label='', confidence=-0.1):
             label if confidence < 0 else label + ': {0:.3f}'.format(confidence),
             (bbox[0], bbox[1] - 10),
             0,
-            .6,
+            .55,
             color=color,
             thickness=thickness
         )
@@ -182,8 +184,8 @@ _img = Image()
 options = {
     "model": "cfg/yolo-new.cfg",    # model of net
     "backup": "ckpt/",              # directory of ckpt (training result)
-    "load": -1,                     # which ckpt will be loaded. -1 represent the last ckpt
-    "threshold": -0.1,              # threshold for confidence
+    "load": -1,                 # which ckpt will be loaded. -1 represent the last ckpt
+    "threshold": 0.0,               # threshold for confidence
     "gpu": 1.0                      # gpu using rate
 }
 tfnet = TFNet(options)

@@ -2,6 +2,9 @@
 
 """Define all of labels."""
 
+from random import seed, randint
+
+
 amazonLabelsList = [
     "avery_binder",
     "ballons",
@@ -89,3 +92,10 @@ ourLabelsList = [
     "windexSprayBottle23oz",
     "all"
 ]
+
+# Generate random color for objects
+seed()
+colors = dict()
+for name in amazonLabelsList:
+    color = (randint(100, 255), randint(100, 255), randint(100, 255))
+    colors[name] = color

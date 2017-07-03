@@ -154,12 +154,11 @@ if __name__ == '__main__':
     task = T2O()
     rospy.sleep(.5)
     task.safe_pose()
-    task.Arm.pub_jointCmd() #home pose
-    task.robot_photo_pose()
+    #task.Arm.pub_jointCmd() #home pose
+    #task.robot_photo_pose()
     # print 'robot finish'
 
-    #self.Arm.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-180, 0, 0) )
-
+    task.Arm.home()
     #task.Arm.pub_ikCmd('ptp', (0.40, 0.0 , 0.2), (-180, 0, 0) )
 
     # task.Arm.relative_move_nsa(n =  0.05) # cam_y
