@@ -49,8 +49,8 @@ int main(int argc,char** argv){
       near_points_percent);
   
 
-  std::cout << "(x, y, z) = " << "(" << x  << "," << y  << "," << z << ")" << std::endl;
-  std::cout << "(r, p, y) = " << "(" << a_x  << "," << a_y  << "," << a_z << ")" << std::endl;
+  // std::cout << "(x, y, z) = " << "(" << x  << "," << y  << "," << z << ")" << std::endl;
+  // std::cout << "(r, p, y) = " << "(" << a_x  << "," << a_y  << "," << a_z << ")" << std::endl;
   
 
   return 0;
