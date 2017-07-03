@@ -21,7 +21,7 @@
 #include <pcl/surface/mls.h>
 #include <pcl/filters/extract_indices.h>
 
-
+using namespace std;
 
 int g_argc;
 char** g_argv;
@@ -367,7 +367,16 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
 
   // std::cout << " (x, y, z) = "  
   // <<  "(" <<  x  << ","  <<  y  << "," <<  z << ")" << std::endl;
+  //std::cout << " (x, y, z) = "  
+  // <<  "(" <<  x  << ","  <<  y  << "," <<  z << ")" << std::endl;
 
+  float cam2tool_y = -0.095 ;
+  float cam2tool_z = 0.25 + 0.035;
+   //------ORI Move 
+  printf("------ORI Move--------\n");
+  float move_cam_x = l.x;
+  float move_cam_y = l.y - cam2tool_y;
+  float move_cam_z = l.z - cam2tool_z;
 }
 
 
