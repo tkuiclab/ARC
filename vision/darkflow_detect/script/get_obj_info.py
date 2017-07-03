@@ -62,10 +62,11 @@ def parse_all_json():
 
     info = dict()
     for folder in folders:
-        jsonfiles = glob.glob(join(folder, '*'))
+        jsonfiles = glob.glob(join(folder, '*.json'))
         for filepath in jsonfiles:
             obj_info = json_parser(filepath)
             info[obj_info.name] = obj_info
+    return info
 
 
 info_dict = parse_all_json()

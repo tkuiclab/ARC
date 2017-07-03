@@ -73,7 +73,11 @@ def detectedInfoToMsg(info):
     """Convert detected infomations to message type."""
     msg = Detected()
     msg.object_name = our2Offical(info['label'])
-    msg.type = info_dict[msg.object_name].type
+    try:
+        msg.type = info_dict[msg.object_name].type
+    except Exception as e:
+        rospy.logwarn(e)
+        msg.type = 'Unknow'
     msg.confidence = info['confidence']
     msg.bound_box = [
         info['topleft']['x'],
@@ -127,7 +131,12 @@ def print_info(info):
     label_name = our2Offical(info['label'])
     print('---------------------------')
     print(label_name)
-    print(info_dict[label_name].type)
+    try:
+        obj_type = info_dict[label_name].type
+    except Exception as e:
+        rospy.logwarn(e)
+        obj_type = 'Unknow'
+    print(obj_type)
     print(info['confidence'])
     print(info['topleft'])
     print(info['bottomright'])
