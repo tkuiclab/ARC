@@ -24,6 +24,8 @@ import json
 
 import arm_task_rel
 
+import s
+
 #[0.3, 0, 0.3, -60, 0, 0, 0];
 _POS = (.2, 0, .3)  # x, y, z
 _ORI = (-70, 0, 0)  # pitch, roll, yaw
@@ -152,20 +154,22 @@ if __name__ == '__main__':
     rospy.init_node('t2o', anonymous=True)
 
     task = T2O()
-    rospy.sleep(.5)
-    task.safe_pose()
-    #task.Arm.pub_jointCmd() #home pose
-    #task.robot_photo_pose()
+    # rospy.sleep(.5)
+    # task.safe_pose()
+    # task.Arm.pub_jointCmd() # home pose
+    # task.robot_photo_pose()
     # print 'robot finish'
+    # sta = s.Strategy()
+    # sta.test_dgo_bin_LM('h') # go to bin number 'num'
 
     task.Arm.home()
-    #task.Arm.pub_ikCmd('ptp', (0.40, 0.0 , 0.2), (-180, 0, 0) )
-
-    # task.Arm.relative_move_nsa(n =  0.05) # cam_y
+    # task.Arm.pub_ikCmd('ptp', (0.40, 0.0 , 0.2), (-180, 0, 0) )
+    # task.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-90, 0, 0) ) # bin photo pose
+    # task.Arm.relative_move_nsa(n =  -0.02) # cam_y
     # task.Arm.relative_move_nsa(s = -0.05) # cam_x
-    # task.Arm.relative_move_nsa(a =  0.05)
+    # task.Arm.relative_move_nsa(a =  0.01)
 
-    #task.Arm.relative_rot_nsa(s =  30)     # pitch -> cam_x
+    # task.Arm.relative_rot_nsa(s =  0)     # pitch -> cam_x
     #task.Arm.relative_rot_nsa(a =  10)     # cam_z
     #task.Arm.relative_rot_nsa(n = 10)     # cam_y
 

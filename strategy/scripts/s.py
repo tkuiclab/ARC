@@ -152,10 +152,10 @@ if __name__ == '__main__':
 	rospy.init_node('strategy')
 
 	try:
-		# s = Strategy()
-		# s.start() 
+		s = Strategy()
+		s.start() 
 
-		write_PickInfo_2_JSON()
+		# write_PickInfo_2_JSON()
 
 		# ========== TEST ===========
 		# Error pose
