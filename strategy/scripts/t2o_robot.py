@@ -164,7 +164,7 @@ if __name__ == '__main__':
 
     # task.Arm.relative_move_nsa(n =  0.05) # cam_y
     # task.Arm.relative_move_nsa(s = -0.05) # cam_x
-    # task.Arm.relative_move_nsa(a =  0.05)
+    task.Arm.relative_move_nsa(a =  -0.05)
 
     #task.Arm.relative_rot_nsa(s =  30)     # pitch -> cam_x
     #task.Arm.relative_rot_nsa(a =  10)     # cam_z

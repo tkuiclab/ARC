@@ -68,7 +68,7 @@ class T2O:
         self.__obj_pose_client.wait_for_result()
 
     def desk_photo_pose(self):
-        self.Arm.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-180, 0, 0) )
+        self.Arm.pub_ikCmd('ptp', (0.30, 0.0 , 0.3), (-180, 0, 0) )
 
     def obj_pose_feedback_cb(self,fb):
         rospy.loginfo("In obj_pose_feedback_cb")
@@ -141,19 +141,19 @@ if __name__ == '__main__':
     task = T2O()
 
     #rospy.sleep(0.5)
-    task.desk_photo_pose()
-
+    #task.desk_photo_pose()
+    task.Arm.home()
     #self.Arm.pub_ikCmd('ptp', (0.30, 0.0 , 0.2), (-180, 0, 0) )
 
     #task.Arm.pub_ikCmd('ptp', (0.40, 0.0 , 0.2), (-180, 0, 0) )
 
     # task.Arm.relative_move_nsa(n =  0.05) # cam_y
     # task.Arm.relative_move_nsa(s = -0.05) # cam_x
-    task.Arm.relative_move_nsa(a = -0.05) # cam_z
+    #task.Arm.relative_move_nsa(a = -0.1) # cam_z
 
     # task.Arm.relative_rot_nsa(s = 30)     # pitch -> cam_x
     # task.Arm.relative_rot_nsa(a = 10)     # cam_z
-    # task.Arm.relative_rot_nsa(n = 10)     # cam_y
+    #task.Arm.relative_rot_nsa(n = 20)     # cam_y_pitch  160
 
     r = rospy.Rate(10)
     while not rospy.is_shutdown():

@@ -42,17 +42,17 @@ void write_pcd(PCT::Ptr cloud, std::string f_name){
   
 
     pcl::PCDWriter writer;
-    writer.write<PT> (f_name, *cloud, false);
+    writer.write<PT> (f_name, *cloud, true);
 
-    std::cout << "Save PCD -> " << f_name<< std::endl;
+    //std::cout << "Save PCD -> " << f_name<< std::endl;
 }
 
 void write_pcd_normals(PC_Normal::Ptr cloud, std::string f_name){
 
     pcl::PCDWriter writer;
-    writer.write<PNormal> (f_name, *cloud, false);
+    writer.write<PNormal> (f_name, *cloud, true);
 
-    std::cout << "Save PCD -> " << f_name<< std::endl;
+    //std::cout << "Save PCD -> " << f_name<< std::endl;
 }
 
 //(input)    ./appname xxx.pcd 
@@ -164,10 +164,10 @@ void get_near_points(PCT::Ptr cloud_in,
   std::vector<int> pointIdxNKNSearch(K);
   std::vector<float> pointNKNSquaredDistance(K);
 
-  std::cout << "K nearest neighbor search at (" << searchPoint.x 
-            << " " << searchPoint.y 
-            << " " << searchPoint.z
-            << ") with K=" << K << std::endl;
+  // std::cout << "K nearest neighbor search at (" << searchPoint.x 
+  //           << " " << searchPoint.y 
+  //           << " " << searchPoint.z
+  //           << ") with K=" << K << std::endl;
 
   if ( kdtree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
   {
@@ -196,7 +196,7 @@ void get_near_points(PCT::Ptr cloud_in,
   extract.setIndices (pointIndices);
   extract.setNegative (false);
   extract.filter (*cloud_out);
-  std::cerr << "PointCloud representing the planar component: " << cloud_out->width * cloud_out->height << " data points." << std::endl;
+  //std::cerr << "PointCloud representing the planar component: " << cloud_out->width * cloud_out->height << " data points." << std::endl;
 }
 
 
@@ -284,7 +284,7 @@ void get_pass_through_points(PCT::Ptr cloud_in,
     pass.setFilterFieldName ("z");
     pass.setFilterLimits (min_z, max_z);
 
-    std::cout << "PT->min_z= " << min_z << ", max_z = " << max_z << std::endl;
+    //std::cout << "PT->min_z= " << min_z << ", max_z = " << max_z << std::endl;
 
 
     pass.setInputCloud (now_cloud);
@@ -295,7 +295,7 @@ void get_pass_through_points(PCT::Ptr cloud_in,
     pass.setFilterFieldName ("y");
     pass.setFilterLimits (min_y, max_y);
 
-    std::cout << "PT->min_y= " << min_y << ", max_y = " << max_y << std::endl;
+    //std::cout << "PT->min_y= " << min_y << ", max_y = " << max_y << std::endl;
 
     pass.setInputCloud (now_cloud);
     pass.filter (*now_cloud);
@@ -305,7 +305,7 @@ void get_pass_through_points(PCT::Ptr cloud_in,
     pass.setFilterFieldName ("x");
     pass.setFilterLimits (min_x, max_x);
 
-     std::cout << "PT->min_x= " << min_x << ", max_x = " << max_x << std::endl;
+    //std::cout << "PT->min_x= " << min_x << ", max_x = " << max_x << std::endl;
 
 
     pass.setInputCloud (now_cloud);
@@ -314,15 +314,6 @@ void get_pass_through_points(PCT::Ptr cloud_in,
 
   
   *cloud_out = *now_cloud;
-  /* for backup point cloud
-  pass.filter (*indices);
-  //PCT::Ptr cloud_cluster (new PCT);
-  for (std::vector<int>::const_iterator pit = indices->begin (); pit != indices->end (); ++pit)
-    cloud_out->points.push_back (cloud_in->points[*pit]); //*
-  cloud_out->width = cloud_out->points.size ();
-  cloud_out->height = 1;
-  cloud_out->is_dense = true;
-  */
 }
 
 #endif
