@@ -146,16 +146,16 @@ if __name__ == '__main__':
     rospy.sleep(0.5)
     rospy.loginfo('T2O Ready')
 
-    #task.robot_photo_pose()
+    # task.safe_pose()
+    task.robot_photo_pose()
     
 
-    #task.robot_photo_pose()
-    #task.Arm.relative_rot_nsa(pitch = -2.301548, yaw = 8.370343)
-    #task.Arm.relative_move_nsa(n= 0.175816, s = 0.026680, a = 0.312114 -obj_dis)
-
+    # task.robot_photo_pose()
+    # task.Arm.relative_rot_nsa(pitch = 9.328644, yaw = 35.861837)
+    # task.Arm.relative_move_nsa(n= 0.306312, s = -0.110500, a = 0.254350 -obj_dis)
 
     #task.Arm.relative_move_nsa( a = 0.1)
-    #exit()
+    # exit()
 
     #----------- Go Photo Pose--------#
     #task.robot_photo_pose()
@@ -165,13 +165,13 @@ if __name__ == '__main__':
     
 
     #----------- Request object pose--------#
-    #task.obj_pose_request('pie_plates')
+    task.obj_pose_request('black_fashion_gloves')
 
     
 
     # -------Back 2 home------#.
-    #task.safe_pose()
-    task.Arm.home()
+    # task.safe_pose()
+    # task.Arm.home()
 
 
     # -------Relative Test------#
