@@ -8,7 +8,7 @@ s_y_max 0.25
 pcl_viewer -multiview 1 *.pcd
 
 # show normals
-pcl_viewer -normals 1 _mls.pcd
+pcl_viewer -normals 1 -ax 1 _mls.pcd
 pcl_viewer -normals 1 _del_out_mean_normal.pcd
 
 # show ax 

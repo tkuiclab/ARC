@@ -104,19 +104,17 @@ class T2O:
         #----------------Rotation---------------_#
         #self.Arm.relative_rot_nsa(pitch = r)  #roll
         #self.Arm.relative_rot_nsa(yaw = p)  #pitch
-        self.Arm.relative_rot_nsa(pitch=r, yaw = p)  #pitch
+        self.Arm.relative_rot_nsa(pitch = r, yaw = p)  #pitch
 
         while self.Arm.busy:
             rospy.sleep(.1)
 
-        
         rospy.loginfo('Move Angle Finish')
 
         
         #return
         
         #----------------Move---------------_#
-        
 
         rospy.loginfo('move linear  s(cam_x)='+str(move_cam_x) + ',n(cam_y)='+str(move_cam_y) + ', a(cam_z)='+str(move_cam_z -obj_dis) )
 
@@ -136,7 +134,7 @@ class T2O:
         while self.Arm.busy:
             rospy.sleep(.1)
         
-        task.Arm.relative_move_nsa( a = obj_dis)
+        task.Arm.relative_move_nsa( a = obj_dis -0.01)
 
 
 
@@ -148,7 +146,7 @@ if __name__ == '__main__':
     rospy.sleep(0.5)
     rospy.loginfo('T2O Ready')
 
-    task.robot_photo_pose()
+    #task.robot_photo_pose()
     
 
     #task.robot_photo_pose()
@@ -160,19 +158,19 @@ if __name__ == '__main__':
     #exit()
 
     #----------- Go Photo Pose--------#
-    task.robot_photo_pose()
+    #task.robot_photo_pose()
     
     while task.Arm.busy:
         rospy.sleep(.1)
     
 
     #----------- Request object pose--------#
-    #task.obj_pose_request('robots_dvd')
+    #task.obj_pose_request('pie_plates')
 
     
 
     # -------Back 2 home------#.
-    task.safe_pose()
+    #task.safe_pose()
     task.Arm.home()
 
 
@@ -189,9 +187,9 @@ if __name__ == '__main__':
     #task.Arm.relative_move_nsa(a =  0.01) # cam_z
 
 
-    #task.Arm.relative_rot_nsa(pitch =  10)     # pitch -> cam_x
-    # task.Arm.relative_rot_nsa(roll =  10)     # cam_z
-    #task.Arm.relative_rot_nsa(yaw = 10)     # cam_y
+    # task.Arm.relative_rot_nsa(pitch =  10)     # pitch -> cam_x
+    # task.Arm.relative_rot_nsa(roll =  -10)     # cam_z
+    # task.Arm.relative_rot_nsa(yaw = -10)     # cam_y
 
     #---------IK FAIL-----------$
     # task.robot_photo_pose()
