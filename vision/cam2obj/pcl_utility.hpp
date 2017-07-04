@@ -38,7 +38,7 @@ std::string path;
 #endif
 
 
-void write_pcd(PCT::Ptr cloud, std::string f_name){
+void write_pcd_2_rospack(PCT::Ptr cloud, std::string f_name){
   
 
     pcl::PCDWriter writer;
@@ -47,7 +47,7 @@ void write_pcd(PCT::Ptr cloud, std::string f_name){
     //std::cout << "Save PCD -> " << f_name<< std::endl;
 }
 
-void write_pcd_normals(PC_Normal::Ptr cloud, std::string f_name){
+void write_pcd_2_rospack_normals(PC_Normal::Ptr cloud, std::string f_name){
 
     pcl::PCDWriter writer;
     writer.write<PNormal> (f_name, *cloud, true);
@@ -267,6 +267,7 @@ void get_hsv_points(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in,
   extract.filter (*cloud_out);
 
 }
+/*
 void get_pass_through_points(PCT::Ptr cloud_in,
             PCT::Ptr cloud_out,
             float min_x, float max_x,
@@ -315,5 +316,5 @@ void get_pass_through_points(PCT::Ptr cloud_in,
   
   *cloud_out = *now_cloud;
 }
-
+*/
 #endif
