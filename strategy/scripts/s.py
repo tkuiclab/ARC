@@ -267,8 +267,18 @@ if __name__ == '__main__':
 
 		# ========================= rel motion test area start =============================
 		dis = 0.05
-		rot = 10
-		s.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-160, 0, 0) )
+		rot = 40
+		# s.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.2), (-170, 40, 0) )
+
+		# s.Arm.relative_rot_nsa(pitch = rot)
+		# s.Arm.relative_move_nsa(a = dis)
+
+		s.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.2), (-170, 40, 0) )
+		s.Arm.relative_rot_pry_move_nsa(a = dis, pitch = rot)
+
+		# s.Arm.relative_move_nsa_rot_pry(a = dis, pitch = rot)
+
+
 		# s.test_relative_move_nsa(0.05)
 		# s.test_relative_rot_nsa(10)
 		# s.test_relative_xyz_base(0.05)

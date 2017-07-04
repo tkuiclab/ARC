@@ -54,7 +54,7 @@ $ rosservice call /robot_cmd "cmd: 'setMinPos'"
 roslaunch arc control.launch
 roslaunch realsense_camera sr300_nodelet_rgbd.launch
 rosrun darkflow_detect object_detect.py
-rosrun obj_pose obj_center
+rosrun obj_pose obj_center    # object_pose_estimator
 rosrun strategy s.py
 web
 

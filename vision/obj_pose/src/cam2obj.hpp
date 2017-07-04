@@ -406,13 +406,17 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   
   //------ORI Move -----//
   float move_cam_x = c_trans_x;
-  float move_cam_y = c_trans_y + cam2tool_y;
+  float move_cam_y = c_trans_y - cam2tool_y;
   float move_cam_z = c_trans_z - cam2tool_z;
 
   printf("-ORI Move -->(%lf, %lf, %lf)\n",
       move_cam_x,move_cam_y,move_cam_z);
 
-  Vector3f tool_vec(center.x, center.y + cam2tool_y, center.z - cam2tool_z);
+  
+      
+    
+
+  Vector3f tool_vec(center.x, center.y - cam2tool_y, center.z - cam2tool_z);
 
   Vector3f tool_trans = tf_neg * tool_vec;
   float tool_x = tool_trans[0];
@@ -422,9 +426,24 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   printf("-Tool Move -->(%lf, %lf, %lf)\n",
       tool_x,tool_y,tool_z);
 
-  x = tool_x;
-  y = tool_y;
-  z = tool_z;
+  
+
+  x = c_trans_x;
+  y = c_trans_y;
+  z = c_trans_z;
+
+
+  printf("----------Test move cam----------\n");
+  printf("task.Arm.relative_rot_nsa(pitch = %lf, yaw = %lf)\n",
+      pcl::rad2deg(roll), pcl::rad2deg(pitch));
+  printf("task.Arm.relative_move_nsa(n= %lf, s = %lf, a = %lf -obj_dis)\n",
+      move_cam_y, move_cam_x, move_cam_z);
+
+  printf("----------Test Trans Tool----------\n");
+  printf("task.Arm.relative_rot_nsa(pitch = %lf, yaw = %lf)\n",
+      pcl::rad2deg(roll), pcl::rad2deg(pitch));
+  printf("task.Arm.relative_move_nsa(n= %lf, s = %lf, a = %lf - obj_dis)\n",
+      tool_y, tool_x, tool_z);
     
 }
 

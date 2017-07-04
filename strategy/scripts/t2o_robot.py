@@ -26,7 +26,7 @@ import arm_task_rel
 from gripper import cam2tool_y, cam2tool_z
 import s
 
-
+obj_dis = 0.1
 
 class T2O:
     """Running arm task class."""
@@ -85,7 +85,7 @@ class T2O:
         l = p.linear
 
         rospy.loginfo("object_pose")
-        rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z)) 
+        rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z) + ")") 
         rospy.loginfo("(roll,pitch,yaw)= (" 
                         + str(numpy.rad2deg(a.x)) + ", " 
                         + str(numpy.rad2deg(a.y)) + ", " 
@@ -97,14 +97,14 @@ class T2O:
         
 
         move_cam_x = l.x
-        move_cam_y = l.y + cam2tool_y
-        move_cam_z = l.z - cam2tool_z
+        move_cam_y = l.y - cam2tool_y
+        move_cam_z = l.z - cam2tool_z 
         
         #return
         #----------------Rotation---------------_#
-        #self.Arm.relative_rot_nsa(pitch = -r)  #roll
-        #self.Arm.relative_rot_nsa(yaw = -p)  #pitch
-        self.Arm.relative_rot_nsa(pitch=-r, yaw = -p)  #pitch
+        #self.Arm.relative_rot_nsa(pitch = r)  #roll
+        #self.Arm.relative_rot_nsa(yaw = p)  #pitch
+        self.Arm.relative_rot_nsa(pitch=r, yaw = p)  #pitch
 
         while self.Arm.busy:
             rospy.sleep(.1)
@@ -113,14 +113,18 @@ class T2O:
         rospy.loginfo('Move Angle Finish')
 
         
-        return
+        #return
         
         #----------------Move---------------_#
         
 
-        rospy.loginfo('move linear  s(cam_x)='+str(move_cam_x) + ',n(cam_y)='+str(move_cam_y) + ', a(cam_z)='+str(move_cam_z) )
+        rospy.loginfo('move linear  s(cam_x)='+str(move_cam_x) + ',n(cam_y)='+str(move_cam_y) + ', a(cam_z)='+str(move_cam_z -obj_dis) )
 
-        self.Arm.relative_move_nsa(n= move_cam_y, s = move_cam_x, a = move_cam_z -0.05)
+        self.Arm.relative_move_nsa(n= move_cam_y, s = move_cam_x, a = move_cam_z -obj_dis)
+        
+
+        #self.Arm.relative_move_nsa(n= l.y, s = l.x)
+        #self.Arm.relative_move_nsa(n= l.y, s = l.x, a = l.z -obj_dis)
 
         
         #----------------Rotation+Move---------------_#
@@ -128,14 +132,12 @@ class T2O:
         #self.Arm.relative_move_nsa_rot_pry(pitch = -r, yaw = -p, s = move_cam_x, n = move_cam_y, a = move_cam_z)
 
         
-        # while self.Arm.busy:
-        #     rospy.sleep(.1)
+        #---------------Suction---------------#
+        while self.Arm.busy:
+            rospy.sleep(.1)
         
-        
-        #self.Arm.relative_move_nsa(a = -0.05)
+        task.Arm.relative_move_nsa( a = obj_dis)
 
-
-    
 
 
 if __name__ == '__main__':
@@ -146,14 +148,23 @@ if __name__ == '__main__':
     rospy.sleep(0.5)
     rospy.loginfo('T2O Ready')
 
+    task.robot_photo_pose()
+    
+
+    #task.robot_photo_pose()
+    #task.Arm.relative_rot_nsa(pitch = -2.301548, yaw = 8.370343)
+    #task.Arm.relative_move_nsa(n= 0.175816, s = 0.026680, a = 0.312114 -obj_dis)
+
+
+    #task.Arm.relative_move_nsa( a = 0.1)
+    #exit()
 
     #----------- Go Photo Pose--------#
     task.robot_photo_pose()
     
     while task.Arm.busy:
         rospy.sleep(.1)
-    rospy.loginfo("robot_photo_pose ready!")
-
+    
 
     #----------- Request object pose--------#
     #task.obj_pose_request('robots_dvd')
@@ -162,7 +173,7 @@ if __name__ == '__main__':
 
     # -------Back 2 home------#.
     task.safe_pose()
-    # task.Arm.home()
+    task.Arm.home()
 
 
     # -------Relative Test------#
@@ -178,9 +189,15 @@ if __name__ == '__main__':
     #task.Arm.relative_move_nsa(a =  0.01) # cam_z
 
 
-    #task.Arm.relative_rot_nsa(s =  10)     # pitch -> cam_x
-    # task.Arm.relative_rot_nsa(a =  10)     # cam_z
-    #task.Arm.relative_rot_nsa(n = 10)     # cam_y
+    #task.Arm.relative_rot_nsa(pitch =  10)     # pitch -> cam_x
+    # task.Arm.relative_rot_nsa(roll =  10)     # cam_z
+    #task.Arm.relative_rot_nsa(yaw = 10)     # cam_y
+
+    #---------IK FAIL-----------$
+    # task.robot_photo_pose()
+    # task.Arm.relative_rot_nsa(pitch = -34.457731, yaw = 1.510902)
+    
+ 
 
     r = rospy.Rate(10)
     while not rospy.is_shutdown():

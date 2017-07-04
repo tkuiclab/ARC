@@ -52,9 +52,6 @@ def write_json(path, content):
         return False
 
 
-
-
-
 def make_pick_list_from_path(item_loc_path, order_path):
     """Using item location file and order file to make a list for picking task."""
     item_loc_json = read_json(item_loc_path)

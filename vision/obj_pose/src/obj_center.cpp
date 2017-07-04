@@ -1,8 +1,8 @@
 
 #include "object_pose_estimator.hpp"
-//#include "seg_plane_cam2obj.hpp"
+#include "seg_plane_cam2obj.hpp"
 //#include "cpc_segmentation.hpp"
-#include "cam2obj.hpp"
+//#include "cam2obj.hpp"
 #include "ICP_alignment.hpp"
 
 
