@@ -100,12 +100,13 @@ class T2O:
         move_cam_y = l.y - cam2tool_y
         move_cam_z = l.z - cam2tool_z 
         
-        #return
+        return
         #----------------Rotation---------------_#
         #self.Arm.relative_rot_nsa(pitch = r)  #roll
         #self.Arm.relative_rot_nsa(yaw = p)  #pitch
-        #self.Arm.relative_rot_nsa(pitch = r, yaw = p)  #pitch
-        self.Arm.relative_rot_pry_move_nsa(pitch = r, yaw = p, n= move_cam_y, s = move_cam_x, a = move_cam_z -obj_dis)
+        self.Arm.relative_rot_nsa(pitch = r, yaw = p)  #pitch
+        
+        #self.Arm.relative_rot_pry_move_nsa(pitch = r, yaw = p, n= move_cam_y, s = move_cam_x, a = move_cam_z -obj_dis)
         
 
         while self.Arm.busy:
