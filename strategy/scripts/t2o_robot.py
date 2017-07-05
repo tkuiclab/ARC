@@ -197,7 +197,7 @@ if __name__ == '__main__':
 
 
     # task.Arm.relative_rot_nsa(pitch =  10)     # pitch -> cam_x
-    task.Arm.relative_rot_nsa(roll =  -200)     # cam_z
+    #task.Arm.relative_rot_nsa(roll =  -200)     # cam_z
     # task.Arm.relative_rot_nsa(yaw = -10)     # cam_y
 
     #---------IK FAIL-----------$
