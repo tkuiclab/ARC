@@ -266,19 +266,19 @@ if __name__ == '__main__':
 		# s.Arm.relative_move_nsa(a = 0.1)   #a= move_cam_z
 
 		# ========================= rel motion test area start =============================
-		dis = 0.05
-		rot = 40
-		# s.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.2), (-170, 40, 0) )
+		# s.Arm.pub_ikCmd('ptp', (0.3, 0 , 0.2), (-180, 0, 0) )
+		dis = -0.05
+		rot = 20
+		# s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
+		# s.Arm.relative_rot_nsa(roll = rot)
+		# s.Arm.relative_move_nsa(s = dis)
 
-		# s.Arm.relative_rot_nsa(pitch = rot)
-		# s.Arm.relative_move_nsa(a = dis)
+		s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
+		s.Arm.relative_rot_pry_move_nsa(s = dis, roll = rot)
 
-		s.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.2), (-170, 40, 0) )
-		s.Arm.relative_rot_pry_move_nsa(a = dis, pitch = rot)
+
 
 		# s.Arm.relative_move_nsa_rot_pry(a = dis, pitch = rot)
-
-
 		# s.test_relative_move_nsa(0.05)
 		# s.test_relative_rot_nsa(10)
 		# s.test_relative_xyz_base(0.05)

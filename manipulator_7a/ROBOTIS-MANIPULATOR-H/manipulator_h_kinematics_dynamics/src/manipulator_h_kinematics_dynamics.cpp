@@ -152,8 +152,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
         manipulator_link_data_[7]->relative_position_ = robotis_framework::getTransitionXYZ(0.12300, -0.04500, 0.00000);
         manipulator_link_data_[7]->joint_axis_ = robotis_framework::getTransitionXYZ(1.0, 0.0, 0.0);
         manipulator_link_data_[7]->center_of_mass_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-        manipulator_link_data_[7]->joint_limit_max_ =  0.95 * M_PI;
-        manipulator_link_data_[7]->joint_limit_min_ = -0.95 * M_PI;
+        manipulator_link_data_[7]->joint_limit_max_ =  1 * M_PI; //orig = 0.95
+        manipulator_link_data_[7]->joint_limit_min_ = -1 * M_PI; //orig = -0.95
         manipulator_link_data_[7]->inertia_ = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
         manipulator_link_data_[8]->name_ = "end";
@@ -861,6 +861,8 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
             link_data.joint_angle_ < link_data.joint_limit_min_)
         {
             std::cout << "ik joint limit: " << i+1 << " " << link_data.joint_angle_ * 180.0 / M_PI << std::endl;
+            std::cout << "max ang of joint " <<i+1 <<" is " << link_data.joint_limit_max_* 180.0 / M_PI << std::endl;
+            std::cout << "min ang of joint " <<i+1 <<" is " << link_data.joint_limit_min_* 180.0 / M_PI << std::endl;
             return false;
         }
         angle[i] = roundN(angle[i], 3);

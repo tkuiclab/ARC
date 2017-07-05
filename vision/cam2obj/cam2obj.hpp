@@ -177,6 +177,15 @@ float& roll, float& pitch){
   
 }
 
+void cam_normal_2_obj_normal(Vector3f obj_normal,
+float& roll, float& pitch){ 
+
+
+
+
+
+}
+
 Vector3f del_out_mean_normal(PC_Normal::Ptr i_cloud, PC_Normal::Ptr o_cloud){
   Vector3f  obj_normal = get_normal_mean(i_cloud);
   

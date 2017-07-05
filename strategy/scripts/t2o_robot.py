@@ -104,7 +104,9 @@ class T2O:
         #----------------Rotation---------------_#
         #self.Arm.relative_rot_nsa(pitch = r)  #roll
         #self.Arm.relative_rot_nsa(yaw = p)  #pitch
-        self.Arm.relative_rot_nsa(pitch = r, yaw = p)  #pitch
+        #self.Arm.relative_rot_nsa(pitch = r, yaw = p)  #pitch
+        self.Arm.relative_rot_pry_move_nsa(pitch = r, yaw = p, n= move_cam_y, s = move_cam_x, a = move_cam_z -obj_dis)
+        
 
         while self.Arm.busy:
             rospy.sleep(.1)
@@ -118,7 +120,7 @@ class T2O:
 
         rospy.loginfo('move linear  s(cam_x)='+str(move_cam_x) + ',n(cam_y)='+str(move_cam_y) + ', a(cam_z)='+str(move_cam_z -obj_dis) )
 
-        self.Arm.relative_move_nsa(n= move_cam_y, s = move_cam_x, a = move_cam_z -obj_dis)
+        #self.Arm.relative_move_nsa(n= move_cam_y, s = move_cam_x, a = move_cam_z -obj_dis)
         
 
         #self.Arm.relative_move_nsa(n= l.y, s = l.x)
@@ -147,8 +149,15 @@ if __name__ == '__main__':
     rospy.loginfo('T2O Ready')
 
     # task.safe_pose()
-    task.robot_photo_pose()
+   # task.robot_photo_pose()
     
+
+    # Problem
+    # task.Arm.relative_rot_nsa(pitch = 2.125044, yaw = 7.428986)
+    # task.Arm.relative_move_nsa(n= 0.197568, s = -0.053241, a = 0.309954 -obj_dis)
+    # ->
+    # task.Arm.relative_rot_pry_move_nsa(pitch = 2.125044, yaw = 7.428986, n= 0.197568, s = -0.053241, a = 0.309954 -obj_dis)
+    # task.Arm.relative_move_nsa( a = obj_dis)
 
     # task.robot_photo_pose()
     # task.Arm.relative_rot_nsa(pitch = 9.328644, yaw = 35.861837)
@@ -158,14 +167,14 @@ if __name__ == '__main__':
     # exit()
 
     #----------- Go Photo Pose--------#
-    #task.robot_photo_pose()
+    task.robot_photo_pose()
     
-    while task.Arm.busy:
-        rospy.sleep(.1)
+    # while task.Arm.busy:
+    #     rospy.sleep(.1)
     
 
     #----------- Request object pose--------#
-    task.obj_pose_request('black_fashion_gloves')
+    # task.obj_pose_request('robots_dvd')
 
     
 
@@ -188,7 +197,7 @@ if __name__ == '__main__':
 
 
     # task.Arm.relative_rot_nsa(pitch =  10)     # pitch -> cam_x
-    # task.Arm.relative_rot_nsa(roll =  -10)     # cam_z
+    task.Arm.relative_rot_nsa(roll =  -200)     # cam_z
     # task.Arm.relative_rot_nsa(yaw = -10)     # cam_y
 
     #---------IK FAIL-----------$
