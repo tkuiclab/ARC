@@ -207,9 +207,15 @@ if __name__ == '__main__':
 
 	try:
 		s = Strategy()
-		# s.start() 
+		s.start() 
 
-		s.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-180, 0, 0) )
+		# dis = 0.05
+		# suction_ang = 0
+		# gripper_suction_deg(suction_ang)
+		# rospy.sleep(1)
+		# s.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-180, -30, 0) )
+		# rospy.sleep(1)
+		# s.Arm.relative_move_suction('ptp', suction_ang, dis)
 		# s.Arm.relative_move_nsa(a = 0.05) 
 		# s.Arm.relative_move_nsa(n = 0.05) 
 

@@ -177,11 +177,24 @@ class ArmTask:
         vec_a = [rot[0][2], rot[1][2], rot[2][2]]
         return vec_n, vec_s, vec_a   
 
-    def relative_move_suction(self, mode='ptp', suction_angle,  dis):
+    def relative_move_suction(self, mode='ptp', suction_angle=0, dis=0 ):
         """Get euler angle and run task."""
-        # note:for nsa rotation only
+        # note:suction_anfle type is degree,  dis is m
         while self.__is_busy:
             rospy.sleep(.1)
+
+        # ======= Calculate suction vector start ========
+        rate_n = float((90-suction_angle)/90.0)
+        rate_a = float(suction_angle/90.0)
+        n = rate_n*dis
+        a = rate_a*dis
+        s = 0
+        # print 'dis = ' + str(dis)
+        # print 'rate_n = ' + str(rate_n)
+        # print 'rate_a = ' + str(rate_a)
+        # print 'n = ' + str(n)
+        # print 'a = ' + str(a)
+        # ======= Calculate suction vector over  ========
 
         fb = self.get_fb()
         pos = fb.group_pose.position

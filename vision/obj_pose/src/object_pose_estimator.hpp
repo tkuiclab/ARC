@@ -2,6 +2,7 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Vector3.h>
 
 //#include <fake_roi/Detect.h>
 #include <darkflow_detect/Detected.h>

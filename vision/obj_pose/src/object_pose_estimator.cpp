@@ -55,6 +55,7 @@ void ObjEstAction::poseEstimation(){
   ROS_INFO("In poseEstimation()");
   
   geometry_msgs::Twist pose;
+  geometry_msgs::Vector3 normal;
 
   PCT::Ptr cloud(new PCT);
   PCT::Ptr cloud_seg (new PCT);
@@ -84,9 +85,11 @@ void ObjEstAction::poseEstimation(){
   cam_2_obj_center(cloud, 
       pose.linear.x, pose.linear.y, pose.linear.z, 
       pose.angular.x, pose.angular.y, pose.angular.z,
+      normal.x, normal.y, normal.z,
       near_points_percent);
   
   result_.object_pose = pose;
+  result_.norm = normal;
 
   as_.setSucceeded(result_);
 
@@ -111,11 +114,14 @@ void ObjEstAction::get_roi(){
         return;
       }
 
+      ROS_WARN("CANNOT Call Service (/detect)");
+      preemptCB();
+
       ROS_WARN("/detect ROI result = False");
       geometry_msgs::Twist pose;
       pose.linear.z = -1; //ROI Fail
       result_.object_pose = pose;
-      as_.setSucceeded(result_);
+      // as_.setSucceeded(result_);
 
       state = NADA;
          

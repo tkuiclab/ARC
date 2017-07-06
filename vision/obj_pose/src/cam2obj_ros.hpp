@@ -205,6 +205,11 @@ float& yaw, float& roll){
 
   yaw = yaw_rad;
   roll = roll_rad;
+
+  printf("obj_normal=(%lf,%lf,%lf)\n", 
+      obj_normal[0],
+      obj_normal[1],
+      obj_normal[2]);
   
   printf("(yaw,roll)=(%lf,%lf)\n", pcl::rad2deg( yaw), pcl::rad2deg( roll));
   printf("xyp=(%lf,%lf,%lf),yaw=%lf\n", xyp[0], xyp[1], xyp[2],pcl::rad2deg( yaw));
@@ -289,6 +294,7 @@ Vector3f del_out_mean_normal(PC_Normal::Ptr i_cloud, PC_Normal::Ptr o_cloud){
 void cam_2_obj_center(PCT::Ptr i_cloud,
           double &x, double &y, double &z,
           double &roll, double &pitch, double &yaw,
+          double &nx, double &ny, double &nz,
           float near_points_percent = 0.1){
   PCT::Ptr cloud (new PCT);
   PCT::Ptr cloud_near_center (new PCT);
@@ -413,6 +419,10 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   x = center.x;
   y = center.y;
   z = center.z;
+
+  nx = obj_normal[0];
+  ny = obj_normal[1];
+  nz = obj_normal[2];
 
   return;
 

@@ -24,7 +24,7 @@ import json
 
 import arm_task_rel
 from gripper import *
-import s
+
 
 obj_dis = 0.1
 
@@ -79,9 +79,11 @@ class T2O:
         
     def obj_pose_done_cb(self, state, result):
         #self.arm_2_obj(result.object_pose)
-        self.tool_2_obj(result.object_pose)
+        # self.tool_2_obj(result.object_pose)
+        self.tool_2_obj(result.object_pose, result.norm)
 
-    def tool_2_obj(self, obj_pose):
+    # def tool_2_obj(self, obj_pose):
+    def tool_2_obj(self, obj_pose, norm):
         p = obj_pose
         a = p.angular
         l = p.linear
@@ -99,15 +101,26 @@ class T2O:
 
         rospy.loginfo("(real_yaw, real_roll)= (" + str(y) + ", " + str(r) + ")")
 
-        move_cam_x = l.x - (gripper_length*cos(radians(y+90)))*sin(radians(r))
-        move_cam_y = l.y - cam2tool_y - (gripper_length*cos(radians(r)))
-        move_cam_z = l.z - cam2tool_z + (gripper_length*cos(radians(r)))
+        move_cam_x = l.x - (gripper_length*sin(radians(y)))*sin(radians(r))
+        move_cam_y = l.y - (gripper_length*cos(radians(r))) - cam2tool_y
+        move_cam_z = l.z - (gripper_length*cos(radians(r))) - cam2tool_z
 
         move_cam_x_inverse = (move_cam_x * cos(radians(y*-1))) - (move_cam_y * sin(radians(y*-1)))
         move_cam_y_inverse = (move_cam_x * sin(radians(y*-1))) + (move_cam_y * cos(radians(y*-1)))
 
+        # obj_normal = [0.929027, 0.055912, -0.366771]
+        rospy.loginfo("NORMAL(x, y, z) = (" + str(norm.x) + ", " + str(norm.y) + ", " + str(norm.z) +")")
+        obj_distance = [norm.x*obj_dis, norm.y*obj_dis, norm.z*obj_dis]
+
+        real_move_x = move_cam_x + obj_distance[0]
+        real_move_y = move_cam_y + obj_distance[1]
+        real_move_z = move_cam_z + obj_distance[2]
+
+        rospy.loginfo("(y, r) = (" + str(y) + ", " + str(r) + ")")
+        rospy.loginfo("(ori_move_cam_x, ori_move_cam_y, ori_move_cam_z)= (" + str(l.x) + ", " + str(l.y - cam2tool_y) + ", " + str(l.z - cam2tool_z) + ")")
         rospy.loginfo("(real_move_cam_x, real_move_cam_y, real_move_cam_z)= (" + str(move_cam_x) + ", " + str(move_cam_y) + ", " + str(move_cam_z) + ")")
         rospy.loginfo("(inverse_x, inverse_y)= (" + str(move_cam_x_inverse) + ", " + str(move_cam_y_inverse) + ")")
+        rospy.loginfo("(real_movex, real_move_y, real_move_z)= (" + str(real_move_x) + ", " + str(real_move_y) + ", " + str(real_move_z) + ")")
         
         #----------------Rotation---------------_#
         #self.Arm.relative_rot_nsa(pitch = r)  #roll
@@ -115,16 +128,38 @@ class T2O:
         # self.Arm.relative_rot_nsa(pitch = r, yaw = p)  #pitch
         self.Arm.relative_rot_nsa(roll = y)
         gripper_suction_deg(r)
+
+        print('=====')
+        print('self.Arm.relative_rot_nsa(roll = '+str(y)+')')
+        print('self.Arm.gripper_suction_deg('+str(r)+')')
         
         # return
         
-        self.Arm.relative_move_nsa(n= move_cam_y_inverse, s = move_cam_x_inverse, a = move_cam_z -obj_dis)
-        
-        #self.Arm.relative_rot_pry_move_nsa(pitch = r, yaw = p, n= move_cam_y, s = move_cam_x, a = move_cam_z -obj_dis)
+        # self.Arm.relative_move_nsa(n= move_cam_y_inverse, s = move_cam_x_inverse, a = move_cam_z -obj_dis)
+        # self.Arm.relative_xyz_base(x = real_move_y*-1, y = real_move_x, z = (move_cam_z - obj_dis)*-1)
+        self.Arm.relative_xyz_base(x = real_move_y*-1, y = real_move_x, z = real_move_z*-1)
+        print('self.Arm.relative_xyz_base(x = '+str(real_move_y*-1)+', y = '+str(real_move_x)+', z = '+str(real_move_z*-1)+')')
+
+        # return
+
+        gripper_vaccum_on()
+
+        # suction move
+        self.Arm.relative_move_suction('ptp', r, obj_dis + 0.015)
+        print("self.Arm.relative_move_suction('ptp', "+str(r)+", obj_dis + 0.015)")
+        print("=====")
         
 
         while self.Arm.busy:
             rospy.sleep(.1)
+
+        self.Arm.pub_ikCmd('ptp', (0.45, 0.00 , 0.15), (-180, 0, 0))
+
+        while self.Arm.busy:
+            rospy.sleep(.1)
+
+        rospy.sleep(3)
+        gripper_vaccum_off()
 
         rospy.loginfo('Move Angle Finish')
 
@@ -141,6 +176,9 @@ class T2O:
                         + str(numpy.rad2deg(a.z)) + ")" ) 
         
                         
+        if l.x ==0 and l.y==0 and l.z==0:
+            return
+
         r = numpy.rad2deg(a.x)
         p = numpy.rad2deg(a.y)
         
@@ -186,7 +224,14 @@ class T2O:
         while self.Arm.busy:
             rospy.sleep(.1)
         
-        task.Arm.relative_move_nsa( a = obj_dis -0.01)
+        gripper_vaccum_on()
+
+        self.Arm.relative_move_nsa( a = obj_dis -0.01)
+
+        self.Arm.pub_ikCmd('ptp', (0.45, 0.00 , 0.15), (-180, 0, 0))
+
+        rospy.sleep(3)
+        gripper_vaccum_off()
 
 
 
@@ -199,7 +244,7 @@ if __name__ == '__main__':
     rospy.loginfo('T2O Ready')
 
     # task.safe_pose()
-   # task.robot_photo_pose()
+    task.robot_photo_pose()
     
 
     # Problem
@@ -224,13 +269,16 @@ if __name__ == '__main__':
     
 
     #----------- Request object pose--------#
-    # task.obj_pose_request('robots_dvd')
+    #task.obj_pose_request('avery_binder')
+    #task.obj_pose_request('robots_dvd')
+    task.obj_pose_request('ticonderoga_pencils')
+    
 
     # task.Arm.relative_rot_nsa(pitch = -10)
 
     # -------Back 2 home------#.
-    task.safe_pose()
-    task.Arm.home()
+    #task.safe_pose()
+    #task.Arm.home()
 
 
     # -------Relative Test------#
@@ -249,6 +297,8 @@ if __name__ == '__main__':
     # task.Arm.relative_rot_nsa(pitch =  10)     # pitch -> cam_x
     #task.Arm.relative_rot_nsa(roll =  -200)     # cam_z
     # task.Arm.relative_rot_nsa(yaw = -10)     # cam_y
+
+    # task.Arm.relative_xyz_base(z = 0.05)
 
     #---------IK FAIL-----------$
     # task.robot_photo_pose()

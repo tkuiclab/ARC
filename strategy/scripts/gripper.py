@@ -2,7 +2,8 @@ import rospy
 from vacuum_cmd_msg.srv import VacuumCmd
 
 
-cam2tool_y = -0.11  #-0.095  #cam axis
+# cam2tool_y = -0.11  #-0.095  #cam axis
+cam2tool_y = -0.06  #-0.095  #cam axis
 cam2tool_z = 0.23   # + 0.035
 gripper_length = 0.04
 
