@@ -2,8 +2,9 @@ import rospy
 from vacuum_cmd_msg.srv import VacuumCmd
 
 
-cam2tool_y = -0.1  #-0.095  #cam axis
-cam2tool_z = 0.23 + 0.035
+cam2tool_y = -0.11  #-0.095  #cam axis
+cam2tool_z = 0.23   # + 0.035
+gripper_length = 0.04
 
 def robot_cmd_client(cmd):
     rospy.wait_for_service('/robot_cmd')
@@ -35,3 +36,7 @@ def gripper_suction_up():
 def gripper_suction_down():
     robot_cmd_client('suctionDown')
     print('Suction Down')
+
+def gripper_suction_deg(deg):
+    robot_cmd_client(str(deg))
+    print('Suction Move : '+str(deg))

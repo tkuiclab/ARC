@@ -20,12 +20,18 @@ from image_convert import save_img, get_now
 from darkflow_detect.srv import Detect, DetectResponse
 from darkflow_detect.msg import Detected
 from darkflow.net.build import TFNet
-from convert_label.convert import offical2Our, our2Offical
+from convert_label.convert import offical2Our, our2Offical, colors
+from get_obj_info import info_dict
 
 
 def handle_request(req):
     """Service request callback."""
     frame = img_cvt.cv_img
+    # Checking image is coming
+    if frame is None:
+        rospy.logwarn("There is no image! Does realsense launch?")
+        return DetectResponse([], False)
+
     cvted_name = offical2Our(req.object_name)
     # Checking converted name
     if not cvted_name:
@@ -41,13 +47,10 @@ def handle_request(req):
     detectedList = list()
     for info in result:
         print_info(info)
-
         # Checking detected object
-        if (cvted_name == 'all' and
-                info['confidence'] > 0.0):
+        if cvted_name == 'all':
             detectedList.append(detectedInfoToMsg(info))
-        elif (cvted_name == info['label'] and
-                info['confidence'] > 0.0):
+        elif cvted_name == info['label']:
             if len(detectedList) > 0:
                 if info['confidence'] > detectedList[0].confidence:
                     detectedList[0] = detectedInfoToMsg(info)
@@ -55,13 +58,13 @@ def handle_request(req):
                 detectedList.append(detectedInfoToMsg(info))
 
     res = DetectResponse([], False)
-    if len(detectedList) > 0:
+    if len(detectedList):
         res.detected = detectedList
         res.result = True
 
     mark_frame(frame, detectedList)
     print('===========================' if len(result)
-        else 'Nothing was detected')
+          else 'Nothing was detected')
 
     return res
 
@@ -70,6 +73,11 @@ def detectedInfoToMsg(info):
     """Convert detected infomations to message type."""
     msg = Detected()
     msg.object_name = our2Offical(info['label'])
+    try:
+        msg.type = info_dict[msg.object_name].type
+    except Exception as e:
+        rospy.logwarn(e)
+        msg.type = 'Unknow'
     msg.confidence = info['confidence']
     msg.bound_box = [
         info['topleft']['x'],
@@ -83,8 +91,8 @@ def detectedInfoToMsg(info):
 def draw_bbox(frame, bbox, label='', confidence=-0.1):
     """Drawing bbox on image."""
     # If the object was detected
-    if len(bbox) > 0:
-        color = (100, 100, 255)
+    if len(bbox):
+        color = colors[label] if label != '' else (100, 100, 255)
         thickness = 2
         cv2.rectangle(
             frame,
@@ -95,10 +103,11 @@ def draw_bbox(frame, bbox, label='', confidence=-0.1):
         )
         cv2.putText(
             frame,
-            label if confidence < 0 else label + ': {0:.3f}'.format(confidence),
+            label if confidence < 0 else label +
+            ': {0:.3f}'.format(confidence),
             (bbox[0], bbox[1] - 10),
             0,
-            .6,
+            .55,
             color=color,
             thickness=thickness
         )
@@ -111,15 +120,23 @@ def mark_frame(frame, detected):
     _img.frame = copy.deepcopy(frame)
     # Drawing all of bbox
     for result in detected:
-        draw_bbox(frame, result.bound_box, result.object_name, result.confidence)
+        draw_bbox(frame, result.bound_box,
+                  result.object_name, result.confidence)
     # Assign frame of prediction to global _img object
     _img.predi = frame
 
 
 def print_info(info):
     """Print infomation of detecting result."""
+    label_name = our2Offical(info['label'])
     print('---------------------------')
-    print(our2Offical(info['label']))
+    print(label_name)
+    try:
+        obj_type = info_dict[label_name].type
+    except Exception as e:
+        rospy.logwarn(e)
+        obj_type = 'Unknow'
+    print(obj_type)
     print(info['confidence'])
     print(info['topleft'])
     print(info['bottomright'])
@@ -176,15 +193,22 @@ class Image(object):
         self._predi = img
         self._refresh = True
 
+
 _img = Image()
 
 # Options for net building
 options = {
     "model": "cfg/yolo-new.cfg",    # model of net
     "backup": "ckpt/",              # directory of ckpt (training result)
+<<<<<<< HEAD
     "load": -1,                     # which ckpt will be loaded. -1 represent the last ckpt
     "threshold": -0.1,              # threshold for confidence
     "gpu": 0.5                      # gpu using rate
+=======
+    "load": -1,                 # which ckpt will be loaded. -1 represent the last ckpt
+    "threshold": 0.0,               # threshold for confidence
+    "gpu": 1.0                      # gpu using rate
+>>>>>>> 0884d9ca3b0d0bad3ea911af1a2e231e779624bf
 }
 tfnet = TFNet(options)
 prepare_network()

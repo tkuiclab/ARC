@@ -14,7 +14,7 @@ def offical2Our(key):
     try:
         return _labelCvt[key]
     except KeyError as e:
-        rospy.logwarn("Labels don't have the name. {}".format(e))
+        rospy.logwarn("The labels don't have the name! {}".format(e))
         return None
 
 def our2Offical(val):

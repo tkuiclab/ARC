@@ -81,12 +81,12 @@ add_definitions(${PCL_DEFINITIONS})
 ## Declare a C++ executable
 # add_executable(${PROJECT_NAME}_node src/object_pose_estimator_node.cpp)
 
-add_executable (object_pose_estimator src/object_pose_estimator.cpp)
 
 ## Add cmake target dependencies of the executable
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
+<<<<<<< HEAD
 
 
 target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES} libpcl_surface.so libpcl_search.so libpcl_visualization.so libpcl_segmentation.so libpcl_features.so libpcl_filters.so libgomp.so libpcl_keypoints.so libpcl_kdtree.so libpcl_recognition.so)
@@ -94,3 +94,15 @@ target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES
 # #target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES})
 # add_dependencies(object_pose_estimator obj_pose_generate_messages_cpp)
 # add_dependencies(object_pose_estimator fake_roi_generate_messages_cpp)
+=======
+add_executable (object_pose_estimator src/object_pose_estimator.cpp)
+target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(object_pose_estimator obj_pose_generate_messages_cpp)
+add_dependencies(object_pose_estimator darkflow_detect_generate_messages_cpp)
+
+add_executable (obj_center src/obj_center.cpp)
+target_link_libraries (obj_center ${PCL_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(obj_center obj_pose_generate_messages_cpp)
+add_dependencies(obj_center darkflow_detect_generate_messages_cpp)
+
+>>>>>>> 0884d9ca3b0d0bad3ea911af1a2e231e779624bf
