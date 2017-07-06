@@ -1,3 +1,6 @@
+#ifndef _OBJECT_POSE_AUXILIARY_H_
+#define _OBJECT_POSE_AUXILIARY_H_
+
 #include <iostream>
 
 #include <ros/ros.h>
@@ -122,7 +125,7 @@ void write_pcd_2_rospack(PCT::Ptr cloud, std::string f_name){
 
 
 void write_pcd_2_rospack_normals(PC_NT::Ptr cloud, std::string f_name){
-    std::string path = ros::package::getPath("obj_pose");
+    path = ros::package::getPath("obj_pose");
     path.append("/pcd_file/");
     path.append(f_name);
 
@@ -132,32 +135,34 @@ void write_pcd_2_rospack_normals(PC_NT::Ptr cloud, std::string f_name){
     std::cout << "Save PCD -> " << path << std::endl;
 }
 
-// bool load_amazon_pcd_model(std::string pcd_filename, pcl::PointCloud<pcl::PointXYZ>::Ptr out_model_cloud)
-// {
-//   int index=0;
-//   std::stringstream ss1;
-//   for(int i =0;i<40;i++)
-//   {
-//     if(LabelList[i]==pcd_filename)
-//     {
-//       index = i;
-//     }
-//   }
+bool load_amazon_pcd_model(std::string pcd_filename, pcl::PointCloud<pcl::PointXYZ>::Ptr out_model_cloud)
+{
+  int index=0;
+  std::stringstream ss1;
+  for(int i =0;i<40;i++)
+  {
+    if(LabelList[i]==pcd_filename)
+    {
+      index = i;
+    }
+  }
 
-//   std::string path = ros::package::getPath("obj_pose");
-//   ss1 << path << "/items/" << AmazonModelList[index] << "/" << AmazonModelList[index] << "1.pcd";
-//   out_model_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr (new pcl::PointCloud<pcl::PointXYZ> ());
-//   ROS_INFO("Loading PCD....");
-//   ROS_INFO("PCD at %s",ss1.str().c_str());
-//   if(pcl::io::loadPCDFile (ss1.str(), *out_model_cloud) < 0)
-//   {
-//     ROS_ERROR("Error loading Amazon Model cloud");
-//     return false;
-//   }else{
-//     // pcl::VoxelGrid<pcl::PointXYZ> sor;
-//     // sor.setInputCloud (out_model_cloud);
-//     // sor.setLeafSize (0.001f, 0.001f, 0.001f);
-//     // sor.filter (*out_model_cloud);
-//     return true;
-//   }
-// }
+  std::string path = ros::package::getPath("obj_pose");
+  ss1 << path << "/items/" << AmazonModelList[index] << "/" << AmazonModelList[index] << "1.pcd";
+  out_model_cloud = pcl::PointCloud<pcl::PointXYZ>::Ptr (new pcl::PointCloud<pcl::PointXYZ> ());
+  ROS_INFO("Loading PCD....");
+  ROS_INFO("PCD at %s",ss1.str().c_str());
+  if(pcl::io::loadPCDFile (ss1.str(), *out_model_cloud) < 0)
+  {
+    ROS_ERROR("Error loading Amazon Model cloud");
+    return false;
+  }else{
+    // pcl::VoxelGrid<pcl::PointXYZ> sor;
+    // sor.setInputCloud (out_model_cloud);
+    // sor.setLeafSize (0.001f, 0.001f, 0.001f);
+    // sor.filter (*out_model_cloud);
+    return true;
+  }
+}
+
+#endif

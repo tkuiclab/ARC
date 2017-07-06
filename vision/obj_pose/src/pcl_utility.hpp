@@ -15,17 +15,17 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/point_types_conversion.h>
 #include <pcl/filters/passthrough.h>
+//#include "object_pose_auxiliary.hpp"
 
 using namespace Eigen;
 
 // Types
-typedef pcl::PointXYZRGB PT;       //point type
+typedef pcl::PointXYZRGBA PT;       //point type
 typedef pcl::PointCloud<PT> PCT;
 
 typedef pcl::PointNormal PNormal;       //point type
 typedef pcl::PointCloud<PNormal> PC_Normal;
 
-std::string path;
 
 #ifdef ShowCloud
 //  pcl::visualization::CloudViewer viewer("Cloud Viewer");

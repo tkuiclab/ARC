@@ -1,6 +1,4 @@
-
 #include "object_pose_estimator.hpp"
-//#include "seg_plane_cam2obj.hpp"
 #include "cpc_segmentation.hpp"
 #include "cam2obj_ros.hpp"
 #include "ICP_alignment.hpp"
@@ -70,45 +68,45 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 
 
 void ObjEstAction::poseEstimation(){
-//   ROS_INFO("In poseEstimation()");
+  ROS_INFO("In poseEstimation()");
   
-//   geometry_msgs::Twist pose;
+  geometry_msgs::Twist pose;
 
-//   PCT::Ptr cloud(new PCT);
-//   PCT::Ptr cloud_seg (new PCT);
-//   PCT::Ptr cloud_seg_largest (new PCT);
+  PCT::Ptr cloud(new PCT);
+  PCT::Ptr cloud_seg (new PCT);
+  PCT::Ptr cloud_seg_largest (new PCT);
 
-//   *cloud = *ROI_cloud;
+  *cloud = *ROI_cloud;
 
-//   std::vector<int> index;
-//   pcl::removeNaNFromPointCloud(*cloud, *cloud, index);
+  std::vector<int> index;
+  pcl::removeNaNFromPointCloud(*cloud, *cloud, index);
   
-// #ifdef SaveCloud
-//   write_pcd_2_rospack(cloud,"_rm_NaN.pcd");
-// #endif
+#ifdef SaveCloud
+  write_pcd_2_rospack(cloud,"_rm_NaN.pcd");
+#endif
 
-//   pass_through_from_arg(cloud, g_argc, g_argv, cloud);
+  pass_through_from_arg(cloud, g_argc, g_argv, cloud);
 
-// #ifdef SaveCloud
-//   write_pcd_2_rospack(cloud,"_PassThrough.pcd");
-// #endif
-//   // only_obj_center(cloud, 
-//   //   pose.linear.x, pose.linear.y, pose.linear.z);
+#ifdef SaveCloud
+  write_pcd_2_rospack(cloud,"_PassThrough.pcd");
+#endif
+  // only_obj_center(cloud, 
+  //   pose.linear.x, pose.linear.y, pose.linear.z);
 
-//   float near_points_percent = 0.1;
-//   if (pcl::console::find_switch (g_argc, g_argv, "-near")){
-//     pcl::console::parse (g_argc, g_argv, "-near", near_points_percent);
-//   }
-//   cam_2_obj_center(cloud, 
-//       pose.linear.x, pose.linear.y, pose.linear.z, 
-//       pose.angular.x, pose.angular.y, pose.angular.z,
-//       near_points_percent);
+  float near_points_percent = 0.1;
+  if (pcl::console::find_switch (g_argc, g_argv, "-near")){
+    pcl::console::parse (g_argc, g_argv, "-near", near_points_percent);
+  }
+  cam_2_obj_center(cloud, 
+      pose.linear.x, pose.linear.y, pose.linear.z, 
+      pose.angular.x, pose.angular.y, pose.angular.z,
+      near_points_percent);
   
-//   result_.object_pose = pose;
+  result_.object_pose = pose;
 
-//   as_.setSucceeded(result_);
+  as_.setSucceeded(result_);
 
-//   state = NADA;
+  state = NADA;
 
 }
 

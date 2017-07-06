@@ -233,7 +233,7 @@ void get_seg_plane_near( PCT::Ptr i_cloud ,PCT::Ptr o_cloud ){
     
     get_largest_cluster(cloud_p, cloud_seg_largest);
     PT center = getCenter(cloud_seg_largest);
-    float dis = pcl::euclideanDistance(PT(0,0,0), center);
+    float dis = pcl::euclideanDistance(PT(0,0,0,0), center);
     
     if(dis < min_dis){
       *o_cloud = *cloud_seg_largest;
