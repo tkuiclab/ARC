@@ -1,5 +1,5 @@
 #include "object_pose_estimator.hpp"
-#include "cpc_segmentation.hpp"
+//#include "cpc_segmentation.hpp"
 #include "cam2obj_ros.hpp"
 #include "ICP_alignment.hpp"
 
@@ -25,14 +25,14 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
   if(state==FOTO){
       pcl::fromROSMsg(*input,*scene_cloud);
 
-      pcl::IndicesPtr indices (new std::vector <int>);
-      pcl::PassThrough<PT> pass;
+      // pcl::IndicesPtr indices (new std::vector <int>);
+      // pcl::PassThrough<PT> pass;
 
-      pass.setFilterFieldName ("z");
-      pass.setFilterLimits (0.3 , 0.8);
-      pass.setKeepOrganized(true);
-      pass.setInputCloud (scene_cloud);
-      pass.filter (*scene_cloud);
+      // pass.setFilterFieldName ("z");
+      // pass.setFilterLimits (0.3 , 0.8);
+      // pass.setKeepOrganized(true);
+      // pass.setInputCloud (scene_cloud);
+      // pass.filter (*scene_cloud);
 
       // pcl::PointCloud<pcl::PointXYZRGBA> mls_points;
       // pcl::search::KdTree<PT>::Ptr tree (new pcl::search::KdTree<PT>);
@@ -50,7 +50,7 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       std::string sys_str;
       sys_str = "rm  " +  path + "*.pcd";
       std::cout << "[CMD] -> " << sys_str << std::endl;  
-      //system(sys_str.c_str());
+      system(sys_str.c_str());
 
       //write pcd
       write_pcd_2_rospack(scene_cloud,"scene_cloud.pcd");
@@ -59,7 +59,7 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       // feedback_.msg = "Raw Point Could Read Done (From Camera)";
       // feedback_.progress = 30;
       // as_.publishFeedback(feedback_);
-      //set_feedback("Grabbing point cloud...",20);
+      set_feedback("Grabbing point cloud...",20);
       
       state = CALL_RCNN;
       call_rcnn_times = 0;
@@ -200,14 +200,15 @@ void ObjEstAction::get_roi(){
   pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
   set_feedback("ROI Done",60);
   
-  state = SEGMETATION;
+  //state = SEGMETATION;
+  state = POSE_ESTIMATION;
 }
 
 void ObjEstAction::segmentation()
 {
   ROS_INFO("Doing 3D Segmentation....");
   std::cout << "scene_seg = " << scence_seg << std::endl;
-
+  /*
   CPCSegmentation cpc_seg;
   if(scence_seg)
   {
@@ -237,6 +238,7 @@ void ObjEstAction::segmentation()
   pcl::toROSMsg(cloud2_, seg_msg);
   seg_msg.header.frame_id = "camera_rgb_optical_frame";
   segmented_pub_.publish(seg_msg);
+  */
 }
 
 void ObjEstAction::do_ICP()

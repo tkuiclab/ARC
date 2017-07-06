@@ -304,10 +304,10 @@ if __name__ == '__main__':
 
     #----------- Request object pose--------#
     #task.obj_pose_request('avery_binder')
-    #task.obj_pose_request('robots_dvd')
+    # task.obj_pose_request('robots_dvd')
     #task.obj_pose_request('ticonderoga_pencils')
     #task.obj_pose_request('scotch_sponges')
-    #task.obj_pose_request('burts_bees_baby_wipes')
+    task.obj_pose_request('burts_bees_baby_wipes')
 
     # task.Arm.relative_rot_nsa(pitch = -10)
 
