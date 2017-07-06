@@ -383,33 +383,37 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
       "("  << pcl::rad2deg(tool_yaw) << "," << 
       pcl::rad2deg(tool_roll) << ")"  << std::endl;
 
-  float real_tool_yaw = (tool_yaw > 0) ? (tool_yaw-M_PI) : (tool_yaw+M_PI); 
-  
-   std::cout << " (real_tool_yaw, roll) = "   <<  
+  float real_tool_yaw = (tool_yaw > 0) ? (tool_yaw-M_PI) : (tool_yaw+M_PI);
+  float real_tool_roll = 90 - (tool_roll + 180);
+   std::cout << " (real_tool_yaw, real_tool_roll) = "   <<  
       "("  << pcl::rad2deg(real_tool_yaw) << "," << 
-      pcl::rad2deg(tool_roll) << ")"  << std::endl;
+      pcl::rad2deg(real_tool_roll) << ")"  << std::endl;
 
 
   yaw = tool_yaw;
   roll = tool_roll;
   pitch = 0;
   
-  Eigen::Affine3f tf_neg = Eigen::Affine3f::Identity();
-  tf_neg.rotate (Eigen::AngleAxisf ( -yaw, Eigen::Vector3f::UnitZ()));
-  tf_neg.rotate (Eigen::AngleAxisf ( -roll,  Eigen::Vector3f::UnitX()));
+  // Eigen::Affine3f tf_neg = Eigen::Affine3f::Identity();
+  // tf_neg.rotate (Eigen::AngleAxisf ( -yaw, Eigen::Vector3f::UnitZ()));
+  // tf_neg.rotate (Eigen::AngleAxisf ( -roll,  Eigen::Vector3f::UnitX()));
 
   
-  Vector3f center_vec(center.x, center.y, center.z);
-  Vector3f after_rotate_center_with_neg;
+  // Vector3f center_vec(center.x, center.y, center.z);
+  // Vector3f after_rotate_center_with_neg;
 
-  after_rotate_center_with_neg = tf_neg * center_vec;
-  float tool_trans_x = after_rotate_center_with_neg[0];
-  float tool_trans_y = after_rotate_center_with_neg[1];
-  float tool_trans_z = after_rotate_center_with_neg[2];
+  // after_rotate_center_with_neg = tf_neg * center_vec;
+  // float tool_trans_x = after_rotate_center_with_neg[0];
+  // float tool_trans_y = after_rotate_center_with_neg[1];
+  // float tool_trans_z = after_rotate_center_with_neg[2];
 
-  x = tool_trans_x;
-  y = tool_trans_y;
-  z = tool_trans_z;
+  // x = tool_trans_x;
+  // y = tool_trans_y;
+  // z = tool_trans_z;
+  x = center.x;
+  y = center.y;
+  z = center.z;
+
   return;
 
   // ----cam_normal_2_obj_normal()-------//
@@ -422,11 +426,11 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   pitch = p;
   yaw = 0;
 
-
+/*
   std::cout << "-------Move------" << std::endl;  
 
   //------rotate center----------//
-  Eigen::Affine3f tf_neg = Eigen::Affine3f::Identity();
+  tf_neg = Eigen::Affine3f::Identity();
   //tf_neg.rotate (Eigen::AngleAxisf ( -yaw,   Eigen::Vector3f::UnitZ()));
   tf_neg.rotate (Eigen::AngleAxisf ( -p, Eigen::Vector3f::UnitY()));
   tf_neg.rotate (Eigen::AngleAxisf ( -r,  Eigen::Vector3f::UnitX()));
@@ -466,7 +470,7 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
       pcl::rad2deg(roll), pcl::rad2deg(pitch));
   printf("task.Arm.relative_move_nsa(n= %lf, s = %lf, a = %lf -obj_dis)\n",
       move_cam_y, move_cam_x, move_cam_z);
-
+*/
     
 }
 

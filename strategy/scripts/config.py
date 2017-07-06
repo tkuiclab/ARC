@@ -12,7 +12,8 @@ BoxShift_Z		= [79000, 75000, 76000 ]
 
 #=== Initialize Tote's Information === 
 ToteId 		= [	  'a',   'b']
-ToteShift_X	= [49000, 11000 ]
+#ToteShift_X	= [49000, 11000 ]
+ToteShift_X	= [60000, 11000 ]
 ToteShift_Z	= [76000, 76000 ]
 
 

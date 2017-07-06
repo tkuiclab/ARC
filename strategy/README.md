@@ -41,6 +41,7 @@ $ rosservice call /robot_cmd "cmd: 'vacuumOn'"
 $ rosservice call /robot_cmd "cmd: 'vacuumOff'" 
 $ rosservice call /robot_cmd "cmd: 'suctionUp'" 
 $ rosservice call /robot_cmd "cmd: 'suctionDown'"
+$ rosservice call /robot_cmd "cmd: '30'"
 
 $ rosservice call /robot_cmd "cmd: 'calibration'"
 $ rosservice call /robot_cmd "cmd: 'setMaxPos'"

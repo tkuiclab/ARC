@@ -209,6 +209,10 @@ if __name__ == '__main__':
 		s = Strategy()
 		# s.start() 
 
+		s.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-180, 0, 0) )
+		# s.Arm.relative_move_nsa(a = 0.05) 
+		# s.Arm.relative_move_nsa(n = 0.05) 
+
 
 
 		# write_PickInfo_2_JSON()
@@ -235,17 +239,17 @@ if __name__ == '__main__':
 			
 		#s.arm_bin_photo()
 			
-		#s.stow.LM_2_tote()			    # -
+		# s.stow.LM_2_tote()			    # -
 		
-		# s.safe_pose()
+		# # s.safe_pose()
 
-		#s.arm_bin_photo()
-		#gripper_vaccum_off()
-		#gripper_suction_up()
-		#gripper_suctoin_down()
+		# #s.arm_bin_photo()
+		# #gripper_vaccum_off()
+		# #gripper_suction_up()
+		# #gripper_suctoin_down()
 		
-		#s.stow.arm_photo_pose()	
-
+		# s.stow.arm_photo_pose()	
+		# exit()
 		#s.Arm.home()
 		#s.stow.test_obj_pose('robots_dvd')  
 
@@ -267,14 +271,14 @@ if __name__ == '__main__':
 
 		# ========================= rel motion test area start =============================
 		# s.Arm.pub_ikCmd('ptp', (0.3, 0 , 0.2), (-180, 0, 0) )
-		dis = -0.05
-		rot = 20
+		# dis = -0.05
+		# rot = 20
 		# s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
 		# s.Arm.relative_rot_nsa(roll = rot)
 		# s.Arm.relative_move_nsa(s = dis)
 
-		s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
-		s.Arm.relative_rot_pry_move_nsa(s = dis, roll = rot)
+		# s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
+		# s.Arm.relative_rot_pry_move_nsa(s = dis, roll = rot)
 
 
 
