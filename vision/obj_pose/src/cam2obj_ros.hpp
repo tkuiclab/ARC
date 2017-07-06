@@ -1,4 +1,4 @@
-#include "pcl_utility.hpp"
+#include "object_pose_auxiliary.hpp"
 
 #include <stdio.h>
 #include <iostream>
@@ -18,13 +18,80 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/segmentation/region_growing.h>
 #include <pcl/common/common.h>
+#include <pcl/common/common_headers.h>
 #include <pcl/surface/mls.h>
 #include <pcl/filters/extract_indices.h>
 
+
 using namespace std;
+using namespace Eigen;
 
 int g_argc;
 char** g_argv;
+
+
+PT getCenter( PCT::Ptr cloud){
+  Eigen::Vector4f centroid;
+  pcl::compute3DCentroid (*cloud, centroid);
+  
+  PT p;
+  p.x = centroid[0];
+  p.y = centroid[1];
+  p.z = centroid[2];
+  
+  return p;
+
+}
+
+
+void get_near_points(PCT::Ptr cloud_in, 
+            PT searchPoint,
+            int K ,
+            PCT::Ptr cloud_out){
+
+  //-----------Get near pointS --------------//
+  pcl::KdTreeFLANN<PT> kdtree;
+  kdtree.setInputCloud (cloud_in);
+
+
+  std::vector<int> pointIdxNKNSearch(K);
+  std::vector<float> pointNKNSquaredDistance(K);
+
+  // std::cout << "K nearest neighbor search at (" << searchPoint.x 
+  //           << " " << searchPoint.y 
+  //           << " " << searchPoint.z
+  //           << ") with K=" << K << std::endl;
+
+  if ( kdtree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
+  {
+    // for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
+    //   std::cout << "    "  <<   cloud_in->points[ pointIdxNKNSearch[i] ].x 
+    //             << " " << cloud_in->points[ pointIdxNKNSearch[i] ].y 
+    //             << " " << cloud_in->points[ pointIdxNKNSearch[i] ].z 
+    //             << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+    
+  }else{
+    std::cout << "kdtree.nearestKSearch  ERROR!!!!!!!!!" << std::endl;
+
+  }
+
+  //return pointIdxNKNSearch;
+
+  pcl::PointIndices::Ptr pointIndices(new pcl::PointIndices);
+
+  //here, I need to set the points from pointIdxNkNSearch to the PoinIndices: inliers 
+  pointIndices->indices=pointIdxNKNSearch;
+
+  pcl::ExtractIndices<PT> extract;
+
+  // Extract the inliers
+  extract.setInputCloud (cloud_in);
+  extract.setIndices (pointIndices);
+  extract.setNegative (false);
+  extract.filter (*cloud_out);
+  std::cerr << "PointCloud representing the planar component: " << cloud_out->width * cloud_out->height << " data points." << std::endl;
+}
+
 
 void get_pass_through_points(PCT::Ptr cloud_in,
             PCT::Ptr cloud_out,
@@ -212,7 +279,26 @@ float& yaw, float& roll){
   
 }
 
-Vector3f del_out_mean_normal(PC_Normal::Ptr i_cloud, PC_Normal::Ptr o_cloud){
+Vector3f get_normal_mean(pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal){
+ 
+  Vector3f obj_normal ;
+
+  obj_normal[0] = obj_normal[1] = obj_normal[2] = 0.0f;
+  
+  for(int i =0;i < cloud_normal->size();i++){
+    obj_normal [0] += cloud_normal->points[i].normal_x;
+    obj_normal [1] += cloud_normal->points[i].normal_y;
+    obj_normal [2] += cloud_normal->points[i].normal_z;
+  }
+
+  obj_normal [0] = obj_normal [0] / cloud_normal->size();
+  obj_normal [1] = obj_normal [1] / cloud_normal->size();
+  obj_normal [2] = obj_normal [2] / cloud_normal->size();
+  
+  return obj_normal;
+}
+
+Vector3f del_out_mean_normal(PC_NT::Ptr i_cloud, PC_NT::Ptr o_cloud){
   Vector3f  obj_normal = get_normal_mean(i_cloud);
   
    printf("obj_normal=(%lf,%lf,%lf)\n", 
@@ -265,7 +351,7 @@ Vector3f del_out_mean_normal(PC_Normal::Ptr i_cloud, PC_Normal::Ptr o_cloud){
   pointIndices->indices=want_indices;
 
 
-  pcl::ExtractIndices<PNormal> extract;
+  pcl::ExtractIndices<PointNT> extract;
   extract.setInputCloud (i_cloud);
   extract.setIndices (pointIndices);
   extract.setNegative (false);
@@ -292,8 +378,8 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
           float near_points_percent = 0.1){
   PCT::Ptr cloud (new PCT);
   PCT::Ptr cloud_near_center (new PCT);
-  PC_Normal::Ptr cloud_normal (new PC_Normal);
-  PC_Normal::Ptr del_normal(new PC_Normal);
+  PC_NT::Ptr cloud_normal (new PC_NT);
+  PC_NT::Ptr del_normal(new PC_NT);
 
   //get center of colud
   PT center =  getCenter(i_cloud);
@@ -334,8 +420,8 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   //------------------MovingLeastSquares----------------//
    // Create a KD-Tree
   pcl::search::KdTree<PT>::Ptr tree (new pcl::search::KdTree<PT>);
-  pcl::PointCloud<PNormal> mls_points;
-  pcl::MovingLeastSquares<PT, PNormal> mls;
+  pcl::PointCloud<PointNT> mls_points;
+  pcl::MovingLeastSquares<PT, PointNT> mls;
   mls.setComputeNormals (true);
   mls.setPolynomialFit (true);
   mls.setSearchMethod (tree);
