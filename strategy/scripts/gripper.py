@@ -2,8 +2,8 @@ import rospy
 from vacuum_cmd_msg.srv import VacuumCmd
 
 
-cam2tool_y = -0.1  #-0.095  #cam axis
-cam2tool_z = 0.23 + 0.035
+cam2tool_y = -0.11  #-0.095  #cam axis
+cam2tool_z = 0.23   # + 0.035
 
 def robot_cmd_client(cmd):
     rospy.wait_for_service('/robot_cmd')

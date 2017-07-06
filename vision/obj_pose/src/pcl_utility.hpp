@@ -143,18 +143,18 @@ void get_near_points(PCT::Ptr cloud_in,
   std::vector<int> pointIdxNKNSearch(K);
   std::vector<float> pointNKNSquaredDistance(K);
 
-  std::cout << "K nearest neighbor search at (" << searchPoint.x 
-            << " " << searchPoint.y 
-            << " " << searchPoint.z
-            << ") with K=" << K << std::endl;
+  // std::cout << "K nearest neighbor search at (" << searchPoint.x 
+  //           << " " << searchPoint.y 
+  //           << " " << searchPoint.z
+  //           << ") with K=" << K << std::endl;
 
   if ( kdtree.nearestKSearch (searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0 )
   {
-    for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
-      std::cout << "    "  <<   cloud_in->points[ pointIdxNKNSearch[i] ].x 
-                << " " << cloud_in->points[ pointIdxNKNSearch[i] ].y 
-                << " " << cloud_in->points[ pointIdxNKNSearch[i] ].z 
-                << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
+    // for (size_t i = 0; i < pointIdxNKNSearch.size (); ++i)
+    //   std::cout << "    "  <<   cloud_in->points[ pointIdxNKNSearch[i] ].x 
+    //             << " " << cloud_in->points[ pointIdxNKNSearch[i] ].y 
+    //             << " " << cloud_in->points[ pointIdxNKNSearch[i] ].z 
+    //             << " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
     
   }else{
     std::cout << "kdtree.nearestKSearch  ERROR!!!!!!!!!" << std::endl;

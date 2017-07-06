@@ -59,3 +59,9 @@ CATKIN_IGNORE
 # pcl_saver ignore
 /vision/pcl_saver/pattern/
 !/vision/pcl_saver/pattern/README.md
+
+# ignore for pcd
+*.pcd
+
+# ignore cam2obj/build
+/vision/cam2obj/build/

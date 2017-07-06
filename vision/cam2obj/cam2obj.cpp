@@ -20,20 +20,20 @@ int main(int argc,char** argv){
   reader.read (f_name + ".pcd", *cloud);
 
 #ifdef SaveCloud
-  write_pcd(cloud,"scene_colud.pcd");
+  write_pcd_2_rospack(cloud,"scene_colud.pcd");
 #endif
 
   std::vector<int> index;
   pcl::removeNaNFromPointCloud(*cloud, *cloud, index);
   
 #ifdef SaveCloud
-  write_pcd(cloud,"_rm_NaN.pcd");
+  write_pcd_2_rospack(cloud,"_rm_NaN.pcd");
 #endif
 
   pass_through_from_arg(cloud, argc,argv, cloud);
 
 #ifdef SaveCloud
-  write_pcd(cloud,"_PassThrough.pcd");
+  write_pcd_2_rospack(cloud,"_PassThrough.pcd");
 #endif
 
   double x,y,z ,a_x,a_y,a_z;
@@ -49,8 +49,8 @@ int main(int argc,char** argv){
       near_points_percent);
   
 
-  std::cout << "(x, y, z) = " << "(" << x  << "," << y  << "," << z << ")" << std::endl;
-  std::cout << "(r, p, y) = " << "(" << a_x  << "," << a_y  << "," << a_z << ")" << std::endl;
+  // std::cout << "(x, y, z) = " << "(" << x  << "," << y  << "," << z << ")" << std::endl;
+  // std::cout << "(r, p, y) = " << "(" << a_x  << "," << a_y  << "," << a_z << ")" << std::endl;
   
 
   return 0;

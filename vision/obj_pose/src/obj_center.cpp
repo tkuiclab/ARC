@@ -1,8 +1,8 @@
 
 #include "object_pose_estimator.hpp"
-//#include "seg_plane_cam2obj.hpp"
+#include "seg_plane_cam2obj.hpp"
 //#include "cpc_segmentation.hpp"
-#include "cam2obj.hpp"
+//#include "cam2obj.hpp"
 #include "ICP_alignment.hpp"
 
 
@@ -74,17 +74,17 @@ void ObjEstAction::poseEstimation(){
 #ifdef SaveCloud
   write_pcd_2_rospack(cloud,"_PassThrough.pcd");
 #endif
-  // only_obj_center(cloud, 
-  //   pose.linear.x, pose.linear.y, pose.linear.z);
+  only_obj_center(cloud, 
+    pose.linear.x, pose.linear.y, pose.linear.z);
 
-  float near_points_percent = 0.1;
-  if (pcl::console::find_switch (g_argc, g_argv, "-near")){
-    pcl::console::parse (g_argc, g_argv, "-near", near_points_percent);
-  }
-  cam_2_obj_center(cloud, 
-      pose.linear.x, pose.linear.y, pose.linear.z, 
-      pose.angular.x, pose.angular.y, pose.angular.z,
-      near_points_percent);
+  // float near_points_percent = 0.1;
+  // if (pcl::console::find_switch (g_argc, g_argv, "-near")){
+  //   pcl::console::parse (g_argc, g_argv, "-near", near_points_percent);
+  // }
+  // cam_2_obj_center(cloud, 
+  //     pose.linear.x, pose.linear.y, pose.linear.z, 
+  //     pose.angular.x, pose.angular.y, pose.angular.z,
+  //     near_points_percent);
   
   result_.object_pose = pose;
 
