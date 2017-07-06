@@ -43,26 +43,34 @@ def handle_request(req):
     start_time = time.time()
     result = tfnet.return_predict(frame)
     rospy.loginfo('Prediction time: {0:.5f}'.format(time.time() - start_time))
-
-    detectedList = list()
+    
+    indicate = dict()
     for info in result:
-        print_info(info)
         # Checking detected object
         if cvted_name == 'all':
-            detectedList.append(detectedInfoToMsg(info))
-        elif cvted_name == info['label']:
-            if len(detectedList) > 0:
-                if info['confidence'] > detectedList[0].confidence:
-                    detectedList[0] = detectedInfoToMsg(info)
+            if info['label'] in indicate:
+                if indicate[info['label']].confidence < info['confidence']:
+                    indicate[info['label']] = detectedInfoToMsg(info)
             else:
-                detectedList.append(detectedInfoToMsg(info))
+                indicate[info['label']] = detectedInfoToMsg(info)
+        elif cvted_name == info['label']:
+            if info['label'] in indicate:
+                if indicate[info['label']].confidence < info['confidence']:
+                    indicate[info['label']] = detectedInfoToMsg(info)
+            else:
+                indicate[info['label']] = detectedInfoToMsg(info)
+
+    msgs = list()
+    for val in indicate.itervalues():
+        msgs.append(val)
+        print_msg(val)
 
     res = DetectResponse([], False)
-    if len(detectedList):
-        res.detected = detectedList
+    if len(msgs):
+        res.detected = msgs
         res.result = True
 
-    mark_frame(frame, detectedList)
+    mark_frame(frame, msgs)
     print('===========================' if len(result)
           else 'Nothing was detected')
 
@@ -126,20 +134,13 @@ def mark_frame(frame, detected):
     _img.predi = frame
 
 
-def print_info(info):
+def print_msg(msg):
     """Print infomation of detecting result."""
-    label_name = our2Offical(info['label'])
     print('---------------------------')
-    print(label_name)
-    try:
-        obj_type = info_dict[label_name].type
-    except Exception as e:
-        rospy.logwarn(e)
-        obj_type = 'Unknow'
-    print(obj_type)
-    print(info['confidence'])
-    print(info['topleft'])
-    print(info['bottomright'])
+    print(msg.object_name)
+    print(msg.type)
+    print(msg.confidence)
+    print(msg.bound_box)
 
 
 def show_detection(event):
@@ -149,6 +150,13 @@ def show_detection(event):
     # Pressing <space> key
     if cv2.waitKey(10) == 32:
         save_img(_img.frame)
+
+
+def req_for_testing(event):
+    """Timer function."""
+    req = Detect()
+    req.object_name = 'all'
+    handle_request(req)
 
 
 def prepare_network():
@@ -216,8 +224,10 @@ if __name__ == '__main__':
     )
     img_cvt = ImageConverter(img_topic)
 
-    # Show result of detection for every 100ms if the frame is fresh
-    rospy.Timer(rospy.Duration(.1), show_detection)
+    # Show result of detection for every 50ms if the frame is fresh
+    rospy.Timer(rospy.Duration(.05), show_detection)
+    # for Testing
+    #rospy.Timer(rospy.Duration(.05), req_for_testing)
     rospy.Service('detect', Detect, handle_request)
     rospy.loginfo("Topic of image is '{}'.".format(img_topic))
     rospy.loginfo('Object detector is running.')

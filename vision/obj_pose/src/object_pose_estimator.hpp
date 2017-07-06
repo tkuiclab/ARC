@@ -34,7 +34,9 @@
 #include <pcl/console/parse.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
-
+#include <pcl/filters/passthrough.h>
+#include <pcl/surface/mls.h>
+#include <pcl/kdtree/kdtree_flann.h>
 #include "object_pose_auxiliary.hpp"
 
 //#define ShowCloud
@@ -73,8 +75,8 @@ public:
     as_.registerGoalCallback(boost::bind(&ObjEstAction::goalCB, this));
     as_.registerPreemptCallback(boost::bind(&ObjEstAction::preemptCB, this));
 
-    //segmented_pub_ =nh_.advertise<sensor_msgs::PointCloud2>("segmented_pointcloud", 1);
-    //align_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("align_pointcloud", 1);
+    segmented_pub_ =nh_.advertise<sensor_msgs::PointCloud2>("segmented_pointcloud", 1);
+    align_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("align_pointcloud", 1);
     cloud_sub = nh_.subscribe("/camera/depth_registered/points", 10, &ObjEstAction::cloudCB,this);
     
     as_.start();
@@ -93,7 +95,7 @@ public:
   void segmentation();
   void cpc_segmentation();
   void do_ICP();
-  //bool load_pcd(std::string pcd_filename);
+  bool load_amazon_pcd(std::string pcd_filename);
   void set_feedback(std::string msg,int progress);
   void print4x4Matrix (const Eigen::Matrix4f & matrix);
 
