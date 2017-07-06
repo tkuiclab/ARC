@@ -165,15 +165,50 @@ float& roll, float& pitch){
   roll = r_rad;
   pitch = p_rad;
   
-
-  // cam_roll = (xp[1] < 0) ? (-1) * r_rad : r_rad;
-  // cam_pitch = (yp[0] > 0) ? (-1) * p_rad : p_rad;
-  // cam_roll = (xp[1] > 0) ? (-1) * r_rad : r_rad;
-  // cam_pitch = (yp[0] < 0) ? (-1) * p_rad : p_rad;
-
   printf("(roll,pitch)=(%lf,%lf)\n", pcl::rad2deg( roll), pcl::rad2deg( pitch));
   printf("xp=(%lf,%lf,%lf),roll=%lf\n", xp[0], xp[1], xp[2],pcl::rad2deg( roll));
   printf("yp=(%lf,%lf,%lf),pitch=%lf\n", yp[0], yp[1], yp[2],pcl::rad2deg( pitch));
+  
+}
+
+//rotation_with_tool 
+//input: obj_normal
+//output: roll, pitch (degree)
+void rotation_with_tool(Vector3f obj_normal,
+float& yaw, float& roll){ 
+  //yaw (z), roll(x)
+  Vector3f cam_normal(0,0,1);
+  Vector3f y_normal(0,1,0);
+  float y_abs = 1 ;  // sqrt( dot(cam_normal,cam_normal) )
+
+  //------------Tool_Yaw--------------//
+  Vector3f xyp(obj_normal[0] , obj_normal[1], 0);//obj in xy plane (z=0)
+  float xyp_abs = sqrt( xyp.dot(xyp) );
+  float cos_th_xyp = y_normal.dot(xyp) / xyp_abs ; //* cam_abs;
+  float yaw_rad = acos(cos_th_xyp);
+
+  yaw_rad = (xyp[0] > 0.0) ? (-1.0) * yaw_rad : yaw_rad;
+
+  //------------Tool_Roll--------------//
+  //rotate obj_normal with -r_rad
+  Eigen::Affine3f tf = Eigen::Affine3f::Identity();
+  tf.rotate (Eigen::AngleAxisf ( -yaw_rad,   Eigen::Vector3f::UnitZ()));
+  Vector3f new_obj_normal = tf * obj_normal;
+ 
+  Vector3f yzp( 0, new_obj_normal[1], new_obj_normal[2]);//obj in x=0, yz plane
+  float yzp_abs = sqrt( yzp.dot(yzp) );
+  float cos_th_yzp = cam_normal.dot(yzp) / yzp_abs ; //* cam_abs;
+  float roll_rad = acos(cos_th_yzp);
+
+  roll_rad = (yzp[1] > 0.0) ? (-1.0) * roll_rad : roll_rad;
+ 
+
+  yaw = yaw_rad;
+  roll = roll_rad;
+  
+  printf("(yaw,roll)=(%lf,%lf)\n", pcl::rad2deg( yaw), pcl::rad2deg( roll));
+  printf("xyp=(%lf,%lf,%lf),yaw=%lf\n", xyp[0], xyp[1], xyp[2],pcl::rad2deg( yaw));
+  printf("yzp=(%lf,%lf,%lf),roll=%lf\n", yzp[0], yzp[1], yzp[2],pcl::rad2deg( roll));
   
 }
 
@@ -323,28 +358,63 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   // Get Angle of Cam Normal to Object Normal //
   //----------------------------------------//
   Vector3f  cam_normal(0.0,0.0,1.0);
-  Matrix3f  R;
 
   //std::cout << " obj_normal -> " << obj_normal << std::endl;  
-  if(obj_normal [2] < 0){
+  // if(obj_normal [2] < 0){
+  //   obj_normal = obj_normal * (-1);
+
+  //   std::cout << " Update  obj_normal -> " << obj_normal << std::endl;  
+  // }
+
+  if(obj_normal [2] > 0){
     obj_normal = obj_normal * (-1);
 
     std::cout << " Update  obj_normal -> " << obj_normal << std::endl;  
   }
 
-  // ----Calculate Rotate from  cam_normal to obj_normal-------//
-  R = Quaternionf().setFromTwoVectors(cam_normal,obj_normal);
-  Vector3f euler = R.eulerAngles(0, 1, 2);
-  yaw = euler[2]; pitch = euler[1]; roll = euler[0];
-  std::cout << "Eigen (roll, pitch, yaw) = "  
-     <<  "(" <<  pcl::rad2deg(roll)  << "," 
-     <<  pcl::rad2deg(pitch)  << "," 
-     <<  pcl::rad2deg(yaw) << ")" << std::endl; 
+  float tool_yaw , tool_roll ;
+  rotation_with_tool(obj_normal, tool_yaw, tool_roll );
+
+// std::cout << " (yaw, roll) = "   <<  
+//       "("  << (tool_yaw) << "," << 
+//       (tool_roll) << ")"  << std::endl;
+
+  std::cout << " (yaw, roll) = "   <<  
+      "("  << pcl::rad2deg(tool_yaw) << "," << 
+      pcl::rad2deg(tool_roll) << ")"  << std::endl;
+
+  float real_tool_yaw = (tool_yaw > 0) ? (tool_yaw-M_PI) : (tool_yaw+M_PI);
+  float real_tool_roll = 90 - (tool_roll + 180);
+   std::cout << " (real_tool_yaw, real_tool_roll) = "   <<  
+      "("  << pcl::rad2deg(real_tool_yaw) << "," << 
+      pcl::rad2deg(real_tool_roll) << ")"  << std::endl;
 
 
-  // std::cout << "Eigen (x, y, z) = "  
-  // <<  "(" <<  e_x  << ","  <<  e_y  << "," <<  e_z << ")" << std::endl;
+  yaw = tool_yaw;
+  roll = tool_roll;
+  pitch = 0;
+  
+  // Eigen::Affine3f tf_neg = Eigen::Affine3f::Identity();
+  // tf_neg.rotate (Eigen::AngleAxisf ( -yaw, Eigen::Vector3f::UnitZ()));
+  // tf_neg.rotate (Eigen::AngleAxisf ( -roll,  Eigen::Vector3f::UnitX()));
 
+  
+  // Vector3f center_vec(center.x, center.y, center.z);
+  // Vector3f after_rotate_center_with_neg;
+
+  // after_rotate_center_with_neg = tf_neg * center_vec;
+  // float tool_trans_x = after_rotate_center_with_neg[0];
+  // float tool_trans_y = after_rotate_center_with_neg[1];
+  // float tool_trans_z = after_rotate_center_with_neg[2];
+
+  // x = tool_trans_x;
+  // y = tool_trans_y;
+  // z = tool_trans_z;
+  x = center.x;
+  y = center.y;
+  z = center.z;
+
+  return;
 
   // ----cam_normal_2_obj_normal()-------//
   float r, p ;//, cam_r, cam_p;
@@ -356,25 +426,8 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   pitch = p;
   yaw = 0;
 
-
-
-
+/*
   std::cout << "-------Move------" << std::endl;  
-
-  //----- eigen test------
-  Eigen::Affine3f  tf_neg = Eigen::Affine3f::Identity();
-  //tf_neg.rotate (Eigen::AngleAxisf ( -yaw,   Eigen::Vector3f::UnitZ()));
-  tf_neg.rotate (Eigen::AngleAxisf ( -pitch, Eigen::Vector3f::UnitY()));
-  tf_neg.rotate (Eigen::AngleAxisf ( -roll,  Eigen::Vector3f::UnitX()));
-
-
-  Vector3f e_rotate;
-  Vector3f c_vec(center.x, center.y, center.z);
-  e_rotate = tf_neg * c_vec;
-  
-  float e_x = e_rotate[0];
-  float e_y = e_rotate[1];
-  float e_z = e_rotate[2];
 
   //------rotate center----------//
   tf_neg = Eigen::Affine3f::Identity();
@@ -391,46 +444,25 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   float c_trans_y = after_rotate_center_with_neg[1];
   float c_trans_z = after_rotate_center_with_neg[2];
 
-  std::cout << " center (x, y, z) = "  
-  <<  "(" <<  center.x  << ","  <<  center.y  << "," <<  center.z << ")" << std::endl;
+  // std::cout << " center (x, y, z) = "  
+  // <<  "(" <<  center.x  << ","  <<  center.y  << "," <<  center.z << ")" << std::endl;
 
   std::cout << "c_trans (x, y, z) = "  
   <<  "(" <<  c_trans_x  << ","  <<  c_trans_y  << "," <<  c_trans_z << ")" << std::endl;
 
-  std::cout << "Eigen (x, y, z) = "  
-  <<  "(" <<  e_x  << ","  <<  e_y  << "," <<  e_z << ")" << std::endl;
-
-
-  float cam2tool_y = -0.11;  //#-0.095  #cam axis
-  float cam2tool_z = 0.23;   //# + 0.035
-  
-  //------ORI Move -----//
-  float move_cam_x = c_trans_x;
-  float move_cam_y = c_trans_y - cam2tool_y;
-  float move_cam_z = c_trans_z - cam2tool_z;
-
-  printf("-ORI Move -->(%lf, %lf, %lf)\n",
-      move_cam_x,move_cam_y,move_cam_z);
-
-  
-      
-    
-
-  Vector3f tool_vec(center.x, center.y - cam2tool_y, center.z - cam2tool_z);
-
-  Vector3f tool_trans = tf_neg * tool_vec;
-  float tool_x = tool_trans[0];
-  float tool_y = tool_trans[1];
-  float tool_z = tool_trans[2];
-
-  printf("-Tool Move -->(%lf, %lf, %lf)\n",
-      tool_x,tool_y,tool_z);
-
-  
 
   x = c_trans_x;
   y = c_trans_y;
   z = c_trans_z;
+
+
+  //------Record Move -----//
+  float cam2tool_y = -0.11;  //#-0.095  #cam axis
+  float cam2tool_z = 0.23;   //# + 0.035
+  
+  float move_cam_x = c_trans_x;
+  float move_cam_y = c_trans_y - cam2tool_y;
+  float move_cam_z = c_trans_z - cam2tool_z;
 
 
   printf("----------Test move cam----------\n");
@@ -438,12 +470,7 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
       pcl::rad2deg(roll), pcl::rad2deg(pitch));
   printf("task.Arm.relative_move_nsa(n= %lf, s = %lf, a = %lf -obj_dis)\n",
       move_cam_y, move_cam_x, move_cam_z);
-
-  printf("----------Test Trans Tool----------\n");
-  printf("task.Arm.relative_rot_nsa(pitch = %lf, yaw = %lf)\n",
-      pcl::rad2deg(roll), pcl::rad2deg(pitch));
-  printf("task.Arm.relative_move_nsa(n= %lf, s = %lf, a = %lf - obj_dis)\n",
-      tool_y, tool_x, tool_z);
+*/
     
 }
 
