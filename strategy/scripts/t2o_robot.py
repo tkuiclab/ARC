@@ -24,6 +24,7 @@ import json
 
 import arm_task_rel
 from gripper import *
+from s import *
 
 
 obj_dis = 0.1
@@ -38,7 +39,7 @@ class T2O:
         rospy.on_shutdown(self.stop_task)
         self.__obj_pose_client = actionlib.SimpleActionClient("/obj_pose", obj_pose.msg.ObjectPoseAction)
         
-        
+
     def stop_task(self):
         """Stop task running."""
         self.Arm.stop_task()
@@ -57,6 +58,12 @@ class T2O:
     
     def safe_pose(self):
         self.Arm.pub_ikCmd('ptp', (0.30, 0.00 , 0.3), (-180, 0, 0))
+        rospy.sleep(.5)
+        while self.Arm.busy:
+            rospy.sleep(.1)
+
+    def bin_photo_pose(self):
+        self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-90, 0, 0) )
         rospy.sleep(.5)
         while self.Arm.busy:
             rospy.sleep(.1)
@@ -244,7 +251,7 @@ if __name__ == '__main__':
     rospy.loginfo('T2O Ready')
 
     # task.safe_pose()
-    task.robot_photo_pose()
+    # task.robot_photo_pose()
     
 
     # Problem
@@ -271,14 +278,20 @@ if __name__ == '__main__':
     #----------- Request object pose--------#
     #task.obj_pose_request('avery_binder')
     #task.obj_pose_request('robots_dvd')
-    task.obj_pose_request('ticonderoga_pencils')
+    # task.obj_pose_request('ticonderoga_pencils')
     
 
     # task.Arm.relative_rot_nsa(pitch = -10)
+    # task.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+
+    # s = Strategy()
+    # s.test_go_bin_LM('e')
+    # task.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-90, 0, 0) )
+    task.bin_photo_pose()
 
     # -------Back 2 home------#.
-    #task.safe_pose()
-    #task.Arm.home()
+    # task.safe_pose()
+    # task.Arm.home()
 
 
     # -------Relative Test------#

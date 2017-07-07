@@ -71,4 +71,5 @@ roslaunch arc control.launch
 roslaunch realsense_camera sr300_nodelet_rgbd.launch
 rosrun darkflow_detect object_detect.py
 rosrun obj_pose object_pose_estimator
+(rosrun obj_pose object_pose_estimator /camera/depth_registered/points:=/camera/depth/points)
 rosrun strategy t2o_robot.py

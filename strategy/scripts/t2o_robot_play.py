@@ -1,7 +1,5 @@
 #! /usr/bin/env python
-# pylint: disable = invalid-name
-# pylint: disable = C0326, C0121, C0301
-# pylint: disable = W0105, C0303, W0312
+
 """Use to generate arm task and run."""
 
 import sys
@@ -266,7 +264,60 @@ class T2O:
         rospy.sleep(3)
         gripper_vaccum_off()
 
+'''
+    def test_relative_move_nsa(self, dis = 0):
+		# =======================================================================
+		""" relative move nsa with a specify dis (safe when euler mode is 'nsa' mode) """
+		# n = move_cam_y , s= -move_cam_x, a = move_cam_z
+		# =======================================================================
+		self.Arm.relative_move_nsa(n = -dis)
+		self.Arm.relative_move_nsa(n =  dis)
+		self.Arm.relative_move_nsa(s = -dis)
+		self.Arm.relative_move_nsa(s =  dis)
+		self.Arm.relative_move_nsa(a =  dis)
+		self.Arm.relative_move_nsa(a = -dis)
 
+	def test_relative_rot_nsa(self, rot = 0):
+		# =======================================================================
+		""" relative rotate pitch roll and yaw with a specifydegree """
+		# (safe when euler mode is 'nsa' mode) 
+		# when yaw(n) is not equal to 0, pitch(s) cannot do relative motion"""
+		# =======================================================================
+		self.Arm.relative_rot_nsa(pitch =  rot)  # pitch
+		self.Arm.relative_rot_nsa(pitch = -rot)
+		self.Arm.relative_rot_nsa(roll  =  rot)  # roll
+		self.Arm.relative_rot_nsa(roll  = -rot)
+		self.Arm.relative_rot_nsa(yaw   =  rot)  # yaw
+		self.Arm.relative_rot_nsa(yaw   = -rot)
+
+	def test_relative_xyz_base(self, dis = 0):
+		self.Arm.relative_xyz_base(x =  dis)
+		self.Arm.relative_xyz_base(x = -dis)
+		self.Arm.relative_xyz_base(y = -dis)
+		self.Arm.relative_xyz_base(y =  dis)
+		self.Arm.relative_xyz_base(z =  dis)
+		self.Arm.relative_xyz_base(z = -dis)
+
+	def test_relative_move_nsa_rot_pry(self, dis = 0, rot = 0):
+		self.Arm.relative_move_nsa_rot_pry(n =  dis, pitch =  rot)
+		self.Arm.relative_move_nsa_rot_pry(n = -dis, pitch = -rot)
+
+		self.Arm.relative_move_nsa_rot_pry(s = -dis, roll =  rot)
+		self.Arm.relative_move_nsa_rot_pry(s =  dis, roll = -rot)
+
+		self.Arm.relative_move_nsa_rot_pry(a =  dis, yaw =  rot)
+		self.Arm.relative_move_nsa_rot_pry(a = -dis, yaw = -rot)
+
+	def test_relative_move_xyz_rot_pry(self, dis = 0, rot = 0):
+		self.Arm.relative_move_xyz_rot_pry(x =  dis, pitch =  rot)
+		self.Arm.relative_move_xyz_rot_pry(x = -dis, pitch = -rot)
+
+		self.Arm.relative_move_xyz_rot_pry(y = -dis, roll =  rot)
+		self.Arm.relative_move_xyz_rot_pry(y =  dis, roll = -rot)
+
+		self.Arm.relative_move_xyz_rot_pry(z = -dis, yaw =  rot)
+		self.Arm.relative_move_xyz_rot_pry(z =  dis, yaw = -rot)
+'''        
 
 if __name__ == '__main__':
 
@@ -277,10 +328,21 @@ if __name__ == '__main__':
     rospy.loginfo('T2O Ready')
 
 
-    # task.safe_pose()
-    task.robot_photo_pose()
+
+    # gripper_suction_up()
+    # # task.safe_pose()
+    #task.robot_photo_pose()
+    # #task.Arm.relative_move_nsa(a = 0.15) 
+
+    # task.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.25), (-90, 0, 0) )
+			
+    # while task.Arm.busy:
+    #     rospy.sleep(.1)
+    
     
 
+
+    # exit()
     # Problem
     # task.Arm.relative_rot_nsa(pitch = 2.125044, yaw = 7.428986)
     # task.Arm.relative_move_nsa(n= 0.197568, s = -0.053241, a = 0.309954 -obj_dis)
@@ -296,7 +358,7 @@ if __name__ == '__main__':
     # exit()
 
     #----------- Go Photo Pose--------#
-    # task.robot_photo_pose()
+    #task.robot_photo_pose()
     
     # while task.Arm.busy:
     #     rospy.sleep(.1)
@@ -307,13 +369,13 @@ if __name__ == '__main__':
     # task.obj_pose_request('robots_dvd')
     #task.obj_pose_request('ticonderoga_pencils')
     #task.obj_pose_request('scotch_sponges')
-    task.obj_pose_request('burts_bees_baby_wipes')
+    # task.obj_pose_request('burts_bees_baby_wipes')
 
     # task.Arm.relative_rot_nsa(pitch = -10)
 
     # -------Back 2 home------#.
-    #task.safe_pose()
-    #task.Arm.home()
+    task.safe_pose()
+    task.Arm.home()
 
 
     # -------Relative Test------#

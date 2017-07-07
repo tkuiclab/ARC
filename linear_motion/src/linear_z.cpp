@@ -83,16 +83,16 @@ void SendCmd(bool Is_Pub, modbus_t* ct, int pos)
 
         //最大速度
         rc = modbus_write_register(ct, 6148, 0);
-        rc = modbus_write_register(ct, 6149, 7000);
+        rc = modbus_write_register(ct, 6149, 10000);
 
         //加速度
         rc = modbus_write_register(ct, 6150, 0);
-        rc = modbus_write_register(ct, 6151, 70000);
+        rc = modbus_write_register(ct, 6151, 80000);
 
         //減速度
         rc = modbus_write_register(ct, 6152, 0);
         printf("6152 rc=%d\n",rc);
-        rc = modbus_write_register(ct, 6153, 70000);
+        rc = modbus_write_register(ct, 6153, 80000);
         printf("6153 rc=%d\n",rc);
 
         //運轉電流

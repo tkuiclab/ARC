@@ -35,6 +35,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/passthrough.h>
+//#include <pcl/surface/impl/mls.hpp>
 #include <pcl/surface/mls.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include "object_pose_auxiliary.hpp"
