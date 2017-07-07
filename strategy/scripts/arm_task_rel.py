@@ -103,7 +103,7 @@ class ArmTask:
         for e in euler:
             cmd.append(e)
 
-        rospy.loginfo('Sent:{}'.format(cmd))
+        #rospy.loginfo('Sent:{}'.format(cmd))
 
         if mode == 'line':
             self.__cmd_pub.publish(cmd)
@@ -176,6 +176,54 @@ class ArmTask:
         vec_s = [rot[0][1], rot[1][1], rot[2][1]]
         vec_a = [rot[0][2], rot[1][2], rot[2][2]]
         return vec_n, vec_s, vec_a   
+
+    def relative_move_suction(self, mode='ptp', suction_angle=0, dis=0 ):
+        """Get euler angle and run task."""
+        # note:suction_anfle type is degree,  dis is m
+        while self.__is_busy:
+            rospy.sleep(.1)
+
+        # ======= Calculate suction vector start ========
+        rate_n = float((90-suction_angle)/90.0)
+        rate_a = float(suction_angle/90.0)
+        n = rate_n*dis
+        a = rate_a*dis
+        s = 0
+        # print 'dis = ' + str(dis)
+        # print 'rate_n = ' + str(rate_n)
+        # print 'rate_a = ' + str(rate_a)
+        # print 'n = ' + str(n)
+        # print 'a = ' + str(a)
+        # ======= Calculate suction vector over  ========
+
+        fb = self.get_fb()
+        pos = fb.group_pose.position
+        ori = fb.group_pose.orientation
+        euler = self.quaternion2euler(ori)
+        rot = self.nsa2rotation(euler)
+        vec_s, vec_n, vec_a = self.rotation2vector(rot)
+        
+        move = [0, 0, 0]
+
+        if n != 0:
+            move += multiply(vec_n, n)
+        if s != 0:
+            move += multiply(vec_s, s)
+        if a != 0:
+            move += multiply(vec_a, a)
+    
+        self.pub_ikCmd(
+            mode,
+            (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
+            (
+                degrees(euler[1]),              
+                degrees(euler[2]+(90*3.14156/180)),
+                degrees(euler[0])
+            )
+        )
+
+        while self.__is_busy:
+            rospy.sleep(.1)
 
     def relative_move_nsa(self, mode='ptp', n=0, s=0, a=0):
         """Get euler angle and run task."""

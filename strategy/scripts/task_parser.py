@@ -93,7 +93,7 @@ def make_stow_list(i_item_loc_json):
     for item in item_loc_json["tote"]["contents"]:
         stow_list.append(StowInfo(item, bin_id))
         #bin_id = bin_id + 1
-        bin_id = chr(ord(bin_id)+1)
+        #bin_id = chr(ord(bin_id)+1)
 
     show_stow_list(stow_list)
 

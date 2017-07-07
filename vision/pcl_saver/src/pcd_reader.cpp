@@ -51,7 +51,7 @@ int main (int argc, char** argv)
   ros::init(argc, argv, "pcl_reader");
   ros::NodeHandle n;
   image_transport::ImageTransport it(n);
-  image_transport::Publisher image_pub = it.advertise("/camera/rgb/image_color", 1);
+  image_transport::Publisher image_pub = it.advertise("/camera/rgb/image_raw", 1);
   ros::Publisher chatter_pub = n.advertise<sensor_msgs::PointCloud2>("/camera/depth_registered/points", 1);
   ros::Rate loop_rate(10);
   sensor_msgs::PointCloud2 pc2;
@@ -86,8 +86,8 @@ int main (int argc, char** argv)
   //             << " "    << cloud->points[i].y
   //             << " "    << cloud->points[i].z << std::endl;
 
-  ROS_INFO("Publish PCD to Topic : /camera/rgb/image_color");
-  ROS_INFO("Publish Img to Topic : /camera/depth_registered/points");
+  ROS_INFO("Publish IMG to Topic : /camera/rgb/image_raw");
+  ROS_INFO("Publish PCD to Topic : /camera/depth_registered/points");
   while (ros::ok())
   {
     imgMsg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();

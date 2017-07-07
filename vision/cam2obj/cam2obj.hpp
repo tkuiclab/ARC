@@ -18,6 +18,7 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/segmentation/region_growing.h>
 #include <pcl/common/common.h>
+#include <pcl/surface/impl/mls.hpp>
 #include <pcl/surface/mls.h>
 #include <pcl/filters/extract_indices.h>
 
@@ -381,7 +382,7 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
       "("  << pcl::rad2deg(tool_yaw) << "," << 
       pcl::rad2deg(tool_roll) << ")"  << std::endl;
 
-  float real_tool_yaw = (tool_yaw > 0) ? (tool_yaw-M_PI) : (tool_yaw+M_PI); 
+  float real_tool_yaw = (tool_yaw > 0) ? (tool_yaw-M_PI) : (tool_yaw+M_PI);
   
    std::cout << " (real_tool_yaw, roll) = "   <<  
       "("  << pcl::rad2deg(real_tool_yaw) << "," << 

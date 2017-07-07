@@ -57,20 +57,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/object_pose_estimator.cpp
-# )
-
-## Add cmake target dependencies of the library
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Declare a C++ executable
-# add_executable(${PROJECT_NAME}_node src/object_pose_estimator_node.cpp)
-
-
-## Add cmake target dependencies of the executable
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 add_executable (object_pose_estimator src/object_pose_estimator.cpp)
@@ -82,4 +68,3 @@ add_executable (obj_center src/obj_center.cpp)
 target_link_libraries (obj_center ${PCL_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(obj_center obj_pose_generate_messages_cpp)
 add_dependencies(obj_center darkflow_detect_generate_messages_cpp)
-

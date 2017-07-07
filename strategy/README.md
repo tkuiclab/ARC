@@ -41,6 +41,7 @@ $ rosservice call /robot_cmd "cmd: 'vacuumOn'"
 $ rosservice call /robot_cmd "cmd: 'vacuumOff'" 
 $ rosservice call /robot_cmd "cmd: 'suctionUp'" 
 $ rosservice call /robot_cmd "cmd: 'suctionDown'"
+$ rosservice call /robot_cmd "cmd: '30'"
 
 $ rosservice call /robot_cmd "cmd: 'calibration'"
 $ rosservice call /robot_cmd "cmd: 'setMaxPos'"
@@ -70,4 +71,5 @@ roslaunch arc control.launch
 roslaunch realsense_camera sr300_nodelet_rgbd.launch
 rosrun darkflow_detect object_detect.py
 rosrun obj_pose object_pose_estimator
+(rosrun obj_pose object_pose_estimator /camera/depth_registered/points:=/camera/depth/points)
 rosrun strategy t2o_robot.py

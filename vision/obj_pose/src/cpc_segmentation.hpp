@@ -53,7 +53,7 @@ class CPCSegmentation
       std::string sys_str;
       sys_str = "rm *.pcd";
       std::cout << "[CMD] -> " << sys_str << std::endl;
-      system(sys_str.c_str());
+      //system(sys_str.c_str());
       scene_segmentation=false;
     }
     void setPointCloud(pcl::PointCloud<PointT>::Ptr input_cloud_ptr)
@@ -99,7 +99,7 @@ class CPCSegmentation
       float concavity_tolerance_threshold = 10;
       float smoothness_threshold = 0.1;
       uint32_t min_segment_size = 0;
-      bool use_extended_convexity=true;
+      bool use_extended_convexity=false;
       bool use_sanity_criterion;
 
       // CPCSegmentation Stuff
@@ -227,8 +227,10 @@ class CPCSegmentation
 
           Eigen::Vector4f centroid;
           pcl::compute3DCentroid (*cloud_cluster1, centroid);
-          if(tmp_max_p.x<=max_points.x && tmp_max_p.y<=max_points.y && tmp_max_p.z<=max_points.z &&
-                        tmp_min_p.x>=min_points.x && tmp_min_p.y>=min_points.y && tmp_min_p.z>=min_points.z)
+          // if(tmp_max_p.x<=max_points.x && tmp_max_p.y<=max_points.y && tmp_max_p.z<=max_points.z &&
+          //               tmp_min_p.x>=min_points.x && tmp_min_p.y>=min_points.y && tmp_min_p.z>=min_points.z)
+          if(centroid(0) <= max_points.x && centroid(1) <= max_points.y && centroid(2) <= max_points.z 
+                  && centroid(0) >= min_points.x && centroid(1) >= min_points.y && centroid(2) >= min_points.z)
           {
             //std::cout << "------------------------------------------------" << std::endl;
             //std::cout << "cluster_" << j << " save!!!" << std::endl;

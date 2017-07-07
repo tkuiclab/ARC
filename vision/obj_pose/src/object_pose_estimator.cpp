@@ -1,10 +1,7 @@
-
 #include "object_pose_estimator.hpp"
-//#include "seg_plane_cam2obj.hpp"
 //#include "cpc_segmentation.hpp"
-#include "cam2obj.hpp"
+#include "cam2obj_ros.hpp"
 #include "ICP_alignment.hpp"
-
 
 using namespace ObjEstAction_namespace;
 
@@ -27,7 +24,6 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 {
   if(state==FOTO){
       pcl::fromROSMsg(*input,*scene_cloud);
-
 #ifdef SaveCloud
       //Remove All PCD File in [package]/pcd_file/*.pcd      
       std::string sys_str;
@@ -38,14 +34,9 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       //write pcd
       write_pcd_2_rospack(scene_cloud,"scene_cloud.pcd");
 #endif
-
-      // feedback_.msg = "Raw Point Could Read Done (From Camera)";
-      // feedback_.progress = 30;
-      // as_.publishFeedback(feedback_);
-      //set_feedback("Grabbing point cloud...",20);
+      set_feedback("Grabbing point cloud...",20);
       
       state = CALL_RCNN;
-      //state = POSE_ESTIMATION;
       call_rcnn_times = 0;
   }
 }
@@ -55,6 +46,7 @@ void ObjEstAction::poseEstimation(){
   ROS_INFO("In poseEstimation()");
   
   geometry_msgs::Twist pose;
+  geometry_msgs::Vector3 normal;
 
   PCT::Ptr cloud(new PCT);
   PCT::Ptr cloud_seg (new PCT);
@@ -84,9 +76,11 @@ void ObjEstAction::poseEstimation(){
   cam_2_obj_center(cloud, 
       pose.linear.x, pose.linear.y, pose.linear.z, 
       pose.angular.x, pose.angular.y, pose.angular.z,
+      normal.x, normal.y, normal.z,
       near_points_percent);
   
   result_.object_pose = pose;
+  result_.norm = normal;
 
   as_.setSucceeded(result_);
 
@@ -111,11 +105,14 @@ void ObjEstAction::get_roi(){
         return;
       }
 
+      ROS_WARN("CANNOT Call Service (/detect)");
+      preemptCB();
+
       ROS_WARN("/detect ROI result = False");
       geometry_msgs::Twist pose;
       pose.linear.z = -1; //ROI Fail
       result_.object_pose = pose;
-      as_.setSucceeded(result_);
+      // as_.setSucceeded(result_);
 
       state = NADA;
          
@@ -175,10 +172,10 @@ void ObjEstAction::get_roi(){
   write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
 #endif 
 
-
+  pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
   set_feedback("ROI Done",60);
   
-  //state = SEGMETATION;
+  // state = SEGMETATION;
   state = POSE_ESTIMATION;
 }
 
@@ -186,7 +183,6 @@ void ObjEstAction::segmentation()
 {
   ROS_INFO("Doing 3D Segmentation....");
   std::cout << "scene_seg = " << scence_seg << std::endl;
-
   /*
   CPCSegmentation cpc_seg;
   if(scence_seg)
@@ -218,6 +214,7 @@ void ObjEstAction::segmentation()
   seg_msg.header.frame_id = "camera_rgb_optical_frame";
   segmented_pub_.publish(seg_msg);
   */
+  
 }
 
 void ObjEstAction::do_ICP()
@@ -227,21 +224,43 @@ void ObjEstAction::do_ICP()
   pcl::PointCloud<pcl::PointXYZ> temp2;
   transformation_matrix = Eigen::Matrix4f::Identity ();
 
-
-  if(load_amazon_pcd_model(obj_name, model_PCD))
+  if(load_amazon_pcd(obj_name))
   {
     ROS_INFO("Load Amazon Model success!");
+    Eigen::Affine3f transform_2 = Eigen::Affine3f::Identity();
+    Eigen::Vector4f centroid;
     if(scence_seg)
     {
+      // Downsample
       pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_xyz (new pcl::PointCloud<pcl::PointXYZ>);
       copyPointCloud(*cloud_cluster, *cloud_xyz);
+      pcl::VoxelGrid<pcl::PointXYZ> sor;
+      sor.setInputCloud (cloud_xyz);
+      sor.setLeafSize (0.005f, 0.005f, 0.005f);
+      sor.filter (*cloud_xyz);
+      // Transfer model_cloud to seg_cloud
+      pcl::compute3DCentroid (*cloud_xyz, centroid);
+      transform_2.translation() << centroid(0), centroid(1), centroid(2);
+      pcl::transformPointCloud (*model_PCD, *model_PCD, transform_2);
+      // Setup input cloud for ICP
       my_icp.setSourceCloud(model_PCD);
       my_icp.setTargetCloud(cloud_xyz);
     }else{
+      // Downsample
+      pcl::VoxelGrid<pcl::PointXYZ> sor;
+      sor.setInputCloud (Max_cluster);
+      sor.setLeafSize (0.005f, 0.005f, 0.005f);
+      sor.filter (*Max_cluster);
+      // Transfer model_cloud to seg_cloud      
+      pcl::compute3DCentroid (*Max_cluster, centroid);
+      transform_2.translation() << centroid(0), centroid(1), centroid(2);
+      pcl::transformPointCloud (*model_PCD, *model_PCD, transform_2);
+      // Setup input cloud for ICP
       my_icp.setSourceCloud(model_PCD);
       my_icp.setTargetCloud(Max_cluster);
     }
     my_icp.align(temp2);
+    printf("Align Score = %f\n",my_icp.getScore());
     transformation_matrix = my_icp.getMatrix ();
     print4x4Matrix (transformation_matrix);
     //pcl::io::savePCDFile ("BIG_SEG.pcd", temp2, false);
@@ -249,7 +268,7 @@ void ObjEstAction::do_ICP()
     //----------------- Pub Segmentation Cloud to topic -----------------//
     pcl::toROSMsg(temp2, seg_msg);
     seg_msg.header.frame_id = "camera_rgb_optical_frame";
-    //align_pub_.publish(seg_msg);
+    align_pub_.publish(seg_msg);
   }else{
     state = NADA;
   }
@@ -299,7 +318,33 @@ void ObjEstAction::print4x4Matrix (const Eigen::Matrix4f & matrix)
   //as_.setSucceeded(result_);
 }
 
-
+bool ObjEstAction::load_amazon_pcd(std::string pcd_filename)
+{
+  int index=0;
+  std::stringstream ss1;
+  for(int i =0;i<40;i++)
+  {
+    if(LabelList[i]==pcd_filename)
+    {
+      index = i;
+    }
+  }
+  ss1 << "/home/iclab/arc_ws/src/ARC/vision/obj_pose/items/" << AmazonModelList[index] << "/" << AmazonModelList[index] << "1.pcd";
+  model_PCD = pcl::PointCloud<pcl::PointXYZ>::Ptr (new pcl::PointCloud<pcl::PointXYZ> ());
+  ROS_INFO("Loading PCD....");
+  ROS_INFO("PCD at %s",ss1.str().c_str());
+  if(pcl::io::loadPCDFile (ss1.str(), *model_PCD) < 0)
+  {
+    ROS_ERROR("Error loading Amazon Model cloud");
+    return false;
+  }else{
+    pcl::VoxelGrid<pcl::PointXYZ> sor;
+    sor.setInputCloud (model_PCD);
+    sor.setLeafSize (0.005f, 0.005f, 0.005f);
+    sor.filter (*model_PCD);
+    return true;
+  }
+}
 
 int main (int argc, char **argv)
 {

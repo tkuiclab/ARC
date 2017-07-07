@@ -62,6 +62,22 @@ class Strategy(threading.Thread):
 		self.stop_robot = True
 		rospy.loginfo("Strategy Exit & Stop Robot")
 
+
+
+	def safe_pose(self):
+		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-180, 0, 0))
+		while self.Arm.busy:
+			rospy.sleep(.1)
+
+	def stow_run(self):
+		if self.stow.is_ready() :
+			rospy.loginfo('Stow Task Running')
+			self.run_task_type = TaskType_Stow
+			self.stow.run()  
+		else:
+			rospy.logwarn('Stow Task Not Ready!!')
+
+
 	def task_cb(self,req):
 		""" description """
 		task_name = req.task_name
@@ -80,12 +96,7 @@ class Strategy(threading.Thread):
 			else:
 				rospy.logwarn('Pick Task Not Ready!!')
 		elif task_name.lower() == 'stow_run':
-			if self.stow.is_ready() :
-				rospy.loginfo('Stow Task Running')
-				self.run_task_type = TaskType_Stow
-				self.stow.run()  
-			else:
-				rospy.logwarn('Stow Task Not Ready!!')
+			self.stow_run()
 		elif task_name.lower() == 'stow_json_item_location':
 			self.stow.save_item_location(req.task_json)
 		else:
@@ -145,118 +156,34 @@ class Strategy(threading.Thread):
 		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.34), (0, 0, 0))
 
 
-	def safe_pose(self):
-		self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-180, 0, 0))
-
-	def test_relative_move_nsa(self, dis = 0):
-		# =======================================================================
-		""" relative move nsa with a specify dis (safe when euler mode is 'nsa' mode) """
-		# n = move_cam_y , s= -move_cam_x, a = move_cam_z
-		# =======================================================================
-		self.Arm.relative_move_nsa(n = -dis)
-		self.Arm.relative_move_nsa(n =  dis)
-		self.Arm.relative_move_nsa(s = -dis)
-		self.Arm.relative_move_nsa(s =  dis)
-		self.Arm.relative_move_nsa(a =  dis)
-		self.Arm.relative_move_nsa(a = -dis)
-
-	def test_relative_rot_nsa(self, rot = 0):
-		# =======================================================================
-		""" relative rotate pitch roll and yaw with a specifydegree """
-		# (safe when euler mode is 'nsa' mode) 
-		# when yaw(n) is not equal to 0, pitch(s) cannot do relative motion"""
-		# =======================================================================
-		self.Arm.relative_rot_nsa(pitch =  rot)  # pitch
-		self.Arm.relative_rot_nsa(pitch = -rot)
-		self.Arm.relative_rot_nsa(roll  =  rot)  # roll
-		self.Arm.relative_rot_nsa(roll  = -rot)
-		self.Arm.relative_rot_nsa(yaw   =  rot)  # yaw
-		self.Arm.relative_rot_nsa(yaw   = -rot)
-
-	def test_relative_xyz_base(self, dis = 0):
-		self.Arm.relative_xyz_base(x =  dis)
-		self.Arm.relative_xyz_base(x = -dis)
-		self.Arm.relative_xyz_base(y = -dis)
-		self.Arm.relative_xyz_base(y =  dis)
-		self.Arm.relative_xyz_base(z =  dis)
-		self.Arm.relative_xyz_base(z = -dis)
-
-	def test_relative_move_nsa_rot_pry(self, dis = 0, rot = 0):
-		self.Arm.relative_move_nsa_rot_pry(n =  dis, pitch =  rot)
-		self.Arm.relative_move_nsa_rot_pry(n = -dis, pitch = -rot)
-
-		self.Arm.relative_move_nsa_rot_pry(s = -dis, roll =  rot)
-		self.Arm.relative_move_nsa_rot_pry(s =  dis, roll = -rot)
-
-		self.Arm.relative_move_nsa_rot_pry(a =  dis, yaw =  rot)
-		self.Arm.relative_move_nsa_rot_pry(a = -dis, yaw = -rot)
-
-	def test_relative_move_xyz_rot_pry(self, dis = 0, rot = 0):
-		self.Arm.relative_move_xyz_rot_pry(x =  dis, pitch =  rot)
-		self.Arm.relative_move_xyz_rot_pry(x = -dis, pitch = -rot)
-
-		self.Arm.relative_move_xyz_rot_pry(y = -dis, roll =  rot)
-		self.Arm.relative_move_xyz_rot_pry(y =  dis, roll = -rot)
-
-		self.Arm.relative_move_xyz_rot_pry(z = -dis, yaw =  rot)
-		self.Arm.relative_move_xyz_rot_pry(z =  dis, yaw = -rot)
-
+	
 
 if __name__ == '__main__':
 	rospy.init_node('strategy')
 
+	
 	try:
 		s = Strategy()
-		# s.start() 
-
-
+		
+		
+	
+		#s.safe_pose()
+		s.start() 
+		
+		gripper_vaccum_off()
+		#s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+		s.stow.test_read_item_location_in_arc_pack("stow_test.json")
+		rospy.sleep(0.3)
+		s.stow_run()
+	
 
 		# write_PickInfo_2_JSON()
 
 
 		# ========== TEST ===========
-		# Error pose
-		#s.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-90, 0, 0) )
-		#s.Arm.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-180, 0, 0))
-		
-		
-		#s.Arm.relative_move_nsa(a = 0.15) 
-		# s.Arm.pub_ikCmd('ptp', (x, y , z), (pitch, roll, yaw) )
-		
-		#s.arm_go_init_pose()
+		#s.test_go_bin_LM('e')
 
-		#s.arm_go_init_pose()
-		
-		# s.test_go_bin_LM('g')
-
-
-
-		#s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.5), (-120, 0, 0) )
-			
-		#s.arm_bin_photo()
-			
-		#s.stow.LM_2_tote()			    # -
-		
-		# s.safe_pose()
-
-		#s.arm_bin_photo()
-		#gripper_vaccum_off()
-		#gripper_suction_up()
-		#gripper_suctoin_down()
-		
-		#s.stow.arm_photo_pose()	
-
-		#s.Arm.home()
-		#s.stow.test_obj_pose('robots_dvd')  
-
-		
-		#s.stow.test_run_with_obj_pose(-0.052098851651, -0.0093888239935, 0.554290473461)
-		#s.stow.test_run_with_obj_pose(-0.0642712190747, 0.0477893352509, 0.546670496464)	
-		
-		
-		#s.Arm.relative_move_nsa(n = 0.04, s = -0.06, a = 0.1)  
-		#s.Arm.relative_move_nsa(s = -0.06)  #s= move_cam_x
-
+		#s.safe_pose()
 
 
 
@@ -267,14 +194,14 @@ if __name__ == '__main__':
 
 		# ========================= rel motion test area start =============================
 		# s.Arm.pub_ikCmd('ptp', (0.3, 0 , 0.2), (-180, 0, 0) )
-		dis = -0.05
-		rot = 20
+		# dis = -0.05
+		# rot = 20
 		# s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
 		# s.Arm.relative_rot_nsa(roll = rot)
 		# s.Arm.relative_move_nsa(s = dis)
 
-		s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
-		s.Arm.relative_rot_pry_move_nsa(s = dis, roll = rot)
+		# s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
+		# s.Arm.relative_rot_pry_move_nsa(s = dis, roll = rot)
 
 
 
