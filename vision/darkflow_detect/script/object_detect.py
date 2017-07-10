@@ -84,7 +84,7 @@ def detectedInfoToMsg(info):
     try:
         msg.type = info_dict[msg.object_name].type
     except Exception as e:
-        rospy.logwarn(e)
+        rospy.logwarn('detectedInfoToMsg {}'.format(e))
         msg.type = 'Unknow'
     msg.confidence = info['confidence']
     msg.bound_box = [

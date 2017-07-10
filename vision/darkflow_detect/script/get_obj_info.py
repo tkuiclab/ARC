@@ -36,8 +36,8 @@ def read_json(path):
 
 
 def _get_info_path():
-    pkg_path = rospkg.RosPack().get_path('obj_pose')
-    return join(pkg_path, 'items')
+    pkg_path = rospkg.RosPack().get_path('arc')
+    return join(pkg_path, 'Training items')
 
 
 def json_parser(path):
@@ -58,6 +58,7 @@ def json_parser(path):
 def parse_all_json():
 
     path = _get_info_path()
+    print(path)
     folders = glob.glob(join(path, '*'))
 
     info = dict()
