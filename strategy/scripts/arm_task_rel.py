@@ -103,7 +103,7 @@ class ArmTask:
         for e in euler:
             cmd.append(e)
 
-        #rospy.loginfo('Sent:{}'.format(cmd))
+        rospy.loginfo('Sent:{}'.format(cmd))
 
         if mode == 'line':
             self.__cmd_pub.publish(cmd)

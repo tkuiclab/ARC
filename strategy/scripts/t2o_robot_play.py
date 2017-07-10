@@ -112,7 +112,7 @@ class T2O:
                         + str(numpy.rad2deg(a.y)) + ", " 
                         + str(numpy.rad2deg(a.z)) + ")" ) 
         
-        
+        return 
         y = (numpy.rad2deg(a.z) - 180) if numpy.rad2deg(a.z) > 0  else (numpy.rad2deg(a.z) + 180)
         r = 90 - (numpy.rad2deg(a.x) + 180)
 
@@ -365,7 +365,8 @@ if __name__ == '__main__':
     
 
     #----------- Request object pose--------#
-    #task.obj_pose_request('avery_binder')
+    # task.obj_pose_request('tissue_box')
+    task.obj_pose_request('crayons')
     # task.obj_pose_request('robots_dvd')
     #task.obj_pose_request('ticonderoga_pencils')
     #task.obj_pose_request('scotch_sponges')
@@ -374,8 +375,8 @@ if __name__ == '__main__':
     # task.Arm.relative_rot_nsa(pitch = -10)
 
     # -------Back 2 home------#.
-    task.safe_pose()
-    task.Arm.home()
+    # task.safe_pose()
+    # task.Arm.home()
 
 
     # -------Relative Test------#
