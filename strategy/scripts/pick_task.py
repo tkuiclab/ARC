@@ -73,9 +73,9 @@ class PickTask:
     def obj_pose_done_cb(self, state, result):
         """Response callback for obj_pose."""
         self.obj_pose = result.object_pose
-        if result.object_pose.linear.z == -1:
+        if not result.success:
             rospy.logwarn('ROI Fail!! obj -> {}'.format(self.now_pick.item))
-            self.state = WaitTask
+            self.state = FinishTask
         else:
             self.obj_pose = result.object_pose
             print('obj_pose {}'.format(self.obj_pose))
@@ -495,7 +495,7 @@ def _test():
         s.run()
 
         rate = rospy.Rate(30)  # 30hz
-        while not rospy.is_shutdown() or not s.finish:
+        while not rospy.is_shutdown() and not s.finish:
             s.pick_core()
             rate.sleep()
     except KeyboardInterrupt as e:
