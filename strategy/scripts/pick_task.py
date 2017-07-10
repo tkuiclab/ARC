@@ -24,7 +24,7 @@ WaitTask = 1        # Wait Task
 ParseJSON = 2       # Parse Json
 Down2Pick = 3       # Move down to pick object in bin.
 Init_Pos = 4        # Make robot arm go to the initial pos()
-Move2BinFront = 5          # Make robot arm go to the specify bin
+Move2BinFront = 5   # Make robot arm go to the specify bin
 WaitRobot = 6       # wait for robot complete task
 Up2LeaveBin = 7     # Move up to leave bin (robot arm still in bin)
 LeaveBin = 8        # Make robot arm leave bin
@@ -49,6 +49,7 @@ _BIN_MAX_DOWN = .135
 _CAM_2_TOOL_Z = .13
 _CAM_2_TOOL_Y = .08
 
+# For checking vacuum function
 check_next_states = [
     RobotMove2Box,
     Prepare2Place,
@@ -392,7 +393,7 @@ class PickTask:
         if n_s in check_next_states:
             self.info = "(Check) Status of Suction: {}".format(self.suck_num)
             print(self.info)
-            return self.suck_num > 0:
+            return self.suck_num > 0
         # Other state do not
         return True
 
