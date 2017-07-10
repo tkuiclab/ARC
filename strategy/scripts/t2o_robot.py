@@ -50,7 +50,8 @@ class T2O:
             rospy.sleep(.1)
         rospy.loginfo('obj_pose_request() obj='+obj)
         
-        goal = obj_pose.msg.ObjectPoseGoal(obj)
+        #goal = obj_pose.msg.ObjectPoseGoal(obj)
+        goal = obj_pose.msg.ObjectPoseGoal(object_name = obj)
 
         self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
         self.__obj_pose_client.wait_for_result()
