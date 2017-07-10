@@ -7,11 +7,28 @@ using namespace ObjEstAction_namespace;
 
 void ObjEstAction::goalCB()
 {
-  state = FOTO;
-  obj_name = as_.acceptNewGoal()->object_name;
+  obj_list.clear();
+  call_rcnn_times = 0;
+
+
+  const obj_pose::ObjectPoseGoalConstPtr goal = as_.acceptNewGoal();
+  obj_name = goal->object_name;
   ROS_INFO("Action calling! Goal=%s",obj_name.c_str());    
   std::cout << "-------------" << obj_name << " ----------" << std::endl;  
   
+  if(goal->object_list.size() > 0){
+    std::cout << "Get Object List: [" ;
+    for(int i =0;i < goal->object_list.size();i++){
+      std::string item_name = goal->object_list[i];
+      std::cout << item_name << ",";
+      obj_list.push_back(item_name);
+    }
+
+    std::cout << "]" << std::endl ;
+  }
+
+  state = FOTO;
+
 }
 
 void ObjEstAction::preemptCB()
@@ -24,9 +41,14 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 {
   if(state==FOTO){
       pcl::fromROSMsg(*input,*scene_cloud);
+
+  
 #ifdef SaveCloud
       //Remove All PCD File in [package]/pcd_file/*.pcd      
       std::string sys_str;
+
+      path = ros::package::getPath("obj_pose");
+      path.append("/pcd_file/");
       sys_str = "rm  " +  path + "*.pcd";
       std::cout << "[CMD] -> " << sys_str << std::endl;  
       system(sys_str.c_str());
@@ -34,13 +56,29 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       //write pcd
       write_pcd_2_rospack(scene_cloud,"scene_cloud.pcd");
 #endif
-      set_feedback("Grabbing point cloud...",20);
+      pub_feedback("Grabbing point cloud...",20);
       
       state = CALL_RCNN;
-      call_rcnn_times = 0;
+      
   }
 }
 
+void ObjEstAction::pub_feedback(std::string msg,int progress)
+{
+  feedback_.msg = msg;
+  feedback_.progress = progress;
+  as_.publishFeedback(feedback_);
+}
+
+void ObjEstAction::pub_error(){
+   geometry_msgs::Twist pose;
+   pose.linear.z = -1; //ROI Fail
+   result_.object_pose = pose;
+
+   as_.setSucceeded(result_);
+   //preemptCB();
+
+}
 
 void ObjEstAction::poseEstimation(){
   ROS_INFO("In poseEstimation()");
@@ -79,72 +117,24 @@ void ObjEstAction::poseEstimation(){
       normal.x, normal.y, normal.z,
       near_points_percent);
   
+  result_.object_name = obj_name;
   result_.object_pose = pose;
   result_.norm = normal;
 
   as_.setSucceeded(result_);
 
-  state = NADA;
-
 }
 
 
-void ObjEstAction::get_roi(){
-
-  roi_srv.request.object_name = obj_name;
-  if(roi_client.call(roi_srv))
-  {
-    ROS_INFO("Get ROI from Service (/detect) ");
-
+//Need Class Var: obj_name, call_rcnn_times
+//Output Class Var: int mini_x, int mini_y,  int max_x,  int max_y;
+// void ObjEstAction::detect_get_one(){
   
-    if(!roi_srv.response.result){
-      
-      if(call_rcnn_times < 20){
-        call_rcnn_times++;
-        
-        return;
-      }
+// }
 
-      ROS_WARN("CANNOT Call Service (/detect)");
-      preemptCB();
-
-      ROS_WARN("/detect ROI result = False");
-      geometry_msgs::Twist pose;
-      pose.linear.z = -1; //ROI Fail
-      result_.object_pose = pose;
-      // as_.setSucceeded(result_);
-
-      state = NADA;
-         
-      return;  
-    }
-    //darkflow_detect::Detected::ConstPtr detected_msg;
-    //const darkflow_detect::Detected all_detect = roi_srv.response.detected;
-
-    for(int i =0;i < roi_srv.response.detected.size();i++){
-      darkflow_detect::Detected detected = roi_srv.response.detected[i];
-
-      if(detected.object_name.compare(obj_name)==0){
-        mini_x = detected.bound_box[0];
-        mini_y = detected.bound_box[1];
-        max_x =  detected.bound_box[2];
-        max_y =  detected.bound_box[3];
-
-        break;
-
-      }
-
-    }
-
-    
-  }else{
-    ROS_WARN("CANNOT Call Service (/detect)");
-    geometry_msgs::Twist pose;
-    result_.object_pose = pose;
-    as_.setSucceeded(result_);
-    return;
-  }
-  ROS_INFO("[mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",mini_x,mini_y,max_x,max_y);
+void ObjEstAction::set_ROI_colud(
+    int mini_x,int mini_y,
+    int max_x, int max_y){
   
   ROI_cloud->width = max_x-mini_x;
   ROI_cloud->height = max_y-mini_y;
@@ -167,16 +157,173 @@ void ObjEstAction::get_roi(){
       index_tmp++;
     }
   }
+}
+
+//Need Class Var: obj_list, call_rcnn_times
+//Output Class Var: int mini_x, int mini_y,  int max_x,  int max_y;
+bool ObjEstAction::get_highest(){
+  roi_srv.request.object_name = "all";
+  if(roi_client.call(roi_srv))
+  {
+    ROS_INFO("Get ROI from Service (/detect) ");
+
+    if(!roi_srv.response.result || 
+      roi_srv.response.detected.size() == 0){
+      if(call_rcnn_times < 20){
+        call_rcnn_times++;
+        return false;
+      }
+
+      ROS_WARN("Call 20 times /detect ROI FAIL");         
+      return false;  
+    }
+    
+    //PCT::Ptr pt_cloud;
+
+    //pass_through_from_arg(scene_cloud, g_argc, g_argv, scene_cloud);
 
 #ifdef SaveCloud
-  write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
-#endif 
+  write_pcd_2_rospack(scene_cloud,"_highest_PassThrough.pcd");
+#endif
 
-  pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
-  set_feedback("ROI Done",60);
+
+    float pass_z_min = 0.3f;
+    float pass_z_max = 0.6f;
+    float pass_y_min = 0.0f;
+    if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_min")){
+      pcl::console::parse (g_argc, g_argv, "-pass_z_min", pass_z_min);
+    }
+
+    if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_max")){
+      pcl::console::parse (g_argc, g_argv, "-pass_z_max", pass_z_max);
+    }
+
+    if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_min")){
+      pcl::console::parse (g_argc, g_argv, "-pass_y_min", pass_y_min);
+    }
+
+    float near_from_cam = 999.0;
+    for(int i =0;i < roi_srv.response.detected.size();i++){
+      darkflow_detect::Detected detected = roi_srv.response.detected[i];
+
+      if(!is_obj_in_obj_list(detected.object_name)){
+        continue;
+      }
+
+      float center_y, center_z;
+      get_center_from_2dbox(
+            scene_cloud,
+            detected.bound_box[0], detected.bound_box[1],
+            detected.bound_box[2], detected.bound_box[3],
+            pass_z_min, pass_z_max,
+            center_y, center_z);
+      
+      if(center_y > pass_y_min && center_z != -1){
+        if(center_z < near_from_cam){
+          obj_name = detected.object_name;
+          mini_x = detected.bound_box[0];
+          mini_y = detected.bound_box[1];
+          max_x =  detected.bound_box[2];
+          max_y =  detected.bound_box[3];
+          
+          near_from_cam = center_z;
+        }
+      }
+
+      std::cout << detected.object_name << 
+        " -> (y, z) = ("<< center_y << "," << center_z << ")" 
+        << std::endl; 
+
+    }
+
+    
+  }else{
+    ROS_WARN("CANNOT Call Service (/detect)");
+    return false;
+  }
+  ROS_INFO("The highest is %s -> [mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",
+      obj_name.c_str(),
+      mini_x,mini_y,max_x,max_y);
   
-  // state = SEGMETATION;
-  state = POSE_ESTIMATION;
+  set_ROI_colud(mini_x,mini_y,max_x,max_y);
+  return true;
+}
+
+bool ObjEstAction::is_obj_in_obj_list(std::string name){
+  //check in request obj_list
+  for(int i =0;i < obj_list.size();i++){
+      if(obj_list[i].compare(name) == 0 ){
+        return true;
+      }
+  }
+  return false;
+}
+
+bool ObjEstAction::get_one_roi(){
+  roi_srv.request.object_name = obj_name;
+  if(roi_client.call(roi_srv))
+  {
+    ROS_INFO("Get ROI from Service (/detect) ");
+    if(!roi_srv.response.result || 
+    roi_srv.response.detected.size() == 0){
+      if(call_rcnn_times < 20){
+        call_rcnn_times++;
+        return false;
+      }
+
+      ROS_WARN("Call 20 times /detect FAIL");
+      return false;  
+    }
+
+    for(int i =0;i < roi_srv.response.detected.size();i++){
+      darkflow_detect::Detected detected = roi_srv.response.detected[i];
+
+      if(detected.object_name.compare(obj_name)==0){
+        mini_x = detected.bound_box[0];
+        mini_y = detected.bound_box[1];
+        max_x =  detected.bound_box[2];
+        max_y =  detected.bound_box[3];
+
+        break;
+
+      }
+
+    }
+
+  }else{
+    ROS_WARN("CANNOT Call Service (/detect)");
+    // pub_error();
+    // state = NADA;
+
+    return false;
+  }
+  ROS_INFO("[mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",mini_x,mini_y,max_x,max_y);
+  
+  set_ROI_colud(mini_x,mini_y,max_x,max_y);
+
+  return true;
+}
+
+bool ObjEstAction::get_roi(){
+  bool success = false;
+  if(obj_list.size() > 0){
+    pub_feedback("Getting ROI of Highest....",40);
+    success = get_highest();
+  }else{
+    pub_feedback("Getting ROI....",40);
+    success = get_one_roi();
+  }
+
+  if(success){
+#ifdef SaveCloud
+    write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
+#endif 
+    pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
+    pub_feedback("ROI Done",60);
+  }else{
+    pub_error();
+  }
+  return success;
 }
 
 void ObjEstAction::segmentation()
@@ -191,12 +338,12 @@ void ObjEstAction::segmentation()
     cpc_seg.set_3D_ROI(min_p, max_p);
     cpc_seg.do_segmentation();
     cloud_cluster = cpc_seg.get_cloud_cluster();
-    state = ALIGMENT;
+    //state = ALIGMENT;
   }else{
     cpc_seg.setPointCloud(ROI_cloud);
     cpc_seg.do_segmentation();
     Max_cluster = cpc_seg.get_BiggestCluster();
-    state = ALIGMENT;
+    //state = ALIGMENT;
   }
 
   //----------------- Pub Segmentation Cloud to topic -----------------//
@@ -223,7 +370,7 @@ void ObjEstAction::do_ICP()
   ICP_alignment my_icp;
   pcl::PointCloud<pcl::PointXYZ> temp2;
   transformation_matrix = Eigen::Matrix4f::Identity ();
-
+  /*
   if(load_amazon_pcd(obj_name))
   {
     ROS_INFO("Load Amazon Model success!");
@@ -254,7 +401,7 @@ void ObjEstAction::do_ICP()
       // Transfer model_cloud to seg_cloud      
       pcl::compute3DCentroid (*Max_cluster, centroid);
       transform_2.translation() << centroid(0), centroid(1), centroid(2);
-      pcl::transformPointCloud (*model_PCD, *model_PCD, transform_2);
+      pcl::transprint4x4MatrixformPointCloud (*model_PCD, *model_PCD, transform_2);
       // Setup input cloud for ICP
       my_icp.setSourceCloud(model_PCD);
       my_icp.setTargetCloud(Max_cluster);
@@ -264,22 +411,18 @@ void ObjEstAction::do_ICP()
     transformation_matrix = my_icp.getMatrix ();
     print4x4Matrix (transformation_matrix);
     //pcl::io::savePCDFile ("BIG_SEG.pcd", temp2, false);
-    state = NADA;
+    //state = NADA;
     //----------------- Pub Segmentation Cloud to topic -----------------//
     pcl::toROSMsg(temp2, seg_msg);
     seg_msg.header.frame_id = "camera_rgb_optical_frame";
     align_pub_.publish(seg_msg);
   }else{
-    state = NADA;
+    //state = NADA;
   }
+  */
 }
 
-void ObjEstAction::set_feedback(std::string msg,int progress)
-{
-  feedback_.msg = msg;
-  feedback_.progress = progress;
-  as_.publishFeedback(feedback_);
-}
+
 
 void ObjEstAction::print4x4Matrix (const Eigen::Matrix4f & matrix)
 {
@@ -362,23 +505,24 @@ int main (int argc, char **argv)
         break;
 
       case CALL_RCNN:
-        ObjEst.set_feedback("Getting ROI....",40);
-        ObjEst.get_roi();
+        state = (ObjEst.get_roi())? POSE_ESTIMATION : NADA;
         break;
 
       case SEGMETATION:
-        ObjEst.set_feedback("Doing segmentation....",60);
+        ObjEst.pub_feedback("Doing segmentation....",60);
         ObjEst.segmentation();
+        state = ALIGMENT;
         break;
 
       case ALIGMENT:
-        ObjEst.set_feedback("Alignment....",80);
+        ObjEst.pub_feedback("Alignment....",80);
         ObjEst.do_ICP();
+        state = NADA;
         break;
       case POSE_ESTIMATION:
-        ObjEst.set_feedback("POSE_ESTIMATION....",60);
+        ObjEst.pub_feedback("POSE_ESTIMATION....",60);
         ObjEst.poseEstimation();
-        
+        state = NADA;
         break;
       default:
         ROS_INFO("Que!?");

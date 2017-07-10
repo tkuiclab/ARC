@@ -3,16 +3,17 @@
 #include <ros/package.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Vector3.h>
+#include <std_msgs/String.h>
 
 //#include <fake_roi/Detect.h>
 #include <darkflow_detect/Detected.h>
 #include <darkflow_detect/Detect.h>
-#include <boost/thread/thread.hpp>
 #include <sensor_msgs/PointCloud2.h>
 #include <actionlib/server/simple_action_server.h>
-
 #include <obj_pose/ObjectPoseAction.h>
 
+
+#include <boost/thread/thread.hpp>
 #include <Eigen/Core>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
@@ -90,18 +91,34 @@ public:
   void goalCB();
   void preemptCB();
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
+  
+  void pub_feedback(std::string msg,int progress);
+  void pub_error();
+  
+
+  bool get_roi();
   void poseEstimation();
   void aligment();
-  void get_roi();
   void segmentation();
   void cpc_segmentation();
   void do_ICP();
-  bool load_amazon_pcd(std::string pcd_filename);
-  void set_feedback(std::string msg,int progress);
-  void print4x4Matrix (const Eigen::Matrix4f & matrix);
-
+  
+  // int obj_list_size(){
+  //   return obj_list.size();
+  // }
 
 protected:
+    
+
+  bool get_one_roi();   //need obj_name
+  bool get_highest();   //need obj_list
+  
+  void set_ROI_colud(int mini_x,int mini_y,int max_x, int max_y);
+
+  bool load_amazon_pcd(std::string pcd_filename);
+  bool is_obj_in_obj_list(std::string name);
+  void print4x4Matrix (const Eigen::Matrix4f & matrix);
+
 
   //------ROS--------//
   ros::NodeHandle nh_;
@@ -131,6 +148,7 @@ protected:
   // std::string tmp_path;
   // std::string tmp_path2;
   std::string obj_name;
+  std::vector<std::string> obj_list;
   //std::string path;
   //std::string pcd_folder;
   

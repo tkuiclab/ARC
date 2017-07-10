@@ -48,16 +48,17 @@ $ rosservice call /robot_cmd "cmd: 'setMaxPos'"
 $ rosservice call /robot_cmd "cmd: 'setMinPos'"
 
 # swicth obj_pose topic
-/camera/depth_registered/points:=/camera/depth/points \
+/camera/depth_registered/points:=/camera/depth/points 
+rosrun obj_pose object_pose_estimator  -pass_z_min 0.3 -pass_z_max 0.57 -pass_y_min 0  -pass_y_max 0.4 -near 0.1
 
 
-# Test with obj_center
+# Test 
 roslaunch arc control.launch
 roslaunch realsense_camera sr300_nodelet_rgbd.launch
 rosrun darkflow_detect object_detect.py
-rosrun obj_pose obj_center    # object_pose_estimator
+rosrun obj_pose object_pose_estimator  -pass_z_min 0.3 -pass_max 0.57 -pass_y_min 0 -near 0.1
 rosrun strategy s.py
-web
+open web
 
 
 move_cam_x = l.x

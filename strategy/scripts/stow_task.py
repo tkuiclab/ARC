@@ -11,7 +11,8 @@ import roslaunch
 import roslib;roslib.load_manifest('obj_pose')
 import rospkg
 import rospy
-
+from darkflow_detect.srv import Detect, DetectResponse
+from darkflow_detect.msg import Detected
 
 import obj_pose.msg
 from actionlib_msgs.msg import GoalID, GoalStatusArray
@@ -24,7 +25,7 @@ import LM_Control
 from task_parser import *
 from config import *
 from gripper import *
-
+import get_obj_info
 
 
 # Define State
@@ -34,8 +35,7 @@ Down2Pick   	= 3		# Move down to pick object in bin.
 Init_Pos		= 4		# Make robot arm go to the initial pos
 LM2Bin			= 5		# Make robot arm go to the specify bin
 WaitRobot   	= 6		# wait for robot complete task
-Up2LeaveBin 	= 7 	# Move up to leave bin (robot arm still in bin)
-LeaveBin		= 8		# Make robot arm leave bin
+ArmLeaveBin		= 8		# Make robot arm leave bin
 FinishTask  	= 9		
 Shift2Bin  		= 10
 PickObj 		= 11
@@ -47,18 +47,18 @@ Recover2InitPos = 15
 # Stow_Task
 LM2Tote			= 16
 ArmLeaveTote	= 18
-GripperDown	= 19
+# GripperDown	= 19
 Shift2Stow		= 20
-ArmPutInBin			= 21
-StowObj			= 22
+ArmPutInBin		= 21
+GripperOff		= 22
 
-Shift2Del 		= 24
+LM2Amnesty 		= 24
 DelObj 			= 25
 PhotoPose		= 26
 VisionProcess	= 27
 WaitVision		= 28
 
-Shift2Obj 		= 30
+Arm2ObjUp 		= 30
 
 LM_LeaveTote	= 31
 CheckIsHold 	= 32
@@ -66,7 +66,10 @@ CheckIsHold 	= 32
 obj_dis = 0.1
 
 class StowTask:
-	""" description """
+
+#--------------------Init & ROS--------------------#
+
+	""" Init  """
 	def __init__(self, i_arm, i_LM):
 		
 		self.Arm = i_arm
@@ -105,8 +108,13 @@ class StowTask:
 		self.Box 		   	= 'a'
 		self.Tote 		   	= 'a'
 
-
-
+		# all item from item_location file, get from make_stow_list()
+		# remove item if success(->stow_success) or fail (->stow_fail)
+		# 
+		self.stow_list = []			
+		self.stow_success = []
+		self.stow_fail = []
+		self.stow_amnesty =[]
 	
 	def ifsuck_cb(self, res):  
 		self.suck_ary = res.data
@@ -115,62 +123,8 @@ class StowTask:
 	def suck_num(self):
 		return sum(self.suck_ary)
         
-	def task_finish(self):
-		""" All Tasks Finish """
-		self.state			= WaitTask
-		self.next_state 	= WaitTask
-		self.Is_ArmBusy 	= False
-		self.Is_LMBusy		= False
-		self.Last_LM_Busy 	= False
-		self.Is_LMArrive   	= True
-		self.Last_LMArrive 	= True
-		self.Is_BaseShiftOK = False
-		self.BinCnt 		= 0
-		
 
-	def obj_pose_feedback_cb(self,fb):
-		rospy.loginfo("In obj_pose_feedback_cb")
-		rospy.loginfo("msg = " + fb.msg)
-		rospy.loginfo("progress = " + str(fb.progress) + "% ")
-
-        
-	def obj_pose_done_cb(self, state, result):
-		self.obj_pose = result.object_pose
-		self.norm = result.norm
-		l = result.object_pose.linear
-		if (l.z == -1) or (l.x == 0 and l.y == 0 and l.z==0):
-			rospy.logwarn('ROI Fail!! obj -> ' + self.now_stow_info.item)
-			self.state = FinishTask
-			return 
-		else:
-			self.obj_pose = result.object_pose
-			self.state = Shift2Obj
-
-
-	def run(self):
-		self.stow_id = 0
-		self.stow_get_one()
-		self.state 	= LM2Tote #Init_Pos
-
-	def is_ready(self):
-		if self.stow_list != None:
-			return True
-		else: 
-			return False
-
-	def stow_get_one(self):
-		""" Get one pick task """
-		""" Set: self.Bin, self.pick_id, self.Box """
-		if self.stow_id >= len(self.stow_list):
-			return False
-		
-		self.now_stow_info = self.stow_list[self.stow_id]
-		
-		self.stow_id = self.stow_id + 1
-		
-		return True
-
-		
+#--------------------Control Area--------------------#		
 	def LM_2_tote(self):
 		self.info = "(GoTote) Shift 2 tote "  
 		print self.info
@@ -183,20 +137,9 @@ class StowTask:
 		self.LM.pub_LM_Cmd(1, GetShift('Tote', 'z', self.Tote ))
 
 	def arm_photo_pose(self, pose=0):
-		self.info = "(Catch) Go PhotoPose "  
-		print self.info
-
-		self.next_state = VisionProcess
-		self.state 		= WaitRobot
-		
 		#self.Arm.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-180, 0, 0))
 		self.Arm.pub_ikCmd('ptp', (0.45, 0.00 , 0.15), (-180, 0, 0))
 		
-		# if not pose:
-		# 	self.Arm.pub_ikCmd('ptp', (0.40, 0.00 , 0.15), (-90, 0, 0))
-		# else:
-		# 	self.Arm.pub_ikCmd('ptp', (0.48, 0.00 , 0.15), (-60, 0, 0))
-
 	def tool_2_obj(self, obj_pose, norm):
 		p = obj_pose
 		a = p.angular
@@ -211,7 +154,7 @@ class StowTask:
 
 
 		y = (numpy.rad2deg(a.z) - 180) if numpy.rad2deg(a.z) > 0  else (numpy.rad2deg(a.z) + 180)
-		r = 90 - (numpy.rad2deg(a.x) + 180)
+		r = 90 - (numpy.rad2degn(a.x) + 180)
 
 		rospy.loginfo("(real_yaw, real_roll)= (" + str(y) + ", " + str(r) + ")")
 
@@ -269,7 +212,146 @@ class StowTask:
 		# 	rospy.sleep(.1)
 
 		# rospy.loginfo('Move Angle Finish')
+	
+	def update_status(self):
+		""" update ARM & LM status  """
+		self.Last_LM_Busy 	= self.Is_LMBusy
+		self.Last_LMArrive 	= self.Is_LMArrive
+		self.Is_ArmBusy 	= self.Arm.busy
+		self.Is_LMBusy  	= self.LM.IsBusy
+		self.Is_LMArrive	= self.LM.IsArrive
 
+#--------------------Vision Area & obj_pose_cb--------------------#	
+
+	def obj_pose_feedback_cb(self,fb):
+		rospy.loginfo("In obj_pose_feedback_cb")
+		rospy.loginfo("msg = " + fb.msg)
+		rospy.loginfo("progress = " + str(fb.progress) + "% ")
+
+        
+	def obj_pose_done_cb(self, state, result):
+		self.obj_pose = result.object_pose
+		self.norm = result.norm
+		l = result.object_pose.linear
+		if (l.z == -1) or (l.x == 0 and l.y == 0 and l.z==0):
+			rospy.logwarn('ROI Fail!! obj -> ' + self.now_stow_info.item)
+			self.state = FinishTask
+			return 
+		else:
+			print 'result.object_name = ' + result.object_name
+			self.obj_pose = result.object_pose
+			self.now_stow_info = self.get_stow_info_by_name(result.object_name)
+			
+			rospy.loginfo("now_stow_info = " + self.now_stow_info.item)
+
+			if(self.now_stow_info== None):
+				self.state = FinishTask
+			else :
+				self.state = Arm2ObjUp
+		
+	def get_detect_all_list(self):
+		detect_client = rospy.ServiceProxy('/detect', Detect)
+		res = detect_client("all")
+		return res.detected
+
+	def request_highest_item(self):
+		goal = obj_pose.msg.ObjectPoseGoal(
+			object_name = "<Highest>",
+			object_list = self.detect_all_in_stow_list
+		)
+
+		self.obj_pose_client.send_goal(
+				goal,
+				feedback_cb = self.obj_pose_feedback_cb, 
+				done_cb=self.obj_pose_done_cb )
+	
+
+#--------------------Strategy Area--------------------#
+	def run(self):
+		self.stow_id = 0
+		self.stow_get_one()
+		self.state 	= LM2Tote #Init_Pos
+
+	def is_ready(self):
+		if self.stow_list != None:
+			return True
+		else: 
+			return False
+
+	def stow_get_one(self):
+		""" Get one pick task """
+		""" Set: self.Bin, self.pick_id, self.Box """
+		if self.stow_id >= len(self.stow_list):
+			return False
+		
+		self.now_stow_info = self.stow_list[self.stow_id]
+		
+		self.stow_id = self.stow_id + 1
+		
+		return True
+
+	def task_finish(self):
+		""" All Tasks Finish """
+		self.state			= WaitTask
+		self.next_state 	= WaitTask
+		self.Is_ArmBusy 	= False
+		self.Is_LMBusy		= False
+		self.Last_LM_Busy 	= False
+		self.Is_LMArrive   	= True
+		self.Last_LMArrive 	= True
+		self.Is_BaseShiftOK = False
+		self.BinCnt 		= 0
+
+	def save_item_location(self,item_location_file):
+		""" Note: Get stow_list """
+		rospy.loginfo("[Stow] Save item_location")
+
+		self.item_location_file = item_location_file
+		self.stow_list = make_stow_list(item_location_file)		
+
+	def get_info(self):
+		info_json = {'info': self.info, 
+				'item': self.now_stow_info.item, 
+				'bin': self.now_stow_info.to_bin
+				}
+		
+		return info_json
+
+	# Need Var: self.stow_list 
+	# Output: stow_info
+	def get_stow_info_by_name(self, name):
+		for stow_info in self.stow_list:
+			if name == stow_info.item:
+				return stow_info
+
+		return None		
+		rospy.logwarn("get_stow_info_by_name() say Cannot stow_info in stow_list by name= "+ name)
+
+	""" Get detec_all from /detect and check it in stow_list"""
+	# Need Var: self.stow_list 
+	# Output Var: self.detect_all_in_stow_list  (string list)
+	def gen_detect_all_in_stow_list(self):
+		detect_all_list = self.get_detect_all_list()
+		self.detect_all_in_stow_list = []
+
+		for d_item in detect_all_list :
+			for s_item in self.stow_list:
+				if d_item.object_name == s_item.item:
+					self.detect_all_in_stow_list.append(d_item.object_name)
+		
+	# input: n_s = next_state
+	# output: Bool
+	def check_vaccum_by_next_state(self, n_s):
+		if n_s == LM_LeaveTote or n_s == ArmLeaveTote or \
+		n_s == LM2Bin or n_s == ArmPutInBin:
+			if self.suck_num == 0:
+				return False
+			else:
+				return True
+		else:
+			return True
+				
+#--------------------Stow_Core--------------------#	
 
 	def stow_core(self):
 		self.update_status()
@@ -300,29 +382,46 @@ class StowTask:
 			return
 
 		elif self.state == PhotoPose:    
-			self.arm_photo_pose()
-			gripper_suction_up()
-			return
-
-		elif self.state == VisionProcess:    
-			self.info = "(Catch) Request Object_Pose with "  + self.now_stow_info.item
+			self.info = "(Catch) Go PhotoPose "  
 			print self.info
 
-			goal = obj_pose.msg.ObjectPoseGoal(self.now_stow_info.item)
+			self.arm_photo_pose()
+			gripper_suction_up()
 
+			self.next_state = VisionProcess
+			self.state 		= WaitRobot
+			
+			return
+
+		elif self.state == VisionProcess:
+
+			'''    
+			self.info = "(Vision) Request Object_Pose with "  + self.now_stow_info.item
+			print self.info
+			goal = obj_pose.msg.ObjectPoseGoal(self.now_stow_info.item)
 			self.obj_pose_client.send_goal(
 					goal,
 					feedback_cb = self.obj_pose_feedback_cb, 
 					done_cb=self.obj_pose_done_cb )
+			'''
+			self.info = "(Vision) Request /detect with all"
+			print self.info
+			
+			self.gen_detect_all_in_stow_list()
+			print "detect_all_in_stow_list[] -> " + str(self.detect_all_in_stow_list)
+			self.info = "(Vision) Request highest"
+			print self.info
+			
+			self.request_highest_item()
 
-			self.next_state = Shift2Obj
+			#self.next_state = Arm2ObjUp
 			self.state 		= WaitVision
 			
 			return
 		
 
-		elif self.state == Shift2Obj:
-			self.info = "(Catch) Arm Shift2Obj "  
+		elif self.state == Arm2ObjUp:
+			self.info = "(Catch) Arm Arm2ObjUp "  
 			print self.info
 
 			self.tool_2_obj(self.obj_pose, self.norm)
@@ -364,64 +463,44 @@ class StowTask:
 			self.Is_BaseShiftOK = False
 			self.LM.pub_LM_Cmd(1, ToteLeave_Z)
 
-			self.next_state = CheckIsHold #ArmLeaveTote
+			self.next_state = ArmLeaveTote #CheckIsHold #LM2Bin #ArmLeaveTote
 			self.state 		= WaitRobot
 			return
 
-
-
-		elif self.state == CheckIsHold:
-			self.info = "(GoBin) CheckIsHold"
-			print self.info
+		# elif self.state == CheckIsHold:
+		# 	self.info = "(GoBin) CheckIsHold"
+		# 	print self.info
 			
-			if self.suck_num == 0:
-				self.state 		= FinishTask
-			else:
-				self.state = LM2Bin
+		# 	if self.suck_num == 0:
+		# 		self.state 		= FinishTask
+		# 	else:
+		# 		self.state = LM2Bin
 			
+		# 	return
 
-			return
+		# elif self.state == LM2Amnesty:       
+		# 	self.next_state 	= DelObj  
+		# 	self.state 			= WaitRobot
+		# 	self.Tote 			= 'b'
+		# 	self.Is_BaseShiftOK = False
+		# 	self.LM.pub_LM_Cmd(2, GetShift('Tote', 'x', self.Tote ))
+		# 	rospy.sleep(0.3)
+		# 	self.LM.pub_LM_Cmd(1, GetShift('Tote', 'z', self.Tote ))
+		# 	self.Tote 			= 'a'
 
-		elif self.state == Shift2Del:       
-			self.next_state 	= DelObj  
-			self.state 			= WaitRobot
-			self.Tote 			= 'b'
-			self.Is_BaseShiftOK = False
-			self.LM.pub_LM_Cmd(2, GetShift('Tote', 'x', self.Tote ))
-			rospy.sleep(0.3)
-			self.LM.pub_LM_Cmd(1, GetShift('Tote', 'z', self.Tote ))
-			self.Tote 			= 'a'
-			print 'Shift2Del'
-			return
+		# 	return
 
-		elif self.state == GripperDown: 
-			self.info = "(GoBin) Arm GripperDown "
-			print self.info
+		# elif self.state == GripperDown: 
+		# 	self.info = "(GoBin) Arm GripperDown "
+		# 	print self.info
 			
-			#-------Note----------#
-			#gripper_suction_down()
-			gripper_suction_up()
+		# 	#-------Note----------#
+		# 	#gripper_suction_down()
+		# 	gripper_suction_up()
 
-			self.next_state = LM2Bin
-			self.state 		= WaitRobot
-
-			
-			return
-
-		elif self.state == LM2Bin:       
-			self.info = "(GoBin) LM LM2Bin, Go Bin -> " + self.now_stow_info.to_bin
-			print self.info
-
-			self.next_state 	= ArmLeaveTote #ArmPutInBin  
-			self.state 			= WaitRobot
-			self.Is_BaseShiftOK = False
-			self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.now_stow_info.to_bin ))
-			rospy.sleep(0.3)
-			self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.now_stow_info.to_bin ))
-			
-			
-			return
-
+		# 	self.next_state = LM2Bin
+		# 	self.state 		= WaitRobot			
+		# 	return
 		elif self.state == ArmLeaveTote:
 			self.info = "(GoBin) Arm ArmLeaveTote "
 			print self.info
@@ -431,44 +510,61 @@ class StowTask:
 			#gripper_suction_up()
 			gripper_suction_down()
 
-			self.next_state = ArmPutInBin
+			self.next_state = LM2Bin #ArmPutInBin
 			self.state 		= WaitRobot
+			return
+
+		elif self.state == LM2Bin:       
+			self.info = "(GoBin) LM LM2Bin, Go Bin -> " + self.now_stow_info.to_bin
+			print self.info
+	
+			self.Is_BaseShiftOK = False
+			self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.now_stow_info.to_bin ))
+			rospy.sleep(0.3)
+			self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.now_stow_info.to_bin ))
+		
+			self.next_state 	= ArmPutInBin #ArmLeaveTote   
+			self.state 			= WaitRobot
+
 			return
 
 		elif self.state == ArmPutInBin:  
 			self.info = "(GoBin) Arm ArmPutInBin "
 			print self.info
 
-			self.next_state = StowObj
+			self.next_state = GripperOff
 			self.state 		= WaitRobot
 
 			self.Arm.relative_move_nsa(a = 0.25) 
 			return
 
-		elif self.state == StowObj or self.state == DelObj:				# Disable Vacuum 
-			
-			if self.state == StowObj:
-				self.next_state = LeaveBin
-				self.info = "(GoBin) PutObj in StowObj "
-			else:
-				self.next_state = FinishTask
-				self.info = "(GoBin) PutObj in DelObj "
-
+		elif self.state == GripperOff:
+			self.info = "(GoBin) PutObj in GripperOff "
 			print self.info
 			
-			self.state = WaitRobot
-			gripper_vaccum_off()
+			if self.suck_num > 0:
+				self.now_stow_info.success = True
+				self.stow_success.append(self.now_stow_info)
+			else:
+				self.now_stow_info.success = False
+				self.stow_fail.append(self.now_stow_info)
 			
+			self.stow_list.remove(self.now_stow_info)
+
+			gripper_vaccum_off()
+
+			self.next_state = ArmLeaveBin
+			self.state = WaitRobot
 			return
 
-		elif self.state == LeaveBin:       
-			self.info = "(GoBin) LeaveBin"
+		elif self.state == ArmLeaveBin:       
+			self.info = "(GoBin) ArmLeaveBin"
 			print self.info
+			
+			self.Arm.relative_move_nsa(a = -0.15) 
 
 			self.next_state = Recover2InitPos
 			self.state 		= WaitRobot
-			#self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (0, 0, 0) )
-			self.Arm.relative_move_nsa(a = -0.15) 
 
 			return
 
@@ -486,15 +582,25 @@ class StowTask:
 
 		elif self.state == WaitRobot:
 			# rospy.sleep(0.3)
+			change_next_state = False
 			if self.Last_LMArrive == False and self.Is_LMArrive == True and self.Is_ArmBusy == False:
 				self.Is_BaseShiftOK = True
-				self.state 			= self.next_state
+				change_next_state = True
 				print 'LM Postive trigger'
 
 			elif self.Is_BaseShiftOK == True and self.Is_ArmBusy == False:
-				self.state 			= self.next_state
+				change_next_state = True
 				print 'BaseShiftOK'
 
+			if change_next_state:
+				if self.check_vaccum_by_next_state(self.next_state):
+					self.state 			= self.next_state
+				else:
+					self.now_stow_info.success = False
+					self.stow_fail.append(self.now_stow_info)
+					self.stow_list.remove(self.now_stow_info)
+
+					self.state = FinishTask
 			return
 
 		elif self.state == FinishTask:
@@ -518,30 +624,17 @@ class StowTask:
 
 
 
-	def save_item_location(self,item_location_file):
-		rospy.loginfo("[Stow] Save item_location")
-
-		self.item_location_file = item_location_file
-		self.stow_list = make_stow_list(item_location_file)		
-
-	def get_info(self):
-		info_json = {'info': self.info, 
-				'item': self.now_stow_info.item, 
-				'bin': self.now_stow_info.to_bin
-				}
-		
-		return info_json
-
-	def update_status(self):
-		""" update ARM & LM status  """
-		self.Last_LM_Busy 	= self.Is_LMBusy
-		self.Last_LMArrive 	= self.Is_LMArrive
-		self.Is_ArmBusy 	= self.Arm.busy
-		self.Is_LMBusy  	= self.LM.IsBusy
-		self.Is_LMArrive	= self.LM.IsArrive
 
 
-#--------------------------------------------------Test--------------------------------------------------
+#Test------------------------------Test--------------------------------------------------
+	def print_stow_list_item(self, i_list, name):
+		p = name + " : {"
+		for stow_info in i_list:
+			p = p + stow_info.item + ", "
+			
+		p = p + "}"
+
+		print(p)
 
 	def test_obj_pose_done(self, status, result):
 		self.obj_pose = result.object_pose
@@ -596,3 +689,11 @@ class StowTask:
 
 		# save_item_location
 		self.save_item_location(read_data)
+
+	def test_2_stow_fail(self):
+		self.now_stow_info.success = False
+		self.stow_fail.append(self.now_stow_info)
+		self.stow_list.remove(self.now_stow_info)
+
+		self.print_stow_list_item(self.stow_list, "stow_list")
+		self.print_stow_list_item(self.stow_fail, "stow_fail")

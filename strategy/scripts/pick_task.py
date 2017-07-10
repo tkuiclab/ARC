@@ -199,7 +199,9 @@ class PickTask:
             print(self.info)
 
             # ActionLib request
-            goal = obj_pose.msg.ObjectPoseGoal(self.now_pick.item)
+            #goal = obj_pose.msg.ObjectPoseGoal(self.now_pick.item)
+            goal = obj_pose.msg.ObjectPoseGoal(object_name = self.now_pick.item)
+            
             self.__obj_pose_client.send_goal(
                 goal,
                 feedback_cb=self.obj_pose_feedback_cb,

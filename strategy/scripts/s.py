@@ -166,15 +166,26 @@ if __name__ == '__main__':
 		s = Strategy()
 		
 		
-	
-		#s.safe_pose()
-		s.start() 
+		#s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
+		#s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00005.json")
+		s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00009.json")
 		
-		gripper_vaccum_off()
-		#s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
-		s.stow.test_read_item_location_in_arc_pack("stow_test.json")
-		rospy.sleep(0.3)
-		s.stow_run()
+		s.stow.gen_detect_all_in_stow_list()
+		s.stow.request_highest_item()
+		
+		rospy.sleep(10)
+		
+		s.stow.test_2_stow_fail()
+		#print str(s.stow.detect_all_in_stow_list)
+
+		#s.safe_pose()
+		# s.start() 
+		
+		# gripper_vaccum_off()
+		# #s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
+		# s.stow.test_read_item_location_in_arc_pack("stow_test.json")
+		# rospy.sleep(0.3)
+		# s.stow_run()
 	
 
 		# write_PickInfo_2_JSON()

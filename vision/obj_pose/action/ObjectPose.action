@@ -1,7 +1,9 @@
 #goal
 string object_name
+string[] object_list   # want get highest item
 ---
 #result
+string object_name   # use for highest item
 geometry_msgs/Twist object_pose
 geometry_msgs/Vector3 norm
 ---

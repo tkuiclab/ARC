@@ -257,6 +257,7 @@ float& yaw, float& roll){
 
   yaw_rad = (xyp[0] > 0.0) ? (-1.0) * yaw_rad : yaw_rad;
 
+  
   //------------Tool_Roll--------------//
   //rotate obj_normal with -r_rad
   Eigen::Affine3f tf = Eigen::Affine3f::Identity();
@@ -571,6 +572,48 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
     
 }
 
+
+bool get_center_from_2dbox(
+    PCT::Ptr i_cloud,
+    int mini_x,int mini_y,
+    int max_x, int max_y, 
+    //pass_through_z
+    float pt_min_z, float pt_max_z,
+    float& center_y, float& center_z){
+
+
+    float sum_z = 0;
+    float sum_y = 0;
+    unsigned int  cp = 0 ;
+    int index;
+    for(int j=mini_y;j<max_y;j++){
+        for(int i=mini_x;i<max_x;i++)  {
+
+          index = j*i_cloud->width+i;
+          if (pcl::isFinite (i_cloud->points[index])) {
+            float y = i_cloud->points[index].y;
+            float z = i_cloud->points[index].z;
+            if(z > pt_min_z &&  z < pt_max_z 
+               ){
+              sum_z += z;
+              sum_y += y;
+              ++cp;
+            }
+          }
+        }
+    }
+
+  
+  if(cp > 0 ){
+
+    center_y = sum_y/(float)cp;
+    center_z =  sum_z / (float)cp;
+    return true;
+  }else{
+    center_z = -1;
+    return false;
+  }
+}
 
 
 void only_obj_center(PCT::Ptr i_cloud,
