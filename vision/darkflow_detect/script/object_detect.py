@@ -21,6 +21,8 @@ from darkflow_detect.srv import Detect, DetectResponse
 from darkflow_detect.msg import Detected
 from darkflow.net.build import TFNet
 from convert_label.convert import offical2Our, our2Offical, colors
+
+os.chdir(rospkg.RosPack().get_path('strategy'))
 from get_obj_info import info_dict
 
 
@@ -208,7 +210,7 @@ _img = Image()
 options = {
     "model": "cfg/yolo-new.cfg",    # model of net
     "backup": "ckpt/",              # directory of ckpt (training result)
-    "load": -1,                 # which ckpt will be loaded. -1 represent the last ckpt
+    "load": -1,                     # which ckpt will be loaded. -1 represent the last ckpt
     "threshold": 0.0,               # threshold for confidence
     "gpu": 1.0                      # gpu using rate
 }
