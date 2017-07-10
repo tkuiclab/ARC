@@ -63,7 +63,7 @@ class T2O:
             rospy.sleep(.1)
         rospy.loginfo('obj_pose_request() obj='+obj)
         
-        goal = obj_pose.msg.ObjectPoseGoal(obj)
+        goal = obj_pose.msg.ObjectPoseGoal(object_name = obj)
 
         self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
         self.__obj_pose_client.wait_for_result()
@@ -98,6 +98,8 @@ class T2O:
 
     # def tool_2_obj(self, obj_pose):
     def tool_2_obj(self, obj_pose, norm):
+        return
+        
         p = obj_pose
         a = p.angular
         l = p.linear
@@ -368,14 +370,14 @@ if __name__ == '__main__':
     #task.obj_pose_request('avery_binder')
     # task.obj_pose_request('robots_dvd')
     #task.obj_pose_request('ticonderoga_pencils')
-    #task.obj_pose_request('scotch_sponges')
+    task.obj_pose_request('scotch_sponges')
     # task.obj_pose_request('burts_bees_baby_wipes')
 
     # task.Arm.relative_rot_nsa(pitch = -10)
 
     # -------Back 2 home------#.
-    task.safe_pose()
-    task.Arm.home()
+    # task.safe_pose()
+    # task.Arm.home()
 
 
     # -------Relative Test------#
@@ -407,3 +409,5 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         #print 'ok...'
         r.sleep()
+
+

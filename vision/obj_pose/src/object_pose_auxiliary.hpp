@@ -117,7 +117,7 @@ void write_pcd_2_rospack(PCT::Ptr cloud, std::string f_name){
     path.append(f_name);
 
     pcl::PCDWriter writer;
-    writer.write<PT> (path, *cloud, true);
+    writer.write<PT> (path, *cloud, false);
 
     std::cout << "Save PCD -> " << path << std::endl;
 }

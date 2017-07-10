@@ -64,7 +64,7 @@ target_link_libraries (object_pose_estimator ${PCL_LIBRARIES} ${catkin_LIBRARIES
 add_dependencies(object_pose_estimator obj_pose_generate_messages_cpp)
 add_dependencies(object_pose_estimator darkflow_detect_generate_messages_cpp)
 
-add_executable (obj_center src/obj_center.cpp)
-target_link_libraries (obj_center ${PCL_LIBRARIES} ${catkin_LIBRARIES})
-add_dependencies(obj_center obj_pose_generate_messages_cpp)
-add_dependencies(obj_center darkflow_detect_generate_messages_cpp)
+# add_executable (center_object src/obj_center.cpp)
+# target_link_libraries (center_object ${PCL_LIBRARIES} ${catkin_LIBRARIES})
+# add_dependencies(center_object obj_pose_generate_messages_cpp)
+# add_dependencies(center_object darkflow_detect_generate_messages_cpp)
