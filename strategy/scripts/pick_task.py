@@ -24,23 +24,23 @@ WaitTask = 1        # Wait Task
 ParseJSON = 2       # Parse Json
 Down2Pick = 3       # Move down to pick object in bin.
 Init_Pos = 4        # Make robot arm go to the initial pos()
-Go2Bin = 5          # Make robot arm go to the specify bin
+Move2BinFront = 5          # Make robot arm go to the specify bin
 WaitRobot = 6       # wait for robot complete task
 Up2LeaveBin = 7     # Move up to leave bin (robot arm still in bin)
 LeaveBin = 8        # Make robot arm leave bin
 FinishTask = 9
-Shift2Bin = 10
+RobotMove2Bin = 10
 PickObj = 11
 PlaceObj = 12
-Move2PlaceObj1 = 13
+RobotMove2Box = 13
 Move2PlaceObj2 = 14
-Move2PlaceObj3 = 15
-Move2PlaceObj4 = 16
+Prepare2Place = 15
+Down2Place = 16
 Recover2InitPos = 17
 
 PhotoPose = 26
 VisionProcess = 27
-Rotate2PickPosOri = 28
+Rotate2PickPose = 28
 WaitVision = 29
 CheckIsHold = 30
 
@@ -48,6 +48,12 @@ _REL_GO_BIN_FRONT = .1
 _BIN_MAX_DOWN = .135
 _CAM_2_TOOL_Z = .13
 _CAM_2_TOOL_Y = .08
+
+check_next_states = [
+    RobotMove2Box,
+    Prepare2Place,
+    Down2Place
+]
 
 
 class PickTask:
@@ -140,7 +146,7 @@ class PickTask:
     def run(self):
         self.pick_id = 0
         self.pick_get_one()
-        self.state = Shift2Bin
+        self.state = RobotMove2Bin
 
     def pick_core(self):
         """Main procedure of finite state machine."""
@@ -153,8 +159,8 @@ class PickTask:
             return
 
         # Move to bin and initial pose
-        elif self.state == Shift2Bin:
-            self.info = "(GoBin) LM Move To Bin {}".format(self.bin)
+        elif self.state == RobotMove2Bin:
+            self.info = "(GoBin) Robot Move to Bin {}".format(self.bin)
             print(self.info)
 
             # Change state
@@ -166,7 +172,7 @@ class PickTask:
             self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.bin))
             rospy.sleep(0.3)
             self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.bin))
-            # Move to initial pose
+            # Arm move to initial pose
             gripper_suction_up()
             self.Arm.pub_ikCmd('ptp', (0.3, 0.0, 0.3), (-90, 0, 0))
 
@@ -183,7 +189,7 @@ class PickTask:
             self.Arm.pub_ikCmd('ptp', (0.3, 0.0, 0.3), (-90, 0, 0))
 
         elif self.state == PhotoPose:
-            self.info = "(GoBin) Arm To PhotoPose"
+            self.info = "(GoBin) Arm to PhotoPose"
             print(self.info)
 
             # Change state
@@ -199,22 +205,32 @@ class PickTask:
             print(self.info)
 
             # ActionLib request
-            #goal = obj_pose.msg.ObjectPoseGoal(self.now_pick.item)
             goal = obj_pose.msg.ObjectPoseGoal(object_name = self.now_pick.item)
-            
             self.__obj_pose_client.send_goal(
                 goal,
                 feedback_cb=self.obj_pose_feedback_cb,
                 done_cb=self.obj_pose_done_cb
             )
-            
+
             # Change state
             self.state = WaitVision
-            self.next_state = Go2Bin
+            self.next_state = Move2BinFront
+
+        # Arm move to bin front
+        elif self.state == Move2BinFront:
+            self.info = "(Catch) Arm Move to Bin Front {}".format(self.bin)
+            print(self.info)
+
+            # Change state
+            self.state = WaitRobot
+            self.next_state = Rotate2PickPose
+
+            # cam_z = self.obj_pose.linear.z - 0.13
+            self.Arm.relative_move_nsa(a=_REL_GO_BIN_FRONT)
 
         # Tune pose to fit object
-        elif self.state == Rotate2PickPosOri:
-            self.info = "(Catch) Arm Rotate 2 Pick Pos and Ori"
+        elif self.state == Rotate2PickPose:
+            self.info = "(Catch) Arm Rotate 2 Pick Pose"
             print(self.info)
 
             # Change state
@@ -229,17 +245,17 @@ class PickTask:
             print("tool_y: {}".format(tool_y))
             self.Arm.relative_move_nsa(s=tool_x, n=tool_y)
 
-        # Move to bin front
-        elif self.state == Go2Bin:
-            self.info = "(Catch) Arm Put in Bin {}".format(self.bin)
+        # Enable the vacuum
+        elif self.state == PickObj:
+            self.info = "(Catch) Vacuum Enable"
             print(self.info)
 
             # Change state
             self.state = WaitRobot
-            self.next_state = Rotate2PickPosOri
+            self.next_state = Down2Pick
 
-            # cam_z = self.obj_pose.linear.z - 0.13
-            self.Arm.relative_move_nsa(a=_REL_GO_BIN_FRONT)
+            gripper_vaccum_on()
+            rospy.sleep(.1)
 
         # Pick the object
         elif self.state == Down2Pick:
@@ -252,18 +268,6 @@ class PickTask:
 
             tool_z = self.obj_pose.linear.z - _CAM_2_TOOL_Z - _REL_GO_BIN_FRONT
             self.Arm.relative_move_nsa(a=tool_z)
-
-        # Enable the vacuum
-        elif self.state == PickObj:
-            self.info = "(Catch) Vacuum Enable"
-            print(self.info)
-
-            # Change state
-            self.state = WaitRobot
-            self.next_state = Down2Pick
-
-            gripper_vaccum_on()
-            rospy.sleep(.1)
 
         # Move upper
         elif self.state == Up2LeaveBin:
@@ -283,21 +287,20 @@ class PickTask:
 
             # Change state
             self.state = WaitRobot
-            self.next_state = CheckIsHold
-            self.past_state = LeaveBin
+            self.next_state = RobotMove2Box
 
             # self.Arm.relative_move_nsa(a=-0.05)
             tool_z = self.obj_pose.linear.z - _CAM_2_TOOL_Z
             self.Arm.relative_move_nsa(a=-tool_z)
 
         # Move to target box
-        elif self.state == Move2PlaceObj1:
-            self.info = "(GoBox) LM Go Box {}".format(self.box)
+        elif self.state == RobotMove2Box:
+            self.info = "(GoBox) Robot Move to Box {}".format(self.box)
             print(self.info)
 
             # Change state
             self.state = WaitRobot
-            self.next_state = Move2PlaceObj3
+            self.next_state = Prepare2Place
 
             self.Is_BaseShiftOK = False
             self.LM.pub_LM_Cmd(2, GetShift('Box', 'x', self.box))
@@ -305,31 +308,20 @@ class PickTask:
             self.LM.pub_LM_Cmd(1, GetShift('Box', 'z', self.box))
             self.Arm.pub_ikCmd('ptp', (0.3, 0, 0.3), (-90, 0, 0))
 
-        elif self.state == Move2PlaceObj2:
-            self.info = "(GoBox) Arm Go Box {}".format(self.box)
-            print(self.info)
-
-            # Change state
-            self.state = WaitRobot
-            self.next_state = Move2PlaceObj3
-
-            self.Arm.pub_ikCmd('ptp', (0.3, 0, 0.3), (-90, 0, 0))
-
         # Prepare to place
-        elif self.state == Move2PlaceObj3:
-            self.info = "(GoBox) Arm Go Box {}".format(self.box)
+        elif self.state == Prepare2Place:
+            self.info = "(GoBox) Arm Prepare to Place {}".format(self.box)
             print(self.info)
 
             # Change state
             self.state = WaitRobot
-            self.next_state = CheckIsHold
-            self.past_state = Move2PlaceObj3
+            self.next_state = Down2Place
 
             self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.2), (-180, 0, 0))
 
         # Move lower
-        elif self.state == Move2PlaceObj4:
-            self.info = "(GoBox) Arm Go Box {}".format(self.box)
+        elif self.state == Down2Place:
+            self.info = "(GoBox) Arm Down to Place {}".format(self.box)
             print(self.info)
 
             # Change state
@@ -340,7 +332,6 @@ class PickTask:
 
         # Disable the vacuum
         elif self.state == PlaceObj:
-            # self.Is_BaseShiftOK = False
             self.info = "(GoBox) Vaccum Disable - [Success]"
             print(self.info)
 
@@ -349,6 +340,7 @@ class PickTask:
             self.next_state = FinishTask
 
             gripper_vaccum_off()
+            self.update_location_file()
 
         elif self.state == Recover2InitPos:
             self.info = "Arm Recover2InitPos"
@@ -360,55 +352,50 @@ class PickTask:
 
             self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.22), (-90, 0, 0))
 
-        # Ckecking suction status
-        elif self.state == CheckIsHold:
-            self.info = "(GoBox) CheckIsHold: {}".format(self.suck_num)
-            print(self.info)
-
-            if self.suck_num:
-                if self.past_state == LeaveBin:
-                    self.state = Move2PlaceObj1
-                    return
-                elif self.past_state == Move2PlaceObj3:
-                    self.state = Move2PlaceObj4
-                    self.place_sucess = True
-                    return
-            # Grasping nothing
-            self.state = FinishTask
-            gripper_vaccum_off()
-
         # ===============================================================
 
         # Wating robot moving
         elif self.state == WaitRobot:
-            # rospy.sleep(0.3)
+            change_next_state = False
             if not self.Last_LMArrive and self.Is_LMArrive:
                 self.Is_BaseShiftOK = True
                 # self.state = self.next_state
                 print('LM Positive trigger')
             elif self.Is_BaseShiftOK and not self.Is_ArmBusy:
-                self.state = self.next_state
-                print('BaseShiftOK')
+                # self.state = self.next_state
+                change_next_state = True
+                print('Robot Move Done')
+
+            if change_next_state:
+                if self.check_vaccum_by_next_state(self.next_state):
+                    self.state = self.next_state
+                # Grasping nothing
+                else:
+                    gripper_vaccum_off()
+                    self.state = FinishTask
 
         # One of task is finished
         elif self.state == FinishTask:
-            # Checking place result
-            if self.place_sucess:
-                self.update_location_file()
-                self.place_sucess = False
-
-            can_get_one = self.pick_get_one()
-            self.info = "Finish Pick One Object"
-
-            if can_get_one:
+            # Can get next task from pick list
+            if self.pick_get_one():
                 self.Is_BaseShiftOK = False
-                self.state = Shift2Bin
-                self.next_state = WaitTask
+                self.state = RobotMove2Bin
+                self.info = "Finish Pick One Object"
             else:
                 self.task_finish()
-                self.info = "Finish Pick Task"
+                self.info = "Finish Pick All of Task"
             print(self.info)
-                
+
+    def check_vaccum_by_next_state(self, n_s):
+        """Checking status of vacuum is hold."""
+        # These state need to check vacuum is hold
+        if n_s in check_next_states:
+            self.info = "(Check) Status of Suction: {}".format(self.suck_num)
+            print(self.info)
+            return self.suck_num > 0:
+        # Other state do not
+        return True
+
     def update_location_file(self):
         """Update item location file and save."""
         rospy.loginfo('Update item location file')
@@ -440,7 +427,6 @@ class PickTask:
         self.item_location = None
         self.order = None
         self.item_loc = None
-        self.place_sucess = False
         # === Initialize State ===
         self.state = WaitTask
         self.past_state = WaitTask
@@ -475,7 +461,6 @@ class PickTask:
         self.Is_LMArrive = True
         self.Last_LMArrive = True
         self.Is_BaseShiftOK = False
-        self.place_sucess = False
 
 
 def _test():
