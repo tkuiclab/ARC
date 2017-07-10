@@ -333,7 +333,7 @@ if __name__ == '__main__':
 
     # gripper_suction_up()
     # # task.safe_pose()
-    #task.robot_photo_pose()
+    task.robot_photo_pose()
     # #task.Arm.relative_move_nsa(a = 0.15) 
 
     # task.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.25), (-90, 0, 0) )
@@ -368,10 +368,10 @@ if __name__ == '__main__':
 
     #----------- Request object pose--------#
     # task.obj_pose_request('tissue_box')
-    task.obj_pose_request('crayons')
+    #task.obj_pose_request('crayons')
     # task.obj_pose_request('robots_dvd')
     #task.obj_pose_request('ticonderoga_pencils')
-    task.obj_pose_request('scotch_sponges')
+    #task.obj_pose_request('scotch_sponges')
     # task.obj_pose_request('burts_bees_baby_wipes')
 
     # task.Arm.relative_rot_nsa(pitch = -10)

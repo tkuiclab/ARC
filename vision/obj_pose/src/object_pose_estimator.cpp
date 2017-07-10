@@ -74,6 +74,7 @@ void ObjEstAction::pub_error(){
    geometry_msgs::Twist pose;
    pose.linear.z = -1; //ROI Fail
    result_.object_pose = pose;
+   result_.success = false;
 
    as_.setSucceeded(result_);
    //preemptCB();

@@ -98,17 +98,16 @@ class T2O:
         rospy.loginfo("msg = " + fb.msg)
         rospy.loginfo("progress = " + str(fb.progress) + "% ")
 
-        
     def obj_pose_done_cb(self, state, result):
         #self.arm_2_obj(result.object_pose)
         # self.tool_2_obj(result.object_pose)
         # self.tool_2_obj(result.object_pose, result.norm)
         # self.tool_2_obj(result.object_pose, result.norm, 180)
-        self.tool_2_obj_bin(result.object_pose, result.norm)
-        # self.tool_2_obj_bin_straight(result.object_pose, result.norm)
+        # self.tool_2_obj_bin(result.object_pose, result.norm)
+        self.tool_2_obj_bin_straight(result.object_pose, result.norm)
 
     # def tool_2_obj(self, obj_pose):
-    def tool_2_obj(self, obj_pose, norm, shot_deg = 0):
+    def tool_2_obj(self, obj_pose, norm, shot_deg = 0): #STOW
         p = obj_pose
         a = p.angular
         l = p.linear
@@ -207,7 +206,7 @@ class T2O:
 
         rospy.loginfo('Move Angle Finish')
 
-    def tool_2_obj_bin(self, obj_pose, norm, shot_deg = 0):
+    def tool_2_obj_bin(self, obj_pose, norm, shot_deg = 0): # BIN
         p = obj_pose
         a = p.angular
         l = p.linear
@@ -285,7 +284,7 @@ class T2O:
 
         rospy.loginfo('Move Angle Finish')
 
-    def tool_2_obj_bin_straight(self, obj_pose, norm, shot_deg = 0):
+    def tool_2_obj_bin_straight(self, obj_pose, norm, shot_deg = 0): # BIN
         p = obj_pose
         a = p.angular
         l = p.linear
@@ -297,7 +296,7 @@ class T2O:
                         + str(numpy.rad2deg(a.y)) + ", " 
                         + str(numpy.rad2deg(a.z)) + ")" ) 
         
-        if l.x ==0 and l.y==0 and l.z==0:
+        if (l.x ==0 and l.y==0 and l.z==0) or l.z < 0:
             return
 
         y = (numpy.rad2deg(a.z) - 180) if numpy.rad2deg(a.z) > 0  else (numpy.rad2deg(a.z) + 180)
@@ -458,14 +457,14 @@ if __name__ == '__main__':
     # task.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
 
     # Bin Place
-    # s = Strategy()
-    # s.test_go_bin_LM('j')
+    s = Strategy()
+    s.test_go_bin_LM('j')
     # task.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-90, 0, 0) )
     # task.bin_photo_pose()
-    # task.bin_place_pose()
+    task.bin_place_pose()
     # task.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.4), (-110, 0, 0) )
-    # gripper_suction_up()
-    # task.obj_pose_request('scotch_sponges')
+    gripper_suction_up()
+    task.obj_pose_request('robots_dvd')
 
     # task.Arm.relative_xyz_base(y = -0.127)
     # task.Arm.relative_xyz_base(y = -0.0020089123927, z = 0.0355671391194)
@@ -473,7 +472,7 @@ if __name__ == '__main__':
 
     # -------Back 2 home------#.
     # task.safe_pose()
-    task.Arm.home()
+    # task.Arm.home()
 
     # -------Relative Test------#
     # task.Arm.relative_rot_nsa(pitch = -14.7) 

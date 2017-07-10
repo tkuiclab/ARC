@@ -6,6 +6,7 @@ string[] object_list   # want get highest item
 string object_name   # use for highest item
 geometry_msgs/Twist object_pose
 geometry_msgs/Vector3 norm
+bool success
 ---
 #feedback
 int32 progress
