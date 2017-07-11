@@ -22,7 +22,7 @@ from darkflow_detect.msg import Detected
 from darkflow.net.build import TFNet
 from convert_label.convert import offical2Our, our2Offical, colors
 
-os.chdir(rospkg.RosPack().get_path('strategy'))
+sys.path.append(rospkg.RosPack().get_path('strategy'))
 from get_obj_info import info_dict
 
 
