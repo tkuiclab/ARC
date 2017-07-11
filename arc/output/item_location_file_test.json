@@ -2,23 +2,17 @@
     "boxes": [
         {
             "size_id": "A1",
-            "contents": [
-                "tissue_box"
-            ]
+            "contents": []
         },
         {
             "size_id": "1A5",
             "contents": [
-                "expo_eraser",
-                "scotch_sponges",
                 "robots_everywhere"
             ]
         },
         {
             "size_id": "1B2",
-            "contents": [
-                "robots_dvd"
-            ]
+            "contents": []
         }
     ],
     "tote": {
@@ -39,11 +33,16 @@
         },
         {
             "bin_id": "D",
-            "contents": []
+            "contents": [
+                "scotch_sponges",
+                "expo_eraser"
+            ]
         },
         {
             "bin_id": "E",
-            "contents": []
+            "contents": [
+                "tissue_box"
+            ]
         },
         {
             "bin_id": "F",
@@ -51,7 +50,9 @@
         },
         {
             "bin_id": "G",
-            "contents": []
+            "contents": [
+                "robots_dvd"
+            ]
         },
         {
             "bin_id": "H",

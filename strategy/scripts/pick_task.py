@@ -3,6 +3,9 @@
 """Strategy for picking task."""
 
 from __future__ import print_function
+import math
+from math import radians, degrees, sin, cos, tan, pi
+import numpy
 import rospy
 import actionlib
 
@@ -37,6 +40,8 @@ Move2PlaceObj2 = 14
 Prepare2Place = 15
 Down2Place = 16
 Recover2InitPos = 17
+NeetStep = 18
+LeavedBin = 19
 
 PhotoPose = 26
 VisionProcess = 27
@@ -46,8 +51,10 @@ CheckIsHold = 30
 
 _REL_GO_BIN_FRONT = .1
 _BIN_MAX_DOWN = .135
-_CAM_2_TOOL_Z = .13
+_CAM_2_TOOL_Z = .11
 _CAM_2_TOOL_Y = .08
+
+obj_dis = 0.06
 
 # For checking vacuum function
 check_next_states = [
@@ -83,10 +90,12 @@ class PickTask:
         if not result.success:
             rospy.logwarn('ROI Fail!! obj -> {}'.format(self.now_pick.item))
             self.state = FinishTask
+            self.oe_ret = None
         else:
             self.obj_pose = result.object_pose
             print('obj_pose {}'.format(self.obj_pose))
             self.state = self.next_state
+            self.oe_ret = result
 
     def ifsuck_cb(self, res):
         """suction status callback."""
@@ -166,7 +175,7 @@ class PickTask:
 
             # Change state
             self.state = WaitRobot
-            self.next_state = VisionProcess
+            self.next_state = PhotoPose
 
             # Move to bin using linear mobile
             self.Is_BaseShiftOK = False
@@ -176,6 +185,7 @@ class PickTask:
             # Arm move to initial pose
             gripper_suction_up()
             self.Arm.pub_ikCmd('ptp', (0.3, 0.0, 0.3), (-90, 0, 0))
+            # self.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.3), (-90, 0, 0))
 
         elif self.state == Init_Pos:
             self.info = "(GoBin) Arm To Init_Pos"
@@ -198,7 +208,7 @@ class PickTask:
             self.next_state = VisionProcess
 
             gripper_suction_up()
-            self.Arm.pub_ikCmd('ptp', (0.3, 0.0, 0.4), (-105, 0, 0))
+            self.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.4), (-110, 0, 0))
 
         # Vision processing
         elif self.state == VisionProcess:
@@ -215,7 +225,21 @@ class PickTask:
 
             # Change state
             self.state = WaitVision
-            self.next_state = Move2BinFront
+            # self.next_state = Move2BinFront
+            self.next_state = NeetStep
+
+        elif self.state == NeetStep:
+            self.info = "(Catch) Arm Move to Bin Front {}".format(self.bin)
+            print(self.info)
+
+            # Change state
+            self.state = WaitRobot
+            self.next_state = Up2LeaveBin
+
+            #
+            if self.oe_ret is not None:
+                # self.tool_2_obj_bin_straight(self.oe_ret.object_pose, self.oe_ret.norm)
+                self.tool_2_obj_bin(self.oe_ret.object_pose, self.oe_ret.norm)
 
         # Arm move to bin front
         elif self.state == Move2BinFront:
@@ -279,7 +303,7 @@ class PickTask:
             self.state = WaitRobot
             self.next_state = LeaveBin
 
-            self.Arm.relative_move_nsa(n=-0.05)
+            self.Arm.relative_xyz_base(z=0.05)
 
         # Move out of bin
         elif self.state == LeaveBin:
@@ -292,7 +316,19 @@ class PickTask:
 
             # self.Arm.relative_move_nsa(a=-0.05)
             tool_z = self.obj_pose.linear.z - _CAM_2_TOOL_Z
-            self.Arm.relative_move_nsa(a=-tool_z)
+            self.Arm.relative_xyz_base(x=-tool_z)
+            print('(Catch) LeaveBin dis: {}'.format(tool_z))
+
+        # Move out of bin
+        elif self.state == LeavedBin:
+            self.info = "(Catch) Arm Leaved Bin"
+            print(self.info)
+
+            # Change state
+            self.state = WaitRobot
+            self.next_state = RobotMove2Box
+
+            self.Arm.relative_xyz_base(x=-.1)
 
         # Move to target box
         elif self.state == RobotMove2Box:
@@ -307,7 +343,8 @@ class PickTask:
             self.LM.pub_LM_Cmd(2, GetShift('Box', 'x', self.box))
             rospy.sleep(0.3)
             self.LM.pub_LM_Cmd(1, GetShift('Box', 'z', self.box))
-            self.Arm.pub_ikCmd('ptp', (0.3, 0, 0.3), (-90, 0, 0))
+            self.Arm.pub_ikCmd('ptp', (0.25, 0, 0.3), (-90, 0, 0))
+            # self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.2), (-180, 0, 0))
 
         # Prepare to place
         elif self.state == Prepare2Place:
@@ -318,7 +355,7 @@ class PickTask:
             self.state = WaitRobot
             self.next_state = Down2Place
 
-            self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.2), (-180, 0, 0))
+            self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.2), (-180, -90, 0))
 
         # Move lower
         elif self.state == Down2Place:
@@ -462,6 +499,183 @@ class PickTask:
         self.Is_LMArrive = True
         self.Last_LMArrive = True
         self.Is_BaseShiftOK = False
+
+    def tool_2_obj_bin_straight(self, obj_pose, norm, shot_deg = 0): # BIN
+        p = obj_pose
+        a = p.angular
+        l = p.linear
+
+        rospy.loginfo("object_pose")
+        rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z) + ")") 
+        rospy.loginfo("(roll,pitch,yaw)= (" 
+                        + str(numpy.rad2deg(a.x)) + ", " 
+                        + str(numpy.rad2deg(a.y)) + ", " 
+                        + str(numpy.rad2deg(a.z)) + ")" ) 
+        
+        if (l.x ==0 and l.y==0 and l.z==0) or l.z < 0:
+            return
+
+        y = (numpy.rad2deg(a.z) - 180) if numpy.rad2deg(a.z) > 0  else (numpy.rad2deg(a.z) + 180)
+        r = 90 - (numpy.rad2deg(a.x) + 180)
+
+        rospy.loginfo("(real_yaw, real_roll)= (" + str(y) + ", " + str(r) + ")")
+
+        # move_cam_x = (l.x - (gripper_length*sin(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
+        # move_cam_y = ((l.y + cam2center_y) + (gripper_length*cos(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
+        # move_cam_z = l.z - (gripper_length*cos(radians(r))) - 0.1#cam2tool_z
+
+        move_cam_x = (l.x - (gripper_length*sin(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
+        move_cam_y = ((l.y + 0.04) + (gripper_length*cos(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
+        move_cam_z = l.z - (gripper_length*cos(radians(r))) - cam2tool_z
+
+        rospy.loginfo("NORMAL(x, y, z) = (" + str(norm.x) + ", " + str(norm.y) + ", " + str(norm.z) +")")
+        obj_distance = [norm.x*obj_dis, norm.y*obj_dis, norm.z*obj_dis]
+
+        real_move_x = move_cam_x + obj_distance[0]*cos(radians(shot_deg))
+        real_move_y = move_cam_y + obj_distance[1]*cos(radians(shot_deg))
+        real_move_z = move_cam_z + obj_distance[2]
+
+        rospy.loginfo("(y, r) = (" + str(y) + ", " + str(r) + ")")
+        rospy.loginfo("(ori_move_cam_x, ori_move_cam_y, ori_move_cam_z)= (" + str(l.x) + ", " + str(l.y) + ", " + str(l.z) + ")")
+        rospy.loginfo("(move_cam_x, move_cam_y, move_cam_z)= (" + str(move_cam_x) + ", " + str(move_cam_y) + ", " + str(move_cam_z) + ")")
+        rospy.loginfo("(real_move_x, real_move_y, real_move_z)= (" + str(real_move_x) + ", " + str(real_move_y) + ", " + str(real_move_z) + ")")
+        
+        #----------------Rotation---------------_#
+        self.Arm.relative_rot_nsa(roll = y)
+        gripper_suction_deg(r)
+
+        print('=====')
+        print('self.Arm.relative_rot_nsa(roll = '+str(y)+')')
+        print('self.Arm.gripper_suction_deg('+str(r)+')')
+        # print('self.Arm.relative_xyz_base(x = '+str(real_move_y*-1)+', y = '+str(real_move_x)+', z = '+str(real_move_z*-1)+')')
+        print('self.Arm.relative_xyz_base(x = '+str(real_move_z)+', y = '+str(real_move_x)+', z = '+str(real_move_y*-1)+')')
+
+        # return
+
+        # if real_move_y > 0.026 :
+        #     print('\FOR SAFE/\FOR SAFE/\FOR SAFE/\FOR SAFE/\FOR SAFE/')
+        #     real_move_y = 0.026
+
+        self.Arm.relative_xyz_base(x = 0.06)
+        self.Arm.relative_xyz_base(x = real_move_z - 0.06, y = real_move_x, z = real_move_y*-1)
+        # self.Arm.relative_xyz_base(y = real_move_x, z = real_move_y*-1)
+        print('self.Arm.relative_xyz_base(x = '+str(real_move_z)+', y = '+str(real_move_x)+', z = '+str(real_move_y*-1)+')')
+
+        gripper_vaccum_on()
+
+        # suction move
+        self.Arm.relative_move_suction('ptp', r, obj_dis + 0.02)
+        print("self.Arm.relative_move_suction('ptp', "+str(r)+", obj_dis + 0.02)")
+        print("=====")
+
+        # rospy.sleep(3)
+        # gripper_vaccum_off()
+        if self.suck_num == 0:
+            self.Arm.relative_move_suction('ptp', r, 0.01)
+
+        if self.suck_num == 0:
+            self.Arm.relative_move_suction('ptp', r, 0.01)
+
+        if self.suck_num == 0:
+            self.Arm.relative_move_suction('ptp', r, 0.01)
+
+        self.Arm.relative_move_suction('ptp', r, (obj_dis + 0.02)*-1)
+        rospy.loginfo('tool_2_obj_bin_straight Finish')
+
+    def tool_2_obj_bin(self, obj_pose, norm, shot_deg = 0): # BIN
+        p = obj_pose
+        a = p.angular
+        l = p.linear
+
+        rospy.loginfo("object_pose")
+        rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z) + ")") 
+        rospy.loginfo("(roll,pitch,yaw)= (" 
+                        + str(numpy.rad2deg(a.x)) + ", " 
+                        + str(numpy.rad2deg(a.y)) + ", " 
+                        + str(numpy.rad2deg(a.z)) + ")" )
+
+        if (l.x ==0 and l.y==0 and l.z==0) or l.z < 0:
+            return
+
+        y = (numpy.rad2deg(a.z) - 180) if numpy.rad2deg(a.z) > 0  else (numpy.rad2deg(a.z) + 180)
+        r = 90 - (numpy.rad2deg(a.x) + 180)
+
+        print("(y, r)= (" + str(y) + ", " + str(r) + ")")
+
+        move_cam_x = (l.x - (gripper_length*sin(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
+        move_cam_y = ((l.y + cam2center_y) + (gripper_length*cos(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
+        move_cam_z = l.z - (gripper_length*cos(radians(r))) - cam2tool_z
+
+        print("NORMAL(x, y, z) = (" + str(norm.x) + ", " + str(norm.y) + ", " + str(norm.z) +")")
+        obj_distance = [norm.x*obj_dis, norm.y*obj_dis, norm.z*obj_dis]
+
+        real_move_x = move_cam_x + obj_distance[0]*cos(radians(shot_deg))
+        real_move_y = move_cam_y + obj_distance[1]*cos(radians(shot_deg))
+        real_move_z = move_cam_z + obj_distance[2]
+        ###
+        dis_real = math.sqrt(real_move_x*real_move_x + real_move_y*real_move_y + real_move_z*real_move_z)
+
+        real_move_x_unit = real_move_x / dis_real
+        real_move_y_unit = real_move_y / dis_real
+        real_move_z_unit = real_move_z / dis_real
+
+        dis = abs(real_move_z)*cos(radians(20))
+        # dis = 0.2 / tan(radians(20))
+        print("dis = "+str(dis))
+        detZ = abs(cam2tool_z - cam2tool_z*cos(radians(20)))
+        detY = abs(cam2tool_y*sin(radians(20)))
+        print("(detZ, detY) = ("+str(detZ)+", "+str(detY)+")")
+
+        real_move_x_rot = real_move_x_unit
+        real_move_y_rot = real_move_y_unit*cos(radians(20)) - real_move_z_unit*sin(radians(20))
+        real_move_z_rot = real_move_z_unit*cos(radians(20)) + real_move_y_unit*sin(radians(20))
+
+        real_move_x_rot = real_move_x_rot*dis
+        real_move_y_rot = real_move_y_rot*(dis - detY)
+        real_move_z_rot = real_move_z_rot*(dis - detZ)
+        ###
+        rospy.loginfo("(l.x, l.y, l.z)= (" + str(l.x) + ", " + str(l.y) + ", " + str(l.z) + ")")
+        rospy.loginfo("(move_cam_x, move_cam_y, move_cam_z)= (" + str(move_cam_x) + ", " + str(move_cam_y) + ", " + str(move_cam_z) + ")")
+        rospy.loginfo("(real_move_x, real_move_y, real_move_z)= (" + str(real_move_x) + ", " + str(real_move_y) + ", " + str(real_move_z) + ")")
+        rospy.loginfo("(real_move_x_rot, real_move_y_rot, real_move_z_rot)= (" + str(real_move_x_rot) + ", " + str(real_move_y_rot) + ", " + str(real_move_z_rot) + ")")
+
+        #----------------Place---------------#
+        self.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.2), (-90, 0, 0) )
+        
+        #----------------Rotation---------------_#
+        self.Arm.relative_rot_nsa(roll = y)
+        gripper_suction_deg(r-20)
+
+        # if real_move_y_rot > 0.026:
+        #     print('\FOR SAFE/\FOR SAFE/\FOR SAFE/\FOR SAFE/\FOR SAFE/')
+        #     real_move_y_rot = 0.026
+
+        print('=====')
+        print('self.Arm.relative_rot_nsa(roll = '+str(y)+')')
+        print('self.Arm.gripper_suction_deg('+str(r-20)+')')
+        print('self.Arm.relative_xyz_base(x = '+str(real_move_z_rot)+', y = '+str(real_move_x_rot)+', z = '+str(real_move_y_rot*-1)+')')
+
+        self.Arm.relative_xyz_base(x = real_move_z_rot, y = real_move_x_rot, z = real_move_y_rot*-1)
+        # self.Arm.relative_xyz_base(y = real_move_x_rot, z = real_move_y_rot*-1)
+
+        gripper_vaccum_on()
+
+        self.Arm.relative_move_suction('ptp', r, obj_dis + 0.02)
+        print("self.Arm.relative_move_suction('ptp', "+str(r)+", obj_dis + 0.018)")
+        print("=====\n")
+
+        if self.suck_num == 0:
+            self.Arm.relative_move_suction('ptp', r, 0.01)
+
+        if self.suck_num == 0:
+            self.Arm.relative_move_suction('ptp', r, 0.01)
+
+        if self.suck_num == 0:
+            self.Arm.relative_move_suction('ptp', r, 0.01)
+
+        #----------------Return---------------_#
+        self.Arm.relative_move_suction('ptp', r, (obj_dis + 0.02)*-1)
+        rospy.loginfo('tool_2_obj_bin Finish')
 
 
 def _test():

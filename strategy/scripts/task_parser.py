@@ -142,8 +142,8 @@ def read_pick_task_and_location():
 
 
 def write_pick_task_location(content):
-    directory = path.join(rospkg.RosPack().get_path('arc'), 'pick_task')
-    ilf = "item_location_file_test_new.json"
+    directory = path.join(rospkg.RosPack().get_path('arc'), 'output')
+    ilf = "item_location_file_test.json"
     item_loc_path = path.join(directory, ilf)
     write_json(item_loc_path, content)
      
