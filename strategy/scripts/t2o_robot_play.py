@@ -348,8 +348,7 @@ if __name__ == '__main__':
     rospy.sleep(0.5)
     rospy.loginfo('T2O Ready')
 
-    test_list()
-    exit()
+
     # gripper_suction_up()
     # # task.safe_pose()
     # task.robot_photo_pose()
@@ -393,8 +392,8 @@ if __name__ == '__main__':
     # task.Arm.relative_rot_nsa(pitch = -10)
 
     # -------Back 2 home------#.
-    #task.safe_pose()
-    # task.Arm.home()
+    task.safe_pose()
+    task.Arm.home()
 
 
     # -------Relative Test------#
