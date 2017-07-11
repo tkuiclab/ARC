@@ -321,6 +321,25 @@ class T2O:
 		self.Arm.relative_move_xyz_rot_pry(z =  dis, yaw = -rot)
 '''        
 
+def test_list():
+    a_list = []
+    #a_list.append("a_1")
+    b_list = a_list
+
+    print(a_list)
+    print(b_list)
+    
+    a_list.append("a_2")
+
+    print(a_list)
+    print(b_list)
+
+    b_list.append("b_1")
+
+    print(a_list)
+    print(b_list)
+
+
 if __name__ == '__main__':
 
     rospy.init_node('t2o_robot', anonymous=True)
@@ -329,6 +348,8 @@ if __name__ == '__main__':
     rospy.sleep(0.5)
     rospy.loginfo('T2O Ready')
 
+    test_list()
+    exit()
     # gripper_suction_up()
     # # task.safe_pose()
     # task.robot_photo_pose()
@@ -372,7 +393,7 @@ if __name__ == '__main__':
     # task.Arm.relative_rot_nsa(pitch = -10)
 
     # -------Back 2 home------#.
-    task.safe_pose()
+    #task.safe_pose()
     # task.Arm.home()
 
 

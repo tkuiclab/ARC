@@ -505,18 +505,14 @@ if __name__ == '__main__':
 
     # task.Arm.relative_rot_nsa(pitch = -10)
     # task.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
-    # Bin Place
-    task.Arm.relative_xyz_base(x = -0.2)
-    # s = Strategy()
-    # s.test_go_bin_LM('e')
-    # task.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.4), (-110, 0, 0) )
-    # task.bin_photo_pose()
-    # task.bin_place_pose()
-    # task.Arm.relative_xyz_base(z = 0.08)
-    # task.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.2), (-90, 0, 0) )
-    gripper_suction_up()
-    # task.obj_pose_request('robots_everywhere')
+    ### Bin Place ###
     # task.Arm.relative_xyz_base(x = -0.2)
+    s = Strategy()
+    s.test_go_bin_LM('g')
+    task.bin_photo_pose()
+    # task.bin_place_pose()
+    gripper_suction_up()
+    task.obj_pose_request('robots_everywhere')
 
     # task.Arm.relative_xyz_base(y = -0.127)
     # task.Arm.relative_xyz_base(y = -0.0020089123927, z = 0.0355671391194)

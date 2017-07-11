@@ -395,7 +395,8 @@ class PickTask:
         # Wating robot moving
         elif self.state == WaitRobot:
             change_next_state = False
-            if not self.Last_LMArrive and self.Is_LMArrive:
+            #if not self.Last_LMArrive and self.Is_LMArrive:
+            if self.Last_LMArrive and self.Is_LMArrive and  not self.Is_LMBusy  and not self.Is_ArmBusy:
                 self.Is_BaseShiftOK = True
                 # self.state = self.next_state
                 print('LM Positive trigger')
@@ -642,7 +643,7 @@ class PickTask:
         #----------------Place---------------#
         self.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.2), (-90, 0, 0) )
         
-        #----------------Rotation---------------_#
+        #----------------Rotation---------------#
         self.Arm.relative_rot_nsa(roll = y)
         gripper_suction_deg(r-20)
 

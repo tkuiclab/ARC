@@ -121,8 +121,13 @@ class StowTask:
         self.stow_fail_2 = []
         self.stow_success = []
         self.stow_amnesty = []
-        self.use_stow_list = self.stow_list
+        
         self.arm_photo_index  = 1
+
+        self.use_stow_list = self.stow_list
+
+
+
 
     def ifsuck_cb(self, res):
         self.suck_ary = res.data
@@ -310,6 +315,22 @@ class StowTask:
         rospy.loginfo("msg = " + fb.msg)
         rospy.loginfo("progress = " + str(fb.progress) + "% ")
 
+    def arm_chage_side_and_state(self):
+        print('>>>>>>>>>arm_chage_side_and_state<<<<<<<<')
+
+        if self.arm_photo_index < Arm_Photo_Index_Max:
+            self.arm_photo_index = self.arm_photo_index + 1
+            self.state = FinishOne
+        else:
+            # self.arm_photo_index >= Arm_Photo_Index_Max
+            self.arm_photo_index = 1
+            
+            if self.use_stow_list != self.stow_fail:
+                self.state = FinishOne
+                self.use_stow_list = self.stow_fail
+            else:
+                self.state = EndTask
+            
         
     def obj_pose_done_cb(self, state, result):
         self.obj_pose = result.object_pose
@@ -318,18 +339,7 @@ class StowTask:
         if result.success == False or (l.z < 0) or (l.x == 0 and l.y == 0 and l.z==0):
             rospy.logwarn('ROI Fail!!')
             
-            if self.arm_photo_index < Arm_Photo_Index_Max:
-                self.arm_photo_index = self.arm_photo_index + 1
-            else:
-                # self.arm_photo_index >= Arm_Photo_Index_Max
-                self.arm_photo_index = 1
-                
-                if self.use_stow_list != self.stow_fail:
-                    self.state = FinishOne
-                    self.use_stow_list = self.stow_fail
-                else:
-                    self.state = EndTask
-            
+            self.arm_chage_side_and_state()
             return
         else:
             print 'result.object_name = ' + result.object_name
@@ -349,22 +359,28 @@ class StowTask:
         return res.detected
 
     def request_highest_item(self):
-        goal = obj_pose.msg.ObjectPoseGoal(
-            object_name = "<Highest>",
-            object_list = self.detect_all_in_stow_list
-        )
 
-        self.obj_pose_client.send_goal(
-                goal,
-                feedback_cb = self.obj_pose_feedback_cb, 
-                done_cb=self.obj_pose_done_cb )
-    
+        if len(self.detect_all_in_stow_list) > 0:
+            goal = obj_pose.msg.ObjectPoseGoal(
+                object_name = "<Highest>",
+                object_list = self.detect_all_in_stow_list
+            )
+
+            self.obj_pose_client.send_goal(
+                    goal,
+                    feedback_cb = self.obj_pose_feedback_cb, 
+                    done_cb=self.obj_pose_done_cb )
+            return True
+        else:
+            #self.arm_chage_side_and_state()
+            return False
 
 #--------------------Strategy Area--------------------#
     def run(self):
         self.stow_id = 0
         self.stow_get_one()
         self.state 	= LM2Tote #Init_Pos
+        self.use_stow_list = self.stow_list
 
     def is_ready(self):
         if self.use_stow_list != None:
@@ -440,6 +456,17 @@ class StowTask:
         detect_all_list = self.get_detect_all_list()
         self.detect_all_in_stow_list = []
 
+        # print "detect_all_list[] -> "
+        # print str(detect_all_list) 
+
+        # print "self.stow_list[] -> "
+        # print str(self.stow_list) 
+
+
+        # print "self.use_stow_list[] -> "
+        # print str(self.use_stow_list) 
+
+
         for d_item in detect_all_list :
             for s_item in self.use_stow_list:
                 if d_item.object_name == s_item.item:
@@ -506,9 +533,13 @@ class StowTask:
             self.info = "(Catch) Go PhotoPose "  
             print self.info
 
+
+
             if self.arm_photo_index == 1:
+                print '--------Go arm_photo_pose--------'
                 self.arm_photo_pose()
             elif self.arm_photo_index == 2:
+                print '--------Go arm_photo_pose 2--------'
                 self.arm_photo_pose_2()
             
             gripper_suction_up()
@@ -537,10 +568,13 @@ class StowTask:
             self.info = "(Vision) Request highest"
             print self.info
             
-            self.request_highest_item()
-
+            if self.request_highest_item() == True:
+                self.state 		= WaitVision
+            else:
+                self.arm_chage_side_and_state()
+                #self.state 		= FinishOne
+            
             # self.next_state = Arm2ObjUp
-            self.state 		= WaitVision
             
             return
         
@@ -655,6 +689,8 @@ class StowTask:
             rospy.sleep(0.3)
             self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.now_stow_info.to_bin ))
         
+            
+
             self.next_state 	= ArmPutInBin #ArmLeaveTote   
             self.state 			= WaitRobot
 
@@ -721,7 +757,12 @@ class StowTask:
         elif self.state == WaitRobot:
             # rospy.sleep(0.3)
             change_next_state = False
-            if self.Last_LMArrive == False and self.Is_LMArrive == True and self.Is_ArmBusy == False:
+
+            #print 'self.Last_LMArrive == ' + str(self.Last_LMArrive) + ' and  self.Is_LMArrive ==' + str(self.Is_LMArrive) + ' and self.Is_ArmBusy == ' + str(self.Is_ArmBusy)
+
+            #if self.Last_LMArrive == False and self.Is_LMArrive == True and self.Is_ArmBusy == False:
+            #if self.Last_LMArrive == True and self.Is_LMArrive == True and self.Is_LMBusy == False and  self.Is_ArmBusy == False:
+            if self.Last_LMArrive and self.Is_LMArrive and  not self.Is_LMBusy  and not self.Is_ArmBusy:
                 self.Is_BaseShiftOK = True
                 change_next_state = True
                 print 'LM Postive trigger'
@@ -764,7 +805,6 @@ class StowTask:
             self.print_stow_list_item(self.stow_list, "stow_list")
             self.print_stow_list_item(self.stow_fail, "stow_fail")
             self.print_stow_list_item(self.stow_fail_2, "stow_fail_2")
-            
             self.print_stow_list_item(self.use_stow_list, "use_stow_list")
         
         elif self.state == EndTask:
@@ -846,3 +886,4 @@ class StowTask:
 
         self.print_stow_list_item(self.use_stow_list, "stow_list")
         self.print_stow_list_item(self.stow_fail, "stow_fail")
+
