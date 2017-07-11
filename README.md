@@ -22,8 +22,10 @@ roslaunch arc control.launch
 
 # Open Vision 
 roslaunch realsense_camera sr300_nodelet_rgbd.launch
-rosrun obj_pose object_pose_estimator
 rosrun darkflow_detect object_detect.py
+
+# Stow Task
+rosrun obj_pose object_pose_estimator 
 
 # Open Strategy
 rosrun strategy s.py

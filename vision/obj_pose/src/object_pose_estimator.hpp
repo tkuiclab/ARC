@@ -48,10 +48,21 @@ enum ProcessingState{
     NADA,
     FOTO,
     SEGMETATION,
-    CALL_RCNN,
+    //CALL_RCNN,
     ALIGMENT,
-    POSE_ESTIMATION
+    POSE_ESTIMATION,
+    GET_ONE_ROI,
+    GET_HIGHEST
 }state;
+
+//for respone to error_code
+
+//#define ERR_DETECT_LESS_MAX               1
+#define ERR_CANNOT_GET_HIGHEST            2
+#define ERR_CANNOT_CALL_DETECT_SERVICE    3
+#define ERR_CALL_DETECT_OVER_TIMES        4
+//#define ERR_DETECT_RESPONE_FAIL    5
+
 
 namespace ObjEstAction_namespace
 {
@@ -96,22 +107,20 @@ public:
   void pub_error();
   
 
-  bool get_roi();
+  //bool get_roi();
   void poseEstimation();
   void aligment();
   void segmentation();
   void cpc_segmentation();
   void do_ICP();
   
-  // int obj_list_size(){
-  //   return obj_list.size();
-  // }
+  void get_one_roi();   //need obj_name
+  void get_highest();   //need obj_list
+  
 
 protected:
     
 
-  bool get_one_roi();   //need obj_name
-  bool get_highest();   //need obj_list
   
   void set_ROI_colud(int mini_x,int mini_y,int max_x, int max_y);
 
@@ -140,7 +149,7 @@ protected:
   int max_x;
   int max_y;
 
-  int call_rcnn_times ;
+  int call_detect_times ;
 
   bool scence_seg;
   
@@ -172,5 +181,8 @@ private:
   pcl::PointCloud<pcl::PointXYZ>::Ptr Max_cluster;
   pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_cluster;
   Eigen::Matrix4f transformation_matrix;
+
+
+  int error_code;
 };
 }

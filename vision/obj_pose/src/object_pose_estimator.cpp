@@ -8,7 +8,7 @@ using namespace ObjEstAction_namespace;
 void ObjEstAction::goalCB()
 {
   obj_list.clear();
-  call_rcnn_times = 0;
+  call_detect_times = 0;
 
 
   const obj_pose::ObjectPoseGoalConstPtr goal = as_.acceptNewGoal();
@@ -27,6 +27,8 @@ void ObjEstAction::goalCB()
     std::cout << "]" << std::endl ;
   }
 
+
+  error_code = 0;
   state = FOTO;
 
 }
@@ -58,8 +60,14 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 #endif
       pub_feedback("Grabbing point cloud...",20);
       
-      state = CALL_RCNN;
-      
+      //state = CALL_RCNN;
+      if(obj_list.size() > 0){
+        pub_feedback("Getting ROI of Highest....",40);
+        state = GET_HIGHEST;
+      }else{
+        pub_feedback("Getting ROI....",40);
+        state = GET_ONE_ROI;
+      }
   }
 }
 
@@ -75,6 +83,7 @@ void ObjEstAction::pub_error(){
    pose.linear.z = -1; //ROI Fail
    result_.object_pose = pose;
    result_.success = false;
+   result_.error_code = error_code;
 
    as_.setSucceeded(result_);
    //preemptCB();
@@ -127,7 +136,7 @@ void ObjEstAction::poseEstimation(){
 }
 
 
-//Need Class Var: obj_name, call_rcnn_times
+//Need Class Var: obj_name, call_detect_times
 //Output Class Var: int mini_x, int mini_y,  int max_x,  int max_y;
 // void ObjEstAction::detect_get_one(){
   
@@ -160,9 +169,9 @@ void ObjEstAction::set_ROI_colud(
   }
 }
 
-//Need Class Var: obj_list, call_rcnn_times
+//Need Class Var: obj_list, call_detect_times
 //Output Class Var: int mini_x, int mini_y,  int max_x,  int max_y;
-bool ObjEstAction::get_highest(){
+void ObjEstAction::get_highest(){
   roi_srv.request.object_name = "all";
   if(roi_client.call(roi_srv))
   {
@@ -170,13 +179,16 @@ bool ObjEstAction::get_highest(){
 
     if(!roi_srv.response.result || 
       roi_srv.response.detected.size() == 0){
-      if(call_rcnn_times < 20){
-        call_rcnn_times++;
-        return false;
+      if(call_detect_times < 20){
+        call_detect_times++;
+        return ;    // for try next time
       }
 
-      ROS_WARN("Call 20 times /detect ROI FAIL");         
-      return false;  
+      ROS_WARN("Call 20 times /detect FAIL");
+      error_code = ERR_CALL_DETECT_OVER_TIMES;     
+      pub_error();
+      state = NADA;
+      return ;
     }
     
     //PCT::Ptr pt_cloud;
@@ -186,6 +198,20 @@ bool ObjEstAction::get_highest(){
 #ifdef SaveCloud
   write_pcd_2_rospack(scene_cloud,"_highest_PassThrough.pcd");
 #endif
+    /*
+    if(roi_srv.respone.result == false){
+      ROS_WARN("roi_srv.respone.result == false"); 
+      error_code = ERR_DETECT_RESPONE_FAIL;      
+      pub_error();
+      return ;
+    }
+    if(roi_srv.response.detected.size() == 0 ){
+      ROS_WARN("roi_srv.response.detected.size() == 0"); 
+      error_code = ERR_DETECT_RESPONE_FAIL;
+      pub_error();
+      return ;     
+    }
+    */
 
 
     float pass_z_min = 0.3f;
@@ -234,20 +260,30 @@ bool ObjEstAction::get_highest(){
       std::cout << detected.object_name << 
         " -> (y, z) = ("<< center_y << "," << center_z << ")" 
         << std::endl; 
+      
+      
+      if(near_from_cam == 999.0){
+        ROS_WARN("CANNOT Get Highest near_from_cam == 999.0");
+        error_code = ERR_CANNOT_GET_HIGHEST;
+        pub_error();
+        return ;
+      }
 
     }
-
     
   }else{
     ROS_WARN("CANNOT Call Service (/detect)");
-    return false;
+    error_code = ERR_CANNOT_CALL_DETECT_SERVICE;
+    pub_error();
+    return ;
   }
   ROS_INFO("The highest is %s -> [mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",
       obj_name.c_str(),
       mini_x,mini_y,max_x,max_y);
   
   set_ROI_colud(mini_x,mini_y,max_x,max_y);
-  return true;
+
+  state = POSE_ESTIMATION;
 }
 
 bool ObjEstAction::is_obj_in_obj_list(std::string name){
@@ -260,20 +296,22 @@ bool ObjEstAction::is_obj_in_obj_list(std::string name){
   return false;
 }
 
-bool ObjEstAction::get_one_roi(){
+void ObjEstAction::get_one_roi(){
   roi_srv.request.object_name = obj_name;
   if(roi_client.call(roi_srv))
   {
     ROS_INFO("Get ROI from Service (/detect) ");
     if(!roi_srv.response.result || 
     roi_srv.response.detected.size() == 0){
-      if(call_rcnn_times < 20){
-        call_rcnn_times++;
-        return false;
+      if(call_detect_times < 20){
+        call_detect_times++;
+        return ;    // for try next time
       }
-
       ROS_WARN("Call 20 times /detect FAIL");
-      return false;  
+      error_code = ERR_CALL_DETECT_OVER_TIMES;
+      pub_error();
+      state = NADA;  
+      return ;  
     }
 
     for(int i =0;i < roi_srv.response.detected.size();i++){
@@ -293,18 +331,19 @@ bool ObjEstAction::get_one_roi(){
 
   }else{
     ROS_WARN("CANNOT Call Service (/detect)");
-    // pub_error();
-    // state = NADA;
-
-    return false;
+    error_code = ERR_CANNOT_CALL_DETECT_SERVICE;
+    pub_error();
+    state = NADA;
+    return ;
   }
   ROS_INFO("[mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",mini_x,mini_y,max_x,max_y);
   
   set_ROI_colud(mini_x,mini_y,max_x,max_y);
 
-  return true;
+  state = POSE_ESTIMATION;
+  return;
 }
-
+/*
 bool ObjEstAction::get_roi(){
   bool success = false;
   if(obj_list.size() > 0){
@@ -315,6 +354,11 @@ bool ObjEstAction::get_roi(){
     success = get_one_roi();
   }
 
+  if(error_code == ERR_DETECT_LESS_MAX){
+
+      return true;    // let to call detect
+  }
+
   if(success){
 #ifdef SaveCloud
     write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
@@ -322,11 +366,13 @@ bool ObjEstAction::get_roi(){
     pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
     pub_feedback("ROI Done",60);
   }else{
+    
+
     pub_error();
   }
   return success;
 }
-
+*/
 void ObjEstAction::segmentation()
 {
   ROS_INFO("Doing 3D Segmentation....");
@@ -505,9 +551,16 @@ int main (int argc, char **argv)
       case FOTO:
         break;
 
-      case CALL_RCNN:
-        state = (ObjEst.get_roi())? POSE_ESTIMATION : NADA;
+      case GET_ONE_ROI:
+        ObjEst.get_one_roi();
         break;
+
+      case GET_HIGHEST:
+        ObjEst.get_highest();
+        break;
+      // case CALL_RCNN:
+      //   state = (ObjEst.get_roi())? POSE_ESTIMATION : NADA;
+      //   break;
 
       case SEGMETATION:
         ObjEst.pub_feedback("Doing segmentation....",60);

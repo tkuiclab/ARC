@@ -28,6 +28,7 @@ class StowInfo:
         self.to_other_tote = False
         self.success = False
 
+        self.gripper_down = True
 
 def read_json(path):
     """Read a JSON file from path, and convert to object of python."""
@@ -94,6 +95,8 @@ def make_stow_list(i_item_loc_json):
     #print 'item_loc_json["tote"]["contents"] = ' + str(item_loc_json["tote"]["contents"])  
 
     stow_list = list()
+
+    
     bin_id = 'e'
     for item in item_loc_json["tote"]["contents"]:
         stow_list.append(StowInfo(item, bin_id))
