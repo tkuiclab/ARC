@@ -96,6 +96,9 @@ class ArmTask:
         # pub_ikCmd('ptp', (x, y , z), (pitch, roll, yaw) )
         # while self.__is_busy:
         #     rospy.sleep(.1)
+
+        self.__is_busy = True
+
         cmd = []
 
         for p in pos:
@@ -110,8 +113,7 @@ class ArmTask:
         elif mode == 'ptp':
             self.__ptp_pub.publish(cmd)
 
-        self.__is_busy = True
-
+        
     def stop_task(self):
         """Stop task running."""
         self.__set_mode_pub.publish('')

@@ -7,7 +7,7 @@ from random import seed, randint
 
 amazonLabelsList = [
     "avery_binder",
-    "ballons",
+    "balloons",
     "band_aid_tape",
     "bath_sponge",
     "black_fashion_gloves",

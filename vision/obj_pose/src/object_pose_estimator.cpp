@@ -130,6 +130,7 @@ void ObjEstAction::poseEstimation(){
   result_.object_name = obj_name;
   result_.object_pose = pose;
   result_.norm = normal;
+  result_.success = true;
 
   as_.setSucceeded(result_);
 
