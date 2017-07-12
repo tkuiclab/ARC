@@ -351,7 +351,7 @@ if __name__ == '__main__':
 
     # gripper_suction_up()
     # # task.safe_pose()
-    # task.robot_photo_pose()
+    task.robot_photo_pose()
     # #task.Arm.relative_move_nsa(a = 0.15) 
 
     # task.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.25), (-90, 0, 0) )
@@ -392,7 +392,7 @@ if __name__ == '__main__':
     # task.Arm.relative_rot_nsa(pitch = -10)
 
     # -------Back 2 home------#.
-    task.safe_pose()
+    # task.safe_pose()
     # task.Arm.home()
 
 
