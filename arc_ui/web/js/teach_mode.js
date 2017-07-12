@@ -954,7 +954,7 @@ $("#btn_InitPos").click(function(){
 	
 	// 對於Input元件來說，要用val()顯示，不能用html()
 	//var tmp_num_arr = [0.3, 0, 0.2, -90, 0, 0, 0];
-	var tmp_num_arr = [0.3, 0, 0.3, -60, 0, 0, 0];
+	var tmp_num_arr = [0.3, 0, 0.3, -90, 0, 0, 0];
 	$("#MF_block_x")	.val(tmp_num_arr[0]);
 	$("#MF_block_y")	.val(tmp_num_arr[1]);
 	$("#MF_block_z")	.val(tmp_num_arr[2]);
@@ -1405,7 +1405,7 @@ var pose_client = new ROSLIB.Service({
     ros : ros,
     name : '/robotis/base/get_kinematics_pose',
     serviceType : 'manipulator_h_base_module_msgs/GetKinematicsPose'
-});
+}); 
 
 var set_mode_pub = new ROSLIB.Topic({
 	ros : ros,
