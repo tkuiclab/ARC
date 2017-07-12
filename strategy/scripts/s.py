@@ -164,7 +164,7 @@ if __name__ == '__main__':
     
     try:
         s = Strategy()
-        s.stow.test_read_item_location_in_arc_pack("stow_test.json")
+        s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
         #s.safe_pose()
         gripper_vaccum_off()
         s.start() 

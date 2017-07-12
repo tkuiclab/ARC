@@ -52,20 +52,13 @@ $ rosservice call /robot_cmd "cmd: 'setMinPos'"
 rosrun obj_pose object_pose_estimator  -pass_z_min 0.3 -pass_z_max 0.57 -pass_y_min 0  -pass_y_max 0.4 -near 0.1
 
 
-# Test 
+# Test Stow Task
 roslaunch arc control.launch
 roslaunch realsense_camera sr300_nodelet_rgbd.launch
 rosrun darkflow_detect object_detect.py
 rosrun obj_pose object_pose_estimator  -pass_z_min 0.3 -pass_max 0.57 -pass_y_min 0 -near 0.1
 rosrun strategy s.py
 open web
-
-
-move_cam_x = l.x
-move_cam_y = l.y + cam2tool_y
-move_cam_z = l.z - cam2tool_z
-self.Arm.relative_move_nsa(n= move_cam_y, s = move_cam_x, a = move_cam_z -0.05)
-
 
 # Test t2o_robot.py
 roslaunch arc control.launch
