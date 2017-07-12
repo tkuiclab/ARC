@@ -211,13 +211,9 @@ options = {
     "model": "cfg/yolo-new.cfg",    # model of net
     "backup": "ckpt/",              # directory of ckpt (training result)
     "load": -1,                     # which ckpt will be loaded. -1 represent the last ckpt
-<<<<<<< HEAD
+
     "threshold": -0.1,              # threshold for confidence
     "gpu": 0.5                      # gpu using rate
-=======
-    "threshold": 0.0,               # threshold for confidence
-    "gpu": 1.0                      # gpu using rate
->>>>>>> 24fd62e6c81de23d64ed71a6e7e8639a505f5393
 }
 tfnet = TFNet(options)
 prepare_network()
