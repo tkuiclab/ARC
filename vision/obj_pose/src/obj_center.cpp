@@ -41,7 +41,7 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       // feedback_.msg = "Raw Point Could Read Done (From Camera)";
       // feedback_.progress = 30;
       // as_.publishFeedback(feedback_);
-      //set_feedback("Grabbing point cloud...",20);
+      //pub_feedback("Grabbing point cloud...",20);
       
       state = CALL_RCNN;
       //state = POSE_ESTIMATION;
@@ -175,7 +175,7 @@ void ObjEstAction::get_roi(){
 #endif 
 
 
-  set_feedback("ROI Done",60);
+  pub_feedback("ROI Done",60);
   
   //state = SEGMETATION;
   state = POSE_ESTIMATION;
@@ -254,7 +254,7 @@ void ObjEstAction::do_ICP()
   }
 }
 
-void ObjEstAction::set_feedback(std::string msg,int progress)
+void ObjEstAction::pub_feedback(std::string msg,int progress)
 {
   feedback_.msg = msg;
   feedback_.progress = progress;
@@ -316,21 +316,21 @@ int main (int argc, char **argv)
         break;
 
       case CALL_RCNN:
-        ObjEst.set_feedback("Getting ROI....",40);
+        ObjEst.pub_feedback("Getting ROI....",40);
         ObjEst.get_roi();
         break;
 
       case SEGMETATION:
-        ObjEst.set_feedback("Doing segmentation....",60);
+        ObjEst.pub_feedback("Doing segmentation....",60);
         ObjEst.segmentation();
         break;
 
       case ALIGMENT:
-        ObjEst.set_feedback("Alignment....",80);
+        ObjEst.pub_feedback("Alignment....",80);
         ObjEst.do_ICP();
         break;
       case POSE_ESTIMATION:
-        ObjEst.set_feedback("POSE_ESTIMATION....",60);
+        ObjEst.pub_feedback("POSE_ESTIMATION....",60);
         ObjEst.poseEstimation();
         
         break;

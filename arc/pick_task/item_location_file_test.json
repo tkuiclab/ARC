@@ -1,0 +1,81 @@
+{
+    "bins": [
+        {
+            "bin_id": "A",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "B",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "C",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "D",
+            "contents": [
+                "scotch_sponges",
+                "expo_eraser"
+            ]
+        },
+        {
+            "bin_id": "E",
+            "contents": [
+                "robots_everywhere",
+                "tissue_box"
+            ]
+        },
+        {
+            "bin_id": "F",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "G",
+            "contents": [
+                "robots_dvd"
+            ]
+        },
+        {
+            "bin_id": "H",
+            "contents": [
+                "hanes_socks"
+            ]
+        },
+        {
+            "bin_id": "I",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "J",
+            "contents": [
+            ]
+        }
+    ],
+    "boxes": [
+        {
+            "size_id": "A1",
+            "contents": [
+            ]
+        },
+        {
+            "size_id": "1A5",
+            "contents": [
+            ]
+        },
+        {
+            "size_id": "1B2",
+            "contents": [
+            ]
+        }
+    ],
+    "tote": {
+        "contents": [
+        ]
+    }
+}

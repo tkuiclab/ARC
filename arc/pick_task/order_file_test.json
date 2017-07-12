@@ -1,0 +1,25 @@
+{
+    "orders": [
+        {
+            "size_id": "1A5",
+            "contents": [
+                "expo_eraser",
+                "scotch_sponges",
+		        "robots_everywhere"
+            ]
+        },
+        {
+            "size_id": "A1",
+            "contents": [
+                "tissue_box"
+            ]
+        },
+        {
+            "size_id": "1B2",
+            "contents": [
+                "robots_dvd",
+                "hanes_socks"
+            ]
+        }
+    ]
+}

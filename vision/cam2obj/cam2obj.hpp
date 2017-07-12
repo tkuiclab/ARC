@@ -18,6 +18,7 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/segmentation/region_growing.h>
 #include <pcl/common/common.h>
+#include <pcl/surface/impl/mls.hpp>
 #include <pcl/surface/mls.h>
 #include <pcl/filters/extract_indices.h>
 

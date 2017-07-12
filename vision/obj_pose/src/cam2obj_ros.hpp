@@ -19,6 +19,7 @@
 #include <pcl/segmentation/region_growing.h>
 #include <pcl/common/common.h>
 #include <pcl/common/common_headers.h>
+//#include <pcl/surface/impl/mls.hpp>
 #include <pcl/surface/mls.h>
 #include <pcl/filters/extract_indices.h>
 
@@ -256,6 +257,7 @@ float& yaw, float& roll){
 
   yaw_rad = (xyp[0] > 0.0) ? (-1.0) * yaw_rad : yaw_rad;
 
+  
   //------------Tool_Roll--------------//
   //rotate obj_normal with -r_rad
   Eigen::Affine3f tf = Eigen::Affine3f::Identity();
@@ -272,6 +274,11 @@ float& yaw, float& roll){
 
   yaw = yaw_rad;
   roll = roll_rad;
+
+  printf("obj_normal=(%lf,%lf,%lf)\n", 
+      obj_normal[0],
+      obj_normal[1],
+      obj_normal[2]);
   
   printf("(yaw,roll)=(%lf,%lf)\n", pcl::rad2deg( yaw), pcl::rad2deg( roll));
   printf("xyp=(%lf,%lf,%lf),yaw=%lf\n", xyp[0], xyp[1], xyp[2],pcl::rad2deg( yaw));
@@ -375,6 +382,7 @@ Vector3f del_out_mean_normal(PC_NT::Ptr i_cloud, PC_NT::Ptr o_cloud){
 void cam_2_obj_center(PCT::Ptr i_cloud,
           double &x, double &y, double &z,
           double &roll, double &pitch, double &yaw,
+          double &nx, double &ny, double &nz,
           float near_points_percent = 0.1){
   PCT::Ptr cloud (new PCT);
   PCT::Ptr cloud_near_center (new PCT);
@@ -500,6 +508,10 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   y = center.y;
   z = center.z;
 
+  nx = obj_normal[0];
+  ny = obj_normal[1];
+  nz = obj_normal[2];
+
   return;
 
   // ----cam_normal_2_obj_normal()-------//
@@ -560,6 +572,48 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
     
 }
 
+
+bool get_center_from_2dbox(
+    PCT::Ptr i_cloud,
+    int mini_x,int mini_y,
+    int max_x, int max_y, 
+    //pass_through_z
+    float pt_min_z, float pt_max_z,
+    float& center_y, float& center_z){
+
+
+    float sum_z = 0;
+    float sum_y = 0;
+    unsigned int  cp = 0 ;
+    int index;
+    for(int j=mini_y;j<max_y;j++){
+        for(int i=mini_x;i<max_x;i++)  {
+
+          index = j*i_cloud->width+i;
+          if (pcl::isFinite (i_cloud->points[index])) {
+            float y = i_cloud->points[index].y;
+            float z = i_cloud->points[index].z;
+            if(z > pt_min_z &&  z < pt_max_z 
+               ){
+              sum_z += z;
+              sum_y += y;
+              ++cp;
+            }
+          }
+        }
+    }
+
+  
+  if(cp > 0 ){
+
+    center_y = sum_y/(float)cp;
+    center_z =  sum_z / (float)cp;
+    return true;
+  }else{
+    center_z = -1;
+    return false;
+  }
+}
 
 
 void only_obj_center(PCT::Ptr i_cloud,
