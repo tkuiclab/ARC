@@ -785,11 +785,11 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     Eigen::Matrix3d R4_7 = R0_4.transpose() * RPY_Rot;
 
     int Wrist = -1; // Wrist Up =  1, Wrist Down = -1
-    double tmp_j5 = atan2(-R4_7(1, 2), -R4_7(0, 2));
-    if( fabs(tmp_j5) > 90*M_PI/180.0 )
-    {
-        Wrist = 1;
-    }
+    // double tmp_j5 = atan2(-R4_7(1, 2), -R4_7(0, 2));
+    // if( fabs(tmp_j5) > 90*M_PI/180.0 )
+    // {
+    //     Wrist = 1;
+    // }
 
     /* joint 6 */
     angle[5] = atan2(Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));

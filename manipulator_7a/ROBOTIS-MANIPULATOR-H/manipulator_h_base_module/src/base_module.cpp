@@ -670,7 +670,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
         double joint_goal_position = dxl->dxl_state_->goal_position_;
 
         joint_state_->curr_joint_state_[joint_name_to_id_[joint_name]].position_ = joint_curr_position;
-        // joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_ = joint_goal_position;
+        joint_state_->goal_joint_state_[joint_name_to_id_[joint_name]].position_ = joint_goal_position;
     }
 
     /*----- forward kinematics -----*/

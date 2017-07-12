@@ -393,7 +393,7 @@ if __name__ == '__main__':
 
     # -------Back 2 home------#.
     task.safe_pose()
-    task.Arm.home()
+    # task.Arm.home()
 
 
     # -------Relative Test------#
