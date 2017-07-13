@@ -27,7 +27,7 @@ from gripper import *
 from s import *
 
 
-obj_dis = 0.1
+obj_dis = 0.015
 
 class T2O:
     """Running arm task class."""
@@ -104,7 +104,8 @@ class T2O:
         # self.tool_2_obj(result.object_pose, result.norm)
         # self.tool_2_obj(result.object_pose, result.norm, 180)
         # self.tool_2_obj_bin(result.object_pose, result.norm)
-        self.tool_2_obj_bin_straight(result.object_pose, result.norm)
+        # self.tool_2_obj_bin_straight(result.object_pose, result.norm)
+        self.tool_2_obj_bin_straight2(result.object_pose, result.norm)
 
     # def tool_2_obj(self, obj_pose):
     def tool_2_obj(self, obj_pose, norm, shot_deg = 0): #STOW
@@ -212,22 +213,34 @@ class T2O:
         l = p.linear
 
         rospy.loginfo("object_pose")
-        rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z) + ")") 
+        rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z) + ")")
         rospy.loginfo("(roll,pitch,yaw)= (" 
                         + str(numpy.rad2deg(a.x)) + ", " 
                         + str(numpy.rad2deg(a.y)) + ", " 
-                        + str(numpy.rad2deg(a.z)) + ")" ) 
+                        + str(numpy.rad2deg(a.z)) + ")" )
+        rospy.loginfo("(norm.x, norm.y, norm.z)= (" + str(norm.x) + ", " + str(norm.y)+ ", " + str(norm.z) + ")")
         
         if (l.x ==0 and l.y==0 and l.z==0) or l.z < 0:
             return
 
-        y = (numpy.rad2deg(a.z) - 180) if numpy.rad2deg(a.z) > 0  else (numpy.rad2deg(a.z) + 180)
+        if l.x * norm.x > 0 :
+            print("#################\nInvert Norm.x\n#################")
+            norm.x = norm.x*-1
+            norm.y = norm.y*-1
+            norm.z = norm.z*-1
+            print("(norm.x, norm.y, norm.z)= (" + str(norm.x) + ", " + str(norm.y)+ ", " + str(norm.z) + ")")
+
+        new_y = numpy.angle(complex(norm.y*-1, norm.x), deg = True)
+        old_y = (numpy.rad2deg(a.z) - 180) if numpy.rad2deg(a.z) > 0  else (numpy.rad2deg(a.z) + 180)
+        old_r = 90 - (numpy.rad2deg(a.x) + 180)
+        y = new_y
         r = 90 - (numpy.rad2deg(a.x) + 180)
 
+        print("(old_y, old_r)= (" + str(old_y) + ", " + str(old_r) + ")")
         print("(y, r)= (" + str(y) + ", " + str(r) + ")")
 
         move_cam_x = (l.x - (gripper_length*sin(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
-        move_cam_y = ((l.y + cam2center_y) + (gripper_length*cos(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
+        move_cam_y = ((l.y - cam2center_y) + (gripper_length*cos(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
         move_cam_z = l.z - (gripper_length*cos(radians(r))) - cam2tool_z
 
         print("NORMAL(x, y, z) = (" + str(norm.x) + ", " + str(norm.y) + ", " + str(norm.z) +")")
@@ -247,7 +260,7 @@ class T2O:
         # dis = 0.2 / tan(radians(20))
         print("dis = "+str(dis))
         detZ = abs(cam2tool_z - cam2tool_z*cos(radians(20)))
-        detY = abs(cam2tool_y*sin(radians(20)))
+        detY = abs(cam2tool_z*sin(radians(20)))
         print("(detZ, detY) = ("+str(detZ)+", "+str(detY)+")")
 
         real_move_x_rot = real_move_x_unit
@@ -265,7 +278,7 @@ class T2O:
 
         #----------------Place---------------#
         self.bin_place_pose()
-        
+
         #----------------Rotation---------------_#
         self.Arm.relative_rot_nsa(roll = y)
         gripper_suction_deg(r-20)
@@ -285,12 +298,12 @@ class T2O:
         self.Arm.relative_xyz_base(x = real_move_z_rot, y = real_move_x_rot, z = real_move_y_rot*-1)
         # self.Arm.relative_xyz_base(y = real_move_x_rot, z = real_move_y_rot*-1)
 
-        # return
+        return
 
         gripper_vaccum_on()
 
         self.Arm.relative_move_suction('ptp', r, obj_dis + 0.02)
-        print("self.Arm.relative_move_suction('ptp', "+str(r)+", obj_dis + 0.018)")
+        print("self.Arm.relative_move_suction('ptp', "+str(r)+", obj_dis + 0.02)")
         print("=====\n")
         
         #----------------Return---------------_#
@@ -299,7 +312,7 @@ class T2O:
 
         self.Arm.relative_move_suction('ptp', r, (obj_dis + 0.02)*-1)
         self.Arm.relative_xyz_base(z = 0.05)
-        self.Arm.relative_xyz_base(x = -0.15)
+        self.Arm.relative_xyz_base(x = -0.2)
         self.safe_pose()
         self.robot_photo_pose()
 
@@ -366,6 +379,121 @@ class T2O:
         self.Arm.relative_xyz_base(x = real_move_z, y = real_move_x, z = real_move_y*-1)
         # self.Arm.relative_xyz_base(y = real_move_x, z = real_move_y*-1)
         print('self.Arm.relative_xyz_base(x = '+str(real_move_z)+', y = '+str(real_move_x)+', z = '+str(real_move_y*-1)+')')
+
+        gripper_vaccum_on()
+
+        # suction move
+        self.Arm.relative_move_suction('ptp', r, obj_dis + 0.018)
+        print("self.Arm.relative_move_suction('ptp', "+str(r)+", obj_dis + 0.018)")
+        print("=====")
+        
+
+        while self.Arm.busy:
+            rospy.sleep(.1)
+
+        self.Arm.relative_move_suction('ptp', r, (obj_dis + 0.018)*-1)
+
+        while self.Arm.busy:
+            rospy.sleep(.1)
+
+        # rospy.sleep(3)
+        # gripper_vaccum_off()
+
+        rospy.loginfo('tool_2_obj_bin_straight Finish')
+
+    def tool_2_obj_bin_straight2(self, obj_pose, norm, shot_deg = 0): # BIN Straight Yaw Move
+        p = obj_pose
+        a = p.angular
+        l = p.linear
+
+        rospy.loginfo("object_pose")
+        rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z) + ")")
+        rospy.loginfo("(roll,pitch,yaw)= (" 
+                        + str(numpy.rad2deg(a.x)) + ", " 
+                        + str(numpy.rad2deg(a.y)) + ", " 
+                        + str(numpy.rad2deg(a.z)) + ")" )
+        rospy.loginfo("(norm.x, norm.y, norm.z)= (" + str(norm.x) + ", " + str(norm.y)+ ", " + str(norm.z) + ")")
+        
+        if (l.x ==0 and l.y==0 and l.z==0) or l.z < 0:
+            return
+
+        # if l.x * norm.x > 0 :
+        #     print("#################\nInvert Norm.x\n#################")
+        #     norm.x = norm.x*-1
+        #     norm.y = norm.y*-1
+        #     norm.z = norm.z*-1
+        #     print("(norm.x, norm.y, norm.z)= (" + str(norm.x) + ", " + str(norm.y)+ ", " + str(norm.z) + ")")
+
+        new_y = numpy.angle(complex(norm.y*-1, norm.x), deg = True)
+        old_y = (numpy.rad2deg(a.z) - 180) if numpy.rad2deg(a.z) > 0  else (numpy.rad2deg(a.z) + 180)
+        old_r = 90 - (numpy.rad2deg(a.x) + 180)
+        y = new_y
+        r = 90 - (numpy.rad2deg(a.x) + 180)
+
+        print("(old_y, old_r)= (" + str(old_y) + ", " + str(old_r) + ")")
+        print("(y, r)= (" + str(y) + ", " + str(r) + ")")
+
+        move_cam_x = (l.x - (gripper_length*sin(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
+        move_cam_y = ((l.y + cam2center_y) + (gripper_length*cos(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
+        move_cam_z = l.z - (gripper_length*cos(radians(r))) - cam2tool_z
+
+        rospy.loginfo("NORMAL(x, y, z) = (" + str(norm.x) + ", " + str(norm.y) + ", " + str(norm.z) +")")
+        obj_distance = [norm.x*obj_dis, norm.y*obj_dis, norm.z*obj_dis]
+
+        real_move_x = move_cam_x + obj_distance[0]*cos(radians(shot_deg))
+        real_move_y = move_cam_y + obj_distance[1]*cos(radians(shot_deg))
+        real_move_z = move_cam_z + obj_distance[2]
+        ###
+        dis_real = math.sqrt(real_move_x*real_move_x + real_move_y*real_move_y + real_move_z*real_move_z)
+
+        real_move_x_unit = real_move_x / dis_real
+        real_move_y_unit = real_move_y / dis_real
+        real_move_z_unit = real_move_z / dis_real
+
+        dis = abs(real_move_z)*cos(radians(20))
+        # dis = 0.2 / tan(radians(20))
+        print("dis = "+str(dis))
+        detZ = abs(cam2tool_z - cam2tool_z*cos(radians(20)))
+        detX = abs(cam2tool_z*sin(radians(20)))
+        print("(detZ, detX) = ("+str(detZ)+", "+str(detX)+")")
+
+        real_move_x_rot = real_move_x_unit*cos(radians(20)) + real_move_z_unit*sin(radians(20))
+        real_move_y_rot = real_move_y_unit
+        real_move_z_rot = real_move_x_unit*sin(radians(20)) + real_move_z_unit*sin(radians(20))
+
+        real_move_x_rot = real_move_x_rot*(dis - detX)
+        real_move_y_rot = real_move_y_rot*dis
+        real_move_z_rot = real_move_z_rot*(dis - detZ)
+        ###
+        rospy.loginfo("(y, r) = (" + str(y) + ", " + str(r) + ")")
+        rospy.loginfo("(l.x, l.y, l.z)= (" + str(l.x) + ", " + str(l.y) + ", " + str(l.z) + ")")
+        rospy.loginfo("(move_cam_x, move_cam_y, move_cam_z)= (" + str(move_cam_x) + ", " + str(move_cam_y) + ", " + str(move_cam_z) + ")")
+        rospy.loginfo("(real_move_x, real_move_y, real_move_z)= (" + str(real_move_x) + ", " + str(real_move_y) + ", " + str(real_move_z) + ")")
+
+        #----------------Place---------------#
+        self.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-90, 0, 0) )
+
+        #----------------Rotation---------------_#
+        self.Arm.relative_rot_nsa(roll = y)
+        gripper_suction_deg(r)
+
+        print('=====')
+        print('self.Arm.relative_rot_nsa(roll = '+str(y)+')')
+        print('self.Arm.gripper_suction_deg('+str(r)+')')
+        # print('self.Arm.relative_xyz_base(x = '+str(real_move_y*-1)+', y = '+str(real_move_x)+', z = '+str(real_move_z*-1)+')')
+        print('self.Arm.relative_xyz_base(x = '+str(real_move_z)+', y = '+str(real_move_x)+', z = '+str(real_move_y*-1)+')')
+
+        # return
+
+        if real_move_y > 0.026 :
+            print('\FOR SAFE/\FOR SAFE/\FOR SAFE/\FOR SAFE/\FOR SAFE/')
+            real_move_y = 0.026
+
+        self.Arm.relative_xyz_base(x = real_move_z, y = real_move_x, z = real_move_y*-1)
+        # self.Arm.relative_xyz_base(y = real_move_x, z = real_move_y*-1)
+        print('self.Arm.relative_xyz_base(x = '+str(real_move_z)+', y = '+str(real_move_x)+', z = '+str(real_move_y*-1)+')')
+
+        return
 
         gripper_vaccum_on()
 
@@ -468,6 +596,13 @@ if __name__ == '__main__':
     rospy.sleep(0.5)
     rospy.loginfo('T2O Ready')
 
+    # task.Arm.relative_xyz_base(x = -0.2)
+    # task.safe_pose()
+    # -------Back 2 home------#.
+    # task.safe_pose()
+    task.Arm.home()
+    exit()
+
     # task.safe_pose()
     
     # task.robot_photo_pose()
@@ -505,22 +640,20 @@ if __name__ == '__main__':
 
     # task.Arm.relative_rot_nsa(pitch = -10)
     # task.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+
     ### Bin Place ###
-    # task.Arm.relative_xyz_base(x = -0.2)
-    s = Strategy()
-    s.test_go_bin_LM('g')
-    task.bin_photo_pose()
+    # s = Strategy()
+    # s.test_go_bin_LM('g')
+    # task.bin_photo_pose()
     # task.bin_place_pose()
+    # task.Arm.pub_ikCmd('ptp', (0.4, -0.15 , 0.25), (-90, 0, 20) )
+    task.Arm.pub_ikCmd('ptp', (0.4, 0.15 , 0.25), (-90, 0, -20) )
     gripper_suction_up()
-    task.obj_pose_request('robots_everywhere')
+    task.obj_pose_request('composition_book')
 
     # task.Arm.relative_xyz_base(y = -0.127)
     # task.Arm.relative_xyz_base(y = -0.0020089123927, z = 0.0355671391194)
     # task.Arm.relative_xyz_base(x = 0.15783756736)
-
-    # -------Back 2 home------#.
-    # task.safe_pose()
-    # task.Arm.home()
 
     # -------Relative Test------#
     # task.Arm.relative_rot_nsa(pitch = -14.7) 

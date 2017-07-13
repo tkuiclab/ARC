@@ -350,7 +350,7 @@ if __name__ == '__main__':
 
 
     # gripper_suction_up()
-    # # task.safe_pose()
+    task.safe_pose()
     task.robot_photo_pose()
     # #task.Arm.relative_move_nsa(a = 0.15) 
 

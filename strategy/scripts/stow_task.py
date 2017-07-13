@@ -342,7 +342,7 @@ class StowTask:
             self.arm_chage_side_and_state()
             return
         else:
-            print 'result.object_name = ' + result.object_name
+            print '-----------obj_pose_done_cb------<< ' + result.object_name +' >>--------------'
             self.obj_pose = result.object_pose
             self.now_stow_info = self.get_stow_info_by_name(result.object_name)
             self.set_stow_method(self.now_stow_info)
@@ -704,7 +704,7 @@ class StowTask:
             self.state 		= WaitRobot
 
             #self.Arm.relative_move_nsa(a = 0.25) 
-            self.Arm.relative_move_nsa(a = 0.3) 
+            self.Arm.relative_move_nsa(a = 0.35) 
             return
 
         elif self.state == GripperOff:
@@ -733,7 +733,7 @@ class StowTask:
             self.info = "(GoBin) ArmLeaveBin"
             print self.info
             
-            self.Arm.relative_move_nsa(a = -0.3) 
+            self.Arm.relative_move_nsa(a = -0.35) 
 
             self.next_state = Recover2InitPos
             self.state 		= WaitRobot

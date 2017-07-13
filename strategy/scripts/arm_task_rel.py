@@ -21,47 +21,51 @@ _ORI = (-70, 0, 0)  # pitch, roll, yaw
 class ArmTask:
     """Running arm task class."""
 
-    def __init__(self):
+    def __init__(self, _name = '/robotis'):
         """Inital object."""
+        self.name = _name
         self.__set_pubSub()
         #rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
         self.__is_busy = False
         self.__set_vel_pub.publish(20)
+        
+        
 
     def __set_pubSub(self):
+        print str(self.name) 
         self.__set_mode_pub = rospy.Publisher(
-            '/robotis/base/set_mode_msg',
+            str(self.name) + '/base/set_mode_msg',
             String,
             # latch=True,
             queue_size=1
         )
         self.__joint_pub = rospy.Publisher(
-            '/robotis/base/Joint_Control',
+            str(self.name) + '/base/Joint_Control',
             JointPose,
             # latch=True,
             queue_size=1
         )
         self.__ptp_pub = rospy.Publisher(
-            '/robotis/base/JointP2P_msg',
+            str(self.name) + '/base/JointP2P_msg',
             IK_Cmd,
             # latch=True,
             queue_size=1
         )
         self.__cmd_pub = rospy.Publisher(
-            '/robotis/base/TaskP2P_msg',
+            str(self.name) + '/base/TaskP2P_msg',
             IK_Cmd,
             # latch=True,
             queue_size=1
         )
         self.__set_vel_pub = rospy.Publisher(
-            '/robotis/base/set_velocity',
+            str(self.name) + '/base/set_velocity',
             Float64,
             latch=True,
             queue_size=1
         )
         self.__status_sub = rospy.Subscriber(
-            '/robotis/status',
+            str(self.name) + '/status',
             StatusMsg,
             self.__status_callback,
             queue_size=1
@@ -119,10 +123,10 @@ class ArmTask:
         self.__set_mode_pub.publish('')
 
     def get_fb(self):
-        rospy.wait_for_service('/robotis/base/get_kinematics_pose')
+        rospy.wait_for_service(self.name + '/base/get_kinematics_pose')
         try:
             get_endpos = rospy.ServiceProxy(
-                '/robotis/base/get_kinematics_pose',
+                self.name + '/base/get_kinematics_pose',
                 GetKinematicsPose
             )
             res = get_endpos('arm')

@@ -4,9 +4,9 @@ from vacuum_cmd_msg.srv import VacuumCmd
 
 # cam2tool_y = -0.11  #-0.095  #cam axis
 # cam2tool_y = -0.04  #-0.095  #cam axis
-cam2tool_y = -0.01 #-0.025  #-0.095  #cam axis
+cam2tool_y = -0.025 #-0.025  #-0.095  #cam axis
 # cam2tool_z = 0.23   # + 0.035
-cam2tool_z = 0.11   # + 0.035
+cam2tool_z = 0.15 #0.13   # + 0.035
 gripper_length = 0.04 #0.04
 cam2center_y = 0.03
 

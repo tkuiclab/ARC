@@ -49,7 +49,7 @@ $ rosservice call /robot_cmd "cmd: 'setMinPos'"
 
 # swicth obj_pose topic
 /camera/depth_registered/points:=/camera/depth/points 
-rosrun obj_pose object_pose_estimator  -pass_z_min 0.3 -pass_z_max 0.57 -pass_y_min 0  -pass_y_max 0.4 -near 0.1
+rosrun obj_pose object_pose_estimator  -pass_z_min 0.3 -pass_z_max 0.576 -pass_y_min 0  -pass_y_max 0.4 -near 0.1
 
 
 # Test Stow Task

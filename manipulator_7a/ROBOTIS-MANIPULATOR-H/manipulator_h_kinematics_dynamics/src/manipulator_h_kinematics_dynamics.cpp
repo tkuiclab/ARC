@@ -826,7 +826,11 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
         }
     }
     if(Euler_Mode == e_nsa)
+    {
         angle[6] -= M_PI/2;
+        std::cout<<"angle[6] -= M_PI/2;" <<"\n";
+    }
+        
 
     for (int i = 0; i < MAX_JOINT_ID; i++)
     {
