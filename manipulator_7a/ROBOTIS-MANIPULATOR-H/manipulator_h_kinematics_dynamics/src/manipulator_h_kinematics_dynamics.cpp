@@ -652,15 +652,24 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     double tmp = tar_position(0);
     tar_position(0) = tar_position(1);
     tar_position(1) = tmp;
+
+    // ================ orig ==================
+    // roll  = tar_orientation(0,0);
+    // pitch = tar_orientation(0,1);
+    // yaw   = tar_orientation(0,2);
+    // ================ after =================
     roll  = tar_orientation(0,0);
-    pitch = tar_orientation(0,1);
-    yaw   = tar_orientation(0,2);
+    pitch = tar_orientation(1,0);
+    yaw   = tar_orientation(2,0);
+    // ========================================
+
     Eigen::Vector3d position = tar_position;
     Eigen::Matrix3d RPY_Rot; // orientation
     // Euler_Mode = e_ICLAB;     // Decide euler angle mode!!!
 
-    std::cout<<"pry = "<<pitch<<", "<<roll<<", "<<yaw<<"\n";
-    std::cout<<std::endl<<"============below============"<<std::endl;
+    std::cout<<"==xyz = "<<position(0)<<", "<<position(1)<<", "<<position(2)<<"\n";
+    std::cout<<"==pryf = "<<pitch<<", "<<roll<<", "<<yaw<<", "<<tarFai<<"\n";
+    std::cout<<std::endl<<"============ Start Calculate ik ============"<<std::endl;
     if(Euler_Mode == e_ICLAB)
     {
         double Cx = cos(pitch);

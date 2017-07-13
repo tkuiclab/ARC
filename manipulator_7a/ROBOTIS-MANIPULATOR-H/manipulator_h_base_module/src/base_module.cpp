@@ -286,7 +286,13 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     robotis_->ik_cmd_fai = cmd->data.size() == 7 ? cmd->data[6] * M_PI / 180.0 : 0.0;
 
     robotis_->ik_target_position_ << x, y, z;
-    robotis_->ik_target_rotation_ << roll, pitch, yaw;
+    // ================ orig ==================
+    // robotis_->ik_target_rotation_ << roll, pitch, yaw;
+    // ================ after =================
+    robotis_->ik_target_rotation_(0,0) = roll;
+    robotis_->ik_target_rotation_(1,0) = pitch;
+    robotis_->ik_target_rotation_(2,0) = yaw;
+    // ========================================
     std::cout<<"ori_data = "<<pitch<<", "<<roll<<", "<<yaw<<"\n";
     std::cout<<"ik_input = "<<robotis_->ik_target_rotation_(0,1)<<", "
                             <<robotis_->ik_target_rotation_(0,0)<<", "

@@ -485,8 +485,9 @@ class StowTask:
         elif now_num < 15:
             i_stow_info.to_bin = 'f'
         
-        i_stow_info.gripper_down = True
-
+        #i_stow_info.gripper_down = True
+        i_stow_info.gripper_down = False
+        
     # input: n_s = next_state
     # output: Bool
     def check_vaccum_by_next_state(self, n_s):
@@ -668,8 +669,8 @@ class StowTask:
             
  
             #self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
-            self.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.25), (-90, 0, 0) )
-           
+            #self.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.25), (-90, 0, 0) )
+            self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
             
             if self.now_stow_info.gripper_down:
                 gripper_suction_down()

@@ -164,14 +164,12 @@ if __name__ == '__main__':
     
     try:
         s = Strategy()
-        # s.Arm.relative_move_xyz()
-        #s.Arm.relative_xyz_base(x=0.05)
-        #s.Arm.relative_xyz_base(x=-0.05)
-        # s.stow.test_read_item_location_in_arc_pack("stow_test.json")
+
+        s.stow.test_read_item_location_in_arc_pack("stow_test.json")
         # #s.safe_pose()
-        # gripper_vaccum_off()
-        # s.start() 
-        # s.stow_run()
+        gripper_vaccum_off()
+        s.start() 
+        s.stow_run()
 
 
         #s.stow.arm_photo_pose()
@@ -208,12 +206,12 @@ if __name__ == '__main__':
 
 
         # ========== TEST Bin Put in===========
-        s.test_go_bin_LM('h')
+        # s.test_go_bin_LM('h')
 
         
-        #arm_leave_tote
-        s.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.15), (-90, 0, 0) )
-        gripper_suction_up()
+        # #arm_leave_tote
+        # s.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+        # gripper_suction_up()
         #s.Arm.relative_move_nsa(a = -0.35) 
 
         # ========== TEST ===========
