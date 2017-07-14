@@ -652,15 +652,24 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     double tmp = tar_position(0);
     tar_position(0) = tar_position(1);
     tar_position(1) = tmp;
+
+    // ================ orig ==================
+    // roll  = tar_orientation(0,0);
+    // pitch = tar_orientation(0,1);
+    // yaw   = tar_orientation(0,2);
+    // ================ after =================
     roll  = tar_orientation(0,0);
-    pitch = tar_orientation(0,1);
-    yaw   = tar_orientation(0,2);
+    pitch = tar_orientation(1,0);
+    yaw   = tar_orientation(2,0);
+    // ========================================
+
     Eigen::Vector3d position = tar_position;
     Eigen::Matrix3d RPY_Rot; // orientation
     // Euler_Mode = e_ICLAB;     // Decide euler angle mode!!!
 
-    std::cout<<"pry = "<<pitch<<", "<<roll<<", "<<yaw<<"\n";
-    std::cout<<std::endl<<"============below============"<<std::endl;
+    std::cout<<"==xyz = "<<position(0)<<", "<<position(1)<<", "<<position(2)<<"\n";
+    std::cout<<"==pryf = "<<pitch<<", "<<roll<<", "<<yaw<<", "<<tarFai<<"\n";
+    std::cout<<std::endl<<"============ Start Calculate ik ============"<<std::endl;
     if(Euler_Mode == e_ICLAB)
     {
         double Cx = cos(pitch);
@@ -785,6 +794,11 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     Eigen::Matrix3d R4_7 = R0_4.transpose() * RPY_Rot;
 
     int Wrist = -1; // Wrist Up =  1, Wrist Down = -1
+    double tmp_j5 = atan2(-R4_7(1, 2), -R4_7(0, 2));
+    if( fabs(tmp_j5) > 90*M_PI/180.0 )
+    {
+        Wrist = 1;
+    }
 
     /* joint 6 */
     angle[5] = atan2(Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
@@ -821,7 +835,11 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
         }
     }
     if(Euler_Mode == e_nsa)
+    {
         angle[6] -= M_PI/2;
+        std::cout<<"angle[6] -= M_PI/2;" <<"\n";
+    }
+        
 
     for (int i = 0; i < MAX_JOINT_ID; i++)
     {

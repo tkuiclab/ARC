@@ -16,24 +16,27 @@
     <!-- Manipulator Manager -->
     <node name="manipulator_h_manager" pkg="manipulator_h_manager" type="manipulator_h_manager"
             output="screen" >
-        <remap from="/robotis/base/JointP2P_msg"  	  to="/right_arm/robotis/base/JointP2P_msg"	    />
-        <remap from="/robotis/base/Joint_Control" 	  to="/right_arm/robotis/base/Joint_Control"	    />
-        <remap from="/robotis/base/TaskP2P_msg"   	  to="/right_arm/robotis/base/TaskP2P_msg"	    />
-        <remap from="/robotis/base/ini_pose_msg"  	  to="/right_arm/robotis/base/ini_pose_msg"	    />
-        <remap from="/robotis/base/kinematics_pose_msg"   to="/right_arm/robotis/base/kinematics_pose_msg"  />
-        <remap from="/robotis/base/set_mode_msg" 	  to="/right_arm/robotis/base/set_mode_msg"	    />
-        <remap from="/robotis/base/set_velocity" 	  to="/right_arm/robotis/base/set_velocity"	    />
+        <remap from="/robotis/base/JointP2P_msg"  	  	  to="/left_arm/robotis/base/JointP2P_msg"	    />
+        <remap from="/robotis/base/Joint_Control" 	  	  to="/left_arm/robotis/base/Joint_Control"	    />
+        <remap from="/robotis/base/TaskP2P_msg"   	  	  to="/left_arm/robotis/base/TaskP2P_msg"	    />
+        <remap from="/robotis/base/ini_pose_msg"  	  	  to="/left_arm/robotis/base/ini_pose_msg"	    />
+        <remap from="/robotis/base/kinematics_pose_msg"   	  to="/left_arm/robotis/base/kinematics_pose_msg"   />
+        <remap from="/robotis/base/set_mode_msg" 	  	  to="/left_arm/robotis/base/set_mode_msg"	    />
+        <remap from="/robotis/base/set_velocity" 	  	  to="/left_arm/robotis/base/set_velocity"	    />
 
-        <remap from="/robotis/enable_ctrl_module" 	  to="/right_arm/robotis/enable_ctrl_module"	    />
-        <remap from="/robotis/goal_joint_states" 	  to="/right_arm/robotis/goal_joint_states"	    />
-        <remap from="/robotis/present_joint_ctrl_modules" to="/right_arm/robotis/present_joint_ctrl_modules"/>
-        <remap from="/robotis/present_joint_states" 	  to="/right_arm/robotis/present_joint_states"	    />
-        <remap from="/robotis/set_control_mode" 	  to="/right_arm/robotis/set_control_mode"	    />
-        <remap from="/robotis/set_joint_ctrl_modules" 	  to="/right_arm/robotis/set_joint_ctrl_modules"    />
-        <remap from="/robotis/set_joint_states" 	  to="/right_arm/robotis/set_joint_states"	    />
-        <remap from="/robotis/status" 			  to="/right_arm/robotis/status"		    />
-        <remap from="/robotis/sync_write_item" 		  to="/right_arm/robotis/sync_write_item"	    />
+        <remap from="/robotis/enable_ctrl_module" 	  	  to="/left_arm/robotis/enable_ctrl_module"	    />
+        <remap from="/robotis/goal_joint_states" 	  	  to="/left_arm/robotis/goal_joint_states"	    />
+        <remap from="/robotis/present_joint_ctrl_modules" 	  to="/left_arm/robotis/present_joint_ctrl_modules" />
+        <remap from="/robotis/present_joint_states" 	  	  to="/left_arm/robotis/present_joint_states"	    />
+        <remap from="/robotis/set_control_mode" 	  	  to="/left_arm/robotis/set_control_mode"	    />
+        <remap from="/robotis/set_joint_ctrl_modules" 	  	  to="/left_arm/robotis/set_joint_ctrl_modules"     />
+        <remap from="/robotis/set_joint_states" 	  	  to="/left_arm/robotis/set_joint_states"	    />
+        <remap from="/robotis/status" 			  	  to="/left_arm/robotis/status"		    	    />
+        <remap from="/robotis/sync_write_item" 		  	  to="/left_arm/robotis/sync_write_item"	    />
 
+	<remap from="/robotis/base/get_joint_pose" 		  to="/left_arm/robotis/base/get_joint_pose"	    	/>
+	<remap from="/robotis/base/get_kinematics_pose" 	  to="/left_arm/robotis/base/get_kinematics_pose"	/>
+	<remap from="/robotis/get_present_joint_ctrl_modules" 	  to="/left_arm/robotis/get_present_joint_ctrl_modules"	/>
     </node>
 
     
@@ -50,8 +53,6 @@
         <param name = "port_z" value ="/dev/arc/LM2" />  <!--"/dev/ttyUSB1" -->
 	    <param name = "port_x" value ="/dev/arc/LM1" />  <!--"/dev/ttyUSB0" -->
         <param name = "baud" value = "9600" />
-	<remap from="/LM_FeedBack" 	to="/right_arm/LM_FeedBack"/>
-	<remap from="/position_topic" 	to="/right_arm/position_topic"/>
         
     </node>
 

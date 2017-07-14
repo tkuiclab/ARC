@@ -7,11 +7,11 @@ from random import seed, randint
 
 amazonLabelsList = [
     "avery_binder",
-    "ballons",
+    "balloons",
     "band_aid_tape",
     "bath_sponge",
     "black_fashion_gloves",
-    "burls_bees_baby_wipes",
+    "burts_bees_baby_wipes",
     "colgate_toothbrush_4pk",
     "composition_book",
     "crayons",
@@ -24,7 +24,7 @@ amazonLabelsList = [
     "hand_weight",
     "hanes_socks",
     "hinged_ruled_index_cards",
-    "ics_cube_tray",
+    "ice_cube_tray",
     "irish_spring_soap",
     "laugh_out_loud_jokes",
     "marbles",

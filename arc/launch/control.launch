@@ -17,8 +17,7 @@
     <node name="manipulator_h_manager" pkg="manipulator_h_manager" type="manipulator_h_manager"
             output="screen" />
 
-    <include file="$(find arc_ui)/launch/ui.launch" />
-
+    
     <!-- run rosserial -->
     <node name="serial_node" pkg="rosserial_python" type="serial_node.py" if="$(arg en_vac)">
         <param name = "port" value ="/dev/arc/arduino" />
@@ -33,6 +32,34 @@
         <param name = "baud" value = "9600" />
         
     </node>
+
+
+
+<!--
+<include file="$(find arc_ui)/launch/ui.launch" />
+-->
+    <!-- rosbridge_server -->
+  <arg name="port" default="9090" />
+  <arg name="address" default="" />
+  <arg name="ssl" default="false" />
+  <arg name="certfile" default=""/>
+  <arg name="keyfile" default="" />
+
+  <arg name="retry_startup_delay" default="5" />
+
+  <arg name="fragment_timeout" default="600" />
+  <arg name="delay_between_messages" default="0" />
+  <arg name="max_message_size" default="None" />
+
+  <arg name="authenticate" default="false" />
+
+  <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+    <arg name="port" value="$(arg port)"/> 
+    <arg name="address" value="$(arg address)"/>
+    <arg name="ssl" value="$(arg ssl)"/>
+    <arg name="certfile" value="$(arg certfile)"/>
+    <arg name="keyfile" value="$(arg keyfile)"/>
+  </include>
 	
     
 

@@ -50,8 +50,6 @@
         <param name = "port_z" value ="/dev/arc/LM2" />  <!--"/dev/ttyUSB1" -->
 	    <param name = "port_x" value ="/dev/arc/LM1" />  <!--"/dev/ttyUSB0" -->
         <param name = "baud" value = "9600" />
-	<remap from="/LM_FeedBack" 	to="/right_arm/LM_FeedBack"/>
-	<remap from="/position_topic" 	to="/right_arm/position_topic"/>
         
     </node>
 

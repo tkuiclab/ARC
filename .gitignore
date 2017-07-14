@@ -65,3 +65,4 @@ CATKIN_IGNORE
 
 # ignore cam2obj/build
 /vision/cam2obj/build/
+/arc/Training items/

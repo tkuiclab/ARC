@@ -21,47 +21,51 @@ _ORI = (-70, 0, 0)  # pitch, roll, yaw
 class ArmTask:
     """Running arm task class."""
 
-    def __init__(self):
+    def __init__(self, _name = '/robotis'):
         """Inital object."""
+        self.name = _name
         self.__set_pubSub()
         #rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
         self.__is_busy = False
         self.__set_vel_pub.publish(20)
+        
+        
 
     def __set_pubSub(self):
+        print str(self.name) 
         self.__set_mode_pub = rospy.Publisher(
-            '/robotis/base/set_mode_msg',
+            str(self.name) + '/base/set_mode_msg',
             String,
             # latch=True,
             queue_size=1
         )
         self.__joint_pub = rospy.Publisher(
-            '/robotis/base/Joint_Control',
+            str(self.name) + '/base/Joint_Control',
             JointPose,
             # latch=True,
             queue_size=1
         )
         self.__ptp_pub = rospy.Publisher(
-            '/robotis/base/JointP2P_msg',
+            str(self.name) + '/base/JointP2P_msg',
             IK_Cmd,
             # latch=True,
             queue_size=1
         )
         self.__cmd_pub = rospy.Publisher(
-            '/robotis/base/TaskP2P_msg',
+            str(self.name) + '/base/TaskP2P_msg',
             IK_Cmd,
             # latch=True,
             queue_size=1
         )
         self.__set_vel_pub = rospy.Publisher(
-            '/robotis/base/set_velocity',
+            str(self.name) + '/base/set_velocity',
             Float64,
             latch=True,
             queue_size=1
         )
         self.__status_sub = rospy.Subscriber(
-            '/robotis/status',
+            str(self.name) + '/status',
             StatusMsg,
             self.__status_callback,
             queue_size=1
@@ -96,6 +100,9 @@ class ArmTask:
         # pub_ikCmd('ptp', (x, y , z), (pitch, roll, yaw) )
         # while self.__is_busy:
         #     rospy.sleep(.1)
+
+        self.__is_busy = True
+
         cmd = []
 
         for p in pos:
@@ -110,17 +117,16 @@ class ArmTask:
         elif mode == 'ptp':
             self.__ptp_pub.publish(cmd)
 
-        self.__is_busy = True
-
+        
     def stop_task(self):
         """Stop task running."""
         self.__set_mode_pub.publish('')
 
     def get_fb(self):
-        rospy.wait_for_service('/robotis/base/get_kinematics_pose')
+        rospy.wait_for_service(self.name + '/base/get_kinematics_pose')
         try:
             get_endpos = rospy.ServiceProxy(
-                '/robotis/base/get_kinematics_pose',
+                self.name + '/base/get_kinematics_pose',
                 GetKinematicsPose
             )
             res = get_endpos('arm')
@@ -177,11 +183,24 @@ class ArmTask:
         vec_a = [rot[0][2], rot[1][2], rot[2][2]]
         return vec_n, vec_s, vec_a   
 
-    def relative_move_suction(self, mode='ptp', suction_angle,  dis):
+    def relative_move_suction(self, mode='ptp', suction_angle=0, dis=0 ):
         """Get euler angle and run task."""
-        # note:for nsa rotation only
+        # note:suction_anfle type is degree,  dis is m
         while self.__is_busy:
             rospy.sleep(.1)
+
+        # ======= Calculate suction vector start ========
+        rate_n = float((90-suction_angle)/90.0)
+        rate_a = float(suction_angle/90.0)
+        n = rate_n*dis
+        a = rate_a*dis
+        s = 0
+        # print 'dis = ' + str(dis)
+        # print 'rate_n = ' + str(rate_n)
+        # print 'rate_a = ' + str(rate_a)
+        # print 'n = ' + str(n)
+        # print 'a = ' + str(a)
+        # ======= Calculate suction vector over  ========
 
         fb = self.get_fb()
         pos = fb.group_pose.position

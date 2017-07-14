@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 """Get location of item in which bin and place into which box."""
-"""for picking challenage."""
 
 #from __future__ import print_function
 from os import path
 import rospkg
 import json
+
 
 class PickInfo:
     """ Information of picking task."""
@@ -17,6 +17,7 @@ class PickInfo:
         self.from_bin = form_bin
         self.to_box = to_box
 
+
 class StowInfo:
     """ Information of stowing task."""
 
@@ -26,6 +27,8 @@ class StowInfo:
         self.to_bin = to_bin
         self.to_other_tote = False
         self.success = False
+
+        self.gripper_down = True
 
 def read_json(path):
     """Read a JSON file from path, and convert to object of python."""
@@ -38,6 +41,7 @@ def read_json(path):
     except IOError as e:
         print(e)
         return None
+
 
 def write_json(path, content):
     """Write object of python to specify JSON file using JSON format."""
@@ -66,6 +70,7 @@ def make_pick_list_from_path(item_loc_path, order_path):
                 pick_list.append(PickInfo(item, bin_id, box_id))
     return pick_list
 
+
 def make_pick_list(i_item_loc_json, i_order_json):
     """Using item location file and order file to make a list for picking task."""
 
@@ -81,6 +86,7 @@ def make_pick_list(i_item_loc_json, i_order_json):
                 pick_list.append(PickInfo(item, bin_id, box_id))
     return pick_list
 
+
 def make_stow_list(i_item_loc_json):
     """Using item location file to make a list for stowing task."""
 
@@ -89,15 +95,18 @@ def make_stow_list(i_item_loc_json):
     #print 'item_loc_json["tote"]["contents"] = ' + str(item_loc_json["tote"]["contents"])  
 
     stow_list = list()
+
+    
     bin_id = 'e'
     for item in item_loc_json["tote"]["contents"]:
         stow_list.append(StowInfo(item, bin_id))
         #bin_id = bin_id + 1
-        bin_id = chr(ord(bin_id)+1)
+        #bin_id = chr(ord(bin_id)+1)
 
     show_stow_list(stow_list)
 
     return stow_list
+
 
 def show_stow_list(i_stow_list):
     for stow in i_stow_list:
@@ -110,6 +119,7 @@ def show_stow_list(i_stow_list):
 def get_json(json_str):
     return json.loads(json_str)
 
+
 def search_item(item_loc_json, target):
     """Searching target item in which bin."""
     for bin in item_loc_json["bins"]:
@@ -120,15 +130,25 @@ def search_item(item_loc_json, target):
     print '[task_parser.py] Say Cannot find '+ target
     return None
 
-def read_config_pick_task():
-    direcotry = rospkg.RosPack().get_path('config') + '/pick_task/'
-    ilf = "item_location_file.json"
-    orf = "order_file.json"
 
-    item_loc_path = path.join(direcotry, ilf)
-    order_path = path.join(direcotry, orf)
+def read_pick_task_and_location():
+    directory = path.join(rospkg.RosPack().get_path('arc'), 'pick_task')
+    ilf = "item_location_file_test.json"
+    orf = "order_file_test.json"
 
-    return make_pick_list_from_path(item_loc_path, order_path)
+    item_loc_path = path.join(directory, ilf)
+    order_path = path.join(directory, orf)
+
+    pick_task = make_pick_list_from_path(item_loc_path, order_path)
+    location_json = read_json(item_loc_path)
+    return pick_task, location_json
+
+
+def write_pick_task_location(content):
+    directory = path.join(rospkg.RosPack().get_path('arc'), 'output')
+    ilf = "item_location_file_test.json"
+    item_loc_path = path.join(directory, ilf)
+    write_json(item_loc_path, content)
      
 
 def _test_pick():
@@ -150,6 +170,7 @@ def _test_pick():
     pick_list = read_config_pick_task()
     for info in pick_list:
         print("item:", info.item, "from_bin:", info.from_bin, "to_box:", info.to_box)
+
 
 def read_init_pick_ilf(direcotry, container):
     # direcotry = rospkg.RosPack().get_path('config') + '/pick_task/base_item_location_file.json'
@@ -178,6 +199,7 @@ def read_init_pick_ilf(direcotry, container):
     print '\nafter append ===>\n' + str(pick_list)
     return pick_list
 
+
 def Insert_Item_2_ContList(ContType, ContList, No, DesireItem):
     if ContType == "Bin" or ContType == "bin" :
         print 'bin'
@@ -202,6 +224,7 @@ def Insert_Item_2_ContList(ContType, ContList, No, DesireItem):
         print "error Cont type"
     return ContList
 
+
 def Delete_Item_from_ContList(ContType, ContList, No, DesireItem):
     if ContType == "Bin" or ContType == "bin" :
         print 'bin'
@@ -215,17 +238,16 @@ def Delete_Item_from_ContList(ContType, ContList, No, DesireItem):
             if item["size_id"] == No:
                 item["contents"].remove(DesireItem)
                 break
-
     elif ContType == "Tote" or ContType == "tote":
         print 'tote'
         tmp_ContList = list()
         tmp_ContList = ContList
         for item in ContList:
             item["contents"].remove(DesireItem)
-
     else:
         print "error Cont type"
     return ContList
+
 
 def Convert_PickTaskList_to_JSON():
     print '[write json] write_PickInfo_2_JSON'
@@ -249,6 +271,7 @@ def Convert_PickTaskList_to_JSON():
     pick_direcotry = rospkg.RosPack().get_path('config') + '/pick_task/save_json_test.json'
     pick_list = { "bins":Bin_List, "boxes":Box_List, "tote":Tote_List}
     write_json(pick_direcotry, pick_list)   
+
 
 def Convert_StowTaskList_to_JSON():
     print '[write json] write_StowInfo_2_JSON'
@@ -277,6 +300,7 @@ def Convert_StowTaskList_to_JSON():
 def write_PickInfo_2_JSON(): # jmp save json
     Convert_PickTaskList_to_JSON()
     Convert_StowTaskList_to_JSON()
+
 
 if __name__ == "__main__":
     info = {'Name': 'Zara', 'Age': 7, 'Class': 'First'}

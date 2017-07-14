@@ -55,7 +55,15 @@
     ],
     "tote": {
         "contents": [
-            "dvdRobots"
+            "mesh_cup",
+            "robots_dvd",
+            "mouse_traps",
+            "windex",
+            "scotch_sponges",
+            "duct_tape",
+            "band_aid_tape",
+            "crayons",
+            "irish_spring_soap"
         ]
     }
 }

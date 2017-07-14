@@ -286,7 +286,13 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     robotis_->ik_cmd_fai = cmd->data.size() == 7 ? cmd->data[6] * M_PI / 180.0 : 0.0;
 
     robotis_->ik_target_position_ << x, y, z;
-    robotis_->ik_target_rotation_ << roll, pitch, yaw;
+    // ================ orig ==================
+    // robotis_->ik_target_rotation_ << roll, pitch, yaw;
+    // ================ after =================
+    robotis_->ik_target_rotation_(0,0) = roll;
+    robotis_->ik_target_rotation_(1,0) = pitch;
+    robotis_->ik_target_rotation_(2,0) = yaw;
+    // ========================================
     std::cout<<"ori_data = "<<pitch<<", "<<roll<<", "<<yaw<<"\n";
     std::cout<<"ik_input = "<<robotis_->ik_target_rotation_(0,1)<<", "
                             <<robotis_->ik_target_rotation_(0,0)<<", "
@@ -676,8 +682,8 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
     /*----- forward kinematics -----*/
     /* 需要下面三行，末端點資訊才會被刷新(教末端點回授) */
     for (int id = 1; id <= MAX_JOINT_ID; id++)
-        manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->goal_joint_state_[id].position_;
-        // manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->curr_joint_state_[id].position_;
+        // manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->goal_joint_state_[id].position_;
+        manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->curr_joint_state_[id].position_;
 
     manipulator_->fk();
 

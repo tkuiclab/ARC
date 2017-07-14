@@ -2,16 +2,18 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Vector3.h>
+#include <std_msgs/String.h>
 
 //#include <fake_roi/Detect.h>
 #include <darkflow_detect/Detected.h>
 #include <darkflow_detect/Detect.h>
-#include <boost/thread/thread.hpp>
 #include <sensor_msgs/PointCloud2.h>
 #include <actionlib/server/simple_action_server.h>
-
 #include <obj_pose/ObjectPoseAction.h>
 
+
+#include <boost/thread/thread.hpp>
 #include <Eigen/Core>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
@@ -33,7 +35,10 @@
 #include <pcl/console/parse.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
-
+#include <pcl/filters/passthrough.h>
+//#include <pcl/surface/impl/mls.hpp>
+#include <pcl/surface/mls.h>
+#include <pcl/kdtree/kdtree_flann.h>
 #include "object_pose_auxiliary.hpp"
 
 //#define ShowCloud
@@ -43,10 +48,21 @@ enum ProcessingState{
     NADA,
     FOTO,
     SEGMETATION,
-    CALL_RCNN,
+    //CALL_RCNN,
     ALIGMENT,
-    POSE_ESTIMATION
+    POSE_ESTIMATION,
+    GET_ONE_ROI,
+    GET_HIGHEST
 }state;
+
+//for respone to error_code
+
+//#define ERR_DETECT_LESS_MAX               1
+#define ERR_CANNOT_GET_HIGHEST            2
+#define ERR_CANNOT_CALL_DETECT_SERVICE    3
+#define ERR_CALL_DETECT_OVER_TIMES        4
+//#define ERR_DETECT_RESPONE_FAIL    5
+
 
 namespace ObjEstAction_namespace
 {
@@ -72,8 +88,8 @@ public:
     as_.registerGoalCallback(boost::bind(&ObjEstAction::goalCB, this));
     as_.registerPreemptCallback(boost::bind(&ObjEstAction::preemptCB, this));
 
-    //segmented_pub_ =nh_.advertise<sensor_msgs::PointCloud2>("segmented_pointcloud", 1);
-    //align_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("align_pointcloud", 1);
+    segmented_pub_ =nh_.advertise<sensor_msgs::PointCloud2>("segmented_pointcloud", 1);
+    align_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("align_pointcloud", 1);
     cloud_sub = nh_.subscribe("/camera/depth_registered/points", 10, &ObjEstAction::cloudCB,this);
     
     as_.start();
@@ -86,18 +102,32 @@ public:
   void goalCB();
   void preemptCB();
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
+  
+  void pub_feedback(std::string msg,int progress);
+  void pub_error();
+  
+
+  //bool get_roi();
   void poseEstimation();
   void aligment();
-  void get_roi();
   void segmentation();
   void cpc_segmentation();
   void do_ICP();
-  //bool load_pcd(std::string pcd_filename);
-  void set_feedback(std::string msg,int progress);
-  void print4x4Matrix (const Eigen::Matrix4f & matrix);
-
+  
+  void get_one_roi();   //need obj_name
+  void get_highest();   //need obj_list
+  
 
 protected:
+    
+
+  
+  void set_ROI_colud(int mini_x,int mini_y,int max_x, int max_y);
+
+  bool load_amazon_pcd(std::string pcd_filename);
+  bool is_obj_in_obj_list(std::string name);
+  void print4x4Matrix (const Eigen::Matrix4f & matrix);
+
 
   //------ROS--------//
   ros::NodeHandle nh_;
@@ -119,7 +149,7 @@ protected:
   int max_x;
   int max_y;
 
-  int call_rcnn_times ;
+  int call_detect_times ;
 
   bool scence_seg;
   
@@ -127,6 +157,7 @@ protected:
   // std::string tmp_path;
   // std::string tmp_path2;
   std::string obj_name;
+  std::vector<std::string> obj_list;
   //std::string path;
   //std::string pcd_folder;
   
@@ -150,5 +181,8 @@ private:
   pcl::PointCloud<pcl::PointXYZ>::Ptr Max_cluster;
   pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_cluster;
   Eigen::Matrix4f transformation_matrix;
+
+
+  int error_code;
 };
 }
