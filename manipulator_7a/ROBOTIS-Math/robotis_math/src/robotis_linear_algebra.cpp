@@ -189,7 +189,7 @@ Eigen::MatrixXd convertRotationToRPY(Eigen::MatrixXd rotation)
   rpy.coeffRef(1,0) = atan2(-rotation.coeff(2,0), sqrt(pow(rotation.coeff(2,1), 2) + pow(rotation.coeff(2,2),2)));
   rpy.coeffRef(2,0) = atan2 (rotation.coeff(1,0), rotation.coeff(0,0));
 
-  return rpy;
+  return rpy;// return value's rpy ranking is [pitch  roll  yaw]
 }
 
 Eigen::MatrixXd convertRPYToRotation(double roll, double pitch, double yaw)
@@ -211,6 +211,29 @@ Eigen::Quaterniond convertRPYToQuaternion(double roll, double pitch, double yaw)
   quaternion = rotation3d;
 
   return quaternion;
+}
+
+Eigen::MatrixXd convertQuat2Rotation(Eigen::Quaterniond quaternion)
+{
+  // Added for arc
+  Eigen::MatrixXd RotMatrix = Eigen::MatrixXd::Identity(3,3);
+  double w = quaternion.w();
+  double x = quaternion.x();
+  double y = quaternion.y();
+  double z = quaternion.z();
+
+  RotMatrix(0,0) = 1 - 2*(y*y + z*z);
+  RotMatrix(0,1) = 2*(x*y - w*z);
+  RotMatrix(0,2) = 2*(x*z + w*y);
+  
+  RotMatrix(1,0) = 2*(x*y + w*z);
+  RotMatrix(1,1) = 1 - 2*(x*x + z*z);
+  RotMatrix(1,2) = 2*(y*z - w*x);
+  
+  RotMatrix(2,0) = 2*(x*z - w*y);
+  RotMatrix(2,1) = 2*(y*z + w*x);
+  RotMatrix(2,2) = 1 - 2*(x*x + y*y);
+  return RotMatrix;
 }
 
 Eigen::Quaterniond convertEulerToQuaternion(double roll, double pitch, double yaw)

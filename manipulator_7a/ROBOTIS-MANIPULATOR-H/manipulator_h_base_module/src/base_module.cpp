@@ -286,13 +286,10 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     robotis_->ik_cmd_fai = cmd->data.size() == 7 ? cmd->data[6] * M_PI / 180.0 : 0.0;
 
     robotis_->ik_target_position_ << x, y, z;
-    // ================ orig ==================
     // robotis_->ik_target_rotation_ << roll, pitch, yaw;
-    // ================ after =================
     robotis_->ik_target_rotation_(0,0) = roll;
     robotis_->ik_target_rotation_(1,0) = pitch;
     robotis_->ik_target_rotation_(2,0) = yaw;
-    // ========================================
     std::cout<<"ori_data = "<<pitch<<", "<<roll<<", "<<yaw<<"\n";
     std::cout<<"ik_input = "<<robotis_->ik_target_rotation_(0,1)<<", "
                             <<robotis_->ik_target_rotation_(0,0)<<", "
@@ -340,13 +337,25 @@ void BaseModule::LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Cons
     robotis_->kinematics_pose_msg_.pose.position.x = cmd->data[0];
     robotis_->kinematics_pose_msg_.pose.position.y = cmd->data[1];
     robotis_->kinematics_pose_msg_.pose.position.z = cmd->data[2];
-    Eigen::Quaterniond quaterion = robotis_framework::convertRPYToQuaternion(cmd->data[4] * M_PI / 180.0,
+    // Eigen::Quaterniond quaterion = robotis_framework::convertRPYToQuaternion(cmd->data[4] * M_PI / 180.0,
+    //                                                                          cmd->data[3] * M_PI / 180.0,
+    //                                                                          cmd->data[5] * M_PI / 180.0);
+    Eigen::Quaterniond quaterion = robotis_framework::convertEulerToQuaternion(cmd->data[4] * M_PI / 180.0,
                                                                              cmd->data[3] * M_PI / 180.0,
                                                                              cmd->data[5] * M_PI / 180.0);
     robotis_->kinematics_pose_msg_.pose.orientation.w = quaterion.w();
     robotis_->kinematics_pose_msg_.pose.orientation.x = quaterion.x();
     robotis_->kinematics_pose_msg_.pose.orientation.y = quaterion.y();
     robotis_->kinematics_pose_msg_.pose.orientation.z = quaterion.z();
+
+    // jmp line1
+    // std::cout<< "cmd data = " <<cmd->data[3] <<"\n";
+    // std::cout<< "cmd data = " <<cmd->data[4] <<"\n";
+    // std::cout<< "cmd data = " <<cmd->data[5] <<"\n";
+    robotis_->line_ik_pos <<cmd->data[0], cmd->data[1], cmd->data[2];
+    robotis_->line_ik_rpy <<cmd->data[4]*M_PI/180.0,
+                            cmd->data[3]*M_PI/180.0,
+                            cmd->data[5]*M_PI/180.0;
     robotis_->ik_cmd_fai = cmd->data.size() == 7 ? cmd->data[6] * M_PI / 180.0 : 0.0;
 
     robotis_->ik_id_start_ = 0;
@@ -573,9 +582,19 @@ void BaseModule::generateTaskTrajProcess()
                                          robotis_->kinematics_pose_msg_.pose.orientation.y,
                                          robotis_->kinematics_pose_msg_.pose.orientation.z));
 
-        /* calc ik */
+        /* calc ik jmp line2 */
+        std::cout   << "line_quat = " 
+                    << robotis_->kinematics_pose_msg_.pose.orientation.w <<", "
+                    << robotis_->kinematics_pose_msg_.pose.orientation.x <<", "
+                    << robotis_->kinematics_pose_msg_.pose.orientation.y <<", "
+                    << robotis_->kinematics_pose_msg_.pose.orientation.z <<"\n";
+
+        std::cout   << "Rot Matrix(ik_target_rotation_) = " << robotis_->ik_target_rotation_ <<"\n";
+
+        std::cout<<"line_ik_pos_cmd = " << robotis_->line_ik_pos <<"\n";
+        std::cout<<"line_ik_ori_cmd = " << robotis_->line_ik_rpy <<"\n";
         bool ik_success = manipulator_->ik(robotis_->ik_target_position_,
-                                           robotis_->ik_target_rotation_,
+                                           robotis_->line_ik_rpy,
                                            robotis_->ik_cmd_fai);
         if (!ik_success)
         {
@@ -591,7 +610,7 @@ void BaseModule::generateTaskTrajProcess()
         {
             double ini_value = joint_state_->curr_joint_state_[id].position_;
             double tar_value = manipulator_->ik_calc_joint_angle_[id - 1];
-            double abs_diff = fabs(tar_value - ini_value);
+            double abs_diff  = fabs(tar_value - ini_value);
 
             if (f_max_diff < abs_diff)
                 f_max_diff = abs_diff;
@@ -682,23 +701,58 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
     /*----- forward kinematics -----*/
     /* 需要下面三行，末端點資訊才會被刷新(教末端點回授) */
     for (int id = 1; id <= MAX_JOINT_ID; id++)
-        // manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->goal_joint_state_[id].position_;
-        manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->curr_joint_state_[id].position_;
+         manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->goal_joint_state_[id].position_;
+        //manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->curr_joint_state_[id].position_;
 
     manipulator_->fk();
 
-    /* ----- send trajectory ----- */
-    if (robotis_->is_moving_ == true)
+    /* ----- send trajectory ----- line3*/
+    if (robotis_->is_moving_ == true)//ptp line
     {
         if (robotis_->cnt_ == 0)
+        {
             robotis_->ik_start_rotation_ = manipulator_->manipulator_link_data_[robotis_->ik_id_end_]->orientation_;
+            
+            // convert error rot matrix to rpy and then fix it
+            Eigen::MatrixXd tmp_start_pry = robotis_framework::convertRotationToRPY(robotis_->ik_start_rotation_);
+            tmp_start_pry(2) += 90*M_PI/180.0;
 
-        if (robotis_->ik_solve_ == true)
+            // convert the correct rpy to quaternion and then convert back to rotation matrix
+            Eigen::Quaterniond start_quaternion = robotis_framework::convertEulerToQuaternion( 
+                                                                            tmp_start_pry(2),
+                                                                            tmp_start_pry(0),
+                                                                            tmp_start_pry(1));
+
+            Eigen::MatrixXd tmp_rot = robotis_framework::convertQuat2Rotation(start_quaternion);
+            for(int i=0 ; i<=2;i++)
+            {
+                for(int j=0 ; j<=2 ; j++)
+                {
+                    robotis_->ik_start_rotation_(i,j) = tmp_rot(i,j);
+                }
+            }
+        }
+
+        if (robotis_->ik_solve_ == true) //line
         {
             robotis_->setInverseKinematics();
 
             /* kinematics of evo  */
-            bool ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_, robotis_->ik_target_fai);
+            std::cout<<"process"<<"\n";
+            // 
+            std::cout<<"ik_curr_pos = " << robotis_->ik_target_position_ <<"\n";
+            robotis_->line_ik_rpy <<robotis_->line_ik_rpy(0,0), 
+                                    robotis_->line_ik_rpy(1,0), 
+                                    robotis_->line_ik_rpy(2,0);
+            // std::cout<<"ik_curr_ori00 = " << robotis_->line_ik_rpy(0,0) <<"\n";
+            // std::cout<<"ik_curr_ori01 = " << robotis_->line_ik_rpy(0,1) <<"\n";
+            // std::cout<<"ik_curr_ori02 = " << robotis_->line_ik_rpy(0,2) <<"\n";
+            // std::cout<<"ik_curr_ori00 = " << robotis_->line_ik_rpy(0,0) <<"\n";
+            // std::cout<<"ik_curr_ori10 = " << robotis_->line_ik_rpy(1,0) <<"\n";
+            // std::cout<<"ik_curr_ori20 = " << robotis_->line_ik_rpy(2,0) <<"\n";
+            std::cout<<"ik_curr_ori20 = " << robotis_->line_ik_rpy<<"\n";
+
+            bool ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->line_ik_rpy, robotis_->ik_target_fai);
             if (ik_success == true)
             {
                 for (int id = 1; id <= MAX_JOINT_ID; id++)
@@ -714,10 +768,13 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
                 robotis_->cnt_ = 0;
             }
         }
-        else
+        else //ptp
         {
             for (int id = 1; id <= MAX_JOINT_ID; id++)
+            {
                 joint_state_->goal_joint_state_[id].position_ = robotis_->calc_joint_tra_(robotis_->cnt_, id);
+                // std::cout<<"Joint " <<id <<" = " <<joint_state_->goal_joint_state_[id].position_;
+            }
         }
 
         robotis_->cnt_++;
