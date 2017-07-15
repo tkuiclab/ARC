@@ -39,8 +39,8 @@ from task_parser import *
 from config import *
 from gripper import *
 #
-# BinArr = ['a',  'b',  'c',  'd',  'e',  'f',  'g',  'h',  'i',  'j',   'k',   'l']
-BinArr = ['a',  'b',  'c',  'd',  'e']
+BinArr = ['a',  'b',  'c',  'd',  'e',  'f',  'g',  'h',  'i',  'j']
+# BinArr = ['a',  'b',  'c',  'd',  'e']
 class Calibrater:
     def __init__(self):
         self.LM  = LM_Control.CLM_Control()
@@ -58,10 +58,10 @@ class Calibrater:
         self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', bin ))
         rospy.sleep(0.5)
 
-        if bin in ['a', 'd', 'g', 'j']:
-            self.Arm.pub_ikCmd('ptp', (0.3, -0.1 , 0.3), (0, 0, 0, -24) )
-        else:
-            self.Arm.pub_ikCmd('ptp', (0.3, 0 , 0.3), (0, 0, 0) )
+        # if bin in ['a', 'd', 'g', 'j']:
+        #     self.Arm.pub_ikCmd('ptp', (0.3, -0.1 , 0.3), (0, 0, 0, -24) )
+        # else:
+        #     self.Arm.pub_ikCmd('ptp', (0.3, 0 , 0.3), (0, 0, 0) )
 
     def Move_Arm(self):
         print 'move arm'

@@ -24,10 +24,14 @@ class CLM_Control:
         self.__is_busy = False
         self.__is_Arrive = False
         self.__set_pubSub()
+        self.x_curr_pos=0
+        self.z_curr_pos=0
 
     def Show_FB_callback(self, msg):
         """ description """
         # print msg.status
+        self.z_curr_pos = msg.x_curr_pos
+        self.x_curr_pos = msg.z_curr_pos
         if msg.status == 'LM_idle':
             self.__is_busy = False
             self.__is_Arrive = False
@@ -67,9 +71,33 @@ class CLM_Control:
     def IsArrive(self):
         return self.__is_Arrive
 
+    def Show_LM_FB(self):
+        print 'x_curr_pos = ' + str(self.x_curr_pos)
+        print 'z_curr_pos = ' + str(self.z_curr_pos)
+
+    def rel_move_LM(self, LM_Name, cm):
+        tmp_x = self.x_curr_pos
+        tmp_z = self.z_curr_pos
+        add = 1000*cm
+
+        if LM_Name == 'left':  #id=1
+            self.pub_LM_Cmd(1, tmp_z - add)
+            rospy.sleep(0.3)
+            
+        elif LM_Name == 'base':#id=2
+            self.pub_LM_Cmd(2, tmp_x - add)
+            
+        else:
+            print'err, please enter "left", "right" or "base" '
+        while(self.__is_Arrive == False):
+            rospy.sleep(0.1)
+            # print'wait'
+
     def pub_LM_Cmd(self, id, pls):
         msg = LM_Cmd()
         msg.id = id
+        # print 'x_curr_pos = ' + str(self.x_curr_pos)
+        # print 'z_curr_pos = ' + str(self.z_curr_pos)
         # print 'LM ' + str(id) + 'send pls = ' + str(pls)
         if id == 1:
             if pls > 80000 or pls < 0:
@@ -93,6 +121,8 @@ class CLM_Control:
         else:
             print 'error input arg for pub_LM_Cmd(self, id, pls)'
         self.set_pls_pub.publish(msg)
+        
+
 
 # def GetShift(LM_Dir):
 #     """ description """
