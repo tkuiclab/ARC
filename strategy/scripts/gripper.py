@@ -9,6 +9,7 @@ cam2tool_y = -0.025 #-0.025  #-0.095  #cam axis
 cam2tool_z = 0.15 #0.13   # + 0.035
 gripper_length = 0.04 #0.04
 cam2center_y = 0.03
+cam2center_y_4_tote = 0.05
 
 def robot_cmd_client(cmd):
     rospy.wait_for_service('/robot_cmd')

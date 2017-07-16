@@ -72,7 +72,9 @@ private:
     double fai;
 
     /*Euler rotation mode*/
-
+    double fk_roll;
+    double fk_pitch;
+    double fk_yaw;
 public:
     teEuler_Mode Euler_Mode;
     ManipulatorKinematicsDynamics();
@@ -116,7 +118,8 @@ public:
     double cal_Redundancy(std::vector<Eigen::Vector3d>& jointPos);
 
     /* ------------------ inverse kinematics ------------------ */
-    bool ik(Eigen::MatrixXd& tar_position, Eigen::MatrixXd& tar_orientation, double tarFai = 0);
+    
+    bool ik(Eigen::MatrixXd& tar_position, Eigen::MatrixXd& tar_orientation, double tarFai = 0, bool exeOpt = false);
     void cal_ElbowInfo(Eigen::Vector3d& P_s, Eigen::Vector3d& P_w, double Fai, Eigen::Vector3d& P_e,Eigen::Vector3d& P_LJ);
 
     Eigen::Vector3d cal_ElbowPos(Eigen::Matrix4d& RotMatrix, double Angle, double LinkLen, double Fai);

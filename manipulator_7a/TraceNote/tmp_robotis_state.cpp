@@ -83,15 +83,15 @@ void RobotisState::setInverseKinematics()
 
     Eigen::Quaterniond start_quaternion = robotis_framework::convertRotationToQuaternion(ik_start_rotation_);
     
-    // convert error rot matrix to rpy and then fix it
-    Eigen::MatrixXd tmp_start_pry = robotis_framework::convertQuaternionToRPY(start_quaternion);
+    // // convert error rot matrix to rpy and then fix it
+    // Eigen::MatrixXd tmp_start_pry = robotis_framework::convertQuaternionToRPY(start_quaternion);
     // tmp_start_pry(2) += 90*M_PI/180.0;
-    std::cout<< "tmp_start_pry = " <<tmp_start_pry <<"\n";
+    // std::cout<< "tmp_start_pry = " <<tmp_start_pry <<"\n";
 
-    // convert the correct rpy to quaternion
-    start_quaternion = robotis_framework::convertEulerToQuaternion( tmp_start_pry(1),
-                                                                    tmp_start_pry(0),
-                                                                    tmp_start_pry(2));//OK
+    // // convert the correct rpy to quaternion
+    // start_quaternion = robotis_framework::convertEulerToQuaternion( tmp_start_pry(2),
+    //                                                                 tmp_start_pry(0),
+    //                                                                 tmp_start_pry(1));
 
     // Calculate Target quaternion
     Eigen::Quaterniond target_quaternion(kinematics_pose_msg_.pose.orientation.w,
@@ -106,11 +106,11 @@ void RobotisState::setInverseKinematics()
     ik_target_rotation_ = robotis_framework::convertQuat2Rotation(quaternion);
 
 
-    // std::cout << "start_quaternion \n" 
-    //           << start_quaternion.w() <<", " 
-    //           << start_quaternion.x() <<", "
-    //           << start_quaternion.y() <<", "
-    //           << start_quaternion.z() <<", "<< std::endl;
+    std::cout << "start_quaternion \n" 
+              << start_quaternion.w() <<", " 
+              << start_quaternion.x() <<", "
+              << start_quaternion.y() <<", "
+              << start_quaternion.z() <<", "<< std::endl;
 
     std::cout << "target_quaternion \n" 
               << target_quaternion.w() <<", " 
@@ -118,20 +118,23 @@ void RobotisState::setInverseKinematics()
               << target_quaternion.y() <<", "
               << target_quaternion.z() <<", "<< std::endl;
 
-    // std::cout << "slerp_quaternion \n" 
-    //           << quaternion.w() <<", " 
-    //           << quaternion.x() <<", "
-    //           << quaternion.y() <<", "
-    //           << quaternion.z() <<", "<< std::endl;
+    std::cout << "slerp_quaternion \n" 
+              << quaternion.w() <<", " 
+              << quaternion.x() <<", "
+              << quaternion.y() <<", "
+              << quaternion.z() <<", "<< std::endl;
     // std::cout << "target_quaternion \n" << target_quaternion << std::endl;
-    // std::cout << "setInverseKinematics start: \n" << ik_start_rotation_  << std::endl;
-    // std::cout << "setInverseKinematics target:\n" << ik_target_rotation_ << std::endl;
+    std::cout << "setInverseKinematics start: \n" << ik_start_rotation_  << std::endl;
+    std::cout << "setInverseKinematics target:\n" << ik_target_rotation_ << std::endl;
 
     /* get next step euler */
     line_ik_rpy = robotis_framework::convertRotationToRPY(ik_target_rotation_);
+    // line_ik_rpy = [line_ik_rpy(1), line_ik_rpy(0), line_ik_rpy(2) ]
+    std::cout<<"in set ik:line_ik_rpy_1 =  " <<line_ik_rpy <<"\n";
     double tmp = line_ik_rpy(0,0);
     line_ik_rpy(0,0) = line_ik_rpy(1,0);
     line_ik_rpy(1,0) = tmp;
+
     std::cout<<"in set ik:line_ik_rpy_2 =  " <<line_ik_rpy <<"\n";
 
     /* get next step redundancy */

@@ -75,6 +75,7 @@ public:
     bool ik_solve_;
     Eigen::MatrixXd ik_target_position_;
     Eigen::MatrixXd ik_start_rotation_, ik_target_rotation_;
+    Eigen::MatrixXd line_ik_pos, line_ik_rpy;
     double ik_target_fai, ik_cmd_fai;
     int ik_id_start_, ik_id_end_;
 

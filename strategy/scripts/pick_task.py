@@ -675,7 +675,7 @@ class PickTask:
             self.Arm.relative_move_suction('ptp', r, 0.01)
 
         #----------------Return---------------_#
-        self.Arm.relative_move_suction('ptp', r, (obj_dis + 0.02)*-1)
+        self.Arm.relative_move_suction('ptp', r, (obj_dis + 0.023)*-1)
         rospy.loginfo('tool_2_obj_bin Finish')
 
 

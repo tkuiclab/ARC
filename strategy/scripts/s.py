@@ -156,54 +156,62 @@ class Strategy(threading.Thread):
         self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.34), (0, 0, 0))
 
 
-    
-
 if __name__ == '__main__':
     rospy.init_node('strategy', disable_signals=True)
 
-    
     try:
         s = Strategy()
 
-        s.stow.test_read_item_location_in_arc_pack("stow_test.json")
+        bin_id = 'e'
+        s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', bin_id))
+        rospy.sleep(0.3)
+        s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', bin_id))
+        # s.LM.pub_LM_Cmd(1, 20000)
+        # rospy.sleep(0.3)
+        # s.LM.Show_LM_FB()
+
+        # s.LM.rel_move_LM('left', 5)
+        # s.LM.rel_move_LM('left', -5)
+        # rospy.sleep(0.3)
+        # s.LM.rel_move_LM('base', 5)
+        # s.LM.rel_move_LM('base', -5)
+
+        # s.stow.test_read_item_location_in_arc_pack("stow_test.json")
+        # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+        
         # #s.safe_pose()
-        gripper_vaccum_off()
-        s.start() 
-        s.stow_run()
+        # gripper_vaccum_off()
+        # s.start() 
+        # s.stow_run()
 
 
-        #s.stow.arm_photo_pose()
+        # # s.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+        # # gripper_vaccum_on()
+
+
+        # s.stow.arm_photo_pose()
         
         #s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
         #s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00005.json")
-        
-        
-        
+
         # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00009.json")
         
         # s.stow.gen_detect_all_in_stow_list()
-        # s.stow.request_highest_item()
-        
+        # print "detect_all_in_stow_list[] -> " + str(s.stow.detect_all_in_stow_list)
+
         # rospy.sleep(10)
         
         # s.stow.test_2_stow_fail()
 
-
-
-
         #print str(s.stow.detect_all_in_stow_list)
 
-        
-        
         # gripper_vaccum_off()
         # #s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
         # s.stow.test_read_item_location_in_arc_pack("stow_test.json")
         # rospy.sleep(0.3)
         # s.stow_run()
-    
 
         # write_PickInfo_2_JSON()
-
 
         # ========== TEST Bin Put in===========
         # s.test_go_bin_LM('h')
@@ -219,7 +227,10 @@ if __name__ == '__main__':
 
         #s.safe_pose()
 
+        # ========== TEST ===========
+        #s.test_go_bin_LM('e')
 
+        #s.safe_pose()
 
         # ============ rel motion test area start ============
         # s.Arm.relative_move_nsa(n = 0.04)  #n = move_cam_y
@@ -247,8 +258,6 @@ if __name__ == '__main__':
         # s.test_relative_move_xyz_rot_pry(dis = 0.05, rot = 10)
 
         # ========================= rel motion test area over ==============================
-
-        
 
         rospy.spin()
     except rospy.ROSInterruptException:

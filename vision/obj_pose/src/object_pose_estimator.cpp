@@ -261,15 +261,13 @@ void ObjEstAction::get_highest(){
       std::cout << detected.object_name << 
         " -> (y, z) = ("<< center_y << "," << center_z << ")" 
         << std::endl; 
-      
-      
-      if(near_from_cam == 999.0){
-        ROS_WARN("CANNOT Get Highest near_from_cam == 999.0");
-        error_code = ERR_CANNOT_GET_HIGHEST;
-        pub_error();
-        return ;
-      }
-
+    }
+    
+    if(near_from_cam == 999.0){
+      ROS_WARN("CANNOT Get Highest near_from_cam == 999.0");
+      error_code = ERR_CANNOT_GET_HIGHEST;
+      pub_error();
+      return ;
     }
     
   }else{
@@ -283,6 +281,11 @@ void ObjEstAction::get_highest(){
       mini_x,mini_y,max_x,max_y);
   
   set_ROI_colud(mini_x,mini_y,max_x,max_y);
+
+
+#ifdef SaveCloud
+    write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
+#endif 
 
   state = POSE_ESTIMATION;
 }
@@ -340,6 +343,10 @@ void ObjEstAction::get_one_roi(){
   ROS_INFO("[mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",mini_x,mini_y,max_x,max_y);
   
   set_ROI_colud(mini_x,mini_y,max_x,max_y);
+
+#ifdef SaveCloud
+    write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
+#endif 
 
   state = POSE_ESTIMATION;
   return;

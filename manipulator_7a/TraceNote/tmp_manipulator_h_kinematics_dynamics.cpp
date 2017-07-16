@@ -152,8 +152,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
         manipulator_link_data_[7]->relative_position_ = robotis_framework::getTransitionXYZ(0.12300, -0.04500, 0.00000);
         manipulator_link_data_[7]->joint_axis_ = robotis_framework::getTransitionXYZ(1.0, 0.0, 0.0);
         manipulator_link_data_[7]->center_of_mass_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-        manipulator_link_data_[7]->joint_limit_max_ =  1 * M_PI; //orig = 0.95
-        manipulator_link_data_[7]->joint_limit_min_ = -1 * M_PI; //orig = -0.95
+        manipulator_link_data_[7]->joint_limit_max_ =  0.95 * M_PI;
+        manipulator_link_data_[7]->joint_limit_min_ = -0.95 * M_PI;
         manipulator_link_data_[7]->inertia_ = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
         manipulator_link_data_[8]->name_ = "end";
@@ -521,8 +521,6 @@ void ManipulatorKinematicsDynamics::fk()
         for(int j=0;j<=2;j++)
         {
             ori(i,j) = roundN(ori(i,j), 4);
-            if(fabs(ori(i,j)) < 0.001)
-                ori(i,j) = 0.0;
         }   
     }
     
@@ -572,22 +570,17 @@ void ManipulatorKinematicsDynamics::fk()
     {
         if( ori(0, 2) < 1 )
         {
-            // if( ori(0, 2) > -1 )
-            if( ori(0,2) - (-1) > 0.0001 )
+            if( ori(0, 2) > -1 )
             {
                 roll  = asin ( ori(0, 2) );
                 pitch = atan2(-ori(1, 2), ori(2, 2));
                 yaw   = atan2(-ori(0, 1), ori(0, 0));
-                //test
-                if(fabs(roll*180/M_PI)>=90)
-                    yaw   = -atan2( ori(0, 1), ori(0, 0));
             }
             else 
             {
                 roll  = -M_PI/2;
                 pitch = -atan2(-ori(1, 0), ori(1, 1));
                 yaw   =  0;
-                // std::cout<<"ori(0, 2) <= -1";
             }
         }
         else 
@@ -595,23 +588,18 @@ void ManipulatorKinematicsDynamics::fk()
             roll  = M_PI/2;
             pitch = atan2(-ori(1, 0), ori(1, 1));
             yaw   = 0;
-            // std::cout<<"ori(0, 2) >= 1";
         }
         pitch = roundN(pitch, 4);
         roll  = roundN(roll , 4);
         yaw   = roundN(yaw  , 4);
     }
-    // normalizeAngle(pitch);
-    // normalizeAngle(roll);
-    // normalizeAngle(yaw);
     /* update matrix of rotation */
     Eigen::Matrix3d     tmp_rot_matrix;
     Eigen::Quaterniond  tmp_Quat;
-    // 
+
     // =============================================================================
     tmp_Quat        = robotis_framework::convertEulerToQuaternion(roll, pitch, yaw);
-    manipulator_link_data_[END_LINK]->orientation_  = robotis_framework::convertQuat2Rotation(tmp_Quat);
-    // manipulator_link_data_[END_LINK]->orientation_  = robotis_framework::convertQuaternionToRotation(tmp_Quat);
+    manipulator_link_data_[END_LINK]->orientation_  = robotis_framework::convertQuaternionToRotation(tmp_Quat);
     // manipulator_link_data_[END_LINK]->orientation_ = tmp_rot_matrix;
     // =============================================================================
 
@@ -661,7 +649,6 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
 
     /* desired cmd */
     double pitch, roll, yaw;
-        
     // if(exeOpt==false) //Avoid change pos x and pos y again when call ik fn in an ik fn 
     {
         double tmp = tar_position(0);
@@ -671,14 +658,6 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     roll  = tar_orientation(0,0);
     pitch = tar_orientation(1,0);
     yaw   = tar_orientation(2,0);
-    
-    //avoid the singularity
-    if( fabs(fabs(roll) - M_PI/2) < 0.1*M_PI/180 )
-    {
-        roll+=1*M_PI/180;
-        std::cout<<"avoid the singularity\n";
-    }
-
     Eigen::Vector3d position = tar_position;
     Eigen::Matrix3d RPY_Rot; // orientation
     // Euler_Mode = e_ICLAB;     // Decide euler angle mode!!!
@@ -782,9 +761,6 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     angle[2] = acos(C(0) / sqrt(pow(C(0), 2) + pow(C(1), 2))) - M_PI;
     angle[2] = C(1) > 0.0001 ? angle[2] : -angle[2];
 
-    // for(int i=0;i<4;i++)
-    //     angle[i] = roundN(angle[i], 4);
-
     // /* ------------------------------------------- orientation ------------------------------------------- */
     double sida1 = angle[0] + DH(0, 3);
     double sida2 = angle[1] + DH(1, 3);
@@ -812,29 +788,11 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     Eigen::Matrix3d R4_7 = R0_4.transpose() * RPY_Rot;
 
     int Wrist = -1; // Wrist Up =  1, Wrist Down = -1
-
-    for(int i=1;i<=7;i++)
-        std::cout<<"=== orig joint ang = "<<manipulator_link_data_[i]->joint_angle_*180/M_PI<<"\n";
-    double Curr_J5 = manipulator_link_data_[6]->joint_angle_;
-    double tmp_j5_1 = atan2(-R4_7(1, 2), -R4_7(0, 2));
-    double tmp_j5_2 = atan2( R4_7(1, 2),  R4_7(0, 2));
-    std::cout<<"=== Curr_J5 = "<<Curr_J5*180/M_PI<<"\n";
-    std::cout<<"=== tmp_j5_1 = "<<tmp_j5_1*180/M_PI<<"\n";
-    std::cout<<"=== tmp_j5_2 = "<<tmp_j5_2*180/M_PI<<"\n";
-
-    if( fabs(Curr_J5-tmp_j5_1) > fabs(Curr_J5-tmp_j5_2) )
-    // if( fabs(tmp_j5_1 - tmp_j5_2) > 120*M_PI/180.0 )
-    {
+    double tmp_j5 = atan2(-R4_7(1, 2), -R4_7(0, 2));
+    if( fabs(tmp_j5) > 90*M_PI/180.0 )
         Wrist = 1;
-        std::cout<<"wrist = 1\n";
-    }
-    else
-        std::cout<<"wrist = -1\n";
-
     /* joint 6 */
     angle[5] = atan2(Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
-    
-    
 
     if (fabs(R4_7(2, 2)) > 0.99999)
     {
@@ -844,22 +802,12 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     }
     else
     {
-        std::cout<<"===== R4_7 =====\n";
-        for(int i=0;i<=2;i++)
-        {
-            for(int j=0;j<=2;j++)
-            {
-                std::cout<<R4_7(i,j)<<",  ";
-            }
-            std::cout<<"\n";
-        }
         if (Wrist > 0)
         {
             angle[4] = atan2(R4_7(1, 2),  R4_7(0, 2));
             angle[6] = atan2(R4_7(2, 1), -R4_7(2, 0));
             if (fabs(angle[4]) > 120.0 * M_PI / 180.0)
             {
-                std::cout<<"J4 > 120\n";
                 angle[5] = atan2(-Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
                 angle[4] = atan2(-R4_7(1, 2), -R4_7(0, 2));
                 angle[6] = atan2(-R4_7(2, 1),  R4_7(2, 0));
@@ -869,22 +817,18 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
         {
             angle[4] = atan2(-R4_7(1, 2), -R4_7(0, 2));
             angle[6] = atan2(-R4_7(2, 1),  R4_7(2, 0));
+            std::cout<<"aa\n";
             if (fabs(angle[4]) > 120.0 * M_PI / 180.0)
             {
-                std::cout<<"J4 > 120\n";
+                std::cout<<"bb\n";
                 angle[5] = atan2(-Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
                 angle[4] = atan2(R4_7(1, 2),  R4_7(0, 2));
                 angle[6] = atan2(R4_7(2, 1), -R4_7(2, 0));
             }
         }
-
     }
     if(Euler_Mode == e_nsa)
-    {
         angle[6] -= M_PI/2;
-        std::cout<<"angle[6] -= M_PI/2;" <<"\n";
-    }
-        
 
     for (int i = 0; i < MAX_JOINT_ID; i++)
     {
@@ -933,12 +877,10 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
             // else 
             {
                 std::cout << "ik joint limit: " << i+1 << " " << link_data.joint_angle_ * 180.0 / M_PI << std::endl;
-                std::cout << "max ang of joint " <<i+1 <<" is " << link_data.joint_limit_max_* 180.0 / M_PI << std::endl;
-                std::cout << "min ang of joint " <<i+1 <<" is " << link_data.joint_limit_min_* 180.0 / M_PI << std::endl;
                 return false;
             }
         }
-        // angle[i] = roundN(angle[i], 4);
+        angle[i] = roundN(angle[i], 3);
         std::cout <<"r_Joint"<<i+1<<" is  "<<angle[i]*180.0 / M_PI<<std::endl;
     }
     std::cout<<"send fai = "<<tarFai<<"\n";
@@ -1107,11 +1049,6 @@ void ManipulatorKinematicsDynamics::gen_TFMat(int index, double theta, Eigen::Ma
     double s_theta = sin(theta + DH(index, 3));
     double c_alpha = cos(DH(index, 1));
     double s_alpha = sin(DH(index, 1));
-
-    c_theta = roundN(c_theta, 4);
-    s_theta = roundN(s_theta, 4);
-    c_alpha = roundN(c_alpha, 4);
-    s_alpha = roundN(s_alpha, 4);
 
     A << c_theta, -s_theta * c_alpha,  s_theta * s_alpha, DH(index, 0) * c_theta,
          s_theta,  c_theta * c_alpha, -c_theta * s_alpha, DH(index, 0) * s_theta,
