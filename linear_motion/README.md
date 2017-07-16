@@ -27,3 +27,6 @@ $ rosrun linear_motion LM_Control.py <driver id> <$1>
 [$1 is a char from a~l, each char represents a pulse]
 [The status of linear motor will display in terminal]
 ```
+
+rosrun strategy LM_Control.py 1 80000 #LM Z
+rosrun strategy LM_Control.py 2 80000 #LM X
