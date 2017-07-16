@@ -35,6 +35,7 @@ TaskType_Pick = 1
 TaskType_Stow = 2
 
 
+
 class Strategy(threading.Thread):
     """ description """
     def __init__(self):
