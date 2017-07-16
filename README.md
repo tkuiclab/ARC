@@ -51,3 +51,27 @@ Strategy in strategy/
 UI  in arc_ui/
 
 Web data in arc_ui/web/
+
+### Git reset (if git collapse)
+
+```bash
+# Copy update & Reset remote respository
+mkdir -p ~/arc_ws_remote/src ; git init; cd ~/arc_ws_remote/src
+git fetch
+git checkout develop
+cd ~/arc_ws_remote
+cp -rf src/ src_remote_fail/
+cd ~/arc_ws_remote/src
+git log
+git reset --hard 583179f20ffe326a39e03786889281d3c4e1faa7
+git push -f origin develop
+
+
+# Copy & Paste only upadte
+cd ~/arc_ws/src
+cp -rf  ~/arc_ws_remote/src_remote_fail/manipulator_7a .
+git add .               
+git commit -a
+git push orgin develop   
+
+```
