@@ -145,23 +145,16 @@ def read_pick_task_and_location():
     return pick_task, location_json
 
 
-def write_pick_task_location(content):
+def write_item_location(content, filetype='Pick'):
     directory = path.join(rospkg.RosPack().get_path('arc'), 'output')
-    ilf = "[Pick] item_location_file.json"
+    if not path.exists(directory):
+        mkdir(directory)
+
+    ilf = "[{}] item_location_file.json".format(filetype)
     item_loc_path = path.join(directory, ilf)
     write_json(item_loc_path, content)
+    print "[{0}] Save Path={1}".format(filetype, item_loc_path)
 
-
-def write_stow_task_location(content):
-    if not path.exists( rospkg.RosPack().get_path('arc') + '/output'):
-        mkdir(rospkg.RosPack().get_path('arc') + '/output')
-
-    directory = path.join(rospkg.RosPack().get_path('arc'), 'output')
-    ilf = "[Stow] item_location_file.json"
-    item_loc_path = path.join(directory, ilf)
-    print "[Stow] Save Path=" + item_loc_path
-    write_json(item_loc_path, content)
-     
 
 def _test_pick():
     """Testing function."""

@@ -356,8 +356,7 @@ class StowTask:
             item_location_json['tote']['contents'].remove(t_stow_info.item)
        
         # Savie item location file
-        write_stow_task_location(item_location_json)
-    
+        write_item_location(item_location_json, filetype='Stow')
     
     # def get_info(self):
     # 	if self.now_stow_info
