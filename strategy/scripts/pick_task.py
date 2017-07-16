@@ -20,7 +20,7 @@ import arm_task_rel
 from config import *
 from gripper import *
 from task_parser import *
-
+from get_obj_info import order_boxes
 
 # Define State jmp
 WaitTask = 1        # Wait Task
@@ -42,6 +42,7 @@ Down2Place = 16
 Recover2InitPos = 17
 NeetStep = 18
 LeavedBin = 19
+LeaveBox = 20
 
 PhotoPose = 26
 VisionProcess = 27
@@ -54,7 +55,7 @@ _BIN_MAX_DOWN = .135
 _CAM_2_TOOL_Z = .11
 _CAM_2_TOOL_Y = .08
 
-obj_dis = 0.06
+obj_dis = 0.01
 
 # For checking vacuum function
 check_next_states = [
@@ -62,6 +63,8 @@ check_next_states = [
     Prepare2Place,
     Down2Place
 ]
+
+_RIGHT_SHIFT = 18000
 
 
 class PickTask:
@@ -133,6 +136,16 @@ class PickTask:
     def is_ready(self):
         return self.pick_list is not None
 
+    def convert_box_to_char(self, box_name):
+        try:
+            num = order_boxes.index(box_name)
+            for i, id in enumerate(['a', 'b', 'c']):
+                if num == i:
+                    return id
+        except ValueError as e:
+            print(e)
+        return 'a'
+
     def pick_get_one(self):
         """Get one pick task."""
         """Set: self.Bin, self.pick_id, self.Box"""
@@ -142,16 +155,7 @@ class PickTask:
         self.now_pick = self.pick_list[self.pick_id]
         self.bin = self.now_pick.from_bin.lower()
         self.item = self.now_pick.item
-
-        if self.now_pick.to_box == 'A1':
-            self.box = 'a'
-        elif self.now_pick.to_box == '1A5':
-            self.box = 'b'
-        elif self.now_pick.to_box == '1B2':
-            self.box = 'c'
-        else:
-            rospy.logerr('Error pick.to_box = {}'.format(self.now_pick.to_box))
-
+        self.box = self.convert_box_to_char(self.now_pick.to_box)
         self.pick_id += 1
         return True
 
@@ -165,18 +169,7 @@ class PickTask:
         self.now_pick = self.fail_list.pop(0)
         self.bin = self.now_pick.from_bin.lower()
         self.item = self.now_pick.item
-
-        box = 'a'
-        for box in []
-        if self.now_pick.to_box == 'A1':
-            self.box = 'a'
-        elif self.now_pick.to_box == '1A5':
-            self.box = 'b'
-        elif self.now_pick.to_box == '1B2':
-            self.box = 'c'
-        else:
-            rospy.logerr('Error pick.to_box = {}'.format(self.now_pick.to_box))
-
+        self.box = self.convert_box_to_char(self.now_pick.to_box)
         return True
 
     def run(self):
@@ -205,9 +198,9 @@ class PickTask:
 
             # Move to bin using linear mobile
             self.Is_BaseShiftOK = False
-            self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.bin))
+            self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.bin) + _RIGHT_SHIFT)
             rospy.sleep(0.3)
-            self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.bin))
+            self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.bin) + 10000)
             # Arm move to initial pose
             gripper_suction_up()
             self.Arm.pub_ikCmd('ptp', (0.3, 0.0, 0.3), (-90, 0, 0))
@@ -234,7 +227,7 @@ class PickTask:
             self.next_state = VisionProcess
 
             gripper_suction_up()
-            self.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.4), (-110, 0, 0))
+            self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.35), (-100, 0, 0))
 
         # Vision processing
         elif self.state == VisionProcess:
@@ -260,12 +253,12 @@ class PickTask:
 
             # Change state
             self.state = WaitRobot
-            self.next_state = Up2LeaveBin
+            self.next_state = PickObj
 
             #
             if self.oe_ret is not None:
                 # self.tool_2_obj_bin_straight(self.oe_ret.object_pose, self.oe_ret.norm)
-                self.tool_2_obj_bin(self.oe_ret.object_pose, self.oe_ret.norm)
+                self.suction_angle = self.tool_2_obj_bin(self.oe_ret.object_pose, self.oe_ret.norm)
 
         # Arm move to bin front
         elif self.state == Move2BinFront:
@@ -276,7 +269,6 @@ class PickTask:
             self.state = WaitRobot
             self.next_state = Rotate2PickPose
 
-            # cam_z = self.obj_pose.linear.z - 0.13
             self.Arm.relative_move_nsa(a=_REL_GO_BIN_FRONT)
 
         # Tune pose to fit object
@@ -317,8 +309,8 @@ class PickTask:
             self.state = WaitRobot
             self.next_state = Up2LeaveBin
 
-            tool_z = self.obj_pose.linear.z - _CAM_2_TOOL_Z - _REL_GO_BIN_FRONT
-            self.Arm.relative_move_nsa(a=tool_z)
+            # self.Arm.relative_move_suction('ptp', self.suction_angle, (obj_dis + 0.01))
+            self.Arm.relative_move_suction('ptp', self.suction_angle, (obj_dis))
 
         # Move upper
         elif self.state == Up2LeaveBin:
@@ -329,7 +321,7 @@ class PickTask:
             self.state = WaitRobot
             self.next_state = LeaveBin
 
-            self.Arm.relative_xyz_base(z=0.05)
+            self.Arm.relative_xyz_base(z=0.02)
 
         # Move out of bin
         elif self.state == LeaveBin:
@@ -381,7 +373,7 @@ class PickTask:
             self.state = WaitRobot
             self.next_state = Down2Place
 
-            self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.2), (-180, -90, 0))
+            self.Arm.pub_ikCmd('ptp', (0.35, -.05, 0.2), (-180, -90, 0))
 
         # Move lower
         elif self.state == Down2Place:
@@ -401,10 +393,21 @@ class PickTask:
 
             # Change state
             self.state = WaitRobot
-            self.next_state = FinishTask
+            self.next_state = LeaveBox
 
             gripper_vaccum_off()
             self.update_location_file()
+
+        # Leave box
+        elif self.state == LeaveBox:
+            self.info = "(GoBox) Leave Box"
+            print(self.info)
+
+            # Change state
+            self.state = WaitRobot
+            self.next_state = FinishTask
+
+            self.Arm.relative_move_nsa(a=-.15)
 
         elif self.state == Recover2InitPos:
             self.info = "Arm Recover2InitPos"
@@ -421,8 +424,7 @@ class PickTask:
         # Wating robot moving
         elif self.state == WaitRobot:
             change_next_state = False
-            #if not self.Last_LMArrive and self.Is_LMArrive:
-            if self.Last_LMArrive and self.Is_LMArrive and  not self.Is_LMBusy  and not self.Is_ArmBusy:
+            if self.Last_LMArrive and self.Is_LMArrive and not self.Is_LMBusy:
                 self.Is_BaseShiftOK = True
                 # self.state = self.next_state
                 print('LM Positive trigger')
@@ -482,7 +484,7 @@ class PickTask:
                 box['contents'].append(self.now_pick.item)
                 break
         # Savie item location file
-        write_pick_task_location(self.item_loc)
+        write_item_location(self.item_loc, filetype='pick')
 
     def get_info(self):
         """Return json information."""
@@ -515,6 +517,8 @@ class PickTask:
 
         self.bin = 'e'
         self.box = 'a'
+
+        self.suction_angle = None
 
     def update_status(self):
         """Update status of arm and linear mobile."""
@@ -619,7 +623,7 @@ class PickTask:
 
         self.Arm.relative_move_suction('ptp', r, (obj_dis + 0.02)*-1)
         rospy.loginfo('tool_2_obj_bin_straight Finish')
-
+    '''
     def tool_2_obj_bin(self, obj_pose, norm, shot_deg = 0): # BIN
         p = obj_pose
         a = p.angular
@@ -714,6 +718,94 @@ class PickTask:
         #----------------Return---------------_#
         self.Arm.relative_move_suction('ptp', r, (obj_dis + 0.02)*-1)
         rospy.loginfo('tool_2_obj_bin Finish')
+    '''
+
+    def tool_2_obj_bin(self, obj_pose, norm, rel_pos = (0, 0, -0.1), rel_ang = (10, 0 , 0)): # BIN
+        relativeAng = rel_ang[0]
+
+        p = obj_pose
+        a = p.angular
+        l = p.linear
+
+        rospy.loginfo("object_pose")
+        rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z) + ")")
+        rospy.loginfo("(roll,pitch,yaw)= (" 
+                        + str(numpy.rad2deg(a.x)) + ", " 
+                        + str(numpy.rad2deg(a.y)) + ", " 
+                        + str(numpy.rad2deg(a.z)) + ")" )
+        rospy.loginfo("(norm.x, norm.y, norm.z)= (" + str(norm.x) + ", " + str(norm.y)+ ", " + str(norm.z) + ")")
+        
+        if (l.x ==0 and l.y==0 and l.z==0) or l.z < 0:
+            return
+
+        if (l.x * norm.x > 0) and (abs(norm.x) > abs(norm.y)) and (abs(norm.x) > abs(norm.z)) :
+            print("#################\nInvert Norm.x\n#################")
+            norm.x = norm.x*-1
+            norm.y = norm.y*-1
+            norm.z = norm.z*-1
+            print("(norm.x, norm.y, norm.z)= (" + str(norm.x) + ", " + str(norm.y)+ ", " + str(norm.z) + ")")
+
+        new_y = numpy.angle(complex(norm.y*-1, norm.x), deg = True)
+        y = new_y
+        r = 90 - (numpy.rad2deg(a.x) + 180)
+
+        print("(y, r)= (" + str(y) + ", " + str(r) + ")")
+
+        move_cam_x = (l.x - (gripper_length*sin(radians(y)))*sin(radians(r)))
+        move_cam_y = ((l.y + cam2center_y) + (gripper_length*cos(radians(y)))*sin(radians(r)))
+        move_cam_z = l.z - (gripper_length*cos(radians(r))) - cam2tool_z
+
+        print("NORMAL(x, y, z) = (" + str(norm.x) + ", " + str(norm.y) + ", " + str(norm.z) +")")
+        obj_distance = [norm.x*obj_dis, norm.y*obj_dis, norm.z*obj_dis]
+
+        real_move_x = move_cam_x + obj_distance[0]
+        real_move_y = move_cam_y + obj_distance[1]
+        real_move_z = move_cam_z + obj_distance[2]
+        ###
+        dis_real = math.sqrt(real_move_x*real_move_x + real_move_y*real_move_y + real_move_z*real_move_z)
+
+        real_move_x_unit = real_move_x / dis_real
+        real_move_y_unit = real_move_y / dis_real
+        real_move_z_unit = real_move_z / dis_real
+
+        # dis = abs(real_move_z)*cos(radians(relativeAng))
+        dis = math.sqrt(real_move_z*real_move_z + real_move_y*real_move_y)*cos(radians(relativeAng))
+        print("dis_real -> dis : "+str(dis_real)+' -> '+str(dis))
+        detZ = abs(cam2tool_z - cam2tool_z*cos(radians(relativeAng)))
+        detY = abs(cam2tool_z*sin(radians(relativeAng)))
+        print("(detZ, detY) = ("+str(detZ)+", "+str(detY)+")")
+
+        real_move_x_rot = real_move_x_unit
+        real_move_y_rot = real_move_y_unit*cos(radians(relativeAng)) - real_move_z_unit*sin(radians(relativeAng))
+        real_move_z_rot = real_move_z_unit*cos(radians(relativeAng)) + real_move_y_unit*sin(radians(relativeAng))
+
+        real_move_x_rot = real_move_x_rot*dis
+        real_move_y_rot = real_move_y_rot*(dis - detY)
+        real_move_z_rot = real_move_z_rot*(dis - detZ)
+        ###
+        rospy.loginfo("(l.x, l.y, l.z)= (" + str(l.x) + ", " + str(l.y) + ", " + str(l.z) + ")")
+        rospy.loginfo("(move_cam_x, move_cam_y, move_cam_z)= (" + str(move_cam_x) + ", " + str(move_cam_y) + ", " + str(move_cam_z) + ")")
+        rospy.loginfo("(real_move_x, real_move_y, real_move_z)= (" + str(real_move_x) + ", " + str(real_move_y) + ", " + str(real_move_z) + ")")
+        rospy.loginfo("(real_move_x_rot, real_move_y_rot, real_move_z_rot)= (" + str(real_move_x_rot) + ", " + str(real_move_y_rot) + ", " + str(real_move_z_rot) + ")")
+
+        #----------------Place---------------#
+        # self.bin_place_pose()
+        # self.Arm.relative_xyz_base(x = rel_pos[0], y = rel_pos[1], z = rel_pos[2])
+        self.Arm.relative_move_xyz_rot_pry(x = rel_pos[0], y = rel_pos[1], z = rel_pos[2], pitch = rel_ang[0], roll = rel_ang[1], yaw = rel_ang[2])
+
+        #----------------Rotation---------------_#
+        self.Arm.relative_rot_nsa(roll = y)
+        gripper_suction_deg(r - relativeAng)
+
+        print('=====')
+        print('self.Arm.relative_rot_nsa(roll = '+str(y)+')')
+        print('self.Arm.gripper_suction_deg('+str(r-relativeAng)+')')
+        print('self.Arm.relative_xyz_base(x = '+str(real_move_z_rot)+', y = '+str(real_move_x_rot)+', z = '+str(real_move_y_rot*-1)+')')
+        # return
+        self.Arm.relative_xyz_base(x = real_move_z_rot, y = real_move_x_rot, z = real_move_y_rot*-1)
+
+        rospy.loginfo('Move Angle Finish')
+        return r
 
 
 def _test():

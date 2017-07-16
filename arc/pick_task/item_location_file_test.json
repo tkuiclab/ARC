@@ -3,30 +3,33 @@
         {
             "bin_id": "A",
             "contents": [
+                "robots_dvd",
+                "hinged_ruled_index_cards"
             ]
         },
         {
             "bin_id": "B",
             "contents": [
+                "robots_everywhere"
             ]
         },
         {
             "bin_id": "C",
             "contents": [
+                "speed_stick"
             ]
         },
         {
             "bin_id": "D",
             "contents": [
-                "scotch_sponges",
-                "expo_eraser"
+                "hanes_socks",
+                "reynolds_wrap",
+                "composition_book"
             ]
         },
         {
             "bin_id": "E",
             "contents": [
-                "robots_everywhere",
-                "tissue_box"
             ]
         },
         {
@@ -37,13 +40,12 @@
         {
             "bin_id": "G",
             "contents": [
-                "robots_dvd"
             ]
         },
         {
             "bin_id": "H",
             "contents": [
-                "hanes_socks"
+                
             ]
         },
         {
