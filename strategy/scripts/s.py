@@ -163,20 +163,8 @@ if __name__ == '__main__':
     try:
         s = Strategy()
 
-        bin_id = 'e'
-        s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', bin_id))
-        rospy.sleep(0.3)
-        s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', bin_id))
-        # s.LM.pub_LM_Cmd(1, 20000)
-        # rospy.sleep(0.3)
-        # s.LM.Show_LM_FB()
-
-        # s.LM.rel_move_LM('left', 5)
-        # s.LM.rel_move_LM('left', -5)
-        # rospy.sleep(0.3)
-        # s.LM.rel_move_LM('base', 5)
-        # s.LM.rel_move_LM('base', -5)
-
+        
+        s.stow.test_dump_stow_success()
         # s.stow.test_read_item_location_in_arc_pack("stow_test.json")
         # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
         
@@ -186,79 +174,6 @@ if __name__ == '__main__':
         # s.stow_run()
 
 
-        # # s.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
-        # # gripper_vaccum_on()
-
-
-        # s.stow.arm_photo_pose()
-        
-        #s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
-        #s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00005.json")
-
-        # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00009.json")
-        
-        # s.stow.gen_detect_all_in_stow_list()
-        # print "detect_all_in_stow_list[] -> " + str(s.stow.detect_all_in_stow_list)
-
-        # rospy.sleep(10)
-        
-        # s.stow.test_2_stow_fail()
-
-        #print str(s.stow.detect_all_in_stow_list)
-
-        # gripper_vaccum_off()
-        # #s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
-        # s.stow.test_read_item_location_in_arc_pack("stow_test.json")
-        # rospy.sleep(0.3)
-        # s.stow_run()
-
-        # write_PickInfo_2_JSON()
-
-        # ========== TEST Bin Put in===========
-        # s.test_go_bin_LM('h')
-
-        
-        # #arm_leave_tote
-        # s.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
-        # gripper_suction_up()
-        #s.Arm.relative_move_nsa(a = -0.35) 
-
-        # ========== TEST ===========
-        #s.test_go_bin_LM('e')
-
-        #s.safe_pose()
-
-        # ========== TEST ===========
-        #s.test_go_bin_LM('e')
-
-        #s.safe_pose()
-
-        # ============ rel motion test area start ============
-        # s.Arm.relative_move_nsa(n = 0.04)  #n = move_cam_y
-        # s.Arm.relative_move_nsa(s = -0.06) #s= move_cam_x
-        # s.Arm.relative_move_nsa(a = 0.1)   #a= move_cam_z
-
-        # ========================= rel motion test area start =============================
-        # s.Arm.pub_ikCmd('ptp', (0.3, 0 , 0.2), (-180, 0, 0) )
-        # dis = -0.05
-        # rot = 20
-        # s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
-        # s.Arm.relative_rot_nsa(roll = rot)
-        # s.Arm.relative_move_nsa(s = dis)
-
-        # s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
-        # s.Arm.relative_rot_pry_move_nsa(s = dis, roll = rot)
-
-
-
-        # s.Arm.relative_move_nsa_rot_pry(a = dis, pitch = rot)
-        # s.test_relative_move_nsa(0.05)
-        # s.test_relative_rot_nsa(10)
-        # s.test_relative_xyz_base(0.05)
-        # s.test_relative_move_nsa_rot_pry(dis = 0.05, rot = 10)
-        # s.test_relative_move_xyz_rot_pry(dis = 0.05, rot = 10)
-
-        # ========================= rel motion test area over ==============================
 
         rospy.spin()
     except rospy.ROSInterruptException:

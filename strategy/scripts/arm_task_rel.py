@@ -33,7 +33,7 @@ class ArmTask:
         
 
     def __set_pubSub(self):
-        print str(self.name) 
+        print "[Arm] name space : " + str(self.name) 
         self.__set_mode_pub = rospy.Publisher(
             str(self.name) + '/base/set_mode_msg',
             String,
