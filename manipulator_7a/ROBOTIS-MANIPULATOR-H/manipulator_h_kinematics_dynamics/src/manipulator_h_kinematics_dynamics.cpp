@@ -607,9 +607,15 @@ void ManipulatorKinematicsDynamics::fk()
     /* update matrix of rotation */
     Eigen::Matrix3d     tmp_rot_matrix;
     Eigen::Quaterniond  tmp_Quat;
-    // 
+
+    //make the local euler to class member euler
+    fk_roll = roll;
+    fk_pitch = pitch;
+    fk_yaw = yaw;
+    
     // =============================================================================
     tmp_Quat        = robotis_framework::convertEulerToQuaternion(roll, pitch, yaw);
+    // robotis_->fk_quaternion = tmp_Quat;
     manipulator_link_data_[END_LINK]->orientation_  = robotis_framework::convertQuat2Rotation(tmp_Quat);
     // manipulator_link_data_[END_LINK]->orientation_  = robotis_framework::convertQuaternionToRotation(tmp_Quat);
     // manipulator_link_data_[END_LINK]->orientation_ = tmp_rot_matrix;
@@ -619,7 +625,6 @@ void ManipulatorKinematicsDynamics::fk()
 
     /* claculate redundancy for fai */
     this->fai = cal_Redundancy(jointPos);
-
     // ======== debug observer area ==========
     static int cnt=0;
     if(cnt++ > 1000)
@@ -635,15 +640,15 @@ void ManipulatorKinematicsDynamics::fk()
         // std::cout<<"quat_fy = "<<roundN(quat_f.y(), 4)<<"\n";
         // std::cout<<"quat_fz = "<<roundN(quat_f.z(), 4)<<"\n";
         // std::cout<<"========== rotation matrix ==========\n";
-        for(int i=0 ; i<=2;i++)
-        {
-            for(int j=0 ; j<=2 ; j++)
-            {
-                std::cout<<ori(i,j)<<"\t";
-                // std::cout<<roundN(manipulator_link_data_[END_LINK]->orientation_(i,j),4)<<"\t";
-            }
-            std::cout<<"\n";
-        }
+        // for(int i=0 ; i<=2;i++)
+        // {
+        //     for(int j=0 ; j<=2 ; j++)
+        //     {
+        //         // std::cout<<ori(i,j)<<"\t";
+        //         std::cout<<roundN(manipulator_link_data_[END_LINK]->orientation_(i,j),4)<<"\t";
+        //     }
+        //     std::cout<<"\n";
+        // }
         std::cout<<"======================================\n";
         std::cout<<"X Y Z = "<<pos(0)<<", "<<pos(1)<<", "<<pos(2)<<std::endl;
         std::cout<<"P R Y F = "<<pitch*180/M_PI<<", "<<roll*180/M_PI<<", "<<yaw*180/M_PI+90<<", "<<fai<<std::endl;
@@ -816,13 +821,16 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     for(int i=1;i<=7;i++)
         std::cout<<"=== orig joint ang = "<<manipulator_link_data_[i]->joint_angle_*180/M_PI<<"\n";
     double Curr_J5 = manipulator_link_data_[6]->joint_angle_;
-    double tmp_j5_1 = atan2(-R4_7(1, 2), -R4_7(0, 2));
-    double tmp_j5_2 = atan2( R4_7(1, 2),  R4_7(0, 2));
+    double tmp_j5_1 = atan2(-1 * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
+    double tmp_j5_2 = atan2( 1 * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
+    // double tmp_j5_1 = atan2(-R4_7(1, 2), -R4_7(0, 2));
+    // double tmp_j5_2 = atan2( R4_7(1, 2),  R4_7(0, 2));
     std::cout<<"=== Curr_J5 = "<<Curr_J5*180/M_PI<<"\n";
     std::cout<<"=== tmp_j5_1 = "<<tmp_j5_1*180/M_PI<<"\n";
     std::cout<<"=== tmp_j5_2 = "<<tmp_j5_2*180/M_PI<<"\n";
 
-    if( fabs(Curr_J5-tmp_j5_1) > fabs(Curr_J5-tmp_j5_2) )
+    if( fabs(Curr_J5-tmp_j5_1) < fabs(Curr_J5-tmp_j5_2) )
+    // if( fabs(Curr_J5-tmp_j5_1) > fabs(Curr_J5-tmp_j5_2) )
     // if( fabs(tmp_j5_1 - tmp_j5_2) > 120*M_PI/180.0 )
     {
         Wrist = 1;

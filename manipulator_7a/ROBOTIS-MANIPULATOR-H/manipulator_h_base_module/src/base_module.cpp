@@ -332,6 +332,11 @@ void BaseModule::LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Cons
 {
     if (enable_ == false)
         return;
+    if( fabs(cmd->data[4]) > 89 )
+    {
+        std::cout<<"[warning] Don't using line fn, when the fabs(roll) is >= 90\n";
+        return ;
+    }
 
     /* 記下命令 */
     robotis_->kinematics_pose_msg_.pose.position.x = cmd->data[0];
@@ -343,6 +348,8 @@ void BaseModule::LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Cons
     Eigen::Quaterniond quaterion = robotis_framework::convertEulerToQuaternion(cmd->data[4] * M_PI / 180.0,
                                                                              cmd->data[3] * M_PI / 180.0,
                                                                              cmd->data[5] * M_PI / 180.0);
+    
+    
     robotis_->kinematics_pose_msg_.pose.orientation.w = quaterion.w();
     robotis_->kinematics_pose_msg_.pose.orientation.x = quaterion.x();
     robotis_->kinematics_pose_msg_.pose.orientation.y = quaterion.y();
@@ -716,13 +723,11 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
             // convert error rot matrix to rpy and then fix it
             Eigen::MatrixXd tmp_start_pry = robotis_framework::convertRotationToRPY(robotis_->ik_start_rotation_);
             tmp_start_pry(2) += 90*M_PI/180.0;
-
             // convert the correct rpy to quaternion and then convert back to rotation matrix
             Eigen::Quaterniond start_quaternion = robotis_framework::convertEulerToQuaternion( 
                                                                             tmp_start_pry(2),
                                                                             tmp_start_pry(0),
                                                                             tmp_start_pry(1));
-
             Eigen::MatrixXd tmp_rot = robotis_framework::convertQuat2Rotation(start_quaternion);
             for(int i=0 ; i<=2;i++)
             {
@@ -732,7 +737,6 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
                 }
             }
         }
-
         if (robotis_->ik_solve_ == true) //line
         {
             robotis_->setInverseKinematics();

@@ -44,6 +44,7 @@ def json_parser(path):
 
 def parse_all_json():
     path = _get_info_path()
+    print('[Obj_Info] Load Training items Info At Path = ' + path)
     folders = glob.glob(join(path, '*'))
 
     info = dict()

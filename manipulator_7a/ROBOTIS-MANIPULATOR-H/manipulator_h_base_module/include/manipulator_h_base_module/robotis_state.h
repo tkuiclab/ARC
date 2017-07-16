@@ -79,6 +79,8 @@ public:
     double ik_target_fai, ik_cmd_fai;
     int ik_id_start_, ik_id_end_;
 
+    Eigen::Quaterniond fk_quaternion;  // return from fk fn
+
     void setInverseKinematics();
 };
 

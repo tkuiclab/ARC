@@ -3,7 +3,8 @@
 """Get location of item in which bin and place into which box."""
 
 #from __future__ import print_function
-from os import path
+from os import path, mkdir
+
 import rospkg
 import json
 
@@ -49,7 +50,7 @@ def write_json(path, content):
         with open(path, 'w') as f:
             # json.dump(content, f, indent=4, separators=(',', ': '), skipkeys=True) # sort_keys=True
             # or following, assume content is str obj
-            f.write(json.dumps(content, f, indent=4, separators=(',', ': ')))
+            f.write(json.dumps(content, f, indent=4, separators=(',', ': '), sort_keys=True))
         return True
     except IOError as e:
         print(e)
@@ -146,8 +147,19 @@ def read_pick_task_and_location():
 
 def write_pick_task_location(content):
     directory = path.join(rospkg.RosPack().get_path('arc'), 'output')
-    ilf = "item_location_file_test.json"
+    ilf = "[Pick] item_location_file.json"
     item_loc_path = path.join(directory, ilf)
+    write_json(item_loc_path, content)
+
+
+def write_stow_task_location(content):
+    if not path.exists( rospkg.RosPack().get_path('arc') + '/output'):
+        mkdir(rospkg.RosPack().get_path('arc') + '/output')
+
+    directory = path.join(rospkg.RosPack().get_path('arc'), 'output')
+    ilf = "[Stow] item_location_file.json"
+    item_loc_path = path.join(directory, ilf)
+    print "[Stow] Save Path=" + item_loc_path
     write_json(item_loc_path, content)
      
 
