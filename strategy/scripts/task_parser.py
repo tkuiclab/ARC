@@ -3,7 +3,8 @@
 """Get location of item in which bin and place into which box."""
 
 #from __future__ import print_function
-from os import path
+from os import path, mkdir
+
 import rospkg
 import json
 
@@ -152,6 +153,9 @@ def write_pick_task_location(content):
 
 
 def write_stow_task_location(content):
+    if not path.exists( rospkg.RosPack().get_path('arc') + '/output'):
+        mkdir(rospkg.RosPack().get_path('arc') + '/output')
+
     directory = path.join(rospkg.RosPack().get_path('arc'), 'output')
     ilf = "[Stow] item_location_file.json"
     item_loc_path = path.join(directory, ilf)

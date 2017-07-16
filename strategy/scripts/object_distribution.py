@@ -7,23 +7,16 @@ from os.path import join
 import sys
 import json
 import glob
+from  get_obj_info import *
+from task_parser import read_json
 
 import rospkg
 
 Task_type = 'Init'
 bin_dict = dict()
 
-class ObjInfo:
-    """Information of objects were defined."""
 
-    def __init__(self, **kwargs):
-        """Init object for information of objects."""
-        self.name = kwargs.get('name')
-        self.dimensions = kwargs.get('dims')
-        self.weight = kwargs.get('weight')
-        self.type = kwargs.get('type')
-
-class binInfo:
+class BinInfo:
     """Information of bin."""
     def __init__(self, **kwargs):
         """Init object for information of shelf."""
@@ -38,36 +31,7 @@ class binInfo:
         self.NowVolume = 0
         self.ObjectNum = 0
 
-def _get_info_path():
-    pkg_path = "/home/luca/PycharmProjects/ARC_Object_Distribution"
-    return join(pkg_path, 'Training items')
 
-def read_json(path):
-    """Read a JSON file from path, and convert to object of python."""
-    try:
-        with open(path) as f:
-            content = json.load(f)
-            # or following
-            # content = json.loads(f.read())
-            return content
-    except IOError as e:
-        print(e)
-        return None
-
-def json_parser(path):
-    try:
-        content = read_json(path)
-        return ObjInfo(
-            name=content['name'],
-            type=content['type'],
-            weight=content['weight'],
-            dims=content['dimensions']
-        )
-
-    except Exception as e:
-        print('============== Exception ==============')
-        print(path, e)
-        sys.exit(-1)
 def bin_json_parser(path):
     try:
         content = read_json(path)
@@ -78,21 +42,6 @@ def bin_json_parser(path):
         print(path, e)
         sys.exit(-1)
 
-def parse_all_json():
-    path = _get_info_path()
-    folders = glob.glob(join(path, '*'))
-
-    info = dict()
-
-    for folder in folders:
-        jsonfiles = glob.glob(join(folder, '*.json'))
-        # print(jsonfiles)
-        for filepath in jsonfiles:
-            obj_info = json_parser(filepath)
-
-            info[obj_info.name] = obj_info
-
-    return info
 
 def parse_shelf():
     bin_spec_path = rospkg.RosPack().get_path('arc') + '/bin_spec.json'
@@ -100,24 +49,25 @@ def parse_shelf():
 
     #content = bin_json_parser("/home/luca/PycharmProjects/ARC_Object_Distribution/bin_spec.json")
     content = bin_json_parser(bin_spec_path)
-    bin_dict[0] = binInfo(block='A', L=content['bins'][0]['dimensions'][0], W=content['bins'][0]['dimensions'][1], H=content['bins'][0]['dimensions'][2])
-    bin_dict[1] = binInfo(block='B', L=content['bins'][1]['dimensions'][0], W=content['bins'][1]['dimensions'][1], H=content['bins'][1]['dimensions'][2])
-    bin_dict[2] = binInfo(block='C', L=content['bins'][2]['dimensions'][0], W=content['bins'][2]['dimensions'][1], H=content['bins'][2]['dimensions'][2])
-    bin_dict[3] = binInfo(block='D', L=content['bins'][3]['dimensions'][0], W=content['bins'][3]['dimensions'][1], H=content['bins'][3]['dimensions'][2])
-    bin_dict[4] = binInfo(block='E', L=content['bins'][4]['dimensions'][0], W=content['bins'][4]['dimensions'][1], H=content['bins'][4]['dimensions'][2])
-    bin_dict[5] = binInfo(block='F', L=content['bins'][5]['dimensions'][0], W=content['bins'][5]['dimensions'][1], H=content['bins'][5]['dimensions'][2])
-    bin_dict[6] = binInfo(block='G', L=content['bins'][6]['dimensions'][0], W=content['bins'][6]['dimensions'][1], H=content['bins'][6]['dimensions'][2])
-    bin_dict[7] = binInfo(block='H', L=content['bins'][7]['dimensions'][0], W=content['bins'][7]['dimensions'][1], H=content['bins'][7]['dimensions'][2])
-    bin_dict[8] = binInfo(block='I', L=content['bins'][8]['dimensions'][0], W=content['bins'][8]['dimensions'][1], H=content['bins'][8]['dimensions'][2])
-    bin_dict[9] = binInfo(block='J', L=content['bins'][9]['dimensions'][0], W=content['bins'][9]['dimensions'][1], H=content['bins'][9]['dimensions'][2])
+    bin_dict[0] = BinInfo(block='A', L=content['bins'][0]['dimensions'][0], W=content['bins'][0]['dimensions'][1], H=content['bins'][0]['dimensions'][2])
+    bin_dict[1] = BinInfo(block='B', L=content['bins'][1]['dimensions'][0], W=content['bins'][1]['dimensions'][1], H=content['bins'][1]['dimensions'][2])
+    bin_dict[2] = BinInfo(block='C', L=content['bins'][2]['dimensions'][0], W=content['bins'][2]['dimensions'][1], H=content['bins'][2]['dimensions'][2])
+    bin_dict[3] = BinInfo(block='D', L=content['bins'][3]['dimensions'][0], W=content['bins'][3]['dimensions'][1], H=content['bins'][3]['dimensions'][2])
+    bin_dict[4] = BinInfo(block='E', L=content['bins'][4]['dimensions'][0], W=content['bins'][4]['dimensions'][1], H=content['bins'][4]['dimensions'][2])
+    bin_dict[5] = BinInfo(block='F', L=content['bins'][5]['dimensions'][0], W=content['bins'][5]['dimensions'][1], H=content['bins'][5]['dimensions'][2])
+    bin_dict[6] = BinInfo(block='G', L=content['bins'][6]['dimensions'][0], W=content['bins'][6]['dimensions'][1], H=content['bins'][6]['dimensions'][2])
+    bin_dict[7] = BinInfo(block='H', L=content['bins'][7]['dimensions'][0], W=content['bins'][7]['dimensions'][1], H=content['bins'][7]['dimensions'][2])
+    bin_dict[8] = BinInfo(block='I', L=content['bins'][8]['dimensions'][0], W=content['bins'][8]['dimensions'][1], H=content['bins'][8]['dimensions'][2])
+    bin_dict[9] = BinInfo(block='J', L=content['bins'][9]['dimensions'][0], W=content['bins'][9]['dimensions'][1], H=content['bins'][9]['dimensions'][2])
 
-def Distribution(type,mission_obj,fullrate):
+def Distribution(type, mission_obj, fullrate):
     '''type = 任務型態'''
     '''mission_obj = 任務所有的物體'''
     '''fullrate = 介於 0~1，定義一個bin填滿的百分比，例如fullrate = 0.9表示物體塞滿bin 90%的體積後就不能再放東西了，數字愈小代表平均一個bin能放的東西會愈少，但物體會愈平均放置於所有bin'''
     parse_shelf()
     object_belong = []
-    info_dict = parse_all_json()
+    #info_dict = parse_all_json()
+    print('info_dict'+str(info_dict))
     out_dict = dict()
 
     if type == 'pick':
