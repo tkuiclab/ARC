@@ -91,6 +91,8 @@ class PickTask:
             rospy.logwarn('ROI Fail!! obj -> {}'.format(self.now_pick.item))
             self.state = FinishTask
             self.oe_ret = None
+            # Add the item to fail list
+            self.fail_list.append(self.now_pick)
         else:
             self.obj_pose = result.object_pose
             print('obj_pose {}'.format(self.obj_pose))
@@ -151,6 +153,30 @@ class PickTask:
             rospy.logerr('Error pick.to_box = {}'.format(self.now_pick.to_box))
 
         self.pick_id += 1
+        return True
+
+    def fail_get_one(self):
+        """Get one of fail."""
+        """Set: self.Bin, self.pick_id, self.Box"""
+        if not len(self.fail_list):
+            return False
+
+        # Pop first element in fail list
+        self.now_pick = self.fail_list.pop(0)
+        self.bin = self.now_pick.from_bin.lower()
+        self.item = self.now_pick.item
+
+        box = 'a'
+        for box in []
+        if self.now_pick.to_box == 'A1':
+            self.box = 'a'
+        elif self.now_pick.to_box == '1A5':
+            self.box = 'b'
+        elif self.now_pick.to_box == '1B2':
+            self.box = 'c'
+        else:
+            rospy.logerr('Error pick.to_box = {}'.format(self.now_pick.to_box))
+
         return True
 
     def run(self):
@@ -420,6 +446,10 @@ class PickTask:
                 self.Is_BaseShiftOK = False
                 self.state = RobotMove2Bin
                 self.info = "Finish Pick One Object"
+            elif self.fail_get_one():
+                self.Is_BaseShiftOK = False
+                self.state = RobotMove2Bin
+                self.info = "Finish Pick One Object and Execute Fail list"
             else:
                 self.task_finish()
                 self.info = "Finish Pick All of Task"
@@ -431,6 +461,9 @@ class PickTask:
         if n_s in check_next_states:
             self.info = "(Check) Status of Suction: {}".format(self.suck_num)
             print(self.info)
+            if not self.suck_num:
+                # Add the item to fail list
+                self.fail_list.append(self.now_pick)
             return self.suck_num > 0
         # Other state do not
         return True
@@ -463,6 +496,8 @@ class PickTask:
     def var_init(self):
         """Initial all of variables."""
         self.pick_list = None
+        self.fail_list = list()
+
         self.item_location = None
         self.order = None
         self.item_loc = None
@@ -492,6 +527,8 @@ class PickTask:
     def task_finish(self):
         """Setting variables for finish."""
         rospy.loginfo('Finish Task')
+        self.fail_list = list()
+
         self.state = WaitTask
         self.next_state = WaitTask
         self.Is_ArmBusy = False
@@ -675,7 +712,7 @@ class PickTask:
             self.Arm.relative_move_suction('ptp', r, 0.01)
 
         #----------------Return---------------_#
-        self.Arm.relative_move_suction('ptp', r, (obj_dis + 0.023)*-1)
+        self.Arm.relative_move_suction('ptp', r, (obj_dis + 0.02)*-1)
         rospy.loginfo('tool_2_obj_bin Finish')
 
 

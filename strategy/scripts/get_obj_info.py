@@ -22,12 +22,26 @@ class ObjInfo:
         self.type = kwargs.get('type')
 
 
-def _get_info_path():
+class BoxInfo:
+    """Information of boxes were defined."""
+
+    def __init__(self, **kwargs):
+        """Init object for information of boxes."""
+        self.name = kwargs.get('name')
+        self.dimensions = kwargs.get('dims')
+
+
+def _get_path(file='obj'):
     pkg_path = rospkg.RosPack().get_path('arc')
-    return join(pkg_path, 'Training items')
+    if file == 'box':
+        return join(pkg_path, 'pick_task', 'box_sizes.json')
+    elif file == 'order_box':
+        return join(pkg_path, 'pick_task', 'order_file_test.json')
+    else:
+        return join(pkg_path, 'Training items')
 
 
-def json_parser(path):
+def json_parser_obj(path):
     try:
         content = read_json(path)
         return ObjInfo(
@@ -36,6 +50,34 @@ def json_parser(path):
             weight=content['weight'],
             dims=content['dimensions']
         )
+    except Exception as e:
+        print('============== Exception ==============')
+        print(path, e)
+        sys.exit(-1)
+
+
+def json_parser_box(path):
+    try:
+        content = read_json(path)
+        box_dict = dict()
+        for box in content['boxes']:
+            name = box['size_id']
+            dims = box['dimensions']
+            box_dict[name] = BoxInfo(name=name, dims=dims)
+        return box_dict
+    except Exception as e:
+        print('============== Exception ==============')
+        print(path, e)
+        sys.exit(-1)
+
+
+def json_parser_order(path):
+    try:
+        content = read_json(path)
+        box_list = list()
+        for box in content['orders']:
+            box_list.append(box['size_id'])
+        return box_list
     except Exception as e:
         print('============== Exception ==============')
         print(path, e)
@@ -51,9 +93,11 @@ def parse_all_json():
     for folder in folders:
         jsonfiles = glob.glob(join(folder, '*.json'))
         for filepath in jsonfiles:
-            obj_info = json_parser(filepath)
+            obj_info = json_parser_obj(filepath)
             info[obj_info.name] = obj_info
     return info
 
 
 info_dict = parse_all_json()
+box_info_dict = json_parser_box(_get_path('box'))
+order_box_list = json_parser_order(_get_path('order_box'))
