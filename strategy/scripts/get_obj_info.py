@@ -85,7 +85,7 @@ def json_parser_order(path):
 
 
 def parse_all_json():
-    path = _get_info_path()
+    path = _get_path()
     print('[Obj_Info] Load Training items Info At Path = ' + path)
     folders = glob.glob(join(path, '*'))
 
@@ -98,6 +98,25 @@ def parse_all_json():
     return info
 
 
+def get_box_width():
+    """Get all of box width."""
+    box_width = list()
+    for box in order_boxes:
+        box_width.append(box_info_dict[box].dimensions[1])
+    box_width.sort(reverse=True)
+    return box_width
+
+
+def sort_box_by_width(box_info, boxes):
+    for _ in range(len(boxes)):
+        for i in range(len(boxes)-1):
+            if box_info[boxes[i]].dimensions[1] < box_info[boxes[i+1]].dimensions[1]:
+                boxes[i], boxes[i+1] = boxes[i+1], boxes[i]
+    return tuple(boxes)
+
+
 info_dict = parse_all_json()
 box_info_dict = json_parser_box(_get_path('box'))
-order_box_list = json_parser_order(_get_path('order_box'))
+
+_box_list = json_parser_order(_get_path('order_box'))
+order_boxes = sort_box_by_width(box_info_dict, _box_list)
