@@ -71,11 +71,11 @@ private:
 
     double fai;
 
+public:
     /*Euler rotation mode*/
     double fk_roll;
     double fk_pitch;
     double fk_yaw;
-public:
     teEuler_Mode Euler_Mode;
     ManipulatorKinematicsDynamics();
     ManipulatorKinematicsDynamics(TreeSelect tree);
