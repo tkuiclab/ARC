@@ -26,6 +26,8 @@ import arm_task_rel
 from gripper import *
 from s import *
 
+import stow_task
+import LM_Control
 
 obj_dis = 0.015
 
@@ -197,6 +199,10 @@ class T2O:
         new_y = numpy.angle(complex(norm.y*-1, norm.x), deg = True)
         y = new_y
         r = 90 - (numpy.rad2deg(a.x) + 180)
+
+        if (abs(90 - r) <= 5):
+            y = 0
+            print("Forward Face y = "+new_y+" -> "+0)
 
         print("(y, r)= (" + str(y) + ", " + str(r) + ")")
 
@@ -476,9 +482,9 @@ if __name__ == '__main__':
     # task.Arm.relative_xyz_base(x = -0.2)
     # task.safe_pose()
     # -------Back 2 home------#.
-    task.safe_pose()
-    task.Arm.home()
-    exit()
+    # task.safe_pose()
+    # task.Arm.home()
+    # exit()
 
     #----------- Go Photo Pose--------#
     # task.robot_photo_pose()
@@ -488,6 +494,14 @@ if __name__ == '__main__':
     
     # s = Strategy()
     # s.stow.LM_2_tote()
+
+    # STOW TEST
+    arm = arm_task_rel.ArmTask()
+    lm = LM_Control.CLM_Control()
+    stow = StowTask(arm, lm)
+    stow.LM_2_tote()
+    stow.arm_photo_pose_2()
+    gripper_suction_up()
 
     ### Bin Place ###
     # s = Strategy()
