@@ -99,23 +99,32 @@ class CLM_Control:
         # print 'x_curr_pos = ' + str(self.x_curr_pos)
         # print 'z_curr_pos = ' + str(self.z_curr_pos)
         # print 'LM ' + str(id) + 'send pls = ' + str(pls)
-        if id == 1:
+        if id == 1:                                             #right
             if pls > 80000 or pls < 0:
                 print 'error pls for Z-dir LM (0 ~ 80000)'
                 return
             else:
                 msg.x = pls
 
-        elif id == 2:
+        elif id == 2:                                             #base
             if pls > 60000 or pls < 0:
                 print 'error pls for Z-dir LM (0 ~ 80000)'
                 return 
             else:
                 msg.z = pls
-        elif id == 3:
+
+        elif id == 3:                                             #left
+            if pls > 80000 or pls < 0:
+                print 'error pls for left LM (0 ~ 80000)'
+                return 
+            else:
+                msg.left = pls
+            print 'sss'
+
+        elif id == 4:
             msg.z = pls
             msg.x = pls
-        elif id == 4:
+        elif id == 5:
             msg.z = pls
             msg.x = pls
         else:
