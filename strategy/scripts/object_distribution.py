@@ -84,7 +84,7 @@ def Distribution(type, mission_obj, fullrate):
             SortBinSize = sorted([bin_dict[j].L,bin_dict[j].W,bin_dict[j].H])
 
             #如果物體三維依大小順序都超出bin的三維，則換至下一個bin
-            if (SortMissionObj[0]>SortBinSize[0] and SortMissionObj[1]>SortBinSize[1] and SortMissionObj[2]>SortBinSize[2]):
+            if (SortMissionObj[0]>SortBinSize[0] or SortMissionObj[1]>SortBinSize[1] or SortMissionObj[2]>SortBinSize[2]):
                 print(mission_obj[i],' over of ' ,bin_dict[j].block ,'dimensions')
                 continue
             else:
@@ -114,8 +114,9 @@ def Distribution(type, mission_obj, fullrate):
 
 def main():
 
-    mission_objects = ['avery_binder','burts_bees_baby_wipes','crayons','epsom_salts','fiskars_scissors','ice_cube_tray','tennis_ball_container','reynolds_wrap'
-                       ,'hanes_socks','colgate_toothbrush_4pk']
+    mission_objects = ['avery_binder','burts_bees_baby_wipes','crayons','epsom_salts','fiskars_scissors',
+                    'ice_cube_tray','tennis_ball_container','reynolds_wrap','hanes_socks','colgate_toothbrush_4pk',
+                    ]
 
     output = Distribution('pick',mission_objects,0.5)
 

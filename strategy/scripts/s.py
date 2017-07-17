@@ -173,6 +173,10 @@ if __name__ == '__main__':
         # s.start() 
         # s.stow_run()
 
+        # ----- Test Vision------#
+        s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00025.json")
+        s.stow.gen_detect_all_in_stow_list()
+        s.stow.request_highest_item()
 
 
         rospy.spin()
