@@ -864,16 +864,14 @@ class PickTask:
 
 def _test():
     """Testing this module."""
-    rospy.init_node('picking_strategy', anonymous=True, disable_signals=True)
     try:
+        rospy.init_node('picking_strategy', anonymous=True, disable_signals=True)
         arm = arm_task_rel.ArmTask()
         lm = LM_Control.CLM_Control()
         s = PickTask(arm, lm)
 
         # Setting picking list
         s.pick_source, s.item_loc = read_pick_task_and_location()
-        for info in s.pick_source:
-            print("item:", info.item, "from_bin:", info.from_bin, "to_box:", info.to_box)
 
         rospy.sleep(0.3)
         s.run()
@@ -883,7 +881,7 @@ def _test():
             s.pick_core()
             rate.sleep()
     except KeyboardInterrupt as e:
-        print('KeyboardInterrupt exit procedure.')
+        print('\nKeyboardInterrupt exit procedure.')
 
 
 if __name__ == '__main__':
