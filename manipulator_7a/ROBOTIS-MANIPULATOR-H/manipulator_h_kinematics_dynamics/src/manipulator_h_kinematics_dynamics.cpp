@@ -607,11 +607,6 @@ void ManipulatorKinematicsDynamics::fk()
     /* update matrix of rotation */
     Eigen::Matrix3d     tmp_rot_matrix;
     Eigen::Quaterniond  tmp_Quat;
-
-    //make the local euler to class member euler
-    fk_roll = roll;
-    fk_pitch = pitch;
-    fk_yaw = yaw;
     
     // =============================================================================
     tmp_Quat        = robotis_framework::convertEulerToQuaternion(roll, pitch, yaw);
@@ -625,6 +620,10 @@ void ManipulatorKinematicsDynamics::fk()
 
     /* claculate redundancy for fai */
     this->fai = cal_Redundancy(jointPos);
+
+    //pub the fk info to the topic "/robotis/fk_fb"
+    fk_x = pos(0);  fk_y = pos(1);  fk_z = pos(2);
+    fk_roll = roll; fk_pitch = pitch;   fk_yaw = yaw;   fk_fai = fai;
     // ======== debug observer area ==========
     static int cnt=0;
     if(cnt++ > 1000)
