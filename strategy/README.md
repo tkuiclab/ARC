@@ -26,6 +26,8 @@ rosrun darkflow_detect object_detect.py
 rosrun obj_pose object_pose_estimator 
 -pass_x_min -0.24 -pass_x_max 0.24 -pass_y_min -0.18 -pass_y_max 0.18 -pass_z_min 0.3 -pass_z_max 0.57 -near 0.1
 
+rosrun obj_pose object_pose_estimator -pass_x_min -0.24 -pass_x_max 0.24 -pass_y_min -0.2 -pass_y_max 0.2 -pass_z_min 0.3 -pass_z_max 0.58 -near 10
+
 # See obj_pose result 
 # in pcd_file/ directory
 pcl_viewer -multiview 1 *.pcd
