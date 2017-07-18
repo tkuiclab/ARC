@@ -143,6 +143,49 @@ void get_pass_through_points(PCT::Ptr cloud_in,
   *cloud_out = *now_cloud;
 }
 
+void get_pass_xyz_from_arg( int argc,  char **argv,
+            float& pass_x_min, float& pass_x_max, 
+            float& pass_y_min, float& pass_y_max,
+            float& pass_z_min, float& pass_z_max){
+
+  float tool_z = 0.26;
+
+  pass_z_max = 0.60;
+  pass_z_min = tool_z;
+
+  pass_x_min = -0.5;
+  pass_x_max =  0.5;
+  pass_y_min = -0.5;
+  pass_y_max =  0.5;
+
+
+  if (pcl::console::find_switch (argc, argv, "-pass_x_min")){
+    pcl::console::parse (argc, argv, "-pass_x_min", pass_x_min);
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_x_max")){
+    pcl::console::parse (argc, argv, "-pass_x_max", pass_x_max);
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_y_min")){
+    pcl::console::parse (argc, argv, "-pass_y_min", pass_y_min);
+  }
+  
+  if (pcl::console::find_switch (argc, argv, "-pass_y_max")){
+    pcl::console::parse (argc, argv, "-pass_y_max", pass_y_max);
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_z_min")){
+    pcl::console::parse (argc, argv, "-pass_z_min", pass_z_min);
+
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_z_max")){
+    pcl::console::parse (argc, argv, "-pass_z_max", pass_z_max);
+  }
+
+}
+
 void pass_through_from_arg(PCT::Ptr cloud_in, 
             int argc,  char **argv,
             PCT::Ptr cloud_out){

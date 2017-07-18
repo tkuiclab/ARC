@@ -83,7 +83,7 @@ BoxShift_X		= cal_box_x_shift()
 BoxShift_Z		= [79000, 79000, 79000]
 
 #=== Initialize Tote's Information ===
-ToteId 		= [  'a',   'b']
+ToteId 		= [  'a',   'amnesty']
 #ToteShift_X	= [49000, 11000 ]
 ToteShift_X	= [60000, 11000]
 ToteShift_Z	= [76000, 76000]

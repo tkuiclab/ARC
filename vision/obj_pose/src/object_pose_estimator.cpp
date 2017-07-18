@@ -1,5 +1,5 @@
 #include "object_pose_estimator.hpp"
-//#include "cpc_segmentation.hpp"
+#include "cpc_segmentation.hpp"
 #include "cam2obj_ros.hpp"
 #include "ICP_alignment.hpp"
 
@@ -13,18 +13,31 @@ void ObjEstAction::goalCB()
 
   const obj_pose::ObjectPoseGoalConstPtr goal = as_.acceptNewGoal();
   obj_name = goal->object_name;
-  ROS_INFO("Action calling! Goal=%s",obj_name.c_str());    
-  std::cout << "-------------" << obj_name << " ----------" << std::endl;  
+  //ROS_INFO("Action calling! Goal=%s",obj_name.c_str());    
+  std::cout << "---------Action calling! Goal = " << obj_name << " ----------" << std::endl;  
   
-  if(goal->object_list.size() > 0){
-    std::cout << "Get Object List: [" ;
-    for(int i =0;i < goal->object_list.size();i++){
-      std::string item_name = goal->object_list[i];
-      std::cout << item_name << ",";
-      obj_list.push_back(item_name);
-    }
+  if(!obj_name.compare("<Highest>")){  //same with <Highest>
+    
+      if(goal->object_list.size() > 0){
+        std::cout << "Get Object List: [" ;
+        for(int i =0;i < goal->object_list.size();i++){
+          std::string item_name = goal->object_list[i];
+          std::cout << item_name << ",";
+          obj_list.push_back(item_name);
+        }
 
-    std::cout << "]" << std::endl ;
+        std::cout << "]" << std::endl ;
+
+
+        next_state = GET_HIGHEST;
+      }else{
+
+        next_state = NADA;
+      }
+  }else if(!obj_name.compare("<Unknown_Highest>")){  //same with <Unkown_Highest>
+      next_state = UNKNOWN_HIGHEST;
+  }else{
+      next_state = GET_ONE_ROI;
   }
 
 
@@ -42,6 +55,9 @@ void ObjEstAction::preemptCB()
 void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 {
   if(state==FOTO){
+      pub_feedback("Grabbing point cloud...",20);
+      
+
       pcl::fromROSMsg(*input,*scene_cloud);
 
   
@@ -58,15 +74,24 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       //write pcd
       write_pcd_2_rospack(scene_cloud,"scene_cloud.pcd");
 #endif
-      pub_feedback("Grabbing point cloud...",20);
       
       //state = CALL_RCNN;
-      if(obj_list.size() > 0){
+      // if(obj_list.size() > 0){
+      //   pub_feedback("Getting ROI of Highest....",40);
+      //   state = GET_HIGHEST;
+      // }else{
+      //   pub_feedback("Getting ROI....",40);
+      //   state = GET_ONE_ROI;
+      // }
+
+      state = next_state;
+
+      if(state == GET_HIGHEST){
         pub_feedback("Getting ROI of Highest....",40);
-        state = GET_HIGHEST;
-      }else{
-        pub_feedback("Getting ROI....",40);
-        state = GET_ONE_ROI;
+      }else if(state == UNKNOWN_HIGHEST){
+        pub_feedback("Getting Highest of UNKNOWN....",40);
+      } else if(state == GET_ONE_ROI){
+        pub_feedback("Getting One ROI....",40);
       }
   }
 }
@@ -76,6 +101,9 @@ void ObjEstAction::pub_feedback(std::string msg,int progress)
   feedback_.msg = msg;
   feedback_.progress = progress;
   as_.publishFeedback(feedback_);
+
+
+  
 }
 
 void ObjEstAction::pub_error(){
@@ -112,7 +140,7 @@ void ObjEstAction::poseEstimation(){
   pass_through_from_arg(cloud, g_argc, g_argv, cloud);
 
 #ifdef SaveCloud
-  write_pcd_2_rospack(cloud,"_PassThrough.pcd");
+  write_pcd_2_rospack(cloud,"_poseEST_PassThrough.pcd");
 #endif
   // only_obj_center(cloud, 
   //   pose.linear.x, pose.linear.y, pose.linear.z);
@@ -196,9 +224,9 @@ void ObjEstAction::get_highest(){
 
     //pass_through_from_arg(scene_cloud, g_argc, g_argv, scene_cloud);
 
-#ifdef SaveCloud
-  write_pcd_2_rospack(scene_cloud,"_highest_PassThrough.pcd");
-#endif
+// #ifdef SaveCloud
+//   write_pcd_2_rospack(scene_cloud,"_highest_PassThrough.pcd");
+// #endif
     /*
     if(roi_srv.respone.result == false){
       ROS_WARN("roi_srv.respone.result == false"); 
@@ -287,6 +315,85 @@ void ObjEstAction::get_highest(){
     write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
 #endif 
 
+  state = POSE_ESTIMATION;
+}
+
+
+void ObjEstAction::unknown_highest(){
+   PCT::Ptr pass_through_cloud(new PCT);
+   pcl::PointCloud<pcl::PointXYZL>::Ptr cpc_min_size_cloud(new pcl::PointCloud<pcl::PointXYZL>);
+   PCT::Ptr want_label_cloud(new PCT);
+
+
+  int min_size = 1000;
+
+  if (pcl::console::find_switch (g_argc, g_argv, "-cpc_min_size")){
+    pcl::console::parse (g_argc, g_argv, "-cpc_min_size", min_size);
+    
+  }
+
+  std::cout << "USE Min_Size = " << min_size << std::endl;
+
+
+
+#ifdef SaveCloud
+  // for test
+  pass_through_from_arg(scene_cloud, g_argc, g_argv, pass_through_cloud);
+
+   write_pcd_2_rospack(pass_through_cloud, "_cpc_pass_through.pcd" );
+#endif
+
+  float pass_x_min, pass_x_max, pass_y_min, pass_y_max,pass_z_min, pass_z_max;
+
+  get_pass_xyz_from_arg(g_argc, g_argv, pass_x_min, pass_x_max, pass_y_min, pass_y_max,pass_z_min, pass_z_max);
+
+
+  map<int, int> label_map;    // index, label_count      
+
+  CPCSegmentation cpc;
+  cpc.setPointCloud(scene_cloud);
+  cpc.do_CPC();
+  cpc.extract_with_min_size(min_size, cpc_min_size_cloud , label_map);
+#ifdef SaveCloud
+   write_label_pcd_2_rospack(cpc_min_size_cloud, "_cpc_min_size.pcd" );
+#endif
+
+  std::map<int, int>::iterator  iter;
+
+
+  pcl::PointXYZ tmp_center;
+  int want_label = 0;   //want the highest label
+  float min_z = 999.0;
+  for(iter = label_map.begin(); iter != label_map.end(); iter++){
+      int label_index  = iter->first;
+      int label_point_count = iter->second;
+      if(label_index > 0 && label_point_count > min_size){    //label index need > 0  ( 0 is nan or don't want)
+         if(cpc.getCentroidWithLabel(cpc_min_size_cloud, label_index, tmp_center)  ){
+            if(tmp_center.x <= pass_x_max && tmp_center.x >= pass_x_min &&
+               tmp_center.y <= pass_y_max && tmp_center.y >= pass_y_min &&
+               tmp_center.z <= pass_z_max && tmp_center.z >= pass_z_min ){    
+                    if(tmp_center.z < min_z){
+                      want_label = label_index;
+                      min_z = tmp_center.z;
+                    }
+            }
+         }
+      }
+  }
+  
+  //cout << "cpc_min_size_cloud size  = " << cpc_min_size_cloud->size() << endl;
+  
+  cpc.getCloudWithLabel(cpc_min_size_cloud, scene_cloud, want_label_cloud, want_label);
+  
+
+#ifdef SaveCloud
+    cout << "want_label_cloud size  = " << want_label_cloud->size() << endl;
+     write_pcd_2_rospack(want_label_cloud, "_want_label.pcd" );
+#endif
+
+
+
+  *ROI_cloud = *want_label_cloud;
   state = POSE_ESTIMATION;
 }
 
@@ -565,6 +672,9 @@ int main (int argc, char **argv)
 
       case GET_HIGHEST:
         ObjEst.get_highest();
+        break;
+      case UNKNOWN_HIGHEST:
+        ObjEst.unknown_highest();
         break;
       // case CALL_RCNN:
       //   state = (ObjEst.get_roi())? POSE_ESTIMATION : NADA;

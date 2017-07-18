@@ -41,8 +41,7 @@
 #include <pcl/kdtree/kdtree_flann.h>
 #include "object_pose_auxiliary.hpp"
 
-//#define ShowCloud
-#define SaveCloud
+
 
 enum ProcessingState{
     NADA,
@@ -52,8 +51,9 @@ enum ProcessingState{
     ALIGMENT,
     POSE_ESTIMATION,
     GET_ONE_ROI,
-    GET_HIGHEST
-}state;
+    GET_HIGHEST,
+    UNKNOWN_HIGHEST
+}state, next_state;
 
 //for respone to error_code
 
@@ -116,7 +116,7 @@ public:
   
   void get_one_roi();   //need obj_name
   void get_highest();   //need obj_list
-  
+  void unknown_highest();
 
 protected:
     
