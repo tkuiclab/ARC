@@ -163,20 +163,29 @@ if __name__ == '__main__':
     try:
         s = Strategy()
 
-        
-        s.stow.test_dump_stow_success()
+
         # s.stow.test_read_item_location_in_arc_pack("stow_test.json")
         # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
         
-        # #s.safe_pose()
+        #s.safe_pose()
         # gripper_vaccum_off()
         # s.start() 
         # s.stow_run()
 
-        # ----- Test Vision------#
-        s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00025.json")
-        s.stow.gen_detect_all_in_stow_list()
-        s.stow.request_highest_item()
+        # ----- Test Vision Highest------#
+        # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
+        # s.stow.gen_detect_all_in_stow_list()
+        # s.stow.request_highest_item()
+
+        # ----- Pick all Unknown Highest------#
+        s.stow.request_unknown_highest_item()
+
+        # ----- Pick all Unknown Highest------#
+        # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json") #any file is ok
+        # s.stow.test_all_unknown_2_amnesty()
+        # gripper_vaccum_off()
+        # s.start() 
+        # s.stow_run()
 
 
         rospy.spin()

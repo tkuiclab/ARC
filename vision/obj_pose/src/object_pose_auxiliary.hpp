@@ -8,6 +8,10 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/console/parse.h>
 
+
+//#define ShowCloud
+#define SaveCloud
+
 // Types
 typedef pcl::PointXYZRGBA PT;           //Point Type
 typedef pcl::PointCloud<PT> PCT;
@@ -19,6 +23,10 @@ typedef pcl::FPFHSignature33 FeatureT;
 typedef pcl::FPFHEstimationOMP<PointNT,PointNT,FeatureT> FeatureEstimationT;
 typedef pcl::PointCloud<FeatureT> FeatureCloudT;
 typedef pcl::visualization::PointCloudColorHandlerCustom<PointNT> ColorHandlerT;
+
+
+typedef pcl::PointXYZL PLabel;
+typedef pcl::PointCloud<PLabel> PC_Label;
 
 std::string path;
 
@@ -131,6 +139,18 @@ void write_pcd_2_rospack_normals(PC_NT::Ptr cloud, std::string f_name){
 
     pcl::PCDWriter writer;
     writer.write<PointNT> (path, *cloud, true);
+
+    std::cout << "Save PCD -> " << path << std::endl;
+}
+
+void write_label_pcd_2_rospack(pcl::PointCloud<pcl::PointXYZL>::Ptr cloud,  std::string f_name){
+    path = ros::package::getPath("obj_pose");
+    path.append("/pcd_file/");
+    path.append(f_name);
+
+
+    pcl::PCDWriter writer;
+    writer.write<pcl::PointXYZL> (path, *cloud, false);
 
     std::cout << "Save PCD -> " << path << std::endl;
 }
