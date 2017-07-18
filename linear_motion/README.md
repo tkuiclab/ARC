@@ -28,5 +28,9 @@ $ rosrun linear_motion LM_Control.py <driver id> <$1>
 [The status of linear motor will display in terminal]
 ```
 
-rosrun strategy LM_Control.py 1 80000 #LM Z
-rosrun strategy LM_Control.py 2 80000 #LM X
+[control LM by teminal]
+```bash
+$ rosrun strategy LM_Control.py 1 <desire pls(0~80000)> #LM right
+$ rosrun strategy LM_Control.py 2 <desire pls(0~60000)> #LM base
+$ rosrun strategy LM_Control.py 3 <desire pls(0~80000)> #LM left
+```

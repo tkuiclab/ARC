@@ -4,25 +4,28 @@
             "bin_id": "A",
             "contents": [
                 "robots_dvd",
-                "hinged_ruled_index_cards"
+                "hinged_ruled_index_cards",
+                "scotch_sponges"
             ]
         },
         {
             "bin_id": "B",
             "contents": [
-                "robots_everywhere"
+                "robots_everywhere",
+                "laugh_out_loud_jokes"
             ]
         },
         {
             "bin_id": "C",
             "contents": [
-                "speed_stick"
+                "speed_stick",
+                "expo_eraser"
             ]
         },
         {
             "bin_id": "D",
             "contents": [
-                "hanes_socks",
+                "pie_plates",
                 "reynolds_wrap",
                 "composition_book"
             ]
@@ -30,6 +33,8 @@
         {
             "bin_id": "E",
             "contents": [
+                "duct_tape",
+                "ballons"
             ]
         },
         {
@@ -40,6 +45,8 @@
         {
             "bin_id": "G",
             "contents": [
+                "burts_bees_baby_wipes",
+                "ticonderoga_pencils"
             ]
         },
         {
