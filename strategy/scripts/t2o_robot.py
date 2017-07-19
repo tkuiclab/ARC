@@ -107,7 +107,8 @@ class T2O:
         # self.tool_2_obj(result.object_pose, result.norm)
         # self.tool_2_obj(result.object_pose, result.norm, 180)
         # self.tool_2_obj_bin(result.object_pose, result.norm)
-        self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.1), rel_ang = (10, 0 , 0))
+        # self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.1), rel_ang = (10, 0 , 0))
+        self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.2), rel_ang = (10, 0 , 0))
         # self.tool_2_obj_bin_straight(result.object_pose, result.norm)
         # self.tool_2_obj_bin2(result.object_pose, result.norm)
 
@@ -200,9 +201,14 @@ class T2O:
         y = new_y
         r = 90 - (numpy.rad2deg(a.x) + 180)
 
-        if (abs(90 - r) <= 5):
+        if (abs(90 - r) <= 5) or abs(new_y) > 100:
             y = 0
-            print("Forward Face y = "+new_y+" -> "+0)
+            r = 90
+            print("Forward Face y = "+str(new_y)+" -> "+str(0))
+            print("Forward Face r = "+str(90 - (numpy.rad2deg(a.x) + 180))+" -> "+str(90))
+            print("Forward Face Norm(x, y) = ("+str(norm.x)+", "+str(norm.y)+" -> (0, 0)")
+            norm.x = 0
+            norm.y = 0
 
         print("(y, r)= (" + str(y) + ", " + str(r) + ")")
 
@@ -258,6 +264,8 @@ class T2O:
         print('self.Arm.relative_xyz_base(x = '+str(real_move_z_rot)+', y = '+str(real_move_x_rot)+', z = '+str(real_move_y_rot*-1)+')')
         # return
         self.Arm.relative_xyz_base(x = real_move_z_rot, y = real_move_x_rot, z = real_move_y_rot*-1)
+        # self.Arm.relative_xyz_base(x = 0.15)
+        # self.Arm.relative_xyz_base(y = real_move_x_rot, z = real_move_y_rot*-1)
 
         rospy.loginfo('Move Angle Finish')
 
@@ -496,12 +504,22 @@ if __name__ == '__main__':
     # s.stow.LM_2_tote()
 
     # STOW TEST
+    # arm = arm_task_rel.ArmTask()
+    # lm = LM_Control.CLM_Control()
+    # stow = StowTask(arm, lm)
+    # stow.LM_2_tote()
+    # stow.arm_photo_pose_2()
+    # gripper_suction_up()
+
+    # PICK TEST
     arm = arm_task_rel.ArmTask()
     lm = LM_Control.CLM_Control()
-    stow = StowTask(arm, lm)
-    stow.LM_2_tote()
-    stow.arm_photo_pose_2()
-    gripper_suction_up()
+    s = PickTask(arm, lm)
+    s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'a') + 18000)
+    rospy.sleep(0.3)
+    s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a') + 10000)
+    task.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
+    task.obj_pose_request('tissue_box')
 
     ### Bin Place ###
     # s = Strategy()

@@ -167,10 +167,28 @@ if __name__ == '__main__':
         # s.stow.test_read_item_location_in_arc_pack("stow_test.json")
         # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
         
-        #s.safe_pose()
+        # s.safe_pose()
+        # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'x', 'a'))
+        # rospy.sleep(0.5)
+        # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a'))
+        # rospy.sleep(0.5)
         # gripper_vaccum_off()
         # s.start() 
         # s.stow_run()
+        # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 170, 0))
+        # s.Arm.relative_xyz_base(x = 0.0612402290131, y = -0.0987435177733, z = -0.295083506803)
+
+        s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 170, 0))
+        s.Arm.relative_move_xyz_rot_pry(x = 0.0612402290131, y = -0.0987435177733, z = -0.2)
+        
+        
+        # ----- Temp  Test------#
+        #s.stow.LM_2_tote()
+        #s.stow.LM_amnesty_up()
+        #s.stow.LM_amnesty_down()
+        #s.stow.arm_photo_pose()
+        #s.stow.arm_photo_pose_2()
+        #s.LM.pub_LM_Cmd(LM_ID_Right, ToteLeave_Z)
 
         # ----- Test Vision Highest------#
         # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
@@ -178,7 +196,12 @@ if __name__ == '__main__':
         # s.stow.request_highest_item()
 
         # ----- Pick all Unknown Highest------#
-        s.stow.request_unknown_highest_item()
+        #s.stow.request_unknown_highest_item()
+
+
+        # s.LM.rel_move_LM('right',35)
+        # s.LM.rel_move_LM('base', -30)
+
 
         # ----- Pick all Unknown Highest------#
         # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json") #any file is ok

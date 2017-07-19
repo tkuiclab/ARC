@@ -122,7 +122,7 @@ void get_pass_through_points(PCT::Ptr cloud_in,
     pass.setFilterFieldName ("y");
     pass.setFilterLimits (min_y, max_y);
 
-    //std::cout << "PT->min_y= " << min_y << ", max_y = " << max_y << std::endl;
+    std::cout << "PT->min_y= " << min_y << ", max_y = " << max_y << std::endl;
 
     pass.setInputCloud (now_cloud);
     pass.filter (*now_cloud);
@@ -216,7 +216,7 @@ void pass_through_from_arg(PCT::Ptr cloud_in,
   
   if (pcl::console::find_switch (argc, argv, "-pass_y_max")){
     pcl::console::parse (argc, argv, "-pass_y_max", pass_y_max);
-    //ROS_INFO("Use pass_y_max = %lf",pass_y_max);
+    ROS_INFO("Use pass_y_max = %lf",pass_y_max);
     //std::cout << "Use pass_y_max =" << pass_y_max << std::endl;
   }
 

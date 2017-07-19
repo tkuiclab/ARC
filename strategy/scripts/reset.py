@@ -56,7 +56,7 @@ if __name__ == '__main__':
     rospy.loginfo('robot_reset Ready')
 
     # -------Back 2 home------#.
-    #task.safe_pose()
+    task.safe_pose()
     task.Arm.home()
 
     while task.Arm.busy:
