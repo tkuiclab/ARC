@@ -290,7 +290,7 @@ class StowTask:
     def request_highest_item(self):
         if len(self.detect_all_in_stow_list) > 0:
             goal = obj_pose.msg.ObjectPoseGoal(
-                object_name = "<Highest>",
+                object_name = "<Closest>",
                 object_list = self.detect_all_in_stow_list
             )
 
@@ -330,7 +330,7 @@ class StowTask:
 
     def request_unknown_highest_item(self):
         goal = obj_pose.msg.ObjectPoseGoal(
-            object_name = "<Unknown_Highest>"
+            object_name = "<Unknown_Closest>"
         )
         self.obj_pose_client.send_goal(
                 goal,
@@ -1013,3 +1013,31 @@ class StowTask:
     def test_all_unknown_2_amnesty(self):
         self.mode = Mode_UnknownProcess
         self.state = LM2Tote
+
+    def test_done_cb(self, state,result):
+        print('result.object_pose = ' + str(result.object_pose))
+        print('result.norm = ' + str(result.norm))
+        print '-----------obj_pose_done_cb---[highest]---<< ' + result.object_name +' >>--------------'
+
+    def test_request_highest(self):
+        
+        goal = obj_pose.msg.ObjectPoseGoal(
+            object_name = "<Closest>",
+            object_list = ["laugh_out_loud_jokes",
+                            "scotch_sponges",
+                            "duct_tape",
+                            "band_aid_tape",
+                            "irish_spring_soap",
+                            "crayons",
+                            "expo_eraser",
+                            "ice_cube_tray",
+                            "robots_dvd"],
+            #          [ xmin, xmax, ymin, ymax, zmin, zmax]
+            limit_ary =[-0.3, 0.3, 0,  0.4, 0.3, 0.6]
+            
+        )
+
+        self.obj_pose_client.send_goal(
+                goal,
+                done_cb=self.test_done_cb )
+    
