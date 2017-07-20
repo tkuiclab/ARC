@@ -51,14 +51,14 @@ enum ProcessingState{
     ALIGMENT,
     POSE_ESTIMATION,
     GET_ONE_ROI,
-    GET_HIGHEST,
-    UNKNOWN_HIGHEST
+    GET_CLOSEST,
+    UNKNOWN_CLOSEST
 }state, next_state;
 
 //for respone to error_code
 
 //#define ERR_DETECT_LESS_MAX               1
-#define ERR_CANNOT_GET_HIGHEST            2
+#define ERR_CANNOT_GET_CLOSEST            2
 #define ERR_CANNOT_CALL_DETECT_SERVICE    3
 #define ERR_CALL_DETECT_OVER_TIMES        4
 //#define ERR_DETECT_RESPONE_FAIL    5
@@ -75,7 +75,8 @@ public:
     as_(nh_, name, false),
     action_name_(name),
     scene_cloud(new PCT),
-    ROI_cloud(new PCT)
+    ROI_cloud(new PCT),
+    limit_z_min(0.3)
   {
     g_argc = argc;
     g_argv = argv;
@@ -115,8 +116,8 @@ public:
   void do_ICP();
   
   void get_one_roi();   //need obj_name
-  void get_highest();   //need obj_list
-  void unknown_highest();
+  void get_closest();   //need obj_list
+  void unknown_closest();
 
 protected:
     
@@ -172,6 +173,11 @@ private:
   PCT::Ptr scene_cloud ;
   PCT::Ptr ROI_cloud;
 
+  //limit for passthrough
+  float limit_x_min, limit_x_max, 
+        limit_y_min, limit_y_max, 
+        limit_z_min, limit_z_max;
+
 
   int g_argc;
   char** g_argv;
@@ -184,5 +190,8 @@ private:
 
 
   int error_code;
+
+
+  int Unknown_Closest_num; // 0 -> most closest , 1 -> second closest
 };
 }

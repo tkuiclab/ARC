@@ -622,9 +622,9 @@ bool get_center_from_2dbox(
     int max_x, int max_y, 
     //pass_through_z
     float pt_min_z, float pt_max_z,
-    float& center_y, float& center_z){
+    float& center_x,float& center_y, float& center_z){
 
-
+    float sum_x = 0;
     float sum_z = 0;
     float sum_y = 0;
     unsigned int  cp = 0 ;
@@ -634,12 +634,14 @@ bool get_center_from_2dbox(
 
           index = j*i_cloud->width+i;
           if (pcl::isFinite (i_cloud->points[index])) {
+            float x = i_cloud->points[index].x;
             float y = i_cloud->points[index].y;
             float z = i_cloud->points[index].z;
             if(z > pt_min_z &&  z < pt_max_z 
                ){
-              sum_z += z;
+              sum_x += x;
               sum_y += y;
+              sum_z += z;
               ++cp;
             }
           }
@@ -648,7 +650,7 @@ bool get_center_from_2dbox(
 
   
   if(cp > 0 ){
-
+    center_x = sum_x/(float)cp;
     center_y = sum_y/(float)cp;
     center_z =  sum_z / (float)cp;
     return true;

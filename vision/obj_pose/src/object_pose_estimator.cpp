@@ -3,6 +3,8 @@
 #include "cam2obj_ros.hpp"
 #include "ICP_alignment.hpp"
 
+#include <boost/lexical_cast.hpp>  // for convert string to int
+
 using namespace ObjEstAction_namespace;
 
 void ObjEstAction::goalCB()
@@ -16,7 +18,23 @@ void ObjEstAction::goalCB()
   //ROS_INFO("Action calling! Goal=%s",obj_name.c_str());    
   std::cout << "---------Action calling! Goal = " << obj_name << " ----------" << std::endl;  
   
-  if(!obj_name.compare("<Highest>")){  //same with <Highest>
+  if(goal->limit_ary.size() == 6){
+    std::cout << "Get limit_ary: [" ;
+    for(int i =0;i < goal->limit_ary.size();i++){
+      std::cout << goal->limit_ary[i] << ",";
+    }
+    std::cout << "]" << std::endl ;
+
+    limit_x_min = goal->limit_ary[0];
+    limit_x_max = goal->limit_ary[1];
+    limit_y_min = goal->limit_ary[2];
+    limit_y_max = goal->limit_ary[3];
+    limit_z_min = goal->limit_ary[4];
+    limit_z_max = goal->limit_ary[5];
+    
+  }
+
+  if(!obj_name.compare("<Closest>")){  //same with <Closest>
     
       if(goal->object_list.size() > 0){
         std::cout << "Get Object List: [" ;
@@ -29,13 +47,36 @@ void ObjEstAction::goalCB()
         std::cout << "]" << std::endl ;
 
 
-        next_state = GET_HIGHEST;
+        next_state = GET_CLOSEST;
       }else{
 
         next_state = NADA;
       }
-  }else if(!obj_name.compare("<Unknown_Highest>")){  //same with <Unkown_Highest>
-      next_state = UNKNOWN_HIGHEST;
+  //}else if(!obj_name.compare("<Unknown_Closest>")){  //same with <Unkown_Closest>
+  }else if(obj_name.find("<Unknown_Closest>") !=std::string::npos){  //same with <Unkown_Closest>
+      Unknown_Closest_num = 0;
+      
+      std::string plus_str ("+");
+      std::size_t plus_pos = obj_name.find(plus_str);
+
+      if (plus_pos!=std::string::npos){
+        std::string add_str = obj_name.substr (plus_pos); 
+        
+        int add;
+        try {
+            add = boost::lexical_cast<int>( add_str);
+        } catch( boost::bad_lexical_cast const& ) {
+            std::cout << "<Error> input string(add_str) was not valid, add_str = " <<  add_str << std::endl;
+        }
+
+        std::cout << "first '+' found at: " << plus_pos << '\n';
+        std::cout << "add_str" << add_str << '\n';
+        printf("add=%d\n",add);
+
+        Unknown_Closest_num = add;
+      }
+
+      next_state = UNKNOWN_CLOSEST;
   }else{
       next_state = GET_ONE_ROI;
   }
@@ -78,7 +119,7 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
       //state = CALL_RCNN;
       // if(obj_list.size() > 0){
       //   pub_feedback("Getting ROI of Highest....",40);
-      //   state = GET_HIGHEST;
+      //   state = GET_CLOSEST;
       // }else{
       //   pub_feedback("Getting ROI....",40);
       //   state = GET_ONE_ROI;
@@ -86,9 +127,9 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 
       state = next_state;
 
-      if(state == GET_HIGHEST){
+      if(state == GET_CLOSEST){
         pub_feedback("Getting ROI of Highest....",40);
-      }else if(state == UNKNOWN_HIGHEST){
+      }else if(state == UNKNOWN_CLOSEST){
         pub_feedback("Getting Highest of UNKNOWN....",40);
       } else if(state == GET_ONE_ROI){
         pub_feedback("Getting One ROI....",40);
@@ -137,10 +178,17 @@ void ObjEstAction::poseEstimation(){
   write_pcd_2_rospack(cloud,"_rm_NaN.pcd");
 #endif
 
-  pass_through_from_arg(cloud, g_argc, g_argv, cloud);
+  //pass_through_from_arg(cloud, g_argc, g_argv, cloud);
+
+  get_pass_through_points(cloud,  cloud,
+                        limit_x_min, limit_x_max,
+                        limit_y_min, limit_y_max,
+                        limit_z_min, limit_z_max
+                     
+                        );
 
 #ifdef SaveCloud
-  write_pcd_2_rospack(cloud,"_poseEST_PassThrough.pcd");
+  write_pcd_2_rospack(cloud,"_poseEstimation_PassThrough.pcd");
 #endif
   // only_obj_center(cloud, 
   //   pose.linear.x, pose.linear.y, pose.linear.z);
@@ -200,7 +248,7 @@ void ObjEstAction::set_ROI_colud(
 
 //Need Class Var: obj_list, call_detect_times
 //Output Class Var: int mini_x, int mini_y,  int max_x,  int max_y;
-void ObjEstAction::get_highest(){
+void ObjEstAction::get_closest(){
   roi_srv.request.object_name = "all";
   if(roi_client.call(roi_srv))
   {
@@ -225,7 +273,7 @@ void ObjEstAction::get_highest(){
     //pass_through_from_arg(scene_cloud, g_argc, g_argv, scene_cloud);
 
 // #ifdef SaveCloud
-//   write_pcd_2_rospack(scene_cloud,"_highest_PassThrough.pcd");
+//   write_pcd_2_rospack(scene_cloud,"_closest_PassThrough.pcd");
 // #endif
     /*
     if(roi_srv.respone.result == false){
@@ -243,20 +291,20 @@ void ObjEstAction::get_highest(){
     */
 
 
-    float pass_z_min = 0.3f;
-    float pass_z_max = 0.6f;
-    float pass_y_min = 0.0f;
-    if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_min")){
-      pcl::console::parse (g_argc, g_argv, "-pass_z_min", pass_z_min);
-    }
+    // float pass_z_min = 0.3f;
+    // float pass_z_max = 0.6f;
+    // float pass_y_min = 0.0f;
+    // if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_min")){
+    //   pcl::console::parse (g_argc, g_argv, "-pass_z_min", pass_z_min);
+    // }
 
-    if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_max")){
-      pcl::console::parse (g_argc, g_argv, "-pass_z_max", pass_z_max);
-    }
+    // if (pcl::console::find_switch (g_argc, g_argv, "-pass_z_max")){
+    //   pcl::console::parse (g_argc, g_argv, "-pass_z_max", pass_z_max);
+    // }
 
-    if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_min")){
-      pcl::console::parse (g_argc, g_argv, "-pass_y_min", pass_y_min);
-    }
+    // if (pcl::console::find_switch (g_argc, g_argv, "-pass_y_min")){
+    //   pcl::console::parse (g_argc, g_argv, "-pass_y_min", pass_y_min);
+    // }
 
     float near_from_cam = 999.0;
     for(int i =0;i < roi_srv.response.detected.size();i++){
@@ -266,15 +314,19 @@ void ObjEstAction::get_highest(){
         continue;
       }
 
-      float center_y, center_z;
+      float center_x, center_y, center_z;
       get_center_from_2dbox(
             scene_cloud,
             detected.bound_box[0], detected.bound_box[1],
             detected.bound_box[2], detected.bound_box[3],
-            pass_z_min, pass_z_max,
-            center_y, center_z);
+            //pass_z_min, pass_z_max,
+            limit_z_min, limit_z_max,
+            center_x, center_y, center_z);
       
-      if(center_y > pass_y_min && center_z != -1){
+      if(center_z != -1 &&
+        center_x > limit_x_min &&  center_x < limit_x_max &&
+        center_y > limit_y_min &&  center_y < limit_y_max &&
+        center_z > limit_z_min &&  center_z < limit_z_max ){
         if(center_z < near_from_cam){
           obj_name = detected.object_name;
           mini_x = detected.bound_box[0];
@@ -286,6 +338,7 @@ void ObjEstAction::get_highest(){
         }
       }
 
+
       std::cout << detected.object_name << 
         " -> (y, z) = ("<< center_y << "," << center_z << ")" 
         << std::endl; 
@@ -293,7 +346,7 @@ void ObjEstAction::get_highest(){
     
     if(near_from_cam == 999.0){
       ROS_WARN("CANNOT Get Highest near_from_cam == 999.0");
-      error_code = ERR_CANNOT_GET_HIGHEST;
+      error_code = ERR_CANNOT_GET_CLOSEST;
       pub_error();
       return ;
     }
@@ -319,8 +372,8 @@ void ObjEstAction::get_highest(){
 }
 
 
-void ObjEstAction::unknown_highest(){
-   PCT::Ptr pass_through_cloud(new PCT);
+void ObjEstAction::unknown_closest(){
+   
    pcl::PointCloud<pcl::PointXYZL>::Ptr cpc_min_size_cloud(new pcl::PointCloud<pcl::PointXYZL>);
    PCT::Ptr want_label_cloud(new PCT);
 
@@ -338,14 +391,21 @@ void ObjEstAction::unknown_highest(){
 
 #ifdef SaveCloud
   // for test
-  pass_through_from_arg(scene_cloud, g_argc, g_argv, pass_through_cloud);
+  //pass_through_from_arg(scene_cloud, g_argc, g_argv, pass_through_cloud);
 
+  PCT::Ptr pass_through_cloud(new PCT);
+  get_pass_through_points(scene_cloud,  pass_through_cloud,
+                        limit_x_min, limit_x_max,
+                        limit_y_min, limit_y_max,
+                        limit_z_min, limit_z_max
+                     
+                        );
    write_pcd_2_rospack(pass_through_cloud, "_cpc_pass_through.pcd" );
 #endif
 
-  float pass_x_min, pass_x_max, pass_y_min, pass_y_max,pass_z_min, pass_z_max;
+  // float pass_x_min, pass_x_max, pass_y_min, pass_y_max,pass_z_min, pass_z_max;
 
-  get_pass_xyz_from_arg(g_argc, g_argv, pass_x_min, pass_x_max, pass_y_min, pass_y_max,pass_z_min, pass_z_max);
+  // get_pass_xyz_from_arg(g_argc, g_argv, pass_x_min, pass_x_max, pass_y_min, pass_y_max,pass_z_min, pass_z_max);
 
 
   map<int, int> label_map;    // index, label_count      
@@ -369,9 +429,9 @@ void ObjEstAction::unknown_highest(){
       int label_point_count = iter->second;
       if(label_index > 0 && label_point_count > min_size){    //label index need > 0  ( 0 is nan or don't want)
          if(cpc.getCentroidWithLabel(cpc_min_size_cloud, label_index, tmp_center)  ){
-            if(tmp_center.x <= pass_x_max && tmp_center.x >= pass_x_min &&
-               tmp_center.y <= pass_y_max && tmp_center.y >= pass_y_min &&
-               tmp_center.z <= pass_z_max && tmp_center.z >= pass_z_min ){    
+            if(tmp_center.x <= limit_x_max && tmp_center.x >= limit_x_min &&
+               tmp_center.y <= limit_y_max && tmp_center.y >= limit_y_min &&
+               tmp_center.z <= limit_z_max && tmp_center.z >= limit_z_min ){    
                     if(tmp_center.z < min_z){
                       want_label = label_index;
                       min_z = tmp_center.z;
@@ -463,7 +523,7 @@ bool ObjEstAction::get_roi(){
   bool success = false;
   if(obj_list.size() > 0){
     pub_feedback("Getting ROI of Highest....",40);
-    success = get_highest();
+    success = get_closest();
   }else{
     pub_feedback("Getting ROI....",40);
     success = get_one_roi();
@@ -670,11 +730,11 @@ int main (int argc, char **argv)
         ObjEst.get_one_roi();
         break;
 
-      case GET_HIGHEST:
-        ObjEst.get_highest();
+      case GET_CLOSEST:
+        ObjEst.get_closest();
         break;
-      case UNKNOWN_HIGHEST:
-        ObjEst.unknown_highest();
+      case UNKNOWN_CLOSEST:
+        ObjEst.unknown_closest();
         break;
       // case CALL_RCNN:
       //   state = (ObjEst.get_roi())? POSE_ESTIMATION : NADA;

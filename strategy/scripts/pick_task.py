@@ -130,7 +130,7 @@ class PickTask:
     def request_highest_item(self):
         if len(self.detect_all_in_bin):
             goal = obj_pose.msg.ObjectPoseGoal(
-                object_name = "<Highest>",
+                object_name = "<Closest>",
                 object_list = self.detect_all_in_bin
             )
             self.__obj_pose_client.send_goal(
