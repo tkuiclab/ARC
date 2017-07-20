@@ -54,7 +54,7 @@ class Calibrater:
             rospy.sleep(0.01)
         
         print 'move 2 bin ->' + bin
-        self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', bin ))
+        self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', bin ) + LM_Right_Arm_Shift)
         rospy.sleep(0.5)
         self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', bin ))
         rospy.sleep(0.5)
@@ -76,14 +76,14 @@ if __name__ == '__main__':
 
         # for single cmd
         # calibrate.Move_Arm()
-        calibrate.Move_LM('j')
-
+        calibrate.Move_LM('c')
+        exit()
         # for continue caltbration task
         r = rospy.Rate(30)
         i = 0
-        # while not rospy.is_shutdown():
-        #     calibrate.Move_LM(BinArr[i])
-        #     i = i+1
+        while not rospy.is_shutdown() and i < len(BinArr):
+            calibrate.Move_LM(BinArr[i])
+            i = i+1
         # ==================================================
 
         r.sleep()

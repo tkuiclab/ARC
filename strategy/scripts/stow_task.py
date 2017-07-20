@@ -21,6 +21,7 @@ from strategy.srv import *
 
 import arm_task_rel
 import LM_Control
+from LM_Control import LM_ID_Base ,LM_ID_Right, LM_ID_Left
 from task_parser import *
 from config import *
 from gripper import *
@@ -62,11 +63,15 @@ Mode_KnownProcess = 1
 Mode_UnknownProcess = 2
 
 
+_LEFT_SHIFT = 18000
+_DOWN_SHIFT = 10000
+
 
 
 # For checking vacuum function
 check_next_states = [
-    LM_LeaveTote,
+    #LM_LeaveTote,
+    ArmLeaveTote,
     LM2Bin,
     ArmPutInBin
 ]
@@ -75,6 +80,7 @@ obj_dis = 0.01
 
 
 Arm_Photo_Index_Max  = 2
+
 
 class StowTask:
 
@@ -180,12 +186,38 @@ class StowTask:
         rospy.sleep(0.3)
         self.LM.pub_LM_Cmd(1, ToteLeave_Z)
 
+    def LM_2_Bin(self, i_bin):
+        self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', i_bin ) + _LEFT_SHIFT)
+        rospy.sleep(0.3)
+        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', i_bin)  + _DOWN_SHIFT)
+
+    def LM_2_Bin_No_Shift(self, i_bin):
+        self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', i_bin ) )
+        rospy.sleep(0.3)
+        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', i_bin)  )
+        
+    def LM_2_Bin_Right_Arm(self, i_bin):
+        self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', i_bin ) + LM_Right_Arm_Shift )
+        rospy.sleep(0.3)
+        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', i_bin)  )
+
+    
+
     def arm_photo_pose(self):
         # self.Arm.pub_ikCmd('ptp', (0.4, 0.00, 0.25), (-180, 0, 0))
         self.Arm.pub_ikCmd('ptp', (0.5, 0.00, 0.15), (-180, 0, 0))
      
     def arm_photo_pose_2(self):
+        self.Arm.pub_ikCmd('ptp', (0.5, 0.00, 0.15), (-180, 0, 0))
+        #self.Arm.pub_ikCmd('ptp', (0.4, 0.00 , 0.25), (180, 180, 0))
+
+    def arm_photo_pose_3(self):
         self.Arm.pub_ikCmd('ptp', (0.4, 0.00 , 0.25), (180, 180, 0))
+
+    def arm_leave_tote(self):
+        self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+
+
 
     def tool_2_obj(self, obj_pose, norm, shot_deg = 0): #STOW
         p = obj_pose
@@ -348,7 +380,7 @@ class StowTask:
     def request_unknown_highest_item(self):
         goal = obj_pose.msg.ObjectPoseGoal(
             object_name = "<Unknown_Closest>",
-
+            limit_ary =[-0.14, 0.14, 0,  0.4, 0.3, 0.6]
         )
         self.obj_pose_client.send_goal(
                 goal,
@@ -534,11 +566,13 @@ class StowTask:
         if self.state == WaitVision:
             return
         elif self.state == LM2Tote: 
-            self.info = "(PhotoPose)"  
+            self.info = "(LM2Tote)"  
+            
             print self.info
 
             self.LM_2_tote()
             #gripper_suction_up()
+            gripper_vaccum_off() 
 
             self.state 			= WaitRobot
             self.next_state 	= PhotoPose 
@@ -570,6 +604,9 @@ class StowTask:
             elif self.arm_photo_index == 2:
                 print '--------Go arm_photo_pose 2--------'
                 self.arm_photo_pose_2()
+            elif self.arm_photo_index == 3:
+                print '--------Go arm_photo_pose 3--------'
+                self.arm_photo_pose_3()
             
             gripper_suction_up()
 
@@ -695,7 +732,8 @@ class StowTask:
  
             #self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
             #self.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.25), (-90, 0, 0) )
-            self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+            #self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+            self.arm_leave_tote()
             
             if self.now_stow_info.gripper_down:
                 gripper_suction_down()
@@ -711,9 +749,10 @@ class StowTask:
             print self.info
     
             self.Is_BaseShiftOK = False
-            self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.now_stow_info.to_bin ))
-            rospy.sleep(0.3)
-            self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.now_stow_info.to_bin ))
+            self.LM_2_Bin(self.now_stow_info.to_bin)
+            # self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.now_stow_info.to_bin ))
+            # rospy.sleep(0.3)
+            # self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.now_stow_info.to_bin ))
         
             
 
@@ -760,10 +799,15 @@ class StowTask:
             self.info = "(ArmLeaveBin) ArmLeaveBin"
             print self.info
             
-            self.Arm.relative_move_nsa(a = -0.35) 
-
             self.next_state = Recover2InitPos
             self.state 		= WaitRobot
+
+
+            
+
+            self.Arm.relative_move_nsa(a = -0.3) 
+
+            
 
             return
 
@@ -786,6 +830,9 @@ class StowTask:
             change_next_state = False
 
             #print 'self.Last_LMArrive == ' + str(self.Last_LMArrive) + ' and  self.Is_LMArrive ==' + str(self.Is_LMArrive) + ' and self.Is_LMBusy == ' + str(self.Is_LMBusy)
+
+            
+
 
             if self.Last_LMArrive == False and self.Is_LMArrive == True and self.Is_ArmBusy == False:
             #if self.Last_LMArrive == True and self.Is_LMArrive == True and self.Is_LMBusy == False and  self.Is_ArmBusy == False:
@@ -812,6 +859,12 @@ class StowTask:
             #     print '~Robot Ready~'
 
 
+            #print 'self.Arm.is_ikfail = ' + str(self.Arm.is_ikfail)
+            if self.Arm.is_ikfail:
+                rospy.logwarn('In Strategy IK Fail')
+                self.Arm.init()
+                change_next_state = True
+
 
             if change_next_state:
                 
@@ -832,18 +885,21 @@ class StowTask:
 
                         self.state = FinishOne
                 else:
+
                     print('self.mode = Mode_UnknownProcess')
+
                     if self.check_vaccum_by_next_state(self.next_state):
                         self.state 			= self.next_state
                     else:
                         self.state 			= LM2Tote
+                        
+                    #self.state 			= self.next_state
 
-                   # self.state 			= self.next_state
             return
 
         elif self.state == FinishOne:
             self.mlog('FinishOne')
-            gripper_vaccum_off()
+            # gripper_vaccum_off()      move to LM2Tote
             can_get_one = self.stow_get_one()
 
             if can_get_one :
@@ -1042,17 +1098,20 @@ class StowTask:
         
         goal = obj_pose.msg.ObjectPoseGoal(
             object_name = "<Closest>",
-            object_list = ["laugh_out_loud_jokes",
-                            "scotch_sponges",
-                            "duct_tape",
-                            "band_aid_tape",
-                            "irish_spring_soap",
-                            "crayons",
-                            "expo_eraser",
-                            "ice_cube_tray",
-                            "robots_dvd"],
+            # object_list = ["laugh_out_loud_jokes",
+            #                 "scotch_sponges",
+            #                 "duct_tape",
+            #                 "band_aid_tape",
+            #                 "irish_spring_soap",
+            #                 "crayons",
+            #                 "expo_eraser",
+            #                 "ice_cube_tray",
+            #                 "robots_dvd"],
+             object_list = ["tissue_box",
+                             "duct_tape"],
+
             #          [ xmin, xmax, ymin, ymax, zmin, zmax]
-            limit_ary =[-0.3, 0.3, 0,  0.4, 0.3, 0.6]
+            limit_ary =[-0.15, 0.15, 0,  0.3, 0.3, 1.0]
             
         )
 

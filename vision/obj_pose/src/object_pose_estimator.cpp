@@ -18,6 +18,9 @@ void ObjEstAction::goalCB()
   //ROS_INFO("Action calling! Goal=%s",obj_name.c_str());    
   std::cout << "---------Action calling! Goal = " << obj_name << " ----------" << std::endl;  
   
+
+  std::cout << "goal->limit_ary.size() = " << goal->limit_ary.size() << std::endl;
+  
   if(goal->limit_ary.size() == 6){
     std::cout << "Get limit_ary: [" ;
     for(int i =0;i < goal->limit_ary.size();i++){

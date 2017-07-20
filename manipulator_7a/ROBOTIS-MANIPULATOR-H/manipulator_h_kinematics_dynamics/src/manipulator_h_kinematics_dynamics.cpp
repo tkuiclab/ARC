@@ -680,7 +680,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     double Curr_J7 = manipulator_link_data_[7]->joint_angle_;
     // //---------------------------------------------------------------------
         
-    // if(exeOpt==false) //Avoid change pos x and pos y again when call ik fn in an ik fn 
+    if(exeOpt==false) //Avoid change pos x and pos y again when call ik fn in an ik fn 
     {
         std::cout<<"\n ========== exe opt ========== \n";
         double tmp = tar_position(0);
@@ -969,66 +969,66 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     std::cout<<"send fai = "<<tarFai<<"\n";
 
     //=== Handle the special case when J7 move from positive to negative or from negative to positive ===
-    // double tmpFai = 10;
-    // std::cout<<"Curr_J7  = "<<robotis_framework::sign(Curr_Ang[7])<<"\n";
-    // std::cout<<"angle[6] = "<<robotis_framework::sign(angle[6])<<"\n";
-    // std::cout<<"Curr_J7  = "<<(Curr_Ang[6])<<"\n";
-    // std::cout<<"angle[6] = "<<(angle[6])<<"\n";
-    // std::cout<<"Curr_Ang_Sum = "<<Curr_Ang_Sum<<"\n";
-    // if(( robotis_framework::sign(Curr_Ang[6]) != robotis_framework::sign(angle[6]) )&&(fabs(Curr_Ang_Sum)>1))
-    // {
-    //     static int recurr_ik_cnt = 0;
-    //     double tmp_fai = 0;
-    //     std::cout<<"Handle the special case when J7 move from positive to negative or from negative to positive\n";
-    //     Eigen::MatrixXd new_pos; 
-    //     new_pos = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);   
-    //     new_pos <<position(0), position(1), position(2);
-    //     Eigen::MatrixXd new_ori = Eigen::MatrixXd::Zero(3, 1);
-    //     for(int i=0;i<=2;i++)
-    //     {
-    //         new_ori(i, 0) = tar_orientation(i, 0);
-    //     }
-    //     //--------method1 (OK)------------
-    //     if(recurr_ik_cnt==0)
-    //     {
-    //         recurr_ik_cnt++;
-    //         tmp_fai = robotis_framework::sign(angle[6])*10*M_PI/180;
-    //         std::cout<<" ======= new fai = "<<tmp_fai<<"\n";
-    //         ik(new_pos, new_ori, tarFai = tmp_fai, exeOpt=true);
+    double tmpFai = 10;
+    std::cout<<"Curr_J7  = "<<robotis_framework::sign(Curr_Ang[7])<<"\n";
+    std::cout<<"angle[6] = "<<robotis_framework::sign(angle[6])<<"\n";
+    std::cout<<"Curr_J7  = "<<(Curr_Ang[6])<<"\n";
+    std::cout<<"angle[6] = "<<(angle[6])<<"\n";
+    std::cout<<"Curr_Ang_Sum = "<<Curr_Ang_Sum<<"\n";
+    if(( robotis_framework::sign(Curr_Ang[6]) != robotis_framework::sign(angle[6]) )&&(fabs(Curr_Ang_Sum)>1))
+    {
+        static int recurr_ik_cnt = 0;
+        double tmp_fai = 0;
+        std::cout<<"Handle the special case when J7 move from positive to negative or from negative to positive\n";
+        Eigen::MatrixXd new_pos; 
+        new_pos = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);   
+        new_pos <<position(0), position(1), position(2);
+        Eigen::MatrixXd new_ori = Eigen::MatrixXd::Zero(3, 1);
+        for(int i=0;i<=2;i++)
+        {
+            new_ori(i, 0) = tar_orientation(i, 0);
+        }
+        //--------method1 (OK)------------
+        if(recurr_ik_cnt==0)
+        {
+            recurr_ik_cnt++;
+            tmp_fai = robotis_framework::sign(angle[6])*10*M_PI/180;
+            std::cout<<" ======= new fai = "<<tmp_fai<<"\n";
+            // ik(new_pos, new_ori, tarFai = tmp_fai, exeOpt=true);
             
-    //     }
-    //     recurr_ik_cnt = 0;
-        //---------method2-------------
+        }
+        recurr_ik_cnt = 0;
+        // //---------method2-------------
         // // if(exeOpt==true)
-        // {
-        //     recurr_ik_cnt++;
-        //     if(recurr_ik_cnt==1)        
-        //     {
-        //         tmp_fai = -10;
-        //         std::cout<<"send new tarFai = "<<tmp_fai<<"\n";
+        // // {
+        // //     recurr_ik_cnt++;
+        // //     if(recurr_ik_cnt==1)        
+        // //     {
+        // //         tmp_fai = -10;
+        // //         std::cout<<"send new tarFai = "<<tmp_fai<<"\n";
                 
-        //     }
-        //     else if(recurr_ik_cnt==2)    
-        //     {
-        //         tmp_fai = 10;
-        //         std::cout<<"send new tarFai = "<<tmp_fai<<"\n";
-        //     }
-        //     else
-        //     {
-        //         tmp_fai = 0;
-        //         std::cout<<"\n====== Either 10 or -10 cannot handle this case!!! ====== \n";
-        //         recurr_ik_cnt=0;
-        //     }
-        // }
-        // if(recurr_ik_cnt<=2)
-        // {
-        //     std::cout<<"new tarFai = "<<tmp_fai<<"\n";
-        //     ik(new_pos, new_ori, tarFai = tmp_fai*M_PI/180, exeOpt=true);
-        // }
-        //--------------------------------
-        // for (int i = 0; i < MAX_JOINT_ID; i++)
-        //     std::cout <<"[new ik output]:Joint"<<i+1<<" is  "<<angle[i]*180.0 / M_PI<<std::endl;
-    // }
+        // //     }
+        // //     else if(recurr_ik_cnt==2)    
+        // //     {
+        // //         tmp_fai = 10;
+        // //         std::cout<<"send new tarFai = "<<tmp_fai<<"\n";
+        // //     }
+        // //     else
+        // //     {
+        // //         tmp_fai = 0;
+        // //         std::cout<<"\n====== Either 10 or -10 cannot handle this case!!! ====== \n";
+        // //         recurr_ik_cnt=0;
+        // //     }
+        // // }
+        // // if(recurr_ik_cnt<=2)
+        // // {
+        // //     std::cout<<"new tarFai = "<<tmp_fai<<"\n";
+        // //     ik(new_pos, new_ori, tarFai = tmp_fai*M_PI/180, exeOpt=true);
+        // // }
+        // // --------------------------------
+        for (int i = 0; i < MAX_JOINT_ID; i++)
+            std::cout <<"[new ik output]:Joint"<<i+1<<" is  "<<angle[i]*180.0 / M_PI<<std::endl;
+    }
     //--------------------------------------------------------------------------------------------
     
     return true;
