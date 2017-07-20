@@ -45,6 +45,9 @@ Recover2InitPos = 17
 NeetStep = 18
 LeavedBin = 19
 LeaveBox = 20
+RobotMove2PlaceBin = 21
+Go2Place = 22
+LeaveCoverBin = 23
 
 PhotoPose = 26
 VisionProcess = 27
@@ -93,6 +96,10 @@ class PickTask:
             self.obj_pose_unsuccess()
         else:
             print('CurrentTask:', self.now_pick.item, 'Closest:', result.object_name)
+            if self.task_state == 'cover':
+                self.obj_pose_success(result)
+                return
+
             if result.object_name == self.now_pick.item:
                 self.obj_pose_success(result)
             else:
@@ -223,7 +230,6 @@ class PickTask:
         self.pick_list = list(self.pick_source)
         self.pick_get_one(self.pick_list)
         self.state = RobotMove2Bin
-        self.print_task_list()
 
     def pick_core(self):
         """Main procedure of finite state machine."""
@@ -368,7 +374,7 @@ class PickTask:
             self.state = WaitRobot
             self.next_state = LeaveBin
 
-            self.Arm.relative_xyz_base(z=0.03)
+            self.Arm.relative_xyz_base(z=0.025)
 
         # Move out of bin
         elif self.state == LeaveBin:
@@ -377,7 +383,7 @@ class PickTask:
 
             # Change state
             self.state = WaitRobot
-            self.next_state = RobotMove2Box
+            self.next_state = LeavedBin
 
             # self.Arm.relative_move_nsa(a=-0.05)
             self.Arm.relative_xyz_base(x=-.18)
@@ -389,10 +395,13 @@ class PickTask:
 
             # Change state
             self.state = WaitRobot
-            self.next_state = RobotMove2Box
+            if self.task_state == 'pick':
+                self.next_state = RobotMove2Box
+            else:
+                self.next_state = RobotMove2PlaceBin
 
-            self.Arm.pub_ikCmd('ptp', (0.3, 0, 0.3), (-90, 0, 0))
-            # self.Arm.relative_xyz_base(x=-.1)
+            self.Arm.pub_ikCmd('ptp', (0.3, 0, 0.2), (-90, 0, 0))
+            print('Task state:', self.task_state)
 
         # Move to target box
         elif self.state == RobotMove2Box:
@@ -442,7 +451,11 @@ class PickTask:
             self.next_state = LeaveBox
 
             gripper_vaccum_off()
-            self.update_location_file()
+
+            if self.task_state == 'pick':
+                self.update_location_file()
+            else:
+                self.next_state = LeaveCoverBin
 
         # Leave box
         elif self.state == LeaveBox:
@@ -455,15 +468,40 @@ class PickTask:
 
             self.Arm.relative_move_nsa(a=-.15)
 
-        elif self.state == Recover2InitPos:
-            self.info = "Arm Recover2InitPos"
+        elif self.state == RobotMove2PlaceBin:
+            self.info = "(GoBin) Robot Move to Bin {}".format('d')
             print(self.info)
 
             # Change state
             self.state = WaitRobot
-            self.next_state = FinishTask
+            self.next_state = Go2Place
 
-            self.Arm.pub_ikCmd('ptp', (0.35, 0, 0.22), (-90, 0, 0))
+            self.Is_BaseShiftOK = False
+            self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'd') + _LEFT_SHIFT)
+            rospy.sleep(0.3)
+            self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'd'))
+
+        # Move into bin
+        elif self.state == Go2Place:
+            self.info = "(Gobin) Arm Go to Place"
+            print(self.info)
+
+            # Change state
+            self.state = WaitRobot
+            self.next_state = PlaceObj
+
+            self.Arm.relative_move_nsa(a=.15)
+
+        elif self.state == LeaveCoverBin:
+            self.info = "(Gobin) Arm Leave Cover Bin"
+            print(self.info)
+
+            # Change state
+            self.state = WaitRobot
+            self.next_state = RobotMove2Bin
+
+            self.Arm.relative_move_nsa(a=-.15)
+            self.task_state = 'pick'
 
         # ===============================================================
 
@@ -491,17 +529,21 @@ class PickTask:
         elif self.state == FinishTask:
             self.Is_BaseShiftOK = False
             self.state = RobotMove2Bin
+            self.print_task_list()
 
             # Can get next task from pick list
             if self.pick_get_one(self.pick_list):
                 self.info = "Finish Pick One Object"
+                self.task_state = 'pick'
+            elif self.pick_get_one(self.cover_list):
+                self.info = "Finish Pick One Object and Execute cover list"
+                self.task_state = 'cover'
             # elif self.pick_get_one(self.fail_list):
             #     self.info = "Finish Pick One Object and Execute Fail list"
             else:
                 self.task_finish()
                 self.info = "Finish Pick All of Task"
             print(self.info)
-            self.print_task_list()
 
     def check_vaccum_by_next_state(self, n_s):
         """Checking status of vacuum is hold."""
@@ -549,6 +591,7 @@ class PickTask:
         self.success_list = list()
         self.cover_list = list()
         self.fail_list = list()
+        self.task_state = 'pick'
 
         self.item_location = None
         self.order = None
@@ -870,9 +913,9 @@ def _test():
         lm = LM_Control.CLM_Control()
         s = PickTask(arm, lm)
 
-        # s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'a') + _LEFT_SHIFT)
+        # s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'd') + _LEFT_SHIFT)
         # rospy.sleep(0.3)
-        # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a'))
+        # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'd'))
 
         # s.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
         # return
