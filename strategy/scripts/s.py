@@ -178,8 +178,32 @@ if __name__ == '__main__':
         # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 170, 0))
         # s.Arm.relative_xyz_base(x = 0.0612402290131, y = -0.0987435177733, z = -0.295083506803)
 
-        s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 170, 0))
-        s.Arm.relative_move_xyz_rot_pry(x = 0.0612402290131, y = -0.0987435177733, z = -0.2)
+        ### 1 (OK)
+        # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 0, 0), -10)
+        # s.Arm.relative_rot_nsa(roll = 170.096292583)
+        # s.Arm.relative_move_xyz_rot_pry(x = 0.0612402290131, y = -0.0987435177733, z = -0.2)
+        # #===========
+        # s.Arm.relative_move_xyz_rot_pry(z = 0.2)
+
+        # ### 2
+        s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 0, 0))
+        s.Arm.relative_rot_nsa(roll = -179.096292583)
+        s.Arm.relative_xyz_base(x = -0.167332398274, y = 0.123866805961, z = -0.2)
+        # #===========
+        # LM up to leave tote
+        # s.Arm.pub_ikCmd('ptp', (0.5, 0.0, 0.15), (-180, 0, 0))  
+
+# ### 3
+# task.Arm.pub_ikCmd('ptp', (0.45, 0.00, 0.25), (-180, 0, 0))
+# self.Arm.relative_rot_nsa(roll = 174.348882876)
+# self.Arm.gripper_suction_deg(71.9343049184)
+# self.Arm.relative_xyz_base(x = -0.121931131417, y = -0.0443766107613, z = -0.329978857648)
+
+# ### 4
+# task.Arm.pub_ikCmd('ptp', (0.45, 0.00, 0.25), (-180, 0, 0))
+# self.Arm.relative_rot_nsa(roll = -168.12720313)
+# self.Arm.gripper_suction_deg(87.1377459354)
+# self.Arm.relative_xyz_base(x = -0.0718525525253, y = 0.0903645809188, z = -0.343695944003)
         
         
         # ----- Temp  Test------#
