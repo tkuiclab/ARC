@@ -114,6 +114,19 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 
       //write pcd
       write_pcd_2_rospack(scene_cloud,"scene_cloud.pcd");
+
+  // for test
+  //pass_through_from_arg(scene_cloud, g_argc, g_argv, pass_through_cloud);
+
+  PCT::Ptr pass_through_cloud(new PCT);
+  get_pass_through_points(scene_cloud,  pass_through_cloud,
+                        limit_x_min, limit_x_max,
+                        limit_y_min, limit_y_max,
+                        limit_z_min, limit_z_max
+                     
+                        );
+   write_pcd_2_rospack(pass_through_cloud, "_scene_cloud_pass_through.pcd" );
+
 #endif
       
       //state = CALL_RCNN;
@@ -388,20 +401,6 @@ void ObjEstAction::unknown_closest(){
   std::cout << "USE Min_Size = " << min_size << std::endl;
 
 
-
-#ifdef SaveCloud
-  // for test
-  //pass_through_from_arg(scene_cloud, g_argc, g_argv, pass_through_cloud);
-
-  PCT::Ptr pass_through_cloud(new PCT);
-  get_pass_through_points(scene_cloud,  pass_through_cloud,
-                        limit_x_min, limit_x_max,
-                        limit_y_min, limit_y_max,
-                        limit_z_min, limit_z_max
-                     
-                        );
-   write_pcd_2_rospack(pass_through_cloud, "_cpc_pass_through.pcd" );
-#endif
 
   // float pass_x_min, pass_x_max, pass_y_min, pass_y_max,pass_z_min, pass_z_max;
 
