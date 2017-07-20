@@ -22,6 +22,7 @@ from config import *
 from gripper import *
 from task_parser import *
 from get_obj_info import order_boxes
+from object_distribution import bin_dict
 
 # Define State jmp
 WaitTask = 1        # Wait Task
@@ -53,8 +54,6 @@ CheckIsHold = 30
 
 _REL_GO_BIN_FRONT = .1
 _BIN_MAX_DOWN = .135
-_CAM_2_TOOL_Z = .11
-_CAM_2_TOOL_Y = .08
 
 obj_dis = 0.02
 
@@ -65,7 +64,8 @@ check_next_states = [
     Down2Place
 ]
 
-_RIGHT_SHIFT = 18000
+_LEFT_SHIFT = 18000
+_DOWN_SHIFT = 10000
 
 
 class PickTask:
@@ -93,12 +93,8 @@ class PickTask:
         if not result.success:
             self.obj_pose_unsuccess()
         else:
-            print('Highest:', result.object_name, self.now_pick.item)
+            print('CurrentTask:', self.now_pick.item, 'Closest:', result.object_name)
             if result.object_name == self.now_pick.item:
-                # self.obj_pose = result.object_pose
-                # print('obj_pose {}'.format(self.obj_pose))
-                # self.state = self.next_state
-                # self.oe_ret = result
                 self.obj_pose_success(result)
             else:
                 print('Search other item in same bin')
@@ -106,36 +102,43 @@ class PickTask:
                 for i, task in enumerate(self.pick_list):
                     if (task.from_bin.lower() == self.bin and
                             task.item == result.object_name):
-                        self.state = VisionProcess
-                        self.pick_list.append(self.now_pick)
+                        # self.state = VisionProcess
+                        self.pick_list.insert(i+1, self.now_pick)
                         self.pick_get_one(self.pick_list, i)
                         print('Current item:', self.now_pick.item)
-                        # self.obj_pose_success(result)
+                        self.obj_pose_success(result)
                         return
-                self.fail_list.append(self.now_pick)
+                self.cover_list.append(self.now_pick)
 
     def obj_pose_success(self, result):
-        self.obj_pose = result.object_pose
-        print('obj_pose {}'.format(self.obj_pose))
         self.state = self.next_state
-        self.oe_ret = result
+        self.obj_pose_ret = result
+        print('obj_pose {}'.format(self.obj_pose_ret.obj_pose))
 
     def obj_pose_unsuccess(self):
         rospy.logwarn('ROI Fail!! obj -> {}'.format(self.now_pick.item))
         self.state = FinishTask
-        self.oe_ret = None
+        self.obj_pose_ret = None
         # Add the item to fail list
         self.fail_list.append(self.now_pick)
 
+    def get_bin_dims(self, bin):
+        bin_id = ord(bin) - ord('a')
+        # dims of the box
+        return bin_dict[bin_id].L, bin_dict[bin_id].W, bin_dict[bin_id].H
+
     def request_highest_item(self):
         if len(self.detect_all_in_bin):
+            W, _, H = get_bin_dims(self.bin)
             goal = obj_pose.msg.ObjectPoseGoal(
-                object_name = "<Closest>",
-                object_list = self.detect_all_in_bin
+                object_name="<Closest>",
+                object_list=self.detect_all_in_bin,
+                # [xmin, xmax, ymin, ymax, zmin, zmax]
+                limit_ary=[-W/2.0, W/2.0, 0, H/2.0, 0.3, 0.6]
             )
             self.__obj_pose_client.send_goal(
                     goal,
-                    feedback_cb = self.obj_pose_feedback_cb, 
+                    feedback_cb=self.obj_pose_feedback_cb, 
                     done_cb=self.obj_pose_done_cb
             )
             return True
@@ -162,6 +165,17 @@ class PickTask:
             for bin_item in curbin['contents']:
                 if d_item.object_name == bin_item:
                     self.detect_all_in_bin.append(d_item.object_name)
+
+    def print_task_list(self):
+        print('pick_list')
+        for i, task in enumerate(self.pick_list):
+            print(i, task.item, task.from_bin, task.to_box)
+        print('cover_list')
+        for i, task in enumerate(self.cover_list):
+            print(i, task.item, task.from_bin, task.to_box)
+        print('fail_list')
+        for i, task in enumerate(self.fail_list):
+            print(i, task.item, task.from_bin, task.to_box)
 
     def ifsuck_cb(self, res):
         """suction status callback."""
@@ -225,20 +239,14 @@ class PickTask:
 
             # Move to bin using linear mobile
             self.Is_BaseShiftOK = False
-            self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.bin) + _RIGHT_SHIFT)
+            self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.bin) + _LEFT_SHIFT)
             rospy.sleep(0.3)
-            self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.bin) + 10000)
+            self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.bin) + _DOWN_SHIFT)
             # Arm move to initial pose
             gripper_suction_up()
             self.Arm.pub_ikCmd('ptp', (0.3, 0.0, 0.3), (-90, 0, 0))
             # self.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.3), (-90, 0, 0))
-
-            print('pick_list')
-            for i, task in enumerate(self.pick_list):
-                print(i, task.item, task.from_bin, task.to_box)
-            print('fail_list')
-            for i, task in enumerate(self.fail_list):
-                print(i, task.item, task.from_bin, task.to_box)
+            print_task_list()
 
         elif self.state == Init_Pos:
             self.info = "(GoBin) Arm To Init_Pos"
@@ -264,24 +272,6 @@ class PickTask:
             # self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.35), (-100, 0, 0))
             self.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
 
-        # # Vision processing
-        # elif self.state == VisionProcess:
-        #     self.info = "(Catch) Request Vision Process: {}".format(self.now_pick.item)
-        #     print(self.info)
-
-        #     # ActionLib request
-        #     goal = obj_pose.msg.ObjectPoseGoal(object_name = self.now_pick.item)
-        #     self.__obj_pose_client.send_goal(
-        #         goal,
-        #         feedback_cb=self.obj_pose_feedback_cb,
-        #         done_cb=self.obj_pose_done_cb
-        #     )
-
-        #     # Change state
-        #     self.state = WaitVision
-        #     # self.next_state = Move2BinFront
-        #     self.next_state = NeetStep
-
         elif self.state == VisionProcess:
             self.info = "(Vision) Request Highest"
             print(self.info)
@@ -305,9 +295,10 @@ class PickTask:
             self.state = WaitRobot
             self.next_state = PickObj
 
-            if self.oe_ret is not None:
-                # self.tool_2_obj_bin_straight(self.oe_ret.object_pose, self.oe_ret.norm)
-                self.suction_angle = self.tool_2_obj_bin(self.oe_ret.object_pose, self.oe_ret.norm)
+            if self.obj_pose_ret is not None:
+                # self.tool_2_obj_bin_straight(self.obj_pose_ret.object_pose, self.obj_pose_ret.norm)
+                self.suction_angle = self.tool_2_obj_bin(
+                    self.obj_pose_ret.object_pose, self.obj_pose_ret.norm)
 
         # Arm move to bin front
         elif self.state == Move2BinFront:
@@ -329,8 +320,8 @@ class PickTask:
             self.state = WaitRobot
             self.next_state = PickObj
 
-            tool_x = self.obj_pose.linear.x
-            tool_y = self.obj_pose.linear.y + _CAM_2_TOOL_Y
+            tool_x = self.obj_pose_ret.obj_pose.linear.x
+            tool_y = self.obj_pose_ret.obj_pose.linear.y
             # Fixed height to avoid collision
             if tool_y > _BIN_MAX_DOWN:
                 tool_y = _BIN_MAX_DOWN
@@ -359,7 +350,8 @@ class PickTask:
             self.next_state = Up2LeaveBin
 
             # self.Arm.relative_move_suction('ptp', self.suction_angle, (obj_dis + 0.01))
-            self.Arm.relative_move_suction('ptp', self.suction_angle, (obj_dis))
+            if not self.suck_num:
+                self.Arm.relative_move_suction('ptp', self.suction_angle, (obj_dis))
 
         # Move upper
         elif self.state == Up2LeaveBin:
@@ -382,9 +374,7 @@ class PickTask:
             self.next_state = RobotMove2Box
 
             # self.Arm.relative_move_nsa(a=-0.05)
-            tool_z = self.obj_pose.linear.z - _CAM_2_TOOL_Z - .1
             self.Arm.relative_xyz_base(x=-.16)
-            print('(Catch) LeaveBin dis: {}'.format(tool_z))
 
         # Move out of bin
         elif self.state == LeavedBin:
@@ -499,8 +489,8 @@ class PickTask:
             # Can get next task from pick list
             if self.pick_get_one(self.pick_list):
                 self.info = "Finish Pick One Object"
-            elif self.pick_get_one(self.fail_list):
-                self.info = "Finish Pick One Object and Execute Fail list"
+            # elif self.pick_get_one(self.fail_list):
+            #     self.info = "Finish Pick One Object and Execute Fail list"
             else:
                 self.task_finish()
                 self.info = "Finish Pick All of Task"
@@ -548,6 +538,7 @@ class PickTask:
         """Initial all of variables."""
         self.pick_source = None
         self.pick_list = None
+        self.cover_list = list()
         self.fail_list = list()
 
         self.item_location = None
@@ -870,9 +861,9 @@ def _test():
         lm = LM_Control.CLM_Control()
         s = PickTask(arm, lm)
 
-        s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'a') + 18000)
+        s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'a') + _LEFT_SHIFT)
         rospy.sleep(0.3)
-        s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a') + 10000)
+        s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a') + _DOWN_SHIFT)
         s.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
         return
 
