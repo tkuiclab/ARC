@@ -111,7 +111,7 @@ void get_pass_through_points(PCT::Ptr cloud_in,
     pass.setFilterFieldName ("z");
     pass.setFilterLimits (min_z, max_z);
 
-    //std::cout << "PT->min_z= " << min_z << ", max_z = " << max_z << std::endl;
+    std::cout << "PT->min_z= " << min_z << ", max_z = " << max_z << std::endl;
 
 
     pass.setInputCloud (now_cloud);
@@ -132,7 +132,7 @@ void get_pass_through_points(PCT::Ptr cloud_in,
     pass.setFilterFieldName ("x");
     pass.setFilterLimits (min_x, max_x);
 
-    //std::cout << "PT->min_x= " << min_x << ", max_x = " << max_x << std::endl;
+    std::cout << "PT->min_x= " << min_x << ", max_x = " << max_x << std::endl;
 
 
     pass.setInputCloud (now_cloud);

@@ -3,14 +3,30 @@
 import get_obj_info as box_info
 
 
+LM_BASE_LIMIT = 60000
+LM_VERTICAL_LIMIT = 80000
+
 def GetShift(Target_Type, LM_Dir, Target):
     """ Get the motion pulse of linear motor """
     # Bin
     if Target_Type == 'Bin':
         if Target in BinId:
             if LM_Dir == 'x':
+                # p = BinShift_X[BinId.index(Target)]
+                # if p > LM_BASE_LIMIT:
+                #     p = LM_BASE_LIMIT
+                # elif p < 0:
+                #     p = 0
+                # return  p
                 return BinShift_X[BinId.index(Target)]
+
             elif LM_Dir=='z':
+                # p = BinShift_Z[BinId.index(Target)]
+                # if p > LM_VERTICAL_LIMIT:
+                #     p = LM_VERTICAL_LIMIT
+                # elif p < 0:
+                #     p = 0
+                # return  p
                 return BinShift_Z[BinId.index(Target)]
             else:
                 print 'Error input Bin dir'
@@ -63,6 +79,8 @@ def cal_box_x_shift():
     return tuple(pulse)
 
 
+
+
 # Initialize Bin's Information
 # BinId 	   		= [   'a',   'b',   'c',   'd',   'e',   'f',   'g',   'h',   'i',   'j',   'k',   'l' ,   'z']
 # BinShift_Z 	    = [     0,     0,     0, 27000, 27000, 27000, 50000, 52000, 50000, 75000, 75000, 75000 , 80000]
@@ -71,9 +89,13 @@ def cal_box_x_shift():
 
 # Note LM 1000 step -> 1cm
 # New Initialize Bin's Information
-BinId       = [   'a',   'b',   'c',   'd',   'e',   'f',   'g',   'h',   'i',   'j',   'k',   'l' ,   'z']
-BinShift_X  = [ 39000, 16000,     0, 39000, 17000,  2000, 17000,  2000, 43000, 15000, 32500,     0 , 59000]
-BinShift_Z  = [ 17000, 17000, 17000, 47000, 36000, 36000, 56000, 56000, 77000, 77000, 75000, 75000 , 80000]
+BinId       = [   'a',   'b',   'c',   'd',   'e',   'f',   'g',   'h',   'i',   'j']
+# BinShift_X  = [ 39000, 16000,     0, 39000, 17000,  2000, 17000,  2000, 43000, 15000, 32500,     0 , 59000]
+# BinShift_Z  = [ 17000, 17000, 17000, 47000, 36000, 36000, 56000, 56000, 77000, 77000, 75000, 75000 , 80000]
+
+BinShift_X  = [ 46000,  18000, 2000, 46000, 19000,  3500, 19000,  3500, 54600, 15000]
+BinShift_Z  = [ 10000,  10000,10000, 43000, 29000, 29000, 49000, 49000, 76000, 76000]
+
 
 Bin         = 'a'
 BinCnt      = 0
@@ -93,9 +115,7 @@ ToteShift_Z	= [62000, 76000]
 
 ToteLeave_Z = 40000     # pick (suck)  finish
 
-LM_ID_Base  = 2   # x move for base LM
-LM_ID_Right = 1   # z move for right LM
-LM_ID_Left  = 3   # Z move for left LM
+LM_Right_Arm_Shift = 18000
 
 
 Box_A1 = 'A1'

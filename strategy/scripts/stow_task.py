@@ -21,6 +21,7 @@ from strategy.srv import *
 
 import arm_task_rel
 import LM_Control
+from LM_Control import LM_ID_Base ,LM_ID_Right, LM_ID_Left
 from task_parser import *
 from config import *
 from gripper import *
@@ -62,6 +63,9 @@ Mode_KnownProcess = 1
 Mode_UnknownProcess = 2
 
 
+_LEFT_SHIFT = 18000
+_DOWN_SHIFT = 10000
+
 
 
 # For checking vacuum function
@@ -76,6 +80,7 @@ obj_dis = 0.01
 
 
 Arm_Photo_Index_Max  = 2
+
 
 class StowTask:
 
@@ -181,6 +186,23 @@ class StowTask:
         rospy.sleep(0.3)
         self.LM.pub_LM_Cmd(1, ToteLeave_Z)
 
+    def LM_2_Bin(self, i_bin):
+        self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', i_bin ) + _LEFT_SHIFT)
+        rospy.sleep(0.3)
+        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', i_bin)  + _DOWN_SHIFT)
+
+    def LM_2_Bin_No_Shift(self, i_bin):
+        self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', i_bin ) )
+        rospy.sleep(0.3)
+        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', i_bin)  )
+        
+    def LM_2_Bin_Right_Arm(self, i_bin):
+        self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', i_bin ) + LM_Right_Arm_Shift )
+        rospy.sleep(0.3)
+        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', i_bin)  )
+
+    
+
     def arm_photo_pose(self):
         # self.Arm.pub_ikCmd('ptp', (0.4, 0.00, 0.25), (-180, 0, 0))
         self.Arm.pub_ikCmd('ptp', (0.5, 0.00, 0.15), (-180, 0, 0))
@@ -191,6 +213,10 @@ class StowTask:
 
     def arm_photo_pose_3(self):
         self.Arm.pub_ikCmd('ptp', (0.4, 0.00 , 0.25), (180, 180, 0))
+
+    def arm_leave_tote(self):
+        self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+
 
 
     def tool_2_obj(self, obj_pose, norm, shot_deg = 0): #STOW
@@ -354,7 +380,7 @@ class StowTask:
     def request_unknown_highest_item(self):
         goal = obj_pose.msg.ObjectPoseGoal(
             object_name = "<Unknown_Closest>",
-
+            limit_ary =[-0.14, 0.14, 0,  0.4, 0.3, 0.6]
         )
         self.obj_pose_client.send_goal(
                 goal,
@@ -706,7 +732,8 @@ class StowTask:
  
             #self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
             #self.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.25), (-90, 0, 0) )
-            self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+            #self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+            self.arm_leave_tote()
             
             if self.now_stow_info.gripper_down:
                 gripper_suction_down()
@@ -722,9 +749,10 @@ class StowTask:
             print self.info
     
             self.Is_BaseShiftOK = False
-            self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.now_stow_info.to_bin ))
-            rospy.sleep(0.3)
-            self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.now_stow_info.to_bin ))
+            self.LM_2_Bin(self.now_stow_info.to_bin)
+            # self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.now_stow_info.to_bin ))
+            # rospy.sleep(0.3)
+            # self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.now_stow_info.to_bin ))
         
             
 
