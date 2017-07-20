@@ -66,7 +66,8 @@ Mode_UnknownProcess = 2
 
 # For checking vacuum function
 check_next_states = [
-    LM_LeaveTote,
+    #LM_LeaveTote,
+    ArmLeaveTote,
     LM2Bin,
     ArmPutInBin
 ]
@@ -185,7 +186,12 @@ class StowTask:
         self.Arm.pub_ikCmd('ptp', (0.5, 0.00, 0.15), (-180, 0, 0))
      
     def arm_photo_pose_2(self):
+        self.Arm.pub_ikCmd('ptp', (0.5, 0.00, 0.15), (-180, 0, 0))
+        #self.Arm.pub_ikCmd('ptp', (0.4, 0.00 , 0.25), (180, 180, 0))
+
+    def arm_photo_pose_3(self):
         self.Arm.pub_ikCmd('ptp', (0.4, 0.00 , 0.25), (180, 180, 0))
+
 
     def tool_2_obj(self, obj_pose, norm, shot_deg = 0): #STOW
         p = obj_pose
@@ -518,11 +524,13 @@ class StowTask:
         if self.state == WaitVision:
             return
         elif self.state == LM2Tote: 
-            self.info = "(PhotoPose)"  
+            self.info = "(LM2Tote)"  
+            
             print self.info
 
             self.LM_2_tote()
             #gripper_suction_up()
+            gripper_vaccum_off() 
 
             self.state 			= WaitRobot
             self.next_state 	= PhotoPose 
@@ -554,6 +562,9 @@ class StowTask:
             elif self.arm_photo_index == 2:
                 print '--------Go arm_photo_pose 2--------'
                 self.arm_photo_pose_2()
+            elif self.arm_photo_index == 3:
+                print '--------Go arm_photo_pose 3--------'
+                self.arm_photo_pose_3()
             
             gripper_suction_up()
 
@@ -744,10 +755,15 @@ class StowTask:
             self.info = "(ArmLeaveBin) ArmLeaveBin"
             print self.info
             
-            self.Arm.relative_move_nsa(a = -0.35) 
-
             self.next_state = Recover2InitPos
             self.state 		= WaitRobot
+
+
+            
+
+            self.Arm.relative_move_nsa(a = -0.3) 
+
+            
 
             return
 
@@ -770,6 +786,9 @@ class StowTask:
             change_next_state = False
 
             #print 'self.Last_LMArrive == ' + str(self.Last_LMArrive) + ' and  self.Is_LMArrive ==' + str(self.Is_LMArrive) + ' and self.Is_LMBusy == ' + str(self.Is_LMBusy)
+
+            
+
 
             if self.Last_LMArrive == False and self.Is_LMArrive == True and self.Is_ArmBusy == False:
             #if self.Last_LMArrive == True and self.Is_LMArrive == True and self.Is_LMBusy == False and  self.Is_ArmBusy == False:
@@ -796,6 +815,12 @@ class StowTask:
             #     print '~Robot Ready~'
 
 
+            #print 'self.Arm.is_ikfail = ' + str(self.Arm.is_ikfail)
+            if self.Arm.is_ikfail:
+                rospy.logwarn('In Strategy IK Fail')
+                self.Arm.init()
+                change_next_state = True
+
 
             if change_next_state:
                 
@@ -817,17 +842,17 @@ class StowTask:
                         self.state = FinishOne
                 else:
                     # print('self.mode = Mode_UnknownProcess')
-                    # if self.check_vaccum_by_next_state(self.next_state):
-                    #     self.state 			= self.next_state
-                    # else:
-                    #     self.state 			= LM2Tote
+                    if self.check_vaccum_by_next_state(self.next_state):
+                        self.state 			= self.next_state
+                    else:
+                        self.state 			= LM2Tote
 
-                    self.state 			= self.next_state
+                    #self.state 			= self.next_state
             return
 
         elif self.state == FinishOne:
             self.mlog('FinishOne')
-            gripper_vaccum_off()
+            # gripper_vaccum_off()      move to LM2Tote
             can_get_one = self.stow_get_one()
 
             if can_get_one :
@@ -1026,17 +1051,20 @@ class StowTask:
         
         goal = obj_pose.msg.ObjectPoseGoal(
             object_name = "<Closest>",
-            object_list = ["laugh_out_loud_jokes",
-                            "scotch_sponges",
-                            "duct_tape",
-                            "band_aid_tape",
-                            "irish_spring_soap",
-                            "crayons",
-                            "expo_eraser",
-                            "ice_cube_tray",
-                            "robots_dvd"],
+            # object_list = ["laugh_out_loud_jokes",
+            #                 "scotch_sponges",
+            #                 "duct_tape",
+            #                 "band_aid_tape",
+            #                 "irish_spring_soap",
+            #                 "crayons",
+            #                 "expo_eraser",
+            #                 "ice_cube_tray",
+            #                 "robots_dvd"],
+             object_list = ["tissue_box",
+                             "duct_tape"],
+
             #          [ xmin, xmax, ymin, ymax, zmin, zmax]
-            limit_ary =[-0.3, 0.3, 0,  0.4, 0.3, 0.6]
+            limit_ary =[-0.15, 0.15, 0,  0.3, 0.3, 1.0]
             
         )
 

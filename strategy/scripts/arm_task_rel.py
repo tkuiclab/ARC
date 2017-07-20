@@ -24,13 +24,17 @@ class ArmTask:
     def __init__(self, _name = '/robotis'):
         """Inital object."""
         self.name = _name
+        self.init()
+        
+    def init(self):
+        
         self.__set_pubSub()
         #rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
         self.__is_busy = False
         self.__set_vel_pub.publish(20)
-        
-        
+        self.__ik_fail =False
+
 
     def __set_pubSub(self):
         print "[Arm] name space : " + str(self.name) 
@@ -76,7 +80,9 @@ class ArmTask:
     def __status_callback(self, msg):
         if 'IK Failed' in msg.status_msg:
             rospy.logwarn('ik fail')
-            self.stop_task()
+            self.__ik_fail = True
+            #self.stop_task()
+
 
         elif 'End Trajectory' in msg.status_msg:
             self.__is_busy = False
@@ -94,6 +100,13 @@ class ArmTask:
 
     def home(self):
         self.pub_jointCmd([0,0,0,0, 0,0,0])
+
+    @property
+    def is_ikfail(self):
+        return self.__ik_fail
+
+    def set_speed(self,i_speed):
+        self.__set_vel_pub.publish(i_speed)
 
     def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI, fai=0):
         """Publish msg of ik cmd (deg) to manager node."""
@@ -184,10 +197,10 @@ class ArmTask:
         vec_a = [rot[0][2], rot[1][2], rot[2][2]]
         return vec_n, vec_s, vec_a   
 
-    def relative_move_suction(self, mode='ptp', suction_angle=0, dis=0 ):
+    def relative_move_suction(self, mode='ptp', suction_angle=0, dis=0, blocking = False):
         """Get euler angle and run task."""
         # note:suction_anfle type is degree,  dis is m
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         # ======= Calculate suction vector start ========
@@ -229,13 +242,13 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
-    def relative_move_nsa(self, mode='ptp', n=0, s=0, a=0):
+    def relative_move_nsa(self, mode='ptp', n=0, s=0, a=0, blocking = False):
         """Get euler angle and run task."""
         # note:for nsa rotation only
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb = self.get_fb()
@@ -264,10 +277,10 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
-    def relative_move_nsa_rot_pry(self, mode='ptp', n=0, s=0, a=0, yaw=0, pitch=0, roll=0):
+    def relative_move_nsa_rot_pry(self, mode='ptp', n=0, s=0, a=0, yaw=0, pitch=0, roll=0, blocking = False):
         """Get euler angle and run task."""
         # ============================================================================
         # note1: for nsa rotation only
@@ -275,7 +288,7 @@ class ArmTask:
         #        however, in ik cmd, it will first move along with nsa, then rot pry
         # ============================================================================
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb = self.get_fb()
@@ -308,7 +321,7 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+        while self.__is_busy  and blocking:
             rospy.sleep(.1)
 
 
@@ -479,9 +492,9 @@ class ArmTask:
         # while self.__is_busy:
         #     rospy.sleep(.1)
 
-    def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0, fai=0):
+    def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0, fai=0, blocking = False):
         """relative move xyz with manipulator base axis."""
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb = self.get_fb()
@@ -510,7 +523,7 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
     @property

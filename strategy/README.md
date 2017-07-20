@@ -71,3 +71,7 @@ rosrun darkflow_detect object_detect.py
 rosrun obj_pose object_pose_estimator
 (rosrun obj_pose object_pose_estimator /camera/depth_registered/points:=/camera/depth/points)
 rosrun strategy t2o_robot.py
+
+
+# for checking pass through
+~/arc_ws/src/ARC/vision/obj_pose/pcd_file$ pcl_viewer _scene_cloud_pass_through.pcd

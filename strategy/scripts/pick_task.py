@@ -870,9 +870,9 @@ def _test():
         lm = LM_Control.CLM_Control()
         s = PickTask(arm, lm)
 
-        s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'a') + 18000)
+        s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'b') + 18000)
         rospy.sleep(0.3)
-        s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a') + 10000)
+        s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'b') + 10000)
         s.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
         return
 
