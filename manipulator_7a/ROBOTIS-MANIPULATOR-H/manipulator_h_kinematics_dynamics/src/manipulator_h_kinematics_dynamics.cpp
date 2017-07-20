@@ -665,8 +665,22 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
 
     /* desired cmd */
     double pitch, roll, yaw;
+
+    // // === save some of the curr angle, help to detect and handle special case ===
+    double Curr_Ang[7];
+    double Curr_Ang_Sum = 0;
+    for(int i=1;i<=7;i++)
+    {
+        Curr_Ang[i-1] = manipulator_link_data_[i]->joint_angle_*180/M_PI;
+        Curr_Ang_Sum += fabs(Curr_Ang[i-1]);
+        std::cout<<"=== orig joint ang = "<<manipulator_link_data_[i]->joint_angle_*180/M_PI<<"\n";
+    }
         
-    // if(exeOpt==true) //Avoid change pos x and pos y again when call ik fn in an ik fn 
+    double Curr_J5 = manipulator_link_data_[6]->joint_angle_;
+    double Curr_J7 = manipulator_link_data_[7]->joint_angle_;
+    // //---------------------------------------------------------------------
+        
+    // if(exeOpt==false) //Avoid change pos x and pos y again when call ik fn in an ik fn 
     {
         std::cout<<"\n ========== exe opt ========== \n";
         double tmp = tar_position(0);
@@ -827,26 +841,22 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
 
     int Wrist = -1; // Wrist Up =  1, Wrist Down = -1
 
-    for(int i=1;i<=7;i++)
-        std::cout<<"=== orig joint ang = "<<manipulator_link_data_[i]->joint_angle_*180/M_PI<<"\n";
-    double Curr_J5 = manipulator_link_data_[6]->joint_angle_;
+    //=== Determine better wrist direct to avoid large rotation in wrist ===Curr_Ang
     double tmp_j5_1 = atan2(-1 * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
     double tmp_j5_2 = atan2( 1 * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
-    // double tmp_j5_1 = atan2(-R4_7(1, 2), -R4_7(0, 2));
-    // double tmp_j5_2 = atan2( R4_7(1, 2),  R4_7(0, 2));
     std::cout<<"=== Curr_J5 = "<<Curr_J5*180/M_PI<<"\n";
     std::cout<<"=== tmp_j5_1 = "<<tmp_j5_1*180/M_PI<<"\n";
     std::cout<<"=== tmp_j5_2 = "<<tmp_j5_2*180/M_PI<<"\n";
 
-    if( fabs(Curr_J5-tmp_j5_1) < fabs(Curr_J5-tmp_j5_2) )
-    // if( fabs(Curr_J5-tmp_j5_1) > fabs(Curr_J5-tmp_j5_2) )
-    // if( fabs(tmp_j5_1 - tmp_j5_2) > 120*M_PI/180.0 )
+    // if( fabs(Curr_J5-tmp_j5_1) < fabs(Curr_J5-tmp_j5_2) )
+    if( fabs(Curr_Ang[5]-tmp_j5_1) < fabs(Curr_Ang[5]-tmp_j5_2) )
     {
         Wrist = 1;
         std::cout<<"wrist = 1\n";
     }
     else
         std::cout<<"wrist = -1\n";
+    //=======================================================================
 
     /* joint 6 */
     angle[5] = atan2(Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
@@ -874,7 +884,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
             angle[6] = atan2(R4_7(2, 1), -R4_7(2, 0));
             if (fabs(angle[4]) > 120.0 * M_PI / 180.0)
             {
-                std::cout<<"J4 > 120\n";
+                // std::cout<<"J4 > 120\n";
                 angle[5] = atan2(-Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
                 angle[4] = atan2(-R4_7(1, 2), -R4_7(0, 2));
                 angle[6] = atan2(-R4_7(2, 1),  R4_7(2, 0));
@@ -886,7 +896,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
             angle[6] = atan2(-R4_7(2, 1),  R4_7(2, 0));
             if (fabs(angle[4]) > 120.0 * M_PI / 180.0)
             {
-                std::cout<<"J4 > 120\n";
+                // std::cout<<"J4 > 120\n";
                 angle[5] = atan2(-Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
                 angle[4] = atan2(R4_7(1, 2),  R4_7(0, 2));
                 angle[6] = atan2(R4_7(2, 1), -R4_7(2, 0));
@@ -958,23 +968,68 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     }
     std::cout<<"send fai = "<<tarFai<<"\n";
 
-    // // Handle the special case when J7 move from positive to negative or from negative to positive
-    // double Curr_J7 = manipulator_link_data_[7]->joint_angle_;
+    //=== Handle the special case when J7 move from positive to negative or from negative to positive ===
     // double tmpFai = 10;
-    // if( robotis_framework::sign(Curr_J7) != robotis_framework::sign(angle[6]) )
+    // std::cout<<"Curr_J7  = "<<robotis_framework::sign(Curr_Ang[7])<<"\n";
+    // std::cout<<"angle[6] = "<<robotis_framework::sign(angle[6])<<"\n";
+    // std::cout<<"Curr_J7  = "<<(Curr_Ang[6])<<"\n";
+    // std::cout<<"angle[6] = "<<(angle[6])<<"\n";
+    // std::cout<<"Curr_Ang_Sum = "<<Curr_Ang_Sum<<"\n";
+    // if(( robotis_framework::sign(Curr_Ang[6]) != robotis_framework::sign(angle[6]) )&&(fabs(Curr_Ang_Sum)>1))
     // {
+    //     static int recurr_ik_cnt = 0;
+    //     double tmp_fai = 0;
     //     std::cout<<"Handle the special case when J7 move from positive to negative or from negative to positive\n";
-    //     Eigen::MatrixXd new_pos;    new_pos <<0,0,0;
+    //     Eigen::MatrixXd new_pos; 
+    //     new_pos = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);   
+    //     new_pos <<position(0), position(1), position(2);
     //     Eigen::MatrixXd new_ori = Eigen::MatrixXd::Zero(3, 1);
     //     for(int i=0;i<=2;i++)
     //     {
-    //         new_pos(i)    = tar_position(i);
     //         new_ori(i, 0) = tar_orientation(i, 0);
     //     }
-        
-    //     ik(new_pos, new_ori, tarFai = 10, true);
+    //     //--------method1 (OK)------------
+    //     if(recurr_ik_cnt==0)
+    //     {
+    //         recurr_ik_cnt++;
+    //         tmp_fai = robotis_framework::sign(angle[6])*10*M_PI/180;
+    //         std::cout<<" ======= new fai = "<<tmp_fai<<"\n";
+    //         ik(new_pos, new_ori, tarFai = tmp_fai, exeOpt=true);
+            
+    //     }
+    //     recurr_ik_cnt = 0;
+        //---------method2-------------
+        // // if(exeOpt==true)
+        // {
+        //     recurr_ik_cnt++;
+        //     if(recurr_ik_cnt==1)        
+        //     {
+        //         tmp_fai = -10;
+        //         std::cout<<"send new tarFai = "<<tmp_fai<<"\n";
+                
+        //     }
+        //     else if(recurr_ik_cnt==2)    
+        //     {
+        //         tmp_fai = 10;
+        //         std::cout<<"send new tarFai = "<<tmp_fai<<"\n";
+        //     }
+        //     else
+        //     {
+        //         tmp_fai = 0;
+        //         std::cout<<"\n====== Either 10 or -10 cannot handle this case!!! ====== \n";
+        //         recurr_ik_cnt=0;
+        //     }
+        // }
+        // if(recurr_ik_cnt<=2)
+        // {
+        //     std::cout<<"new tarFai = "<<tmp_fai<<"\n";
+        //     ik(new_pos, new_ori, tarFai = tmp_fai*M_PI/180, exeOpt=true);
+        // }
+        //--------------------------------
+        // for (int i = 0; i < MAX_JOINT_ID; i++)
+        //     std::cout <<"[new ik output]:Joint"<<i+1<<" is  "<<angle[i]*180.0 / M_PI<<std::endl;
     // }
-    // //--------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------
     
     return true;
 }
