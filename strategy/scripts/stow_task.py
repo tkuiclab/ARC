@@ -291,7 +291,9 @@ class StowTask:
         if len(self.detect_all_in_stow_list) > 0:
             goal = obj_pose.msg.ObjectPoseGoal(
                 object_name = "<Closest>",
-                object_list = self.detect_all_in_stow_list
+                object_list = self.detect_all_in_stow_list,
+                limit_ary =[-0.3, 0.3, 0,  0.4, 0.3, 0.6]
+
             )
 
             self.obj_pose_client.send_goal(
@@ -712,7 +714,8 @@ class StowTask:
             self.state 		= WaitRobot
 
             #self.Arm.relative_move_nsa(a = 0.25) 
-            self.Arm.relative_move_nsa(a = 0.35) 
+            #self.Arm.relative_move_nsa(a = 0.35) 
+            self.Arm.relative_move_nsa(a = 0.2)
             return
 
         elif self.state == GripperOff:
