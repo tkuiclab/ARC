@@ -321,15 +321,15 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy  and blocking:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
 
-    def relative_move_xyz_rot_pry(self, mode='ptp', x=0, y=0, z=0, yaw=0, pitch=0, roll=0, fai=0):
+    def relative_move_xyz_rot_pry(self, mode='ptp', x=0, y=0, z=0, yaw=0, pitch=0, roll=0, fai=0, blocking=False):
         """Get euler angle and run task."""
         # note:for nsa rotation only
         # euler[0~2] = [r p y] = [a s n]
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb    = self.get_fb()
@@ -351,10 +351,10 @@ class ArmTask:
             ),fai
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
-    def relative_rot_nsa(self, mode='ptp', pitch=0, roll=0, yaw=0, exe=True):
+    def relative_rot_nsa(self, mode='ptp', pitch=0, roll=0, yaw=0, exe=True, blocking=False):
         """Get euler angle and run task."""
         # note:for nsa rotation only
         # euler[0~2] = [r p y] = [a s n]
@@ -362,7 +362,7 @@ class ArmTask:
         tmp_ori = [yaw, pitch, roll]
         print '\n2.relative_rot_nsa = ' + str(pitch)
         print '===[n, s, a] = ' + str(tmp_ori)
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb    = self.get_fb()
@@ -383,13 +383,12 @@ class ArmTask:
                     # degrees(euler[1]+(pitch*3.14156/180)),              
                     # degrees(euler[2]+((roll+90)*3.14156/180)),
                     # degrees(euler[0]+(yaw*3.14156/180))
-                    
                     degrees(euler[1] + radians(pitch) ),
                     degrees(euler[2] + radians(roll+90) + radians(0) ),
                     degrees(euler[0] + radians(yaw) )
                 )
             )
-            while self.__is_busy:
+            while self.__is_busy and blocking:
                 rospy.sleep(.1)
         else:
             print 'exe = false'

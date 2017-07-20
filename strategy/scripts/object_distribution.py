@@ -12,6 +12,7 @@ from task_parser import read_json
 
 import rospkg
 
+
 Task_type = 'Init'
 bin_dict = dict()
 
@@ -59,6 +60,7 @@ def parse_shelf():
     bin_dict[7] = BinInfo(block='H', L=content['bins'][7]['dimensions'][0], W=content['bins'][7]['dimensions'][1], H=content['bins'][7]['dimensions'][2])
     bin_dict[8] = BinInfo(block='I', L=content['bins'][8]['dimensions'][0], W=content['bins'][8]['dimensions'][1], H=content['bins'][8]['dimensions'][2])
     bin_dict[9] = BinInfo(block='J', L=content['bins'][9]['dimensions'][0], W=content['bins'][9]['dimensions'][1], H=content['bins'][9]['dimensions'][2])
+
 
 def Distribution(type, mission_obj, fullrate):
     '''type = 任務型態'''
@@ -112,6 +114,7 @@ def Distribution(type, mission_obj, fullrate):
     #print (out_dict)
     return out_dict
 
+
 def main():
 
     mission_objects = ['avery_binder','burts_bees_baby_wipes','crayons','epsom_salts','fiskars_scissors',
@@ -122,6 +125,11 @@ def main():
 
     print('===============output===============')
     print(output)
+
+
+# Make bin_dict have value
+parse_shelf()
+
 
 if __name__ == '__main__':
     main()
