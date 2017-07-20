@@ -667,17 +667,17 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     double pitch, roll, yaw;
 
     // // === save some of the curr angle, help to detect and handle special case ===
-    // double Curr_Ang[7];
-    // double Curr_Ang_Sum = 0;
-    // for(int i=1;i<=7;i++)
-    // {
-    //     Curr_Ang[i-1] = manipulator_link_data_[i]->joint_angle_*180/M_PI;
-    //     Curr_Ang_Sum += fabs(Curr_Ang[i-1]);
-    //     std::cout<<"=== orig joint ang = "<<manipulator_link_data_[i]->joint_angle_*180/M_PI<<"\n";
-    // }
+    double Curr_Ang[7];
+    double Curr_Ang_Sum = 0;
+    for(int i=1;i<=7;i++)
+    {
+        Curr_Ang[i-1] = manipulator_link_data_[i]->joint_angle_*180/M_PI;
+        Curr_Ang_Sum += fabs(Curr_Ang[i-1]);
+        std::cout<<"=== orig joint ang = "<<manipulator_link_data_[i]->joint_angle_*180/M_PI<<"\n";
+    }
         
-    // double Curr_J5 = manipulator_link_data_[6]->joint_angle_;
-    // double Curr_J7 = manipulator_link_data_[7]->joint_angle_;
+    double Curr_J5 = manipulator_link_data_[6]->joint_angle_;
+    double Curr_J7 = manipulator_link_data_[7]->joint_angle_;
     // //---------------------------------------------------------------------
         
     // if(exeOpt==false) //Avoid change pos x and pos y again when call ik fn in an ik fn 
@@ -849,7 +849,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     std::cout<<"=== tmp_j5_2 = "<<tmp_j5_2*180/M_PI<<"\n";
 
     // if( fabs(Curr_J5-tmp_j5_1) < fabs(Curr_J5-tmp_j5_2) )
-    if( fabs(Curr_Ang[6]-tmp_j5_1) < fabs(Curr_Ang[6]-tmp_j5_2) )
+    if( fabs(Curr_Ang[5]-tmp_j5_1) < fabs(Curr_Ang[5]-tmp_j5_2) )
     {
         Wrist = 1;
         std::cout<<"wrist = 1\n";
