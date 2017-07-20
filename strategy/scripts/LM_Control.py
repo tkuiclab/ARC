@@ -13,7 +13,7 @@ import arm_task_rel
 from std_msgs.msg import Int32
 from std_msgs.msg import String
 from linear_motion.msg   import LM_Cmd
-from vacuum_cmd_msg.srv import VacuumCmd
+# from vacuum_cmd_msg.srv import VacuumCmd
 
 TargetId =      ['a',  'b',  'c',  'd',  'e',  'f',  'g',  'h',  'i',  'j',   'k',   'l']
 TargetShift_X = [  0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 50000, 65000, 80000]
@@ -22,7 +22,7 @@ TargetShift_Z = [  0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 4000
 class CLM_Control:
     def __init__(self):
         self.__is_busy = False
-        self.__is_Arrive = False
+        self.__is_Arrive = True
         self.__set_pubSub()
         self.x_curr_pos=0
         self.z_curr_pos=0
@@ -34,7 +34,7 @@ class CLM_Control:
         self.x_curr_pos = msg.z_curr_pos
         if msg.status == 'LM_idle':
             self.__is_busy = False
-            self.__is_Arrive = False
+            self.__is_Arrive = True
 
         elif msg.status == 'LM_busy':
             # print 'LM_busy'  
@@ -80,7 +80,7 @@ class CLM_Control:
         tmp_z = self.z_curr_pos
         add = 1000*cm
 
-        if LM_Name == 'left':  #id=1
+        if LM_Name == 'right':  #id=1
             self.pub_LM_Cmd(1, tmp_z - add)
             rospy.sleep(0.3)
             
@@ -88,39 +88,55 @@ class CLM_Control:
             self.pub_LM_Cmd(2, tmp_x - add)
             
         else:
-            print'err, please enter "left", "right" or "base" '
+            print'err, please enter "right", "right" or "base" '
         while(self.__is_Arrive == False):
             rospy.sleep(0.1)
             # print'wait'
 
     def pub_LM_Cmd(self, id, pls):
+        rospy.sleep(0.2)
         msg = LM_Cmd()
         msg.id = id
+        if msg.status == 'LM_busy':
+            return
+        print 'pls = ' + str(pls)
         # print 'x_curr_pos = ' + str(self.x_curr_pos)
         # print 'z_curr_pos = ' + str(self.z_curr_pos)
         # print 'LM ' + str(id) + 'send pls = ' + str(pls)
-        if id == 1:
+        if id == 1:                                             #right
             if pls > 80000 or pls < 0:
                 print 'error pls for Z-dir LM (0 ~ 80000)'
                 return
             else:
                 msg.x = pls
 
-        elif id == 2:
+        elif id == 2:                                             #base
             if pls > 60000 or pls < 0:
-                print 'error pls for Z-dir LM (0 ~ 80000)'
+                print 'error pls for base-dir LM (0 ~ 60000)'
                 return 
             else:
                 msg.z = pls
-        elif id == 3:
+
+        elif id == 3:                                             #left
+            if pls > 80000 or pls < 0:
+                print 'error pls for left LM (0 ~ 80000)'
+                return 
+            else:
+                msg.left = pls
+            print 'sss'
+
+        elif id == 4:
             msg.z = pls
             msg.x = pls
-        elif id == 4:
+        elif id == 5:
             msg.z = pls
             msg.x = pls
         else:
             print 'error input arg for pub_LM_Cmd(self, id, pls)'
+
+        self.__is_Arrive = False
         self.set_pls_pub.publish(msg)
+
         
 
 

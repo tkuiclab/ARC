@@ -23,7 +23,10 @@ rosrun darkflow_detect object_detect.py
 
 # obj_pose 
 # for stow
-rosrun obj_pose object_pose_estimator -pass_x_min -0.24 -pass_x_max 0.24 -pass_y_min -0.18 -pass_y_max 0.18 -pass_z_min 0.3 -pass_z_max 0.57 -near 0.1
+rosrun obj_pose object_pose_estimator 
+-pass_x_min -0.24 -pass_x_max 0.24 -pass_y_min -0.18 -pass_y_max 0.18 -pass_z_min 0.3 -pass_z_max 0.57 -near 0.1
+
+rosrun obj_pose object_pose_estimator -pass_x_min -0.13 -pass_x_max 0.13 -pass_y_min 0 -pass_y_max 0.4 -pass_z_min 0.3 -pass_z_max 0.6 -near 0.1
 
 # See obj_pose result 
 # in pcd_file/ directory
@@ -49,14 +52,15 @@ $ rosservice call /robot_cmd "cmd: 'setMinPos'"
 
 # swicth obj_pose topic
 /camera/depth_registered/points:=/camera/depth/points 
-rosrun obj_pose object_pose_estimator  -pass_z_min 0.3 -pass_z_max 0.576 -pass_y_min 0  -pass_y_max 0.4 -near 0.1
+rosrun obj_pose object_pose_estimator  -pass_z_min 0.3 -pass_z_max 0.6 -pass_y_min 0  -pass_y_max 0.4 -near 0.1
 
 
 # Test Stow Task
 roslaunch arc control.launch
 roslaunch realsense_camera sr300_nodelet_rgbd.launch
 rosrun darkflow_detect object_detect.py
-rosrun obj_pose object_pose_estimator  -pass_z_min 0.3 -pass_max 0.57 -pass_y_min 0 -near 0.1
+rosrun obj_pose object_pose_estimator  -pass_z_min 0.3 -pass_y_max 0.6 -pass_y_min 0 -near 0.1
+
 rosrun strategy s.py
 open web
 

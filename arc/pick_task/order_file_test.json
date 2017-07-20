@@ -1,24 +1,28 @@
 {
     "orders": [
         {
-            "size_id": "1A5",
+            "size_id": "A1",
             "contents": [
-		        "robots_everywhere",
-                "scotch_sponges",
-                "expo_eraser"
+                "hinged_ruled_index_cards",
+                "duct_tape"
             ]
         },
         {
-            "size_id": "A1",
+            "size_id": "1A5",
             "contents": [
-                "tissue_box"
+                "composition_book",
+                "speed_stick",
+                "ticonderoga_pencils"
             ]
         },
         {
             "size_id": "1B2",
             "contents": [
                 "robots_dvd",
-                "hanes_socks"
+                "pie_plates",
+                "reynolds_wrap",
+                "scotch_sponges",
+                "laugh_out_loud_jokes"
             ]
         }
     ]

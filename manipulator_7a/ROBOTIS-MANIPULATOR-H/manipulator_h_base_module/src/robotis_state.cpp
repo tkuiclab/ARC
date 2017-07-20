@@ -63,6 +63,7 @@ RobotisState::RobotisState()
     ik_target_rotation_ = robotis_framework::convertRPYToRotation(0.0, 0.0, 0.0);
     line_ik_pos         = robotis_framework::convertRPYToRotation(0.0, 0.0, 0.0);
     line_ik_rpy         = Eigen::MatrixXd::Zero(1, 3);
+    fk_quaternion = robotis_framework::convertEulerToQuaternion(-90, 0, 0);
 
     ik_target_fai = 0;
     ik_cmd_fai    = 0;
@@ -93,6 +94,7 @@ void RobotisState::setInverseKinematics()
                                                                     tmp_start_pry(0),
                                                                     tmp_start_pry(2));//OK
 
+    // start_quaternion = fk_quaternion;
     // Calculate Target quaternion
     Eigen::Quaterniond target_quaternion(kinematics_pose_msg_.pose.orientation.w,
                                          kinematics_pose_msg_.pose.orientation.x,
@@ -100,7 +102,7 @@ void RobotisState::setInverseKinematics()
                                          kinematics_pose_msg_.pose.orientation.z);
 
     double count = (double)cnt_ / (double)all_time_steps_;
-
+    
     Eigen::Quaterniond quaternion = start_quaternion.slerp(count, target_quaternion);
     // ik_target_rotation_ = robotis_framework::convertQuaternionToRotation(quaternion);
     ik_target_rotation_ = robotis_framework::convertQuat2Rotation(quaternion);

@@ -122,7 +122,7 @@ void get_pass_through_points(PCT::Ptr cloud_in,
     pass.setFilterFieldName ("y");
     pass.setFilterLimits (min_y, max_y);
 
-    //std::cout << "PT->min_y= " << min_y << ", max_y = " << max_y << std::endl;
+    std::cout << "PT->min_y= " << min_y << ", max_y = " << max_y << std::endl;
 
     pass.setInputCloud (now_cloud);
     pass.filter (*now_cloud);
@@ -141,6 +141,49 @@ void get_pass_through_points(PCT::Ptr cloud_in,
 
   
   *cloud_out = *now_cloud;
+}
+
+void get_pass_xyz_from_arg( int argc,  char **argv,
+            float& pass_x_min, float& pass_x_max, 
+            float& pass_y_min, float& pass_y_max,
+            float& pass_z_min, float& pass_z_max){
+
+  float tool_z = 0.26;
+
+  pass_z_max = 0.60;
+  pass_z_min = tool_z;
+
+  pass_x_min = -0.5;
+  pass_x_max =  0.5;
+  pass_y_min = -0.5;
+  pass_y_max =  0.5;
+
+
+  if (pcl::console::find_switch (argc, argv, "-pass_x_min")){
+    pcl::console::parse (argc, argv, "-pass_x_min", pass_x_min);
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_x_max")){
+    pcl::console::parse (argc, argv, "-pass_x_max", pass_x_max);
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_y_min")){
+    pcl::console::parse (argc, argv, "-pass_y_min", pass_y_min);
+  }
+  
+  if (pcl::console::find_switch (argc, argv, "-pass_y_max")){
+    pcl::console::parse (argc, argv, "-pass_y_max", pass_y_max);
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_z_min")){
+    pcl::console::parse (argc, argv, "-pass_z_min", pass_z_min);
+
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_z_max")){
+    pcl::console::parse (argc, argv, "-pass_z_max", pass_z_max);
+  }
+
 }
 
 void pass_through_from_arg(PCT::Ptr cloud_in, 
@@ -173,7 +216,7 @@ void pass_through_from_arg(PCT::Ptr cloud_in,
   
   if (pcl::console::find_switch (argc, argv, "-pass_y_max")){
     pcl::console::parse (argc, argv, "-pass_y_max", pass_y_max);
-    //ROS_INFO("Use pass_y_max = %lf",pass_y_max);
+    ROS_INFO("Use pass_y_max = %lf",pass_y_max);
     //std::cout << "Use pass_y_max =" << pass_y_max << std::endl;
   }
 
@@ -579,9 +622,9 @@ bool get_center_from_2dbox(
     int max_x, int max_y, 
     //pass_through_z
     float pt_min_z, float pt_max_z,
-    float& center_y, float& center_z){
+    float& center_x,float& center_y, float& center_z){
 
-
+    float sum_x = 0;
     float sum_z = 0;
     float sum_y = 0;
     unsigned int  cp = 0 ;
@@ -591,12 +634,14 @@ bool get_center_from_2dbox(
 
           index = j*i_cloud->width+i;
           if (pcl::isFinite (i_cloud->points[index])) {
+            float x = i_cloud->points[index].x;
             float y = i_cloud->points[index].y;
             float z = i_cloud->points[index].z;
             if(z > pt_min_z &&  z < pt_max_z 
                ){
-              sum_z += z;
+              sum_x += x;
               sum_y += y;
+              sum_z += z;
               ++cp;
             }
           }
@@ -605,7 +650,7 @@ bool get_center_from_2dbox(
 
   
   if(cp > 0 ){
-
+    center_x = sum_x/(float)cp;
     center_y = sum_y/(float)cp;
     center_z =  sum_z / (float)cp;
     return true;

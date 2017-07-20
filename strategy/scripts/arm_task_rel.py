@@ -33,7 +33,7 @@ class ArmTask:
         
 
     def __set_pubSub(self):
-        print str(self.name) 
+        print "[Arm] name space : " + str(self.name) 
         self.__set_mode_pub = rospy.Publisher(
             str(self.name) + '/base/set_mode_msg',
             String,
@@ -95,7 +95,7 @@ class ArmTask:
     def home(self):
         self.pub_jointCmd([0,0,0,0, 0,0,0])
 
-    def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI):
+    def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI, fai=0):
         """Publish msg of ik cmd (deg) to manager node."""
         # pub_ikCmd('ptp', (x, y , z), (pitch, roll, yaw) )
         # while self.__is_busy:
@@ -109,6 +109,7 @@ class ArmTask:
             cmd.append(p)
         for e in euler:
             cmd.append(e)
+        cmd.append(fai)
 
         #rospy.loginfo('Sent:{}'.format(cmd))
 
@@ -311,7 +312,7 @@ class ArmTask:
             rospy.sleep(.1)
 
 
-    def relative_move_xyz_rot_pry(self, mode='ptp', x=0, y=0, z=0, yaw=0, pitch=0, roll=0):
+    def relative_move_xyz_rot_pry(self, mode='ptp', x=0, y=0, z=0, yaw=0, pitch=0, roll=0, fai=0):
         """Get euler angle and run task."""
         # note:for nsa rotation only
         # euler[0~2] = [r p y] = [a s n]
@@ -334,7 +335,7 @@ class ArmTask:
                 degrees(euler[1]+(pitch*3.14156/180)),              
                 degrees(euler[2]+((roll+90)*3.14156/180)),
                 degrees(euler[0]+(yaw*3.14156/180))
-            )
+            ),fai
         )
 
         while self.__is_busy:
@@ -478,7 +479,7 @@ class ArmTask:
         # while self.__is_busy:
         #     rospy.sleep(.1)
 
-    def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0):
+    def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0, fai=0):
         """relative move xyz with manipulator base axis."""
         while self.__is_busy:
             rospy.sleep(.1)

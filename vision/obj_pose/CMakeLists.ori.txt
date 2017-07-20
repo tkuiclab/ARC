@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
 )
-find_package(PCL 1.8 REQUIRED REQUIRED COMPONENTS 
+find_package(PCL 1.7 REQUIRED REQUIRED COMPONENTS 
 	io
 	registration
 	segmentation
@@ -54,7 +54,7 @@ catkin_package(
 ## Build ##
 ###########
 include_directories(
-  ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
 )
 
 

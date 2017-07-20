@@ -27,8 +27,9 @@
 
     <!--run modbus(linear) -->
     <node name="linear_z" pkg="linear_motion" type="linear_z" output="screen">
-        <param name = "port_z" value ="/dev/arc/LM2" />  <!--"/dev/ttyUSB1" -->
-	    <param name = "port_x" value ="/dev/arc/LM1" />  <!--"/dev/ttyUSB0" -->
+        <param name = "port_right" value ="/dev/arc/LM2" />  <!--"/dev/ttyUSB1" -->
+	<param name = "port_base"  value ="/dev/arc/LM1" />  <!--"/dev/ttyUSB0" -->
+	<param name = "port_left"  value ="/dev/arc/LM3" />  <!--"/dev/ttyUSB3" -->
         <param name = "baud" value = "9600" />
         
     </node>

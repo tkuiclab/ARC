@@ -26,8 +26,10 @@ import arm_task_rel
 from gripper import *
 from s import *
 
+import stow_task
+import LM_Control
 
-obj_dis = 0.015
+obj_dis = 0.02 #0.015
 
 class T2O:
     """Running arm task class."""
@@ -105,7 +107,8 @@ class T2O:
         # self.tool_2_obj(result.object_pose, result.norm)
         # self.tool_2_obj(result.object_pose, result.norm, 180)
         # self.tool_2_obj_bin(result.object_pose, result.norm)
-        self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.1), rel_ang = (10, 0 , 0))
+        # self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.1), rel_ang = (10, 0 , 0))
+        self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.2), rel_ang = (10, 0 , 0))
         # self.tool_2_obj_bin_straight(result.object_pose, result.norm)
         # self.tool_2_obj_bin2(result.object_pose, result.norm)
 
@@ -198,6 +201,15 @@ class T2O:
         y = new_y
         r = 90 - (numpy.rad2deg(a.x) + 180)
 
+        if (abs(90 - r) <= 5) or abs(new_y) > 100:
+            y = 0
+            r = 90
+            print("Forward Face y = "+str(new_y)+" -> "+str(0))
+            print("Forward Face r = "+str(90 - (numpy.rad2deg(a.x) + 180))+" -> "+str(90))
+            print("Forward Face Norm(x, y) = ("+str(norm.x)+", "+str(norm.y)+" -> (0, 0)")
+            norm.x = 0
+            norm.y = 0
+
         print("(y, r)= (" + str(y) + ", " + str(r) + ")")
 
         move_cam_x = (l.x - (gripper_length*sin(radians(y)))*sin(radians(r)))
@@ -205,7 +217,7 @@ class T2O:
         move_cam_z = l.z - (gripper_length*cos(radians(r))) - cam2tool_z
 
         print("NORMAL(x, y, z) = (" + str(norm.x) + ", " + str(norm.y) + ", " + str(norm.z) +")")
-        obj_distance = [norm.x*obj_dis, norm.y*obj_dis, norm.z*obj_dis]
+        obj_distance = [norm.x*(obj_dis), norm.y*(obj_dis), norm.z*(obj_dis)]
 
         real_move_x = move_cam_x + obj_distance[0]
         real_move_y = move_cam_y + obj_distance[1]
@@ -252,6 +264,8 @@ class T2O:
         print('self.Arm.relative_xyz_base(x = '+str(real_move_z_rot)+', y = '+str(real_move_x_rot)+', z = '+str(real_move_y_rot*-1)+')')
         # return
         self.Arm.relative_xyz_base(x = real_move_z_rot, y = real_move_x_rot, z = real_move_y_rot*-1)
+        # self.Arm.relative_xyz_base(x = 0.15)
+        # self.Arm.relative_xyz_base(y = real_move_x_rot, z = real_move_y_rot*-1)
 
         rospy.loginfo('Move Angle Finish')
 
@@ -414,56 +428,7 @@ class T2O:
 
         rospy.loginfo('tool_2_obj_bin_straight Finish')
 
-    def arm_2_obj(self, obj_pose):
-        p = obj_pose
-        a = p.angular
-        l = p.linear
 
-        rospy.loginfo("object_pose")
-        rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z) + ")") 
-        rospy.loginfo("(roll,pitch,yaw)= (" 
-                        + str(numpy.rad2deg(a.x)) + ", " 
-                        + str(numpy.rad2deg(a.y)) + ", " 
-                        + str(numpy.rad2deg(a.z)) + ")" ) 
-        
-                        
-        if l.x ==0 and l.y==0 and l.z==0:
-            return
-
-        r = numpy.rad2deg(a.x)
-        p = numpy.rad2deg(a.y)
-        
-
-        move_cam_x = l.x
-        move_cam_y = l.y - cam2tool_y
-        move_cam_z = l.z - cam2tool_z 
-        
-        return
-        #----------------Rotation---------------_#
-        #self.Arm.relative_rot_nsa(pitch = r)  #roll
-        #self.Arm.relative_rot_nsa(yaw = p)  #pitch
-        self.Arm.relative_rot_nsa(pitch = r, yaw = p)  #pitch
-        
-        #self.Arm.relative_rot_pry_move_nsa(pitch = r, yaw = p, n= move_cam_y, s = move_cam_x, a = move_cam_z -obj_dis)
-        
-
-        while self.Arm.busy:
-            rospy.sleep(.1)
-
-        rospy.loginfo('Move Angle Finish')
-
-        #----------------Move---------------_#
-
-        rospy.loginfo('move linear  s(cam_x)='+str(move_cam_x) + ',n(cam_y)='+str(move_cam_y) + ', a(cam_z)='+str(move_cam_z -obj_dis) )
-
-        #self.Arm.relative_move_nsa(n= move_cam_y, s = move_cam_x, a = move_cam_z -obj_dis)
-
-        #self.Arm.relative_move_nsa(n= l.y, s = l.x)
-        #self.Arm.relative_move_nsa(n= l.y, s = l.x, a = l.z -obj_dis)
-
-        #----------------Rotation+Move---------------_#
-        #rospy.loginfo('move linear  s(cam_x)='+str(move_cam_x) + ',n(cam_y)='+str(move_cam_y) + ', a(cam_z)='+str(move_cam_z) )
-        #self.Arm.relative_move_nsa_rot_pry(pitch = -r, yaw = -p, s = move_cam_x, n = move_cam_y, a = move_cam_z)
 
 if __name__ == '__main__':
 
@@ -476,9 +441,9 @@ if __name__ == '__main__':
     # task.Arm.relative_xyz_base(x = -0.2)
     # task.safe_pose()
     # -------Back 2 home------#.
-    task.safe_pose()
-    task.Arm.home()
-    exit()
+    # task.safe_pose()
+    # task.Arm.home()
+    # exit()
 
     #----------- Go Photo Pose--------#
     # task.robot_photo_pose()
@@ -488,6 +453,24 @@ if __name__ == '__main__':
     
     # s = Strategy()
     # s.stow.LM_2_tote()
+
+    # STOW TEST
+    # arm = arm_task_rel.ArmTask()
+    # lm = LM_Control.CLM_Control()
+    # stow = StowTask(arm, lm)
+    # stow.LM_2_tote()
+    # stow.arm_photo_pose_2()
+    # gripper_suction_up()
+
+    # PICK TEST
+    arm = arm_task_rel.ArmTask()
+    lm = LM_Control.CLM_Control()
+    s = PickTask(arm, lm)
+    s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'a') + 18000)
+    rospy.sleep(0.3)
+    s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a') + 10000)
+    task.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
+    task.obj_pose_request('duct_tape')
 
     ### Bin Place ###
     # s = Strategy()

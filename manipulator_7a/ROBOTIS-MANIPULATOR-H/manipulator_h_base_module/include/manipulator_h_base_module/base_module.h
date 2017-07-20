@@ -106,6 +106,7 @@ class BaseModule
 
     ros::Publisher status_msg_pub_;
     ros::Publisher set_ctrl_module_pub_;
+    ros::Publisher FK_FeedBack_pub_;
 
     std::map<std::string, int> joint_name_to_id_;
 
@@ -146,6 +147,7 @@ class BaseModule
     void stop();
     bool isRunning();
     /* Parameter */
+    manipulator_h_base_module_msgs::IK_Cmd fk_fb_msg;
     BaseJointState *joint_state_;
     RobotisState *robotis_;
     ManipulatorKinematicsDynamics *manipulator_;
