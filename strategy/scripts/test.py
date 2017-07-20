@@ -25,9 +25,6 @@ from s import *
 
 
 
-        
-
-
 if __name__ == '__main__':
     rospy.init_node('s_test', disable_signals=True)
 
@@ -40,6 +37,13 @@ if __name__ == '__main__':
         ss.stow.gen_detect_all_in_stow_list()
         ss.stow.request_highest_item()
 
+
+        # ----- Pick all Unknown Highest------#
+        # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json") #any file is ok
+        # s.stow.test_all_unknown_2_amnesty()
+        # gripper_vaccum_off()
+        # s.start() 
+        # s.stow_run()
 
         rospy.spin()
 

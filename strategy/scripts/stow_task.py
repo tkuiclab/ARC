@@ -265,21 +265,35 @@ class StowTask:
         rospy.loginfo("progress = " + str(fb.progress) + "% ")
 
     def arm_chage_side_and_state(self):
-        print('>>>>>>>>>arm_chage_side_and_state<<<<<<<<')
-
+        
         if self.arm_photo_index < Arm_Photo_Index_Max:
             self.arm_photo_index = self.arm_photo_index + 1
             self.state = FinishOne
+
+            self.mlog('>>>>>>>>>>>> arm_chage_side  <<<<<<<<<<<<< self.arm_photo_index = ' + str(self.arm_photo_index))
+
         else:
             # self.arm_photo_index >= Arm_Photo_Index_Max
-            self.arm_photo_index = 1
-            
-            if self.use_stow_list != self.stow_fail:
-                self.state = FinishOne
-                self.use_stow_list = self.stow_fail
-                self.arm_photo_index = 1
+            if self.mode == Mode_KnownProcess:
+                self.mode = Mode_UnknownProcess
+                self.state = LM2Tote
+
+                self.mlog('--------------- Mode_UnknownProcess--------------')
+
             else:
-                self.state = EndTask
+
+                
+                self.mode == Mode_KnownProcess
+                self.arm_photo_index = 1
+                
+                if self.use_stow_list != self.stow_fail:
+                    self.mlog('==================Stow Fail==================')
+
+                    self.state = FinishOne
+                    self.use_stow_list = self.stow_fail
+                    self.arm_photo_index = 1
+                else:
+                    self.state = EndTask
     
 
     def get_detect_all_list(self):
@@ -292,7 +306,8 @@ class StowTask:
             goal = obj_pose.msg.ObjectPoseGoal(
                 object_name = "<Closest>",
                 object_list = self.detect_all_in_stow_list,
-                limit_ary =[-0.3, 0.3, 0,  0.4, 0.3, 0.6]
+                #limit_ary =[-0.3, 0.3, 0,  0.4, 0.3, 0.6]
+                limit_ary =[-0.14, 0.14, 0,  0.4, 0.3, 0.6]
 
             )
 
@@ -332,7 +347,8 @@ class StowTask:
 
     def request_unknown_highest_item(self):
         goal = obj_pose.msg.ObjectPoseGoal(
-            object_name = "<Unknown_Closest>"
+            object_name = "<Unknown_Closest>",
+
         )
         self.obj_pose_client.send_goal(
                 goal,
@@ -816,13 +832,13 @@ class StowTask:
 
                         self.state = FinishOne
                 else:
-                    # print('self.mode = Mode_UnknownProcess')
-                    # if self.check_vaccum_by_next_state(self.next_state):
-                    #     self.state 			= self.next_state
-                    # else:
-                    #     self.state 			= LM2Tote
+                    print('self.mode = Mode_UnknownProcess')
+                    if self.check_vaccum_by_next_state(self.next_state):
+                        self.state 			= self.next_state
+                    else:
+                        self.state 			= LM2Tote
 
-                    self.state 			= self.next_state
+                   # self.state 			= self.next_state
             return
 
         elif self.state == FinishOne:

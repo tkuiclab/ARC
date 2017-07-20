@@ -190,10 +190,7 @@ if __name__ == '__main__':
         #s.stow.arm_photo_pose_2()
         #s.LM.pub_LM_Cmd(LM_ID_Right, ToteLeave_Z)
 
-        # ----- Test Vision Highest------#
-        # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
-        # s.stow.gen_detect_all_in_stow_list()
-        # s.stow.request_highest_item()
+        
 
         # ----- Pick all Unknown Highest------#
         #s.stow.request_unknown_highest_item()
@@ -203,12 +200,7 @@ if __name__ == '__main__':
         # s.LM.rel_move_LM('base', -30)
 
 
-        # ----- Pick all Unknown Highest------#
-        # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json") #any file is ok
-        # s.stow.test_all_unknown_2_amnesty()
-        # gripper_vaccum_off()
-        # s.start() 
-        # s.stow_run()
+       
 
 
         rospy.spin()
