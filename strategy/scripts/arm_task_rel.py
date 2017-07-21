@@ -8,6 +8,7 @@ from numpy import multiply
 
 import rospy
 import tf
+import object_distribution
 
 from std_msgs.msg import String, Float64
 from robotis_controller_msgs.msg import StatusMsg
@@ -245,53 +246,82 @@ class ArmTask:
         while self.__is_busy and blocking:
             rospy.sleep(.1)
 
-    # def Get_OneBoundPos_of_TCP_orig(self, n, s, a):
-    #     fb = self.get_fb()
-    #     pos = fb.group_pose.position
-    #     ori = fb.group_pose.orientation
-    #     euler = self.quaternion2euler(ori)
-    #     rot = self.nsa2rotation(euler)
-    #     vec_s, vec_n, vec_a = self.rotation2vector(rot)
-        
-    #     offset = [0, 0, 0]
-    #     offset += multiply(vec_n, n)
-    #     offset += multiply(vec_s, s)
-    #     offset += multiply(vec_a, a)
-
-    #     pos2 = [ pos.x + offset[1], pos.y + offset[0], pos.z + offset[2] ]
-    #     return offset
-
-    # def Get_AllBoundPos_of_TCP_orig(self):
-    #     """  """
-    #     P = 200         #Protect (mm)
-    #     F = P + 280     #Forward (+a)
-    #     L = P + 50      #Left    (-s)
-    #     R = P + 31      #Right   (+s)
-    #     U = P + 80      #Up      (-n)
-    #     D = P + 50      #Down    (+n)
-
-    #     P_RU = Get_OneBoundPos_of_TCP(-U,  R, F)  # Righ  Up
-    #     P_LU = Get_OneBoundPos_of_TCP(-U, -L, F)  # Left  Up
-    #     P_RD = Get_OneBoundPos_of_TCP( U,  R, F)  # Right Down
-    #     P_LD = Get_OneBoundPos_of_TCP( U, -L, F)  # Left  Down
-
-    #     BoundPos_of_TCP = [P_RU, P_LU, P_RD, P_LD]
-    #     return BoundPos_of_TCP
-    def Get_Collision_Avoidance_Cmd(self, desire_cmd, SuctionAngle, BinID):
+    def Get_Collision_Avoidance_Cmd(self, desire_cmd, LM1, LM2, SuctionAngle, BinID):
         #desire_cmd = [x, y, z, pitch(deg), roll(deg), yaw(deg)]
-        BinArr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+        BinArr          = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+        TCP_BoundPos_ID = ['A', 'B', 'C', 'D', 'E', 'F']
         BoundPos_Arr = []
-        
-        aa = self.Get_OneBoundPos_of_TCP(desire_cmd, SuctionAngle, BinID)
-        print 'aa = ' + str(aa)
-        # for ID in BinArr:
-        #     BoundPos_Arr.append(self.Get_OneBoundPos_of_TCP(desire_cmd, SuctionAngle, ID))
-        
 
+        # Define parameters
+        LM1_Orig = 64000
+        LM2_Orig = 60000
+        Arm_Orig = [0.3, -0.12, 0]
 
-    def Get_OneBoundPos_of_TCP(self, desire_cmd, angle, BinID):
+        # Calculate the coordinate of whole robot(Arm+LM)
+        LM1_Coor = LM1_Orig - LM1
+        LM2_Coor = LM2_Orig - LM2
+        print 'LM1_Coor = ' + str(LM1_Coor)
+        print 'LM2_Coor = ' + str(LM2_Coor)
+        Arm_Coor = [desire_cmd[0], Arm_Orig[1] + desire_cmd[1], Arm_Orig[2] + desire_cmd[2]]
+
+        Sys_Coor = [desire_cmd[0],  Arm_Coor[1] + LM2_Coor,  Arm_Coor[2] + LM1_Coor, 
+                    desire_cmd[3],  desire_cmd[4],           desire_cmd[5]]
+        
+        # Check is there any TCP_BoundPos is collision
+        fix_vec = [0, 0, 0]
+        extract_dis = 0.05
+
+        Binlimit = object_distribution.parse_shelf(id = BinID)                  # get the target bin's limit info
+        print '===== Bin Limit Info of ' + str(BinID) + ' ====='
+        print 'Binlimit.min_y = ' + str(Binlimit.min_y)
+        print 'Binlimit.max_y = ' + str(Binlimit.max_y)
+        print 'Binlimit.min_z = ' + str(Binlimit.min_z)
+        print 'Binlimit.max_z = ' + str(Binlimit.max_z)
+        print '\n'
+
+        for BP_id in TCP_BoundPos_ID:
+            BoundPos = self.Get_OneBoundPos_of_TCP(Sys_Coor, SuctionAngle, BP_id)      # get each bound pos of tcp
+            # print 'Sys_Coor = ' + str(Sys_Coor)
+            print 'BoundPos = ' + str(BoundPos)
+            if(BoundPos[0] >= 0.4):
+                if (BoundPos[1] > Binlimit.min_y) and (BoundPos[1] < Binlimit.max_y) and (BoundPos[2] > Binlimit.min_z) and (BoundPos[2] < Binlimit.max_z):
+                   print 'OKOK\n'
+                   pass
+                else:
+                    print 'fix'
+                    if BoundPos[1] <= Binlimit.min_y:
+                        tmp = BoundPos[1]
+                        BoundPos[1] = Binlimit.min_y + extract_dis ;    print 'BoundPos[1] <= Binlimit.min_y'
+                        Sys_Coor[1] = Sys_Coor[1] + abs(BoundPos[1] - tmp)
+
+                    if BoundPos[1] >= Binlimit.max_y: 
+                        tmp = BoundPos[1]
+                        BoundPos[1] = Binlimit.max_y - extract_dis ;    print 'BoundPos[1] >= Binlimit.max_y'
+                        Sys_Coor[1] = Sys_Coor[1] - abs(BoundPos[1] - tmp)
+
+                    if BoundPos[2] <= Binlimit.min_z:
+                        tmp = BoundPos[2]
+                        BoundPos[2] = Binlimit.min_z + extract_dis ;    print 'BoundPos[2] <= Binlimit.min_z'
+                        Sys_Coor[2] = Sys_Coor[2] + abs(BoundPos[2] - tmp)
+
+                    if BoundPos[2] >= Binlimit.max_z: 
+                        tmp = BoundPos[2]
+                        BoundPos[2] = Binlimit.max_z - extract_dis ;    print 'BoundPos[2] >= Binlimit.max_z'
+                        Sys_Coor[2] = Sys_Coor[2] - abs(BoundPos[2] - tmp)
+                    print '==\n'
+            else:
+                pass
+        # print '---------------------------------------------------------'
+        print 'Final Sys_Coor = ' + str(Sys_Coor)
+        a = (80000-LM1)/100000.0
+        b = (60000-LM2)/100000.0
+        print a
+        Fix_output = [Sys_Coor[0],  Sys_Coor[1]-b*0,  Sys_Coor[2]-a*0]
+        print 'Fix_output = ' + str(Fix_output)
+
+    def Get_OneBoundPos_of_TCP(self, desire_cmd, angle, BoundID):
         # Get Curr FeedBack
-        
+        print 'BoundID = ' + str(BoundID)
         pi = 3.14159
         fb = self.get_fb()
         pos = fb.group_pose.position
@@ -309,8 +339,8 @@ class ArmTask:
         # init var(m)
         len_f  = 0.08
         len_TM = 0.02
-        T_U    = 0.03
-        T_D    = 0.03
+        T_U    = 0.06
+        T_D    = 0.035
         Suct_L = 0.03
         Suct_R = 0.05
         len_tool = 0.15
@@ -320,37 +350,37 @@ class ArmTask:
         BoundPos = [0,0,0]
 
         # Get_OneBoundPos_of_TCP 
-        if(BinID=='A'):  # Pipe_FL(A)
+        if(BoundID=='A'):  # Pipe_FL(A)
             tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
             tmp_pos[1] = pos.y
             tmp_pos[2] = pos.z + len_f*sin(angle)
             offset   = self.Get_Suction_rel_offset(desire_cmd, angle, -T_U, -Suct_L)
 
-        elif(BinID=='B'):
+        elif(BoundID=='B'):
             tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
             tmp_pos[1] = pos.y
             tmp_pos[2] = pos.z + len_f*sin(angle)
             offset   = self.Get_Suction_rel_offset(desire_cmd, angle, -T_U, Suct_R)
 
-        elif(BinID=='C'):
+        elif(BoundID=='C'):
             tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
             tmp_pos[1] = pos.y
             tmp_pos[2] = pos.z + len_f*sin(angle)
             offset   = self.Get_Suction_rel_offset(desire_cmd, angle, T_D, -Suct_L)
 
-        elif(BinID=='D'):
+        elif(BoundID=='D'):
             tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
             tmp_pos[1] = pos.y
             tmp_pos[2] = pos.z + len_f*sin(angle)
             offset   = self.Get_Suction_rel_offset(desire_cmd, angle, T_D, Suct_R)
 
-        elif(BinID=='E'):
+        elif(BoundID=='E'):
             tmp_pos[0] = pos.x + len_TM*cos(angle) + len_tool
             tmp_pos[1] = pos.y
             tmp_pos[2] = pos.z + len_TM*sin(angle)
             offset   = self.Get_Suction_rel_offset(desire_cmd, angle, T_D, -Suct_L)
 
-        elif(BinID=='F'):
+        elif(BoundID=='F'):
             tmp_pos[0] = pos.x + len_TM*cos(angle) + len_tool
             tmp_pos[1] = pos.y
             tmp_pos[2] = pos.z + len_TM*sin(angle)

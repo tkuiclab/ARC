@@ -2,7 +2,7 @@
 # coding=UTF-8
 """Get information of item in json. and distribution to bin"""
 
-from __future__ import print_function
+# from __future__ import print_function
 from os.path import join
 import sys
 import json
@@ -11,7 +11,7 @@ from  get_obj_info import *
 #from task_parser import read_json
 import sys
 import rospkg
-
+import rospy
 
 Task_type = 'Init'
 bin_dict = dict()
@@ -41,8 +41,18 @@ class BinInfo:
         self.max_y = 0
         self.min_z = 0
         self.max_z = 0
-        
 
+def Get_Sys_Coordinate(Arm_Pos, LM1, LM2):
+    LM1_Orig = 64000
+    LM2_Orig = 60000
+    Arm_Orig = [0.3, -0.12, 0]
+
+    LM1_Coor = LM1_Orig - LM1
+    LM2_Coor = LM2_Orig - LM2
+    Arm_Coor = [Arm_Orig[0] + Arm_Pos[0], Arm_Orig[1] + Arm_Pos[1], Arm_Orig[2] + Arm_Pos[2]]
+
+    Sys_Coor = [0, Arm_Coor[1] + LM2_Coor, Arm_Coor[2] + LM1_Coor]
+    return Sys_Coor
 
 
 def parse_shelf(id = -1):
@@ -146,11 +156,12 @@ def parse_shelf(id = -1):
     bin_dict[9] = J
 
     # =================================================================================================
-
+    id = Word2Num(id)
 
     if(id >= 0) and (id <= 9):
         return bin_dict[id]
     else:
+        print 'id = ' + str(id)
         return bin_dict
 
 

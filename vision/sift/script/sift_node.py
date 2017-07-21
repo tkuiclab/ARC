@@ -144,9 +144,13 @@ class image_converter:
                         matchesMask = matchesMask, # draw only inliers
                         flags = 2)
 
+      # plt.close()
+      # plt.cla()
+      # plt.clf()
       img3 = cv2.drawMatches(img1,kp1,img2,kp2,good,None,**draw_params)
       cv2.imwrite('result_' + compare.lower() +' .png', img3)
-      plt.imshow(img3, 'gray'),plt.show(block=False)
+      plt.imshow(img3, 'gray')
+      plt.show(block=False)
     else:
       print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
       matchesMask = None
