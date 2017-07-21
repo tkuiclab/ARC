@@ -183,7 +183,7 @@ class ArmTask:
         vec_s = [rot[0][1], rot[1][1], rot[2][1]]
         vec_a = [rot[0][2], rot[1][2], rot[2][2]]
         return vec_n, vec_s, vec_a   
-
+    
     def relative_move_suction(self, mode='ptp', suction_angle=0, dis=0 ):
         """Get euler angle and run task."""
         # note:suction_anfle type is degree,  dis is m
@@ -231,6 +231,90 @@ class ArmTask:
 
         while self.__is_busy:
             rospy.sleep(.1)
+
+    # def Get_OneBoundPos_of_TCP_orig(self, n, s, a):
+    #     fb = self.get_fb()
+    #     pos = fb.group_pose.position
+    #     ori = fb.group_pose.orientation
+    #     euler = self.quaternion2euler(ori)
+    #     rot = self.nsa2rotation(euler)
+    #     vec_s, vec_n, vec_a = self.rotation2vector(rot)
+        
+    #     offset = [0, 0, 0]
+    #     offset += multiply(vec_n, n)
+    #     offset += multiply(vec_s, s)
+    #     offset += multiply(vec_a, a)
+
+    #     pos2 = [ pos.x + offset[1], pos.y + offset[0], pos.z + offset[2] ]
+    #     return offset
+
+    # def Get_AllBoundPos_of_TCP_orig(self):
+    #     """  """
+    #     P = 200         #Protect (mm)
+    #     F = P + 280     #Forward (+a)
+    #     L = P + 50      #Left    (-s)
+    #     R = P + 31      #Right   (+s)
+    #     U = P + 80      #Up      (-n)
+    #     D = P + 50      #Down    (+n)
+
+    #     P_RU = Get_OneBoundPos_of_TCP(-U,  R, F)  # Righ  Up
+    #     P_LU = Get_OneBoundPos_of_TCP(-U, -L, F)  # Left  Up
+    #     P_RD = Get_OneBoundPos_of_TCP( U,  R, F)  # Right Down
+    #     P_LD = Get_OneBoundPos_of_TCP( U, -L, F)  # Left  Down
+
+    #     BoundPos_of_TCP = [P_RU, P_LU, P_RD, P_LD]
+    #     return BoundPos_of_TCP
+
+    def Get_OneBoundPos_of_TCP(self, angle, PosID):
+        # Get Curr FeedBack
+        fb = self.get_fb()
+        pos = fb.group_pose.position
+        ori = fb.group_pose.orientation
+        euler = self.quaternion2euler(ori)
+        rot = self.nsa2rotation(euler)
+        vec_s, vec_n, vec_a = self.rotation2vector(rot)
+
+        # init var(m)
+        len_f  = 0.08
+        T_U    = 0.03
+        T_D    = 0.03
+        Suct_L = 0.03
+        Suct_R = 0.05
+        len_tool = 0.15
+
+        offset = [0,0,0]
+
+        # Get_OneBoundPos_of_TCP 
+        if(PosID==1):  # Pipe_FL(A)
+            tmp_A    = [0,0,0]
+            tmp_A[0] = pos.x + len_f*cos(angle) + len_tool
+            tmp_A[1] = pos.y
+            tmp_A[2] = pos.z + len_f*sin(angle)
+            offset   = Get_Suction_rel_offset(angle, -T_U, Suct_L)
+
+            new_pos = [tmp_A[0] + offset[1], tmp_A[1] + offset[2], tmp_A[2] + offset[2]]
+            
+        
+    def Get_Suction_rel_offset(self,angle, dis, vec_s_len):
+        rate_n = float((90-angle)/90.0)
+        rate_a = float(angle/90.0)
+        n = rate_n*(dis)
+        a = rate_a*(dis)
+        s = vec_s_len
+        
+        # Get Curr FeedBack
+        fb = self.get_fb()
+        pos = fb.group_pose.position
+        ori = fb.group_pose.orientation
+        euler = self.quaternion2euler(ori)
+        rot = self.nsa2rotation(euler)
+        vec_s, vec_n, vec_a = self.rotation2vector(rot)
+
+        offset  = [0, 0, 0]
+        offset += multiply(vec_n, n)
+        offset += multiply(vec_s, s)
+        offset += multiply(vec_a, a)
+        return offset
 
     def relative_move_nsa(self, mode='ptp', n=0, s=0, a=0):
         """Get euler angle and run task."""

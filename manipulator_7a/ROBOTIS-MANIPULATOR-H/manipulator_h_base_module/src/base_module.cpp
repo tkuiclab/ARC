@@ -306,12 +306,59 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     bool ik_success = manipulator_->ik(robotis_->ik_target_position_,
                                        robotis_->ik_target_rotation_,
                                        robotis_->ik_cmd_fai);
-    if (!ik_success)
+    // ======================= new ================================
+    if(!ik_success)
     {
-        ROS_INFO("PTP: IK ERR !!!");
-        publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "IK Failed: Joint Limit");
-        return;
+        bool check_ik_again_success = true;
+        double new_fai_Arr[3] = {10, -10, 0};       // for avoid J7_Over180
+        double fai_interval   = 10;                 // for avoid Joint Limit
+        double new_fai        = 0;
+        if(manipulator_->ErrCode.J7_Over180 == true)
+        {
+            for(int i=0 ; i<=2  ; i++)
+            {
+                check_ik_again_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_, new_fai_Arr[i]*M_PI/180);
+                if(check_ik_again_success)
+                {
+                    std::cout<<"new_fai = "<<new_fai_Arr[i]<<"\n";
+                    manipulator_->ErrCode.J7_Over180 == false;
+                    new_fai = new_fai_Arr[i];
+                    break;
+                }
+                if((i==2)&&(check_ik_again_success==false))
+                {
+                    std::cout<<"\n====== Neither 10 nor -10 can handle this case!!! ====== \n";
+                }
+            }
+        }
+        // if(manipulator_->ErrCode.JointLimit == true)
+        // {
+        //     for(int i=1 ; i>=-1 ; i-=2 )
+        //     {
+        //         fai_interval *= (robotis_framework::sign(new_fai)>=0) ? 1 : -1 ;
+        //         for(int j = 1 ; j<=9 ; j++)
+        //         {
+        //             check_ik_again_success = ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_, i*fai_interval[j]*M_PI/180);
+        //             if(check_ik_again_success == true)
+        //             {
+        //                 std::cout<<"Solve joint limit with fai = "<<i*new_fai[j]*M_PI/180<<"\n";
+        //                 i = 3;  //for break upper loop
+        //                 break;
+        //             }
+        //         }
+        //     }
+        // }
+        if(manipulator_->ErrCode.JointLimit == true)
+            return;
     }
+    // ======================= orig ================================
+    // if (!ik_success)
+    // {
+    //     ROS_INFO("PTP: IK ERR !!!");
+    //     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "IK Failed: Joint Limit");
+    //     return;
+    // }
+    // =======================================================
 
     // manipulator_->fk();
     // std::cout << "FK position_: " << manipulator_->manipulator_link_data_[END_LINK]->position_ << std::endl;
