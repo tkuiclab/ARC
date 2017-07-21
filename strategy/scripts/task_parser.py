@@ -7,6 +7,7 @@ from os import path, mkdir
 
 import rospkg
 import json
+from object_distribution import stow_distribution, find_obj_in_distribution, show_bin_content
 
 
 class PickInfo:
@@ -108,16 +109,27 @@ def make_stow_list(i_item_loc_json):
     
     #print 'item_loc_json["tote"]["contents"] = ' + str(item_loc_json["tote"]["contents"])  
 
+
+    #bin_distribution = Distribution('stow',item_loc_json["tote"]["contents"],0.9)
+    bin_distribution, bin_content = stow_distribution(item_loc_json["tote"]["contents"])
+
+    show_bin_content(bin_content)
+
     stow_list = list()
 
-    
+
     bin_id = 'e'
     for item in item_loc_json["tote"]["contents"]:
-        stow_list.append(StowInfo(item, bin_id))
+        bin = find_obj_in_distribution(bin_distribution, item)
+        stow_list.append(StowInfo(item, bin) )
+        # for item_bin in bin_distribution:
+        #     if item_bin[1] == item:
+        #         stow_list.append(StowInfo(item, item_bin[0]))
         #bin_id = bin_id + 1
         #bin_id = chr(ord(bin_id)+1)
 
-    show_stow_list(stow_list)
+    
+    #show_stow_list(stow_list)
 
     return stow_list
 
@@ -125,9 +137,11 @@ def make_stow_list(i_item_loc_json):
 def show_stow_list(i_stow_list):
     for stow in i_stow_list:
         if stow.to_other_tote:
-            print stow.item + '\t\t-> Unknown Tote' + ' (' + str(stow.success) + ')'
+            print '{} -> Unknown Tote'.format(stow.item)
+            #print stow.item + '\t\t\t-> Unknown Tote' + ' (' + str(stow.success) + ')'
         else:
-            print stow.item + '\t\t-> ' + stow.to_bin + ' (' + str(stow.success) + ')'
+            print '{} -> {}'.format(stow.item,stow.to_bin )
+            #print stow.item + '\t\t\t-> ' + stow.to_bin + ' (' + str(stow.success) + ')'
         
 
 def get_json(json_str):

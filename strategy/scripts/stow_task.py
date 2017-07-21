@@ -28,6 +28,9 @@ from gripper import *
 import get_obj_info
 
 
+from object_distribution import Distribution
+
+
 # Define State
 WaitTask = 1		# Wait Task
 #Init_Pos = 4		# Make robot arm go to the initial pos
@@ -334,6 +337,8 @@ class StowTask:
         return res.detected
 
     def request_highest_item(self):
+        print 'in request_highest_item + self.detect_all_in_stow_list=' + str(self.detect_all_in_stow_list)
+
         if len(self.detect_all_in_stow_list) > 0:
             goal = obj_pose.msg.ObjectPoseGoal(
                 object_name = "<Closest>",
@@ -350,6 +355,7 @@ class StowTask:
             return True
         else:
             #self.arm_chage_side_and_state()
+            rospy.warn("len( detect_all_in_stow_list) <=0")
             return False
 
     def obj_pose_done_cb(self, state, result):
@@ -632,7 +638,7 @@ class StowTask:
                 print self.info
                 
                 self.gen_detect_all_in_stow_list()
-                print "detect_all_in_stow_list[] -> " + str(self.detect_all_in_stow_list)
+                print "\tdetect_all_in_stow_list[] -> " + str(self.detect_all_in_stow_list)
                 self.info = "(Vision) Request highest"
                 print self.info
                 
@@ -1094,6 +1100,17 @@ class StowTask:
         print('result.norm = ' + str(result.norm))
         print '-----------obj_pose_done_cb---[highest]---<< ' + result.object_name +' >>--------------'
 
+
+    # def test_Distribution(self):
+    #     mission_objects = ['avery_binder','burts_bees_baby_wipes','crayons','epsom_salts','fiskars_scissors',
+    #                 'ice_cube_tray','tennis_ball_container','reynolds_wrap','hanes_socks','colgate_toothbrush_4pk',
+    #                 ]
+
+    #     output = Distribution('pick',mission_objects,0.5)
+
+    #     print('===============output===============')
+    #     print(output)
+
     def test_request_highest(self):
         
         goal = obj_pose.msg.ObjectPoseGoal(
@@ -1107,7 +1124,7 @@ class StowTask:
             #                 "expo_eraser",
             #                 "ice_cube_tray",
             #                 "robots_dvd"],
-             object_list = ["tissue_box",
+            object_list = ["tissue_box",
                              "duct_tape"],
 
             #          [ xmin, xmax, ymin, ymax, zmin, zmax]
@@ -1118,4 +1135,6 @@ class StowTask:
         self.obj_pose_client.send_goal(
                 goal,
                 done_cb=self.test_done_cb )
+
+
     

@@ -29,6 +29,9 @@ def safe_pose(arm):
     while arm.busy:
         rospy.sleep(.1)
 
+# def test_SIFT():
+
+
 if __name__ == '__main__':
     rospy.init_node('s_test', disable_signals=True)
 
@@ -37,10 +40,19 @@ if __name__ == '__main__':
 
         #safe_pose(ss.Arm)
 
+        #--------Test save_item_location() & distributioni--------#
+        #ss.stow.test_read_item_location_in_arc_pack("stow_20.json")
+        ss.stow.test_read_item_location_in_arc_pack("item_location_file.json")
+        exit()
+
+
         #-------Test Vision Closest----------#
-        # ss.stow.test_read_item_location_in_arc_pack("stow.toteTask_00009.json")
-        # ss.stow.gen_detect_all_in_stow_list()
-        # ss.stow.request_highest_item()
+        ss.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
+        ss.stow.gen_detect_all_in_stow_list()
+
+        print ('request_highest_item()')
+
+        ss.stow.request_highest_item()
 
 
         # ----- Test Photo Pose ------#
@@ -48,7 +60,7 @@ if __name__ == '__main__':
         # ss.stow.arm_photo_pose()
 
         
-        # ss.stow.test_request_highest()
+        #ss.stow.test_request_highest()
 
 
         #ss.stow.arm_photo_pose()
@@ -65,6 +77,9 @@ if __name__ == '__main__':
         # s.stow_run()
 
 
+        # ----- Test Photo Pose ------#
+        ss.stow.LM_2_tote()
+        ss.stow.arm_photo_pose()
 
         #---------LM & Arm with Bin----------#
         gripper_suction_up()
@@ -77,6 +92,8 @@ if __name__ == '__main__':
         # ss.Arm.relative_move_nsa(a = 0.2)
         #sss.LM.pub_LM_Cmd(LM_ID_Base, 60000)
 
+
+        
         rospy.spin()
 
     except rospy.ROSInterruptException:

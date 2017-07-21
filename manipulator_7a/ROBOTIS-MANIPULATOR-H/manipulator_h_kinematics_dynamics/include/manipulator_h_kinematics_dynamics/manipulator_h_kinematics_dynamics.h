@@ -57,6 +57,13 @@ typedef enum
     e_nsa
 }teEuler_Mode;
 
+struct stErrCode
+{
+    bool JointLimit;
+    bool J7_Over180;
+    bool TCP_SoftLimit;
+};
+
 class ManipulatorKinematicsDynamics
 {
 private:
@@ -70,8 +77,9 @@ private:
     double rho2;
 
     double fai;
-
+    
 public:
+    stErrCode ErrCode;
     /*Euler rotation mode*/
     double fk_x, fk_y, fk_z;
     double fk_roll;

@@ -168,23 +168,30 @@ if __name__ == '__main__':
 
     try:
         s = Strategy()
-
-        gripper_vaccum_off()
-        #s.stow.test_read_item_location_in_arc_pack("stow_20.json")
-        s.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
-        # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+        # =========== test ===========
+        desire_cmd = [0.3, 0, 0.3, -90, 0, 0]
         
-        s.safe_pose()
-        # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'x', 'a'))
-        # rospy.sleep(0.5)
-        # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a'))
-        # rospy.sleep(0.5)
+        s.Arm.Get_Collision_Avoidance_Cmd(desire_cmd, 0, 'C')
+        s.Arm.Get_Collision_Avoidance_Cmd(desire_cmd, 90, 'C')
+        # ============================
         
-        s.start() 
-        s.stow_run()
-        # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 170, 0))
-        # s.Arm.relative_xyz_base(x = 0.0612402290131, y = -0.0987435177733, z = -0.295083506803)
-
+        #===
+        # gripper_vaccum_off()
+        # #s.stow.test_read_item_location_in_arc_pack("stow_20.json")
+        # s.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
+        # # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+        
+        # s.safe_pose()
+        # # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'x', 'a'))
+        # # rospy.sleep(0.5)
+        # # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a'))
+        # # rospy.sleep(0.5)
+        
+        # s.start() 
+        # s.stow_run()
+        # # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 170, 0))
+        # # s.Arm.relative_xyz_base(x = 0.0612402290131, y = -0.0987435177733, z = -0.295083506803)
+        #===
         ### 1 (OK)
         # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 0, 0))
         # s.Arm.relative_rot_nsa(roll = 170.096292583)

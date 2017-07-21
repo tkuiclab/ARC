@@ -8,7 +8,7 @@ import sys
 import rospkg
 import json
 import glob
-from task_parser import read_json
+#from task_parser import read_json
 
 
 class ObjInfo:
@@ -30,6 +30,19 @@ class BoxInfo:
         self.name = kwargs.get('name')
         self.dimensions = kwargs.get('dims')
 
+
+
+def read_json(path):
+    """Read a JSON file from path, and convert to object of python."""
+    try:
+        with open(path) as f:
+            content = json.load(f)
+            # or following
+            # content = json.loads(f.read())
+            return content
+    except IOError as e:
+        print(e)
+        return None
 
 def _get_path(file='obj'):
     pkg_path = rospkg.RosPack().get_path('arc')

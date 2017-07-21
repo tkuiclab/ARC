@@ -910,7 +910,6 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
         std::cout<<"angle[6] -= M_PI/2;" <<"\n";
     }
         
-
     for (int i = 0; i < MAX_JOINT_ID; i++)
     {
         /* checking angle is nan */
@@ -919,7 +918,6 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
             std::cout << "angle[" << i << "] is nan" << std::endl;
             return false;
         }
-
         if((fabs(angle[i]) > 0) && (fabs(angle[i]) < 0.0001))
             angle[i] = 0;
 
@@ -948,26 +946,42 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
         if (link_data.joint_angle_ > link_data.joint_limit_max_ ||
             link_data.joint_angle_ < link_data.joint_limit_min_)
         {
-            // tarFai -= 5;
-            // if( (tarFai >= -90)&&(tarFai <= 0) )
-            // {
-            //     //ik(robotis_->ik_target_position_, robotis_->line_ik_rpy, robotis_->ik_target_fai);
-            //     std::cout<<"=== change fai from "<<tarFai+5 <<"to "<<tarFai<<" ===\n";
-            //     this->ik(tar_position, tar_orientation, tarFai, exeOpt = true);
-            // }
-            // else 
-            {
-                std::cout << "ik joint limit: " << i+1 << " " << link_data.joint_angle_ * 180.0 / M_PI << std::endl;
-                std::cout << "max ang of joint " <<i+1 <<" is " << link_data.joint_limit_max_* 180.0 / M_PI << std::endl;
-                std::cout << "min ang of joint " <<i+1 <<" is " << link_data.joint_limit_min_* 180.0 / M_PI << std::endl;
-                return false;
-            }
+            std::cout << "ik joint limit: " << i+1 << " " << link_data.joint_angle_ * 180.0 / M_PI << std::endl;
+            std::cout << "max ang of joint " <<i+1 <<" is " << link_data.joint_limit_max_* 180.0 / M_PI << std::endl;
+            std::cout << "min ang of joint " <<i+1 <<" is " << link_data.joint_limit_min_* 180.0 / M_PI << std::endl;
+            ErrCode.JointLimit = true;
+            std::cout<<"==================\n";
+            std::cout<<"\nJoint Limit\n";
+            std::cout<<"==================\n";
+            break;
         }
-        // angle[i] = roundN(angle[i], 4);
-        std::cout <<"r_Joint"<<i+1<<" is  "<<angle[i]*180.0 / M_PI<<std::endl;
+        else
+        {
+            ErrCode.JointLimit = false;  
+            std::cout <<"r_Joint"<<i+1<<" is  "<<angle[i]*180.0 / M_PI<<std::endl;
+            // angle[i] = roundN(angle[i], 4);
+        }
     }
-    std::cout<<"send fai = "<<tarFai<<"\n";
+    // Handle J7 Over 180 (method2)
+    if(( robotis_framework::sign(Curr_Ang[6]) != robotis_framework::sign(angle[6]) )&&(fabs(Curr_Ang_Sum)>1))
+    {
+        ErrCode.J7_Over180 = true;
+        std::cout<<"==================\n";
+        std::cout<<"\nJoint 7 over 180\n";
+        std::cout<<"==================\n";
+    }
+    else 
+    {
+        ErrCode.J7_Over180 = false;
+    }
 
+    //Determine is ik ik_success
+    if((ErrCode.J7_Over180 == false) && (ErrCode.JointLimit == false))
+        return true;
+    else 
+        return false;
+
+    //-----------------------------
     //=== Handle the special case when J7 move from positive to negative or from negative to positive ===
     double tmpFai = 10;
     std::cout<<"Curr_J7  = "<<robotis_framework::sign(Curr_Ang[7])<<"\n";
@@ -1031,7 +1045,6 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     }
     //--------------------------------------------------------------------------------------------
     
-    return true;
 }
 
 void ManipulatorKinematicsDynamics::cal_ElbowInfo(Eigen::Vector3d& P_s, Eigen::Vector3d& P_w, double Fai, Eigen::Vector3d& P_e,Eigen::Vector3d& P_LJ)
