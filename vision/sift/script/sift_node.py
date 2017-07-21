@@ -30,6 +30,7 @@ class image_converter:
     self.rospack = rospkg.RosPack()
     print("OK")
 
+
   def handle_get_file_name(self, req):
     print("Request : "+str(req.fileName))
     ################## SIFT Process ###############
@@ -127,9 +128,7 @@ class image_converter:
                       matchesMask = matchesMask, # draw only inliers
                       flags = 2)
 
-    # img3 = cv2.drawMatches(img1,kp1,img2,kp2,good,None,**draw_params)
-    # cv2.imwrite('result_Hinged_Ruled_Index_Cards.png', img3)
-    # plt.imshow(img3, 'gray'),plt.show()
+    
 
     return polygon
     #'''

@@ -28,9 +28,6 @@ from gripper import *
 import get_obj_info
 
 
-from object_distribution import Distribution
-
-
 # Define State
 WaitTask = 1		# Wait Task
 #Init_Pos = 4		# Make robot arm go to the initial pos

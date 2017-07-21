@@ -53,70 +53,6 @@ def parse_shelf():
 
     return bin_dict
 
-def Distribution(type,mission_obj,fullrate):
-    '''type = 任務型態'''
-    '''mission_obj = 任務所有的物體'''
-    '''fullrate = 介於 0~1，定義一個bin填滿的百分比，例如fullrate = 0.9表示物體塞滿bin 90%的體積後就不能再放東西了，數字愈小代表平均一個bin能放的東西會愈少，但物體會愈平均放置於所有bin'''
-    bin_dict = parse_shelf()
-    object_belong = []
-    #info_dict = parse_all_json()
-
-    # print('info_dict' + str(info_dict))
-    #out_dict = dict()
-    LimitOfObj = []
-
-    if type == 'pick':
-        limit = 4
-    else :
-        limit = 2
-
-
-    for i in range(len(['A','B','C','D','E','F','G','H','I','J'])):
-        LimitOfObj.append(limit) 
-
-    if type == 'obj too big!':
-        LimitOfObj[3] = 4
-        LimitOfObj[9] = 4
- 
-    #print(info_dict[mission_obj[4]].dimensions[0],info_dict[mission_obj[4]].dimensions[1],info_dict[mission_obj[4]].dimensions[2])
-    for i in range(len(mission_obj)):
-        for j in range(10):
-
-            #排序物體和bin的三圍
-            SortMissionObj = sorted([info_dict[mission_obj[i]].dimensions[0],info_dict[mission_obj[i]].dimensions[1],info_dict[mission_obj[i]].dimensions[2]])
-            SortBinSize = sorted([bin_dict[j].L,bin_dict[j].W,bin_dict[j].H])
-
-            #如果物體三維依大小順序都超出bin的三維，則換至下一個bin
-            if (SortMissionObj[0]>SortBinSize[0] or SortMissionObj[1]>SortBinSize[1] or SortMissionObj[2]>SortBinSize[2]):
-                # print(mission_obj[i],' over of ' ,bin_dict[j].block ,'dimensions')
-                
-                continue
-            else:
-                # 如果超出一個bin可容納的最大物體數，則換下一個bin
-                if bin_dict[j].ObjectNum >= LimitOfObj[j]:
-                    # print('bin ',bin_dict[j].block,' full')
-                    continue
-                else:
-                    # 計算bin剩下的體積
-                    bin_dict[j].NowVolume = bin_dict[j].NowVolume + (info_dict[mission_obj[i]].dimensions[0] * info_dict[mission_obj[i]].dimensions[1] * info_dict[mission_obj[i]].dimensions[2])
-                    # 如果bin已經容納不下，則換下一個bin
-                    if bin_dict[j].NowVolume > bin_dict[j].TotalVolume*fullrate:
-                        bin_dict[j].NowVolume = bin_dict[j].NowVolume - (info_dict[mission_obj[i]].dimensions[0] * info_dict[mission_obj[i]].dimensions[1] * info_dict[mission_obj[i]].dimensions[2])
-                        # print('out of limit when ',mission_obj[i],'in ',bin_dict[j].block)                  
-                        continue
-                    else:
-                        #計算bin內的物體數
-                        bin_dict[j].ObjectNum = bin_dict[j].ObjectNum + 1
-                        object_belong.append(bin_dict[j].block)
-                        bin_dict[j].Object.append(mission_obj[i])
-                        # print(mission_obj[i],' in bin',bin_dict[j].block)
-                        # print(bin_dict[j].block, 'rest volume ', bin_dict[j].TotalVolume - bin_dict[j].NowVolume)   
-                        break
-
-
-    out_dict = zip(object_belong,mission_obj)
-    #print (out_dict)
-    return out_dict,bin_dict
 
 def Word2Num(word):
     if word == 'A':
@@ -142,9 +78,9 @@ def Word2Num(word):
 
 allobj_dict = parse_all_json()
 
-def DistributionV2(type,mission_obj,fullrate):
+def DistributionV2(type, mission_obj, fullrate, out_of_bin):
     binsize_dict = parse_shelf()
-    
+    #allobj_dict = parse_all_json()
     sortedbinValue = []
     sortedbinName = []
 
@@ -155,10 +91,10 @@ def DistributionV2(type,mission_obj,fullrate):
 
     LimitOfObj = []
 
+    limit = 2
     if type == 'pick':
         limit = 4
-    else:
-        limit = 2
+
 
     LimitOfObj = dict()
 
@@ -192,11 +128,10 @@ def DistributionV2(type,mission_obj,fullrate):
     # print (MissionObjOrder)
 ######################################################
 
-
     for i in range(len(BinOrder)):
         LimitOfObj[BinOrder[i]] = limit
 
-    if type == 'obj_too_big':
+    if out_of_bin == 1:
         LimitOfObj['D'] = 4
         LimitOfObj['J'] = 4
 
@@ -223,14 +158,13 @@ def DistributionV2(type,mission_obj,fullrate):
                         binsize_dict[Word2Num(j)].ObjectNum = binsize_dict[Word2Num(j)].ObjectNum + 1
                         object_belong.append(binsize_dict[Word2Num(j)].block)
                         binsize_dict[Word2Num(j)].Object.append(i)
-                        # print(mission_obj[i],' in bin',bin_dict[j].block)
-                        # print(bin_dict[j].block, 'rest volume ', bin_dict[j].TotalVolume - bin_dict[j].NowVolume)
+                        # print(binsize_dict[Word2Num(j)].block,' in bin',binsize_dict[Word2Num(j)].block)
+                        # print(binsize_dict[Word2Num(j)].block, 'rest volume ', binsize_dict[Word2Num(j)].TotalVolume - binsize_dict[Word2Num(j)].NowVolume)
                         break
 
     out_dict = zip(object_belong, mission_obj)
     # print (out_dict)
     return out_dict, binsize_dict
-
 
 def find_obj_in_bin_content(bin_content, want_obj):
     for i in range(10):
@@ -248,18 +182,29 @@ def find_obj_in_distribution(bin_distri, want_obj):
             return item_bin[0]
 
 def stow_distribution(stow_content):
-    output , bin_content = DistributionV2('stow',stow_content,0.01)
+    output, bin_content = DistributionV2('stow',stow_content,0.01, 0)
     i = 0
-    while len(output)<len(stow_content):
+    while len(output) < len(stow_content):
         i = i + 0.01
-        if i <= 1 :
-            output, bin_content = DistributionV2('stow', stow_content, i)
-            
+        if i <= 1:
+            output, bin_content = DistributionV2('stow', stow_content, i, 0)
         else:
-            output, bin_content = DistributionV2('obj_too_big', stow_content, i)
+            output, bin_content = DistributionV2('stow', stow_content, i, 1)
+            print ('Out of bin')
             break
         sys.stdout.write("Use Volume: %d%%   \r" % (i*100) )
         sys.stdout.flush()
+
+    # while len(output)<len(stow_content):
+    #     i = i + 0.01
+    #     if i <= 1 :
+    #         output, bin_content = DistributionV2('stow', stow_content, i)
+            
+    #     else:
+    #         output, bin_content = DistributionV2('obj_too_big', stow_content, i)
+    #         break
+    #     sys.stdout.write("Use Volume: %d%%   \r" % (i*100) )
+    #     sys.stdout.flush()
 
     print('[object_distribution] Use ' + str(i*100) + '% can put all')
 
@@ -282,15 +227,17 @@ def main():
     #     mission_object.append(str(item_loc_json['tote']['contents'][i]))
 
 
-    output , bin_content = DistributionV2('pick',mission_object,0.01)
+    output, bin_content = DistributionV2('stow',mission_object,0.01, 0)
     i = 0
-    while len(output)<  len(mission_object): #len(stow_task_content['tote']['contents']):
+    while len(output) < len(mission_object):
         i = i + 0.01
-        if i <= 1 :
-            output, bin_content = DistributionV2('stow', mission_object, i)
-            break
+        if i <= 1:
+            output, bin_content = DistributionV2('stow', mission_object, i, 0)
         else:
-            output, bin_content = DistributionV2('obj_too_big', mission_object, i)
+            output, bin_content = DistributionV2('stow', mission_object, i, 1)
+            print ('Out of bin')
+            break
+
         print (i)
 
     print('===============output===============')
