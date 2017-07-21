@@ -1,0 +1,99 @@
+{
+    "bins": [
+        {
+            "bin_id": "A",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "B",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "C",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "D",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "E",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "F",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "G",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "H",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "I",
+            "contents": [
+            ]
+        },
+        {
+            "bin_id": "J",
+            "contents": [
+            ]
+        }
+    ],
+    "boxes": [
+    ],
+    "tote": {
+        "contents": [
+            "burts_bees_baby_wipes",
+            "black_fashion_gloves",
+            "ticonderoga_pencils",
+            "speed_stick",
+            "tennis_ball_container",
+            "windex",
+            "laugh_out_loud_jokes",
+            "scotch_sponges",
+            "robots_dvd",
+            "expo_eraser",
+            "ice_cube_tray",
+            "hinged_ruled_index_cards",
+            "glue_sticks",
+            "composition_book",
+            "robots_everywhere",
+            "plastic_wine_glass",
+            "colgate_toothbrush_4pk"
+
+            
+            // "tissue_box",
+            // "burts_bees_baby_wipes",
+            // "black_fashion_gloves",
+            // "ticonderoga_pencils",
+            // "speed_stick",
+            // "tennis_ball_container",
+            // "windex",
+            // "laugh_out_loud_jokes",
+            // "scotch_sponges",
+            // "robots_dvd",
+            // "expo_eraser",
+            // "pie_plates",
+            // "ice_cube_tray",
+            // "hinged_ruled_index_cards",
+            // "hanes_socks",
+            // "glue_sticks",
+            // "composition_book",
+            // "robots_everywhere",
+            // "plastic_wine_glass",
+            // "colgate_toothbrush_4pk"
+        ]
+    }
+}

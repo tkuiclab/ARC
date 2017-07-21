@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+
+<launch>    
+
+    <arg name="en_vac" default="true" />
+
+    <!-- run rosserial -->
+    <node name="serial_node" pkg="rosserial_python" type="serial_node.py" if="$(arg en_vac)">
+        <param name = "port" value ="/dev/arc/arduino" />
+        <param name = "baud" value = "57600" />
+    </node>
+
+</launch>
