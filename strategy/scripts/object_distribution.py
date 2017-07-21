@@ -9,7 +9,7 @@ import json
 import glob
 from  get_obj_info import *
 #from task_parser import read_json
-
+import sys
 import rospkg
 
 
@@ -118,6 +118,119 @@ def Distribution(type,mission_obj,fullrate):
     #print (out_dict)
     return out_dict,bin_dict
 
+def Word2Num(word):
+    if word == 'A':
+        return 0
+    if word == 'B':
+        return 1
+    if word == 'C':
+        return 2
+    if word == 'D':
+        return 3
+    if word == 'E':
+        return 4
+    if word == 'F':
+        return 5
+    if word == 'G':
+        return 6
+    if word == 'H':
+        return 7
+    if word == 'I':
+        return 8
+    if word == 'J':
+        return 9
+
+allobj_dict = parse_all_json()
+
+def DistributionV2(type,mission_obj,fullrate):
+    binsize_dict = parse_shelf()
+    
+    sortedbinValue = []
+    sortedbinName = []
+
+    sortedmissionobjValue = []
+    sortedmissionobjName = []
+
+    object_belong = []
+
+    LimitOfObj = []
+
+    if type == 'pick':
+        limit = 4
+    else:
+        limit = 2
+
+    LimitOfObj = dict()
+
+    #最後排序bin大小後的順序
+    BinOrder = []
+    MissionObjOrder = []
+
+# bin大小排序
+######################################################
+    for i in range(len(binsize_dict)):
+        sortedbinValue.append(binsize_dict[i].TotalVolume)
+        sortedbinName.append(binsize_dict[i].block)
+
+    sortedBinSize = sorted(zip(sortedbinValue, sortedbinName))
+
+    for i in range(len(sortedBinSize)):
+        BinOrder.append(sortedBinSize[i][1])
+######################################################
+
+#任務物體大小排序
+######################################################
+    for i in range(len(mission_obj)):
+        sortedmissionobjValue.append(allobj_dict[mission_obj[i]].dimensions[0]*allobj_dict[mission_obj[i]].dimensions[1]*allobj_dict[mission_obj[i]].dimensions[2])
+        sortedmissionobjName.append(mission_obj[i])
+
+    sortedMissionObjSize = sorted(zip(sortedmissionobjValue, sortedmissionobjName))
+
+    for i in range(len(sortedMissionObjSize)):
+        MissionObjOrder.append(sortedMissionObjSize[i][1])
+
+    # print (MissionObjOrder)
+######################################################
+
+
+    for i in range(len(BinOrder)):
+        LimitOfObj[BinOrder[i]] = limit
+
+    if type == 'obj_too_big':
+        LimitOfObj['D'] = 4
+        LimitOfObj['J'] = 4
+
+    for i in MissionObjOrder:
+        for j in BinOrder:
+            #排序物體和bin的三圍
+            SortMissionObj = sorted([allobj_dict[i].dimensions[0], allobj_dict[i].dimensions[1], allobj_dict[i].dimensions[2]])
+            SortBinSize = sorted([binsize_dict[Word2Num(j)].L,binsize_dict[Word2Num(j)].W,binsize_dict[Word2Num(j)].H])
+            # 如果物體三維依大小順序都超出bin的三維，則換至下一個bin
+            if (SortMissionObj[0] > SortBinSize[0] or SortMissionObj[1] > SortBinSize[1] or SortMissionObj[2] >SortBinSize[2]):
+                # print(mission_obj[i],' over of ' ,bin_dict[j].block ,'dimensions')
+                continue
+            else:
+                if binsize_dict[Word2Num(j)].ObjectNum >= LimitOfObj[j]:
+                    continue
+                else:
+                    binsize_dict[Word2Num(j)].NowVolume = binsize_dict[Word2Num(j)].NowVolume + (allobj_dict[i].dimensions[0] * allobj_dict[i].dimensions[1] *allobj_dict[i].dimensions[2])
+                    if binsize_dict[Word2Num(j)].NowVolume > binsize_dict[Word2Num(j)].TotalVolume * fullrate:
+                        binsize_dict[Word2Num(j)].NowVolume = binsize_dict[Word2Num(j)].NowVolume - (allobj_dict[i].dimensions[0] * allobj_dict[i].dimensions[1] *allobj_dict[i].dimensions[2])
+                        # print('out of limit when ',mission_obj[i],'in ',bin_dict[j].block)
+                        continue
+                    else:
+                        # 計算bin內的物體數
+                        binsize_dict[Word2Num(j)].ObjectNum = binsize_dict[Word2Num(j)].ObjectNum + 1
+                        object_belong.append(binsize_dict[Word2Num(j)].block)
+                        binsize_dict[Word2Num(j)].Object.append(i)
+                        # print(mission_obj[i],' in bin',bin_dict[j].block)
+                        # print(bin_dict[j].block, 'rest volume ', bin_dict[j].TotalVolume - bin_dict[j].NowVolume)
+                        break
+
+    out_dict = zip(object_belong, mission_obj)
+    # print (out_dict)
+    return out_dict, binsize_dict
+
 
 def find_obj_in_bin_content(bin_content, want_obj):
     for i in range(10):
@@ -135,12 +248,18 @@ def find_obj_in_distribution(bin_distri, want_obj):
             return item_bin[0]
 
 def stow_distribution(stow_content):
-    output , bin_content = Distribution('stow',stow_content,0.01)
+    output , bin_content = DistributionV2('stow',stow_content,0.01)
     i = 0
     while len(output)<len(stow_content):
         i = i + 0.01
-        output, bin_content = Distribution('stow', stow_content, i)
-        #print (i)
+        if i <= 1 :
+            output, bin_content = DistributionV2('stow', stow_content, i)
+            
+        else:
+            output, bin_content = DistributionV2('obj_too_big', stow_content, i)
+            break
+        sys.stdout.write("Use Volume: %d%%   \r" % (i*100) )
+        sys.stdout.flush()
 
     print('[object_distribution] Use ' + str(i*100) + '% can put all')
 
@@ -162,6 +281,24 @@ def main():
     # for i in range(len(item_loc_json['tote']['contents'])):
     #     mission_object.append(str(item_loc_json['tote']['contents'][i]))
 
+
+    output , bin_content = DistributionV2('pick',mission_object,0.01)
+    i = 0
+    while len(output)<  len(mission_object): #len(stow_task_content['tote']['contents']):
+        i = i + 0.01
+        if i <= 1 :
+            output, bin_content = DistributionV2('stow', mission_object, i)
+            break
+        else:
+            output, bin_content = DistributionV2('obj_too_big', mission_object, i)
+        print (i)
+
+    print('===============output===============')
+    print(output)
+    print('===============Object in bin===============')
+    for i in range(10):
+        print('bin ',bin_content[i].block,' ',bin_content[i].Object)
+    '''
     output , bin_content = Distribution('pick',mission_object,0.01)
     i = 0
     while len(output)<len(item_loc_json['tote']['contents']):
@@ -180,6 +317,6 @@ def main():
     show_bin_content(bin_content)
 
     # print("marbles -> " + find_obj_in_distribution(output, "marbles") )
-
+    '''
 if __name__ == '__main__':
     main()
