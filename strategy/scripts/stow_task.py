@@ -63,9 +63,7 @@ Mode_KnownProcess = 1
 Mode_UnknownProcess = 2
 
 
-_LEFT_SHIFT = 18000
-_DOWN_SHIFT = 10000
-
+LM_UP_SHIFT = 2000
 
 
 # For checking vacuum function
@@ -187,9 +185,13 @@ class StowTask:
         self.LM.pub_LM_Cmd(1, ToteLeave_Z)
 
     def LM_2_Bin(self, i_bin):
-        self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', i_bin ) + _LEFT_SHIFT)
+        # self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', i_bin ) + _LEFT_SHIFT)
+        # rospy.sleep(0.3)
+        # self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', i_bin)  + _DOWN_SHIFT)
+        self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', bin ) + LM_Right_Arm_Shift)
         rospy.sleep(0.3)
-        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', i_bin)  + _DOWN_SHIFT)
+        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', bin ) - LM_UP_SHIFT)
+
 
     def LM_2_Bin_No_Shift(self, i_bin):
         self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', i_bin ) )
@@ -199,7 +201,7 @@ class StowTask:
     def LM_2_Bin_Right_Arm(self, i_bin):
         self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', i_bin ) + LM_Right_Arm_Shift )
         rospy.sleep(0.3)
-        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', i_bin)  )
+        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', i_bin)  - LM_UP_SHIFT)
 
     
 
@@ -267,14 +269,15 @@ class StowTask:
         # rospy.loginfo("(real_move_x, real_move_y, real_move_z)= (" + str(real_move_x) + ", " + str(real_move_y) + ", " + str(real_move_z) + ")")
 
         # #----------------Rotation---------------_#
-        self.Arm.relative_rot_nsa(roll = y)
+        print('self.Arm.relative_rot_nsa(roll = '+str(y)+')')
+        self.Arm.relative_rot_nsa(roll = y, blocking = True)
         gripper_suction_deg(r)
 
         # print('=====')
         # print('self.Arm.relative_rot_nsa(roll = '+str(y)+')')
         # print('self.Arm.gripper_suction_deg('+str(r)+')')
-        # print('self.Arm.relative_xyz_base(x = '+str(real_move_y*-1)+', y = '+str(real_move_x)+', z = '+str(real_move_z*-1)+')')
-        self.Arm.relative_xyz_base(x = real_move_y*-1, y = real_move_x, z = real_move_z*-1)
+        print('self.Arm.relative_xyz_base(x = '+str(real_move_y*-1)+', y = '+str(real_move_x)+', z = '+str(real_move_z*-1)+')')
+        self.Arm.relative_xyz_base(x = real_move_y*-1, y = real_move_x, z = real_move_z*-1, blocking = True)
 
         self.gripper_roll = r
 
@@ -352,7 +355,7 @@ class StowTask:
             return True
         else:
             #self.arm_chage_side_and_state()
-            rospy.warn("len( detect_all_in_stow_list) <=0")
+            rospy.logwarn("len( detect_all_in_stow_list) <=0")
             return False
 
     def obj_pose_done_cb(self, state, result):
@@ -752,7 +755,7 @@ class StowTask:
             print self.info
     
             self.Is_BaseShiftOK = False
-            self.LM_2_Bin(self.now_stow_info.to_bin)
+            self.LM_2_Bin_Right_Arm(self.now_stow_info.to_bin)
             # self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.now_stow_info.to_bin ))
             # rospy.sleep(0.3)
             # self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.now_stow_info.to_bin ))
