@@ -28,9 +28,6 @@ from gripper import *
 import get_obj_info
 
 
-from object_distribution import Distribution
-
-
 # Define State
 WaitTask = 1		# Wait Task
 #Init_Pos = 4		# Make robot arm go to the initial pos
@@ -1124,7 +1121,7 @@ class StowTask:
             #                 "expo_eraser",
             #                 "ice_cube_tray",
             #                 "robots_dvd"],
-             object_list = ["tissue_box",
+            object_list = ["tissue_box",
                              "duct_tape"],
 
             #          [ xmin, xmax, ymin, ymax, zmin, zmax]
@@ -1135,4 +1132,6 @@ class StowTask:
         self.obj_pose_client.send_goal(
                 goal,
                 done_cb=self.test_done_cb )
+
+
     

@@ -29,6 +29,9 @@ def safe_pose(arm):
     while arm.busy:
         rospy.sleep(.1)
 
+# def test_SIFT():
+
+
 if __name__ == '__main__':
     rospy.init_node('s_test', disable_signals=True)
 

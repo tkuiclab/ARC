@@ -1,20 +1,33 @@
+#!/usr/bin/env python
 import numpy as np
 import cv2
 import math
 import os
 import glob
+import rospkg
 
 # code by FengFeng
 
 MIN_MATCH_COUNT = 10
 
-if not os.path.isdir('./training items') :
-	os.mkdir('training items')
 
-for dirname, dirnames, filenames in os.walk('./Training items'):
+arc_item_path = rospkg.RosPack().get_path('arc') + '/Training items'
+sift_item_path = rospkg.RosPack().get_path('sift') + '/training items'
+
+# if not os.path.isdir('./training items') :
+# 	os.mkdir('training items')
+
+if not os.path.isdir(sift_item_path) :
+	os.mkdir(sift_item_path)
+
+
+print('arc_item_path = ' + arc_item_path)
+print ('sift_item_path = ' + sift_item_path)
+
+for dirname, dirnames, filenames in os.walk(arc_item_path): #os.walk('./Training items'):
 	for filename in filenames:
 		if os.path.splitext(filename)[-1] == '.png' :
-			print(os.path.join(dirname, filename))
+			#print(os.path.join(dirname, filename))
 
 			img_src = cv2.imread(os.path.join(dirname, filename))
 						
@@ -43,9 +56,19 @@ for dirname, dirnames, filenames in os.walk('./Training items'):
 		
 			Roi2 = img_src[min_x:max_x, min_y:max_y]
 
-			path = str.lower(dirname)
-			if not os.path.isdir(path) :
-				os.mkdir(path)
-			print(path + str.lower(filename))
-			cv2.imwrite(str.lower(dirname) + '/' + str.lower(filename), Roi2)
+
+			last_dir_name = os.path.basename(os.path.normpath(dirname))
+
+			sift_item_dir = sift_item_path + '/'+ str.lower(last_dir_name)
+			#sift_item_dir = str.lower(sift_item_dir)
+
+			
+			if not os.path.isdir(sift_item_dir) :
+				os.mkdir(sift_item_dir)
+				print 'mkdir  ' + sift_item_dir
+
+			
+
+			print('Create ' + sift_item_dir +'/' + str.lower(filename))
+			cv2.imwrite(sift_item_dir +'/' + str.lower(filename), Roi2)
 
