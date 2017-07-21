@@ -1,0 +1,12 @@
+{
+  "grasp":["bath_sponge","hand_weight","marbles","mesh_cup","toilet_brush","white_facecloth"],
+  "suck":["avery_binder","ballons","band_aid_tape","burts_bees_baby_wipes",
+          "colgate_toothbrush_4pk","composition_book","crayons","expo_eraser",
+          "glue_sticks","hinged_ruled_index_cards","ice_cube_tray","irish_spring_soap",
+          "laugh_out_loud_jokes","mouse_traps","pie_plates","plastic_wine_glass",
+          "poland_spring_water","reynolds_wrap","robots_dvd","robots_everywhere",
+          "scotch_sponges","speed_stick","table_cloth","tennis_ball_container",
+          "ticonderoga_pencils","tissue_box","windex"],
+  "suckMaybe":["black_fashion_gloves","duct_tape","epsom_salts","fiskars_scissors",
+               "hanes_socks","flashlight","measuring_spoons"]
+}
