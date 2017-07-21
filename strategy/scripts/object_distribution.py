@@ -15,7 +15,7 @@ import rospkg
 
 Task_type = 'Init'
 bin_dict = dict()
-
+orig_pos = [0.4, -0.12, 0]  # coordinate for the whole system(shelf, arm, LM)
 
 class BinInfo:
     """Information of bin."""
@@ -28,14 +28,24 @@ class BinInfo:
         self.W = kwargs.get('W')
         #高
         self.H = kwargs.get('H')
-        self.TotalVolume = self.L*self.W*self.H
+        if (self.L or self.W or self.H) is not None:
+            self.TotalVolume = self.L*self.W*self.H
+        else:
+            self.TotalVolume = None
         self.NowVolume = 0
         self.ObjectNum = 0
         self.Object = []
 
+        # bound 
+        self.min_y = 0
+        self.max_y = 0
+        self.min_z = 0
+        self.max_z = 0
+        
 
 
-def parse_shelf():
+
+def parse_shelf(id = -1):
     bin_spec_path = rospkg.RosPack().get_path('arc') + '/bin_spec.json'
     
     #content = bin_json_parser("/home/luca/PycharmProjects/ARC_Object_Distribution/bin_spec.json")
@@ -51,7 +61,97 @@ def parse_shelf():
     bin_dict[8] = BinInfo(block='I', L=content['bins'][8]['dimensions'][0], W=content['bins'][8]['dimensions'][1], H=content['bins'][8]['dimensions'][2])
     bin_dict[9] = BinInfo(block='J', L=content['bins'][9]['dimensions'][0], W=content['bins'][9]['dimensions'][1], H=content['bins'][9]['dimensions'][2])
 
-    return bin_dict
+    # ================================ Initialize all bin's bound info ================================
+    A = bin_dict[0]
+    B = bin_dict[1]
+    C = bin_dict[2]
+    D = bin_dict[3]
+    E = bin_dict[4]
+    F = bin_dict[5]
+    G = bin_dict[6]
+    H = bin_dict[7]
+    I = bin_dict[8]
+    J = bin_dict[9]
+
+    # ==================== [Bin A] ====================
+    A.min_y = orig_pos[1]
+    A.max_y = A.min_y + A.W
+    A.min_z = orig_pos[2] + (D.H + I.H)
+    A.max_z = A.min_z + A.H
+
+    # ==================== [Bin B] ====================
+    B.min_y = orig_pos[1] + A.W
+    B.max_y = B.min_y + B.W
+    B.min_z = orig_pos[2] + (D.H + I.H)
+    B.max_z = B.min_z + B.H
+
+    # ==================== [Bin C] ====================
+    C.min_y = orig_pos[1] + A.W + B.W
+    C.max_y = C.min_y + C.W
+    C.min_z = orig_pos[2] + (D.H + I.H)
+    C.max_z = C.min_z + C.H
+
+    # ==================== [Bin D] ====================
+    D.min_y = orig_pos[1]
+    D.max_y = D.min_y + D.W
+    D.min_z = orig_pos[2] + I.H
+    D.max_z = D.min_z + D.H
+
+    # ==================== [Bin E] ====================
+    E.min_y = orig_pos[1] + D.W
+    E.max_y = E.min_y + E.W
+    E.min_Z = orig_pos[2] + (I.H + G.H)
+    E.max_Z = E.min_Z + E.H
+
+    # ==================== [Bin F] ====================
+    F.min_y = orig_pos[1] + D.W + E.W
+    F.max_y = F.min_y + F.W
+    F.min_z = orig_pos[2] + J.H + H.H
+    F.max_z = F.min_z + F.H
+
+    # ==================== [Bin G] ====================
+    G.min_y = orig_pos[1] + D.W
+    G.max_y = G.min_y + G.W
+    G.min_z = orig_pos[2] + I.H
+    G.max_z = G.min_z + G.H
+
+    # ==================== [Bin H] ====================
+    H.min_y = orig_pos[1] + D.W + G.W
+    H.max_y = H.min_y + H.W
+    H.min_z = orig_pos[2] + J.H
+    H.max_z = H.min_z + H.H
+    
+    # ==================== [Bin I] ====================
+    I.min_y = orig_pos[1]
+    I.max_y = I.min_y + I.W
+    I.min_z = orig_pos[2]
+    I.max_z = I.min_z + I.H
+
+    # ==================== [Bin J] ====================
+    J.min_y = orig_pos[1] + I.W
+    J.max_y = J.min_y + J.W 
+    J.min_z = orig_pos[2]
+    J.max_z = J.min_z + J.H
+
+    #===================================================
+    bin_dict[0] = A
+    bin_dict[1] = B
+    bin_dict[2] = C
+    bin_dict[3] = D
+    bin_dict[4] = E
+    bin_dict[5] = F
+    bin_dict[6] = G
+    bin_dict[7] = H
+    bin_dict[8] = I
+    bin_dict[9] = J
+
+    # =================================================================================================
+
+
+    if(id >= 0) and (id <= 9):
+        return bin_dict[id]
+    else:
+        return bin_dict
 
 def Distribution(type,mission_obj,fullrate):
     '''type = 任務型態'''
