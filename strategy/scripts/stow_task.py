@@ -1108,6 +1108,31 @@ class StowTask:
     #     print('===============output===============')
     #     print(output)
 
+    def test_request_closest_sift(self):
+        
+        goal = obj_pose.msg.ObjectPoseGoal(
+            object_name = "<Closest>",
+            # object_list = ["laugh_out_loud_jokes",
+            #                 "scotch_sponges",
+            #                 "duct_tape",
+            #                 "band_aid_tape",
+            #                 "irish_spring_soap",
+            #                 "crayons",
+            #                 "expo_eraser",
+            #                 "ice_cube_tray",
+            #                 "robots_dvd"],
+            object_list = ["tissue_box",
+                             "duct_tape"],
+
+            #          [ xmin, xmax, ymin, ymax, zmin, zmax]
+            limit_ary =[-0.15, 0.15, 0,  0.3, 0.3, 1.0]
+            
+        )
+
+        self.obj_pose_client.send_goal(
+                goal,
+                done_cb=self.test_done_cb )
+
     def test_request_highest(self):
         
         goal = obj_pose.msg.ObjectPoseGoal(

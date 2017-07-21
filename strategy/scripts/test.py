@@ -21,6 +21,7 @@ import json
 import arm_task_rel
 from gripper import *
 from s import *
+from sift.srv import *
 
 
 def safe_pose(arm):
@@ -32,6 +33,26 @@ def safe_pose(arm):
 # def test_SIFT():
 
 
+def sift_client(obj_name):
+    rospy.wait_for_service('/sift_server')
+    try:
+        client = rospy.ServiceProxy(
+            '/sift_server',
+             sift
+        )
+
+        res = client(obj_name)
+
+        print('xmin =' + str(res.xmin))
+        print('xmax =' + str(res.xmax))
+        print('xmax =' + str(res.ymin))
+        print('xmax =' + str(res.ymax))
+        
+
+       
+    except rospy.ServiceException, e:
+        print "Service call (Vacuum) failed: %s" % e
+
 if __name__ == '__main__':
     rospy.init_node('s_test', disable_signals=True)
 
@@ -39,7 +60,8 @@ if __name__ == '__main__':
         ss = Strategy()
 
         #safe_pose(ss.Arm)
-
+        sift_client('speed_stick')
+        exit()
         #--------Test save_item_location() & distributioni--------#
         #ss.stow.test_read_item_location_in_arc_pack("stow_20.json")
         ss.stow.test_read_item_location_in_arc_pack("item_location_file.json")
