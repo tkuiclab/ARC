@@ -37,6 +37,12 @@ if __name__ == '__main__':
 
         #safe_pose(ss.Arm)
 
+        #--------Test save_item_location() & distributioni--------#
+        #ss.stow.test_read_item_location_in_arc_pack("stow_20.json")
+        ss.stow.test_read_item_location_in_arc_pack("item_location_file.json")
+        exit()
+
+
         #-------Test Vision Closest----------#
         ss.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
         ss.stow.gen_detect_all_in_stow_list()
@@ -68,6 +74,9 @@ if __name__ == '__main__':
         # s.stow_run()
 
 
+        # ----- Test Photo Pose ------#
+        ss.stow.LM_2_tote()
+        ss.stow.arm_photo_pose()
 
         #---------LM & Arm with Bin----------#
         gripper_suction_up()
@@ -80,6 +89,8 @@ if __name__ == '__main__':
         # ss.Arm.relative_move_nsa(a = 0.2)
         #sss.LM.pub_LM_Cmd(LM_ID_Base, 60000)
 
+
+        
         rospy.spin()
 
     except rospy.ROSInterruptException:

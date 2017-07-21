@@ -281,13 +281,17 @@ class ArmTask:
         #desire_cmd = [x, y, z, pitch(deg), roll(deg), yaw(deg)]
         BinArr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
         BoundPos_Arr = []
-        for ID in BinArr:
-            BoundPos_Arr.append(self.Get_OneBoundPos_of_TCP(desire_cmd, SuctionAngle, ID))
+        
+        aa = self.Get_OneBoundPos_of_TCP(desire_cmd, SuctionAngle, BinID)
+        print 'aa = ' + str(aa)
+        # for ID in BinArr:
+        #     BoundPos_Arr.append(self.Get_OneBoundPos_of_TCP(desire_cmd, SuctionAngle, ID))
         
 
 
     def Get_OneBoundPos_of_TCP(self, desire_cmd, angle, BinID):
         # Get Curr FeedBack
+        
         pi = 3.14159
         fb = self.get_fb()
         pos = fb.group_pose.position
@@ -296,6 +300,7 @@ class ArmTask:
         pos.x = desire_cmd[0]
         pos.y = desire_cmd[1]
         pos.z = desire_cmd[2]
+        euler = [ desire_cmd[3], desire_cmd[4], desire_cmd[5] ]
 
         # Get n s a vector
         rot = self.nsa2rotation(euler)
@@ -353,14 +358,14 @@ class ArmTask:
         
         else :
             print 'err BinID\n'
-
-        BoundPos[0] = tmp_pos[0] + offset[1]
-        BoundPos[1] = tmp_pos[1] + offset[0]
+        
+        BoundPos[0] = tmp_pos[0] + offset[0]
+        BoundPos[1] = tmp_pos[1] + offset[1]
         BoundPos[2] = tmp_pos[2] + offset[2]
         return BoundPos
         
     def Get_Suction_rel_offset(self, desire_cmd, angle, dis, vec_s_len):
-        
+        pi = 3.14159
         # Get desire cmd (cal offset only need euler)
         euler = [ desire_cmd[3]*pi/180, desire_cmd[4]*pi/180, desire_cmd[5]*pi/180 ]
 
@@ -379,6 +384,7 @@ class ArmTask:
         offset += multiply(vec_n, n)
         offset += multiply(vec_s, s)
         offset += multiply(vec_a, a)
+        
         return offset
 
     def relative_move_nsa(self, mode='ptp', n=0, s=0, a=0, blocking = False):

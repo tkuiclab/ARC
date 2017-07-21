@@ -28,6 +28,9 @@ from gripper import *
 import get_obj_info
 
 
+from object_distribution import Distribution
+
+
 # Define State
 WaitTask = 1		# Wait Task
 #Init_Pos = 4		# Make robot arm go to the initial pos
@@ -1096,6 +1099,17 @@ class StowTask:
         print('result.object_pose = ' + str(result.object_pose))
         print('result.norm = ' + str(result.norm))
         print '-----------obj_pose_done_cb---[highest]---<< ' + result.object_name +' >>--------------'
+
+
+    # def test_Distribution(self):
+    #     mission_objects = ['avery_binder','burts_bees_baby_wipes','crayons','epsom_salts','fiskars_scissors',
+    #                 'ice_cube_tray','tennis_ball_container','reynolds_wrap','hanes_socks','colgate_toothbrush_4pk',
+    #                 ]
+
+    #     output = Distribution('pick',mission_objects,0.5)
+
+    #     print('===============output===============')
+    #     print(output)
 
     def test_request_highest(self):
         
