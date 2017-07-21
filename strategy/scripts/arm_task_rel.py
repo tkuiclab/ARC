@@ -277,18 +277,33 @@ class ArmTask:
 
     #     BoundPos_of_TCP = [P_RU, P_LU, P_RD, P_LD]
     #     return BoundPos_of_TCP
+    def Get_Collision_Avoidance_Cmd(self, desire_cmd, SuctionAngle, BinID):
+        #desire_cmd = [x, y, z, pitch(deg), roll(deg), yaw(deg)]
+        BinArr = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+        BoundPos_Arr = []
+        for ID in BinArr:
+            BoundPos_Arr.append(self.Get_OneBoundPos_of_TCP(desire_cmd, SuctionAngle, ID))
+        
 
-    def Get_OneBoundPos_of_TCP(self, angle, PosID):
+
+    def Get_OneBoundPos_of_TCP(self, desire_cmd, angle, BinID):
         # Get Curr FeedBack
+        pi = 3.14159
         fb = self.get_fb()
         pos = fb.group_pose.position
-        ori = fb.group_pose.orientation
-        euler = self.quaternion2euler(ori)
+
+        # Get desire cmd
+        pos.x = desire_cmd[0]
+        pos.y = desire_cmd[1]
+        pos.z = desire_cmd[2]
+
+        # Get n s a vector
         rot = self.nsa2rotation(euler)
         vec_s, vec_n, vec_a = self.rotation2vector(rot)
 
         # init var(m)
         len_f  = 0.08
+        len_TM = 0.02
         T_U    = 0.03
         T_D    = 0.03
         Suct_L = 0.03
@@ -296,32 +311,69 @@ class ArmTask:
         len_tool = 0.15
 
         offset = [0,0,0]
+        tmp_pos  = [0,0,0]
+        BoundPos = [0,0,0]
 
         # Get_OneBoundPos_of_TCP 
-        if(PosID==1):  # Pipe_FL(A)
-            tmp_A    = [0,0,0]
-            tmp_A[0] = pos.x + len_f*cos(angle) + len_tool
-            tmp_A[1] = pos.y
-            tmp_A[2] = pos.z + len_f*sin(angle)
-            offset   = Get_Suction_rel_offset(angle, -T_U, Suct_L)
+        if(BinID=='A'):  # Pipe_FL(A)
+            tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_f*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, -T_U, -Suct_L)
 
-            new_pos = [tmp_A[0] + offset[1], tmp_A[1] + offset[2], tmp_A[2] + offset[2]]
-            
+        elif(BinID=='B'):
+            tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_f*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, -T_U, Suct_R)
+
+        elif(BinID=='C'):
+            tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_f*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, T_D, -Suct_L)
+
+        elif(BinID=='D'):
+            tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_f*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, T_D, Suct_R)
+
+        elif(BinID=='E'):
+            tmp_pos[0] = pos.x + len_TM*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_TM*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, T_D, -Suct_L)
+
+        elif(BinID=='F'):
+            tmp_pos[0] = pos.x + len_TM*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_TM*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, T_D,  Suct_R)
         
-    def Get_Suction_rel_offset(self,angle, dis, vec_s_len):
+        else :
+            print 'err BinID\n'
+
+        BoundPos[0] = tmp_pos[0] + offset[1]
+        BoundPos[1] = tmp_pos[1] + offset[0]
+        BoundPos[2] = tmp_pos[2] + offset[2]
+        return BoundPos
+        
+    def Get_Suction_rel_offset(self, desire_cmd, angle, dis, vec_s_len):
+        
+        # Get desire cmd (cal offset only need euler)
+        euler = [ desire_cmd[3]*pi/180, desire_cmd[4]*pi/180, desire_cmd[5]*pi/180 ]
+
+        # Get n s a unit vector
+        rot = self.nsa2rotation(euler)
+        vec_s, vec_n, vec_a = self.rotation2vector(rot)
+
+        # calculate n s a len
         rate_n = float((90-angle)/90.0)
         rate_a = float(angle/90.0)
         n = rate_n*(dis)
         a = rate_a*(dis)
         s = vec_s_len
-        
-        # Get Curr FeedBack
-        fb = self.get_fb()
-        pos = fb.group_pose.position
-        ori = fb.group_pose.orientation
-        euler = self.quaternion2euler(ori)
-        rot = self.nsa2rotation(euler)
-        vec_s, vec_n, vec_a = self.rotation2vector(rot)
 
         offset  = [0, 0, 0]
         offset += multiply(vec_n, n)
