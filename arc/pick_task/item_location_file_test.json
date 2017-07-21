@@ -11,7 +11,7 @@
         {
             "bin_id": "B",
             "contents": [
-                "robots_everywhere",
+                "burts_bees_baby_wipes",
                 "laugh_out_loud_jokes"
             ]
         },
@@ -45,7 +45,7 @@
         {
             "bin_id": "G",
             "contents": [
-                "burts_bees_baby_wipes",
+                "robots_everywhere",
                 "ticonderoga_pencils"
             ]
         },
@@ -63,6 +63,7 @@
         {
             "bin_id": "J",
             "contents": [
+                "avery_binder"
             ]
         }
     ],
