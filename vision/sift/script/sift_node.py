@@ -9,6 +9,7 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from geometry_msgs.msg import Polygon, Point32
+from std_msgs.msg import Int32
 
 import rospkg
 
@@ -33,14 +34,14 @@ class image_converter:
   def handle_get_file_name(self, req):
     print("Request : "+str(req.fileName))
     ################## SIFT Process ###############
-    res = self.sift_process(req.fileName)
-    # p1 = Point32()
-    # p1.x = 1
-    # p1.y = 0
-    # p1.z = 0
-    # pol = Polygon()
-    # pol.points = [p1]
-    return siftResponse(res)
+    pol, rect = self.sift_process(req.fileName)
+    resp = siftResponse()
+    resp.points = pol
+    resp.xmin = rect[0]
+    resp.xmax = rect[1]
+    resp.ymin = rect[2]
+    resp.ymax = rect[3]
+    return resp
 
   def callback(self,data):
     try:
@@ -50,6 +51,7 @@ class image_converter:
 
   def sift_process(self, compare):
     polygon = Polygon()
+    xmin = Int32(); ymin = Int32(); xmax = Int32(); ymax = Int32()
     tmpArr = list()
     MIN_MATCH_COUNT = 10
 
@@ -102,13 +104,22 @@ class image_converter:
       pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
       dst = cv2.perspectiveTransform(pts,M)
       print(dst)
+      # bufferXmin = dst[0][0][0]; bufferYmin = dst[0][0][1]
+      # bufferXmax = dst[0][0][0]; bufferYmax = dst[0][0][1]
+      bufferX = []; bufferY = []
       for i in range(len(dst)) :
         point = Point32()
+        # xmin = Int32(); ymin = Int32(); xmax = Int32(); ymax = Int32()
         point.x = dst[i][0][0]
         point.y = dst[i][0][1]
         point.z = 0
         polygon.points.append(point)
         print(str(i)+" : Append point ("+str(point.x)+", "+str(point.y)+")")
+        bufferX.append(point.x); bufferY.append(point.y)
+      
+      bufferX.sort(); bufferY.sort()
+      xmin.data = bufferX[0]; xmax.data = bufferX[-1]
+      ymin.data = bufferY[0]; ymax.data = bufferY[-1]
 
       img2 = cv2.polylines(img2,[np.int32(dst)],True,255,3, cv2.LINE_AA)
 
@@ -119,6 +130,7 @@ class image_converter:
       point.x = -1
       point.y = -1
       point.z = -1
+      xmin.data = -1; ymin.data = -1; xmax.data = -1; ymax.data = -1
       polygon.points = [point]
 
 
@@ -127,11 +139,11 @@ class image_converter:
                       matchesMask = matchesMask, # draw only inliers
                       flags = 2)
 
-    # img3 = cv2.drawMatches(img1,kp1,img2,kp2,good,None,**draw_params)
-    # cv2.imwrite('result_Hinged_Ruled_Index_Cards.png', img3)
-    # plt.imshow(img3, 'gray'),plt.show()
+    img3 = cv2.drawMatches(img1,kp1,img2,kp2,good,None,**draw_params)
+    cv2.imwrite('result_Hinged_Ruled_Index_Cards.png', img3)
+    plt.imshow(img3, 'gray'),plt.show(block=False)
 
-    return polygon
+    return polygon, (xmin, xmax, ymin, ymax)
     #'''
 
 def main(args):
