@@ -334,6 +334,8 @@ class StowTask:
         return res.detected
 
     def request_highest_item(self):
+        print 'in request_highest_item + self.detect_all_in_stow_list=' + str(self.detect_all_in_stow_list)
+
         if len(self.detect_all_in_stow_list) > 0:
             goal = obj_pose.msg.ObjectPoseGoal(
                 object_name = "<Closest>",
@@ -350,6 +352,7 @@ class StowTask:
             return True
         else:
             #self.arm_chage_side_and_state()
+            rospy.warn("len( detect_all_in_stow_list) <=0")
             return False
 
     def obj_pose_done_cb(self, state, result):
@@ -632,7 +635,7 @@ class StowTask:
                 print self.info
                 
                 self.gen_detect_all_in_stow_list()
-                print "detect_all_in_stow_list[] -> " + str(self.detect_all_in_stow_list)
+                print "\tdetect_all_in_stow_list[] -> " + str(self.detect_all_in_stow_list)
                 self.info = "(Vision) Request highest"
                 print self.info
                 

@@ -62,7 +62,7 @@ enum ProcessingState{
 #define ERR_CANNOT_CALL_DETECT_SERVICE    3
 #define ERR_CALL_DETECT_OVER_TIMES        4
 //#define ERR_DETECT_RESPONE_FAIL    5
-
+#define ERR_0_CLOUD        6
 
 namespace ObjEstAction_namespace
 {
@@ -105,7 +105,7 @@ public:
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
   
   void pub_feedback(std::string msg,int progress);
-  void pub_error();
+  void pub_error(const char *err_msg);
   
 
   //bool get_roi();
@@ -123,13 +123,16 @@ protected:
     
 
   
-  void set_ROI_colud(int mini_x,int mini_y,int max_x, int max_y);
+  void set_ROI_cloud(int mini_x,int mini_y,int max_x, int max_y);
 
   bool load_amazon_pcd(std::string pcd_filename);
   bool is_obj_in_obj_list(std::string name);
   void print4x4Matrix (const Eigen::Matrix4f & matrix);
 
+  
+  void check_0_cloud_error_sub(const char *cloud_name);
 
+  bool check_0_cloud(PCT::Ptr i_cloud, const char *cloud_name);
   //------ROS--------//
   ros::NodeHandle nh_;
   ros::Publisher segmented_pub_;

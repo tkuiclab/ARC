@@ -163,17 +163,38 @@ void ObjEstAction::pub_feedback(std::string msg,int progress)
   
 }
 
-void ObjEstAction::pub_error(){
+void ObjEstAction::pub_error(const char *err_msg){
    geometry_msgs::Twist pose;
    pose.linear.z = -1; //ROI Fail
    result_.object_pose = pose;
    result_.success = false;
-   result_.error_code = error_code;
+   //result_.error_code = error_code;
+   result_.error_msg = std::string(err_msg);
 
    as_.setSucceeded(result_);
    //preemptCB();
 
 }
+
+
+void ObjEstAction::check_0_cloud_error_sub(const char *cloud_name){
+  std::stringstream ss1;
+  ss1 << cloud_name << "cloud size <= 0";
+  ROS_WARN( "(0_Cloud) ->  %s",ss1.str().c_str());
+  //error_code = ERR_0_CLOUD;     
+  pub_error(ss1.str().c_str());
+}
+
+bool ObjEstAction::check_0_cloud(PCT::Ptr i_cloud, const char *cloud_name){
+  if(i_cloud->size() <= 0){
+    check_0_cloud_error_sub(cloud_name);
+    return false;
+  }
+  return true;
+}
+
+
+
 
 void ObjEstAction::poseEstimation(){
   ROS_INFO("In poseEstimation()");
@@ -190,8 +211,13 @@ void ObjEstAction::poseEstimation(){
   std::vector<int> index;
   pcl::removeNaNFromPointCloud(*cloud, *cloud, index);
   
+
+  if(!check_0_cloud(cloud,"_pst_rm_NaN" )){
+    return ;
+  }
+
 #ifdef SaveCloud
-  write_pcd_2_rospack(cloud,"_rm_NaN.pcd");
+  write_pcd_2_rospack(cloud,"_pst_rm_NaN.pcd");
 #endif
 
   //pass_through_from_arg(cloud, g_argc, g_argv, cloud);
@@ -203,8 +229,12 @@ void ObjEstAction::poseEstimation(){
                      
                         );
 
+  if(!check_0_cloud(cloud,"_pst_PassThrough" )){
+    return ;
+  }
+
 #ifdef SaveCloud
-  write_pcd_2_rospack(cloud,"_poseEstimation_PassThrough.pcd");
+  write_pcd_2_rospack(cloud,"_pst_PassThrough.pcd");
 #endif
   // only_obj_center(cloud, 
   //   pose.linear.x, pose.linear.y, pose.linear.z);
@@ -213,12 +243,17 @@ void ObjEstAction::poseEstimation(){
   if (pcl::console::find_switch (g_argc, g_argv, "-near")){
     pcl::console::parse (g_argc, g_argv, "-near", near_points_percent);
   }
-  cam_2_obj_center(cloud, 
+  bool suc = cam_2_obj_center(cloud, 
       pose.linear.x, pose.linear.y, pose.linear.z, 
       pose.angular.x, pose.angular.y, pose.angular.z,
       normal.x, normal.y, normal.z,
       near_points_percent);
   
+  if(!suc){
+    pub_error("cam_2_obj_center Fail");
+  }
+
+
   result_.object_name = obj_name;
   result_.object_pose = pose;
   result_.norm = normal;
@@ -235,7 +270,7 @@ void ObjEstAction::poseEstimation(){
   
 // }
 
-void ObjEstAction::set_ROI_colud(
+void ObjEstAction::set_ROI_cloud(
     int mini_x,int mini_y,
     int max_x, int max_y){
   
@@ -278,8 +313,8 @@ void ObjEstAction::get_closest(){
       }
 
       ROS_WARN("Call 20 times /detect FAIL");
-      error_code = ERR_CALL_DETECT_OVER_TIMES;     
-      pub_error();
+      //error_code = ERR_CALL_DETECT_OVER_TIMES;     
+      pub_error("Call 20 times /detect FAIL");
       state = NADA;
       return ;
     }
@@ -362,26 +397,29 @@ void ObjEstAction::get_closest(){
     
     if(near_from_cam == 999.0){
       ROS_WARN("CANNOT Get Highest near_from_cam == 999.0");
-      error_code = ERR_CANNOT_GET_CLOSEST;
-      pub_error();
+     // error_code = ERR_CANNOT_GET_CLOSEST;
+      pub_error("CANNOT Get Highest near_from_cam == 999.0");
       return ;
     }
     
   }else{
     ROS_WARN("CANNOT Call Service (/detect)");
-    error_code = ERR_CANNOT_CALL_DETECT_SERVICE;
-    pub_error();
+    //error_code = ERR_CANNOT_CALL_DETECT_SERVICE;
+    pub_error("CANNOT Call Service (/detect)");
     return ;
   }
   ROS_INFO("The highest is %s -> [mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",
       obj_name.c_str(),
       mini_x,mini_y,max_x,max_y);
   
-  set_ROI_colud(mini_x,mini_y,max_x,max_y);
+  set_ROI_cloud(mini_x,mini_y,max_x,max_y);
 
+  if(!check_0_cloud(ROI_cloud,"_closest_ROI")){
+    return;
+  }
 
 #ifdef SaveCloud
-    write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
+    write_pcd_2_rospack(ROI_cloud,"_closest_ROI.pcd");
 #endif 
 
   state = POSE_ESTIMATION;
@@ -481,8 +519,8 @@ void ObjEstAction::get_one_roi(){
         return ;    // for try next time
       }
       ROS_WARN("Call 20 times /detect FAIL");
-      error_code = ERR_CALL_DETECT_OVER_TIMES;
-      pub_error();
+      //error_code = ERR_CALL_DETECT_OVER_TIMES;
+      pub_error("Call 20 times /detect FAIL");
       state = NADA;  
       return ;  
     }
@@ -504,14 +542,14 @@ void ObjEstAction::get_one_roi(){
 
   }else{
     ROS_WARN("CANNOT Call Service (/detect)");
-    error_code = ERR_CANNOT_CALL_DETECT_SERVICE;
-    pub_error();
+    //error_code = ERR_CANNOT_CALL_DETECT_SERVICE;
+    pub_error("CANNOT Call Service (/detect)");
     state = NADA;
     return ;
   }
   ROS_INFO("[mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",mini_x,mini_y,max_x,max_y);
   
-  set_ROI_colud(mini_x,mini_y,max_x,max_y);
+  set_ROI_cloud(mini_x,mini_y,max_x,max_y);
 
 #ifdef SaveCloud
     write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");

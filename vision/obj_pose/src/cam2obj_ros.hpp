@@ -422,7 +422,7 @@ Vector3f del_out_mean_normal(PC_NT::Ptr i_cloud, PC_NT::Ptr o_cloud){
 
 
 //get camera center to object center transform
-void cam_2_obj_center(PCT::Ptr i_cloud,
+bool cam_2_obj_center(PCT::Ptr i_cloud,
           double &x, double &y, double &z,
           double &roll, double &pitch, double &yaw,
           double &nx, double &ny, double &nz,
@@ -443,6 +443,11 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   // std::cout << "Near Points Percent = " << (near_points_percent*100) << "%" 
   //     << ", get_near_points() Points = " << cloud->size()  << std::endl;
 
+  if(cloud->size() < 0){
+    std::cout << "[ERROR] cam_2_obj_center say _near_points size() <=0" << std::endl;
+    return false;
+  }
+
 #ifdef SaveCloud
   write_pcd_2_rospack(cloud,"_near_points.pcd");
 #endif
@@ -461,6 +466,11 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
     vg.filter (*cloud);
     std::cout << "cam_2_obj_center() say After VoxelGrid Points = " << cloud->size() << std::endl;
   
+    if(cloud->size() < 0){
+      std::cout << "[ERROR] cam_2_obj_center say _vg size() <=0" << std::endl;
+      return false;
+    }
+
 #ifdef SaveCloud
   write_pcd_2_rospack(cloud,"_vg.pcd");
 #endif
@@ -480,6 +490,11 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   mls.setInputCloud (cloud);
   mls.process (*cloud_normal);
 
+  if(cloud_normal->size() < 0){
+    std::cout << "[ERROR] cam_2_obj_center say mls size() <=0" << std::endl;
+    return false;
+  }
+
 #ifdef SaveCloud    
   write_pcd_2_rospack_normals(cloud_normal,"_mls.pcd");
 #endif
@@ -488,6 +503,12 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   
   Vector3f  obj_normal = del_out_mean_normal(cloud_normal,del_normal);
   
+  if(del_normal->size() < 0){
+    std::cout << "[ERROR] cam_2_obj_center say del_normal size() <=0" << std::endl;
+    return false;
+  }
+
+
 #ifdef SaveCloud
   write_pcd_2_rospack_normals(del_normal,"_del_out_normal.pcd");
 #endif  
@@ -512,19 +533,15 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   float tool_yaw , tool_roll ;
   rotation_with_tool(obj_normal, tool_yaw, tool_roll );
 
-// std::cout << " (yaw, roll) = "   <<  
-//       "("  << (tool_yaw) << "," << 
-//       (tool_roll) << ")"  << std::endl;
-
-  std::cout << " (yaw, roll) = "   <<  
-      "("  << pcl::rad2deg(tool_yaw) << "," << 
-      pcl::rad2deg(tool_roll) << ")"  << std::endl;
+  // std::cout << " (yaw, roll) = "   <<  
+  //     "("  << pcl::rad2deg(tool_yaw) << "," << 
+  //     pcl::rad2deg(tool_roll) << ")"  << std::endl;
 
   float real_tool_yaw = (tool_yaw > 0) ? (tool_yaw-M_PI) : (tool_yaw+M_PI);
   float real_tool_roll = 90 - (tool_roll + 180);
-   std::cout << " (real_tool_yaw, real_tool_roll) = "   <<  
-      "("  << pcl::rad2deg(real_tool_yaw) << "," << 
-      pcl::rad2deg(real_tool_roll) << ")"  << std::endl;
+  //  std::cout << " (real_tool_yaw, real_tool_roll) = "   <<  
+  //     "("  << pcl::rad2deg(real_tool_yaw) << "," << 
+  //     pcl::rad2deg(real_tool_roll) << ")"  << std::endl;
 
 
   yaw = tool_yaw;
@@ -555,7 +572,8 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   ny = obj_normal[1];
   nz = obj_normal[2];
 
-  return;
+  //return;
+  return true;
 
   // ----cam_normal_2_obj_normal()-------//
   float r, p ;//, cam_r, cam_p;

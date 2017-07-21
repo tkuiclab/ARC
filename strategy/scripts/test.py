@@ -38,9 +38,12 @@ if __name__ == '__main__':
         #safe_pose(ss.Arm)
 
         #-------Test Vision Closest----------#
-        # ss.stow.test_read_item_location_in_arc_pack("stow.toteTask_00009.json")
-        # ss.stow.gen_detect_all_in_stow_list()
-        # ss.stow.request_highest_item()
+        ss.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
+        ss.stow.gen_detect_all_in_stow_list()
+
+        print ('request_highest_item()')
+
+        ss.stow.request_highest_item()
 
 
         # ----- Test Photo Pose ------#
@@ -48,7 +51,7 @@ if __name__ == '__main__':
         # ss.stow.arm_photo_pose()
 
         
-        # ss.stow.test_request_highest()
+        #ss.stow.test_request_highest()
 
 
         #ss.stow.arm_photo_pose()
