@@ -9,10 +9,10 @@ from vacuum_cmd_msg.srv import VacuumCmd
 # cam2center_y_4_tote = 0.05
 
 # NOW
-cam2tool_z = 0.27 #0.26
+cam2tool_z = 0.18 #0.27 #0.26
 gripper_length = 0.04
 cam2center_y = 0.035
-cam2center_y_4_tote = 0.05
+cam2center_y_4_tote = 0.06 #0.05
 
 def robot_cmd_client(cmd):
     rospy.wait_for_service('/robot_cmd')

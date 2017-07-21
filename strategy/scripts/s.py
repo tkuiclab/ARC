@@ -21,6 +21,7 @@ from strategy.srv import *
 
 import arm_task_rel
 import LM_Control
+
 #import task_parser
 from task_parser import *
 from config import *
@@ -57,8 +58,13 @@ class Strategy(threading.Thread):
 
         self.run_task_type = TaskType_None
 
+        self.Arm.set_speed(20)
+
         rospy.sleep(0.3)
         rospy.loginfo("Strategy Ready!!")
+
+
+
         
     def shutdown(self):
         """ description """
@@ -163,32 +169,33 @@ if __name__ == '__main__':
     try:
         s = Strategy()
 
-
-        # s.stow.test_read_item_location_in_arc_pack("stow_test.json")
+        gripper_vaccum_off()
+        #s.stow.test_read_item_location_in_arc_pack("stow_20.json")
+        s.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
         # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
         
-        # s.safe_pose()
+        s.safe_pose()
         # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'x', 'a'))
         # rospy.sleep(0.5)
         # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a'))
         # rospy.sleep(0.5)
-        # gripper_vaccum_off()
-        # s.start() 
-        # s.stow_run()
+        
+        s.start() 
+        s.stow_run()
         # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 170, 0))
         # s.Arm.relative_xyz_base(x = 0.0612402290131, y = -0.0987435177733, z = -0.295083506803)
 
         ### 1 (OK)
-        # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 0, 0), -10)
+        # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 0, 0))
         # s.Arm.relative_rot_nsa(roll = 170.096292583)
-        # s.Arm.relative_move_xyz_rot_pry(x = 0.0612402290131, y = -0.0987435177733, z = -0.2)
+        # s.Arm.relative_move_xyz_rot_pry(x = 0.0612402290131, y = -0.0987435177733, z = -0.2, fai = 0)
         # #===========
         # s.Arm.relative_move_xyz_rot_pry(z = 0.2)
 
         # ### 2
-        s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 0, 0))
-        s.Arm.relative_rot_nsa(roll = -179.096292583)
-        s.Arm.relative_xyz_base(x = -0.167332398274, y = 0.123866805961, z = -0.2)
+        # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 0, 0))
+        # s.Arm.relative_rot_nsa(roll = -179.096292583)
+        # s.Arm.relative_move_xyz_rot_pry(x = -0.167332398274, y = 0.123866805961, z = -0.2, fai = 20)
         # #===========
         # LM up to leave tote
         # s.Arm.pub_ikCmd('ptp', (0.5, 0.0, 0.15), (-180, 0, 0))  
@@ -214,10 +221,7 @@ if __name__ == '__main__':
         #s.stow.arm_photo_pose_2()
         #s.LM.pub_LM_Cmd(LM_ID_Right, ToteLeave_Z)
 
-        # ----- Test Vision Highest------#
-        # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
-        # s.stow.gen_detect_all_in_stow_list()
-        # s.stow.request_highest_item()
+        
 
         # ----- Pick all Unknown Highest------#
         #s.stow.request_unknown_highest_item()
@@ -227,12 +231,7 @@ if __name__ == '__main__':
         # s.LM.rel_move_LM('base', -30)
 
 
-        # ----- Pick all Unknown Highest------#
-        # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json") #any file is ok
-        # s.stow.test_all_unknown_2_amnesty()
-        # gripper_vaccum_off()
-        # s.start() 
-        # s.stow_run()
+       
 
 
         rospy.spin()

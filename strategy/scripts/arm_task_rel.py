@@ -24,13 +24,17 @@ class ArmTask:
     def __init__(self, _name = '/robotis'):
         """Inital object."""
         self.name = _name
+        self.init()
+        
+    def init(self):
+        
         self.__set_pubSub()
         #rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
         self.__is_busy = False
         self.__set_vel_pub.publish(20)
-        
-        
+        self.__ik_fail =False
+
 
     def __set_pubSub(self):
         print "[Arm] name space : " + str(self.name) 
@@ -76,7 +80,9 @@ class ArmTask:
     def __status_callback(self, msg):
         if 'IK Failed' in msg.status_msg:
             rospy.logwarn('ik fail')
-            self.stop_task()
+            self.__ik_fail = True
+            #self.stop_task()
+
 
         elif 'End Trajectory' in msg.status_msg:
             self.__is_busy = False
@@ -94,6 +100,13 @@ class ArmTask:
 
     def home(self):
         self.pub_jointCmd([0,0,0,0, 0,0,0])
+
+    @property
+    def is_ikfail(self):
+        return self.__ik_fail
+
+    def set_speed(self,i_speed):
+        self.__set_vel_pub.publish(i_speed)
 
     def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI, fai=0):
         """Publish msg of ik cmd (deg) to manager node."""
@@ -183,11 +196,11 @@ class ArmTask:
         vec_s = [rot[0][1], rot[1][1], rot[2][1]]
         vec_a = [rot[0][2], rot[1][2], rot[2][2]]
         return vec_n, vec_s, vec_a   
-    
-    def relative_move_suction(self, mode='ptp', suction_angle=0, dis=0 ):
+
+    def relative_move_suction(self, mode='ptp', suction_angle=0, dis=0, blocking = False):
         """Get euler angle and run task."""
         # note:suction_anfle type is degree,  dis is m
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         # ======= Calculate suction vector start ========
@@ -229,7 +242,7 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
     # def Get_OneBoundPos_of_TCP_orig(self, n, s, a):
@@ -316,10 +329,10 @@ class ArmTask:
         offset += multiply(vec_a, a)
         return offset
 
-    def relative_move_nsa(self, mode='ptp', n=0, s=0, a=0):
+    def relative_move_nsa(self, mode='ptp', n=0, s=0, a=0, blocking = False):
         """Get euler angle and run task."""
         # note:for nsa rotation only
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb = self.get_fb()
@@ -348,10 +361,10 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
-    def relative_move_nsa_rot_pry(self, mode='ptp', n=0, s=0, a=0, yaw=0, pitch=0, roll=0):
+    def relative_move_nsa_rot_pry(self, mode='ptp', n=0, s=0, a=0, yaw=0, pitch=0, roll=0, blocking = False):
         """Get euler angle and run task."""
         # ============================================================================
         # note1: for nsa rotation only
@@ -359,7 +372,7 @@ class ArmTask:
         #        however, in ik cmd, it will first move along with nsa, then rot pry
         # ============================================================================
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb = self.get_fb()
@@ -392,15 +405,15 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
 
-    def relative_move_xyz_rot_pry(self, mode='ptp', x=0, y=0, z=0, yaw=0, pitch=0, roll=0, fai=0):
+    def relative_move_xyz_rot_pry(self, mode='ptp', x=0, y=0, z=0, yaw=0, pitch=0, roll=0, fai=0, blocking=False):
         """Get euler angle and run task."""
         # note:for nsa rotation only
         # euler[0~2] = [r p y] = [a s n]
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb    = self.get_fb()
@@ -422,10 +435,10 @@ class ArmTask:
             ),fai
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
-    def relative_rot_nsa(self, mode='ptp', pitch=0, roll=0, yaw=0, exe=True):
+    def relative_rot_nsa(self, mode='ptp', pitch=0, roll=0, yaw=0, exe=True, blocking=False):
         """Get euler angle and run task."""
         # note:for nsa rotation only
         # euler[0~2] = [r p y] = [a s n]
@@ -433,7 +446,7 @@ class ArmTask:
         tmp_ori = [yaw, pitch, roll]
         print '\n2.relative_rot_nsa = ' + str(pitch)
         print '===[n, s, a] = ' + str(tmp_ori)
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb    = self.get_fb()
@@ -454,13 +467,12 @@ class ArmTask:
                     # degrees(euler[1]+(pitch*3.14156/180)),              
                     # degrees(euler[2]+((roll+90)*3.14156/180)),
                     # degrees(euler[0]+(yaw*3.14156/180))
-                    
                     degrees(euler[1] + radians(pitch) ),
                     degrees(euler[2] + radians(roll+90) + radians(0) ),
                     degrees(euler[0] + radians(yaw) )
                 )
             )
-            while self.__is_busy:
+            while self.__is_busy and blocking:
                 rospy.sleep(.1)
         else:
             print 'exe = false'
@@ -563,9 +575,9 @@ class ArmTask:
         # while self.__is_busy:
         #     rospy.sleep(.1)
 
-    def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0, fai=0):
+    def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0, fai=0, blocking = False):
         """relative move xyz with manipulator base axis."""
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb = self.get_fb()
@@ -594,7 +606,7 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
     @property

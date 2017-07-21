@@ -23,23 +23,62 @@ from gripper import *
 from s import *
 
 
-
-
-        
-
+def safe_pose(arm):
+    arm.pub_ikCmd('ptp', (0.30, 0.00 , 0.3), (-180, 0, 0))
+    rospy.sleep(.5)
+    while arm.busy:
+        rospy.sleep(.1)
 
 if __name__ == '__main__':
     rospy.init_node('s_test', disable_signals=True)
 
     try:
         ss = Strategy()
-        #ss.stow.test_request_highest()
-        
+
+        #safe_pose(ss.Arm)
+
         #-------Test Vision Closest----------#
-        ss.stow.test_read_item_location_in_arc_pack("stow.toteTask_00009.json")
+        ss.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
         ss.stow.gen_detect_all_in_stow_list()
+
+        print ('request_highest_item()')
+
         ss.stow.request_highest_item()
 
+
+        # ----- Test Photo Pose ------#
+        # ss.stow.LM_2_tote()
+        # ss.stow.arm_photo_pose()
+
+        
+        #ss.stow.test_request_highest()
+
+
+        #ss.stow.arm_photo_pose()
+
+        
+        # ss.Arm.relative_move_nsa(a = -0.2)
+        
+        #ss.stow.LM_2_Bin('a')
+        # ----- Pick all Unknown Highest------#
+        # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json") #any file is ok
+        # s.stow.test_all_unknown_2_amnesty()
+        # gripper_vaccum_off()
+        # s.start() 
+        # s.stow_run()
+
+
+
+        #---------LM & Arm with Bin----------#
+        gripper_suction_up()
+        #ss.stow.LM_2_Bin_No_Shift('b')
+        ss.stow.LM_2_Bin_Right_Arm('d')
+        
+        ss.stow.arm_leave_tote()
+        while ss.Arm.busy:
+            rospy.sleep(.1)
+        # ss.Arm.relative_move_nsa(a = 0.2)
+        #sss.LM.pub_LM_Cmd(LM_ID_Base, 60000)
 
         rospy.spin()
 

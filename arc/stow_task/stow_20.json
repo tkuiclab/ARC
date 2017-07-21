@@ -3,38 +3,26 @@
         {
             "bin_id": "A",
             "contents": [
-                "robots_dvd",
-                "hinged_ruled_index_cards",
-                "scotch_sponges"
             ]
         },
         {
             "bin_id": "B",
             "contents": [
-                "burts_bees_baby_wipes",
-                "laugh_out_loud_jokes"
             ]
         },
         {
             "bin_id": "C",
             "contents": [
-                "speed_stick",
-                "expo_eraser"
             ]
         },
         {
             "bin_id": "D",
             "contents": [
-                "pie_plates",
-                "reynolds_wrap",
-                "composition_book"
             ]
         },
         {
             "bin_id": "E",
             "contents": [
-                "duct_tape",
-                "ballons"
             ]
         },
         {
@@ -45,14 +33,11 @@
         {
             "bin_id": "G",
             "contents": [
-                "robots_everywhere",
-                "ticonderoga_pencils"
             ]
         },
         {
             "bin_id": "H",
             "contents": [
-                
             ]
         },
         {
@@ -63,29 +48,26 @@
         {
             "bin_id": "J",
             "contents": [
-                "avery_binder"
             ]
         }
     ],
     "boxes": [
-        {
-            "size_id": "A1",
-            "contents": [
-            ]
-        },
-        {
-            "size_id": "1A5",
-            "contents": [
-            ]
-        },
-        {
-            "size_id": "1B2",
-            "contents": [
-            ]
-        }
     ],
     "tote": {
         "contents": [
+            "tissue_box",
+            "burts_bees_baby_wipes",
+            "black_fashion_gloves",
+            "ticonderoga_pencils",
+            "speed_stick",
+            "tennis_ball_container",
+            "windex",
+            "band_aid_tape",
+            "robots_dvd",
+            "laugh_out_loud_jokes",
+            "scotch_sponges",
+            "hinged_ruled_index_cards",
+            "expo_eraser"
         ]
     }
 }

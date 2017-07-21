@@ -15,9 +15,15 @@ from std_msgs.msg import String
 from linear_motion.msg   import LM_Cmd
 # from vacuum_cmd_msg.srv import VacuumCmd
 
-TargetId =      ['a',  'b',  'c',  'd',  'e',  'f',  'g',  'h',  'i',  'j',   'k',   'l']
-TargetShift_X = [  0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 50000, 65000, 80000]
-TargetShift_Z = [  0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 40000, 60000]
+
+LM_ID_Base  = 2   # x move for base LM
+LM_ID_Right = 1   # z move for right LM
+LM_ID_Left  = 3   # Z move for left LM
+
+
+# TargetId =      ['a',  'b',  'c',  'd',  'e',  'f',  'g',  'h',  'i',  'j',   'k',   'l']
+# TargetShift_X = [  0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 50000, 65000, 80000]
+# TargetShift_Z = [  0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 40000, 60000]
 
 class CLM_Control:
     def __init__(self):
@@ -103,21 +109,29 @@ class CLM_Control:
         # print 'x_curr_pos = ' + str(self.x_curr_pos)
         # print 'z_curr_pos = ' + str(self.z_curr_pos)
         # print 'LM ' + str(id) + 'send pls = ' + str(pls)
-        if id == 1:                                             #right
-            if pls > 80000 or pls < 0:
-                print 'error pls for Z-dir LM (0 ~ 80000)'
-                return
+        if id == LM_ID_Right :                                             #right
+            if pls > 80000 :
+                print 'Error pls for Z-dir LM (0 ~ 80000) pls = ' + str(pls) + ' > 80000,  USE 80000!'
+                msg.x = 80000
+                #return
+            elif pls < 0:
+                print 'Error pls for Z-dir LM (0 ~ 80000) pls = ' + str(pls) + ' < 0,  USE 0!'
+                msg.x = 0
             else:
                 msg.x = pls
 
-        elif id == 2:                                             #base
-            if pls > 60000 or pls < 0:
-                print 'error pls for base-dir LM (0 ~ 60000)'
-                return 
+        elif id == LM_ID_Base:                                             #base
+            if pls > 60000 :
+                print 'Error pls for Base-dir LM (0 ~ 60000) pls = ' + str(pls) + ',>60000  USE 60000!'
+                msg.z = 60000
+                #return 
+            elif pls < 0:
+                print 'Error pls for Base-dir LM (0 ~ 60000) pls = ' + str(pls) + ' < 0,  USE 0!'
+                msg.z = 0
             else:
                 msg.z = pls
 
-        elif id == 3:                                             #left
+        elif id == LM_ID_Left:                                             #left
             if pls > 80000 or pls < 0:
                 print 'error pls for left LM (0 ~ 80000)'
                 return 

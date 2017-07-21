@@ -8,7 +8,7 @@ string object_name   # use for highest item
 geometry_msgs/Twist object_pose
 geometry_msgs/Vector3 norm
 bool success
-int32 error_code
+string error_msg
 ---
 #feedback
 int32 progress
