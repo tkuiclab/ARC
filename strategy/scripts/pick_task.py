@@ -22,7 +22,7 @@ from config import *
 from gripper import *
 from task_parser import *
 from get_obj_info import order_boxes
-from object_distribution import bin_dict
+from object_distribution import parse_shelf
 
 # Define State jmp
 WaitTask = 1        # Wait Task
@@ -83,6 +83,7 @@ class PickTask:
         self.Arm = arm
         self.LM = lm
         self.var_init()
+        self.bin_dict = parse_shelf()
 
     def obj_pose_feedback_cb(self, fb):
         """Feedback callback for obj_pose."""
@@ -133,11 +134,12 @@ class PickTask:
     def get_bin_dims(self, bin):
         bin_id = ord(bin) - ord('a')
         # dims of the box
-        return bin_dict[bin_id].L, bin_dict[bin_id].W, bin_dict[bin_id].H
+        return self.bin_dict[bin_id].L, self.bin_dict[bin_id].W, self.bin_dict[bin_id].H
 
     def request_highest_item(self):
         if len(self.detect_all_in_bin):
             W, _, H = self.get_bin_dims(self.bin)
+            print('Bin: {}, W: {}, H: {}'.format(self.bin, W, H))
             goal = obj_pose.msg.ObjectPoseGoal(
                 object_name="<Closest>",
                 object_list=self.detect_all_in_bin,

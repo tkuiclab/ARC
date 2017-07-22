@@ -165,13 +165,11 @@ def search_item(json_content, target, file='order'):
     return None
 
 
-def read_pick_task_and_location():
+def read_pick_task_and_location(location="item_location_file.json", order="order_file.json"):
     directory = path.join(rospkg.RosPack().get_path('arc'), 'pick_task')
-    ilf = "item_location_file_test.json"
-    orf = "order_file_test.json"
 
-    item_loc_path = path.join(directory, ilf)
-    order_path = path.join(directory, orf)
+    item_loc_path = path.join(directory, location)
+    order_path = path.join(directory, order)
 
     pick_task = make_pick_list_from_path(item_loc_path, order_path)
     location_json = read_json(item_loc_path)
