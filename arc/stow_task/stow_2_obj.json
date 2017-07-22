@@ -55,7 +55,9 @@
     ],
     "tote": {
         "contents": [
-            "dvdRobots"
+            "expo_eraser",
+            "scotch_sponges",
+            "composition_book"
         ]
     }
 }

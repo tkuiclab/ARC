@@ -1,13 +1,14 @@
 #goal
 string object_name
-string[] object_list   # want get highest item
+string[] object_list   # want get closest item
+float32[] limit_ary    # limit of  [x_min, x_max, y_min, y_max, z_min, z_max]
 ---
 #result
 string object_name   # use for highest item
 geometry_msgs/Twist object_pose
 geometry_msgs/Vector3 norm
 bool success
-int32 error_code
+string error_msg
 ---
 #feedback
 int32 progress

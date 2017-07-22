@@ -8,6 +8,8 @@
 //#include <fake_roi/Detect.h>
 #include <darkflow_detect/Detected.h>
 #include <darkflow_detect/Detect.h>
+
+#include <sift/sift.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <actionlib/server/simple_action_server.h>
 #include <obj_pose/ObjectPoseAction.h>
@@ -44,8 +46,7 @@
 #include "tf_conversions/tf_eigen.h"
 #include "manipulator_h_base_module_msgs/IK_Cmd.h"
 
-//#define ShowCloud
-#define SaveCloud
+
 
 enum ProcessingState{
     NADA,
@@ -55,17 +56,19 @@ enum ProcessingState{
     ALIGMENT,
     POSE_ESTIMATION,
     GET_ONE_ROI,
-    GET_HIGHEST
-}state;
+    GET_CLOSEST,
+    GET_CLOSEST_SIFT,
+    UNKNOWN_CLOSEST
+}state, next_state;
 
 //for respone to error_code
 
 //#define ERR_DETECT_LESS_MAX               1
-#define ERR_CANNOT_GET_HIGHEST            2
+#define ERR_CANNOT_GET_CLOSEST            2
 #define ERR_CANNOT_CALL_DETECT_SERVICE    3
 #define ERR_CALL_DETECT_OVER_TIMES        4
 //#define ERR_DETECT_RESPONE_FAIL    5
-
+#define ERR_0_CLOUD        6
 
 namespace ObjEstAction_namespace
 {
@@ -78,7 +81,8 @@ public:
     as_(nh_, name, false),
     action_name_(name),
     scene_cloud(new PCT),
-    ROI_cloud(new PCT)
+    ROI_cloud(new PCT),
+    limit_z_min(0.3)
   {
     g_argc = argc;
     g_argv = argv;
@@ -98,7 +102,7 @@ public:
     as_.start();
 
     roi_client = nh_.serviceClient<darkflow_detect::Detect>("/detect");
-  
+    
     ROS_INFO("obj_pose READY!");
   }
 
@@ -163,7 +167,7 @@ public:
   }
   
   void pub_feedback(std::string msg,int progress);
-  void pub_error();
+  void pub_error(const char *err_msg);
   
 
   //bool get_roi();
@@ -174,21 +178,25 @@ public:
   void do_ICP();
   
   void get_one_roi();   //need obj_name
-  void get_highest();   //need obj_list
-  
+  void get_closest();   //need obj_list
+  void get_closest_SIFT();
+  void unknown_closest();
 
 protected:
     
 
   
-  void set_ROI_colud(int mini_x,int mini_y,int max_x, int max_y);
+  void set_ROI_cloud(int mini_x,int mini_y,int max_x, int max_y);
 
   bool load_amazon_pcd(std::string pcd_filename);
   bool is_obj_in_obj_list(std::string name);
   void print4x4Matrix (Eigen::Matrix4f & matrix, Eigen::Vector4f centroid);
   // Eigen::Matrix3d euler2Quaternion( double roll, double pitch, double yaw);
   Eigen::Quaterniond euler2Quaternion( const double roll, const double pitch, const double yaw);
+  
+  void check_0_cloud_error_sub(const char *cloud_name);
 
+  bool check_0_cloud(PCT::Ptr i_cloud, const char *cloud_name);
   //------ROS--------//
   ros::NodeHandle nh_;
   ros::Publisher segmented_pub_;
@@ -196,6 +204,7 @@ protected:
   ros::Subscriber cloud_sub;
   ros::Subscriber arm_fb_sub;
   ros::ServiceClient roi_client;
+  ros::ServiceClient sift_roi_client;
 
   actionlib::SimpleActionServer<obj_pose::ObjectPoseAction> as_;
   std::string action_name_;
@@ -216,6 +225,8 @@ protected:
   
   darkflow_detect::Detect roi_srv;
   manipulator_h_base_module_msgs::GetKinematicsPose arm_fb_srv;
+  sift::sift sift_roi_srv;
+
   // std::string tmp_path;
   // std::string tmp_path2;
   std::string obj_name;
@@ -238,6 +249,11 @@ private:
   PCT::Ptr scene_cloud ;
   PCT::Ptr ROI_cloud;
 
+  //limit for passthrough
+  float limit_x_min, limit_x_max, 
+        limit_y_min, limit_y_max, 
+        limit_z_min, limit_z_max;
+
 
   int g_argc;
   char** g_argv;
@@ -249,5 +265,8 @@ private:
   Eigen::Matrix4f transformation_matrix;
 
   int error_code;
+
+
+  int Unknown_Closest_num; // 0 -> most closest , 1 -> second closest
 };
 }

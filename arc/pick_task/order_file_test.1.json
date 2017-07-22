@@ -1,0 +1,29 @@
+{
+    "orders": [
+        {
+            "size_id": "A1",
+            "contents": [
+                "hinged_ruled_index_cards",
+                "duct_tape"
+            ]
+        },
+        {
+            "size_id": "1A5",
+            "contents": [
+                "composition_book",
+                "speed_stick",
+                "ticonderoga_pencils"
+            ]
+        },
+        {
+            "size_id": "1B2",
+            "contents": [
+                "robots_dvd",
+                "pie_plates",
+                "reynolds_wrap",
+                "scotch_sponges",
+                "laugh_out_loud_jokes"
+            ]
+        }
+    ]
+}

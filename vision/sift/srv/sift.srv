@@ -1,0 +1,7 @@
+string fileName
+---
+geometry_msgs/Polygon points
+std_msgs/Int32 xmin
+std_msgs/Int32 ymin
+std_msgs/Int32 xmax
+std_msgs/Int32 ymax

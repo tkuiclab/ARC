@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
 )
-find_package(PCL 1.7 REQUIRED REQUIRED COMPONENTS 
+find_package(PCL 1.8 REQUIRED REQUIRED COMPONENTS 
 	io
 	registration
 	segmentation
@@ -65,7 +65,7 @@ set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
 #set(PCL_LIBRARY_DIRS "/usr/lib")
 
 include_directories(
-  ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR}
+  ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS}
 )
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})

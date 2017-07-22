@@ -140,8 +140,8 @@ ManipulatorKinematicsDynamics::ManipulatorKinematicsDynamics(TreeSelect tree)
         manipulator_link_data_[6]->relative_position_ = robotis_framework::getTransitionXYZ(0.12300, -0.04500, 0.00000);
         manipulator_link_data_[6]->joint_axis_ = robotis_framework::getTransitionXYZ(1.0, 0.0, 0.0);
         manipulator_link_data_[6]->center_of_mass_ = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);
-        manipulator_link_data_[6]->joint_limit_max_ =  0.5 * M_PI;
-        manipulator_link_data_[6]->joint_limit_min_ = -0.5 * M_PI;
+        manipulator_link_data_[6]->joint_limit_max_ =  0.56 * M_PI;
+        manipulator_link_data_[6]->joint_limit_min_ = -0.56 * M_PI;
         manipulator_link_data_[6]->inertia_ = robotis_framework::getInertiaXYZ(1.0, 0.0, 0.0, 1.0, 0.0, 1.0);
 
         manipulator_link_data_[7]->name_ = "joint7";
@@ -521,6 +521,8 @@ void ManipulatorKinematicsDynamics::fk()
         for(int j=0;j<=2;j++)
         {
             ori(i,j) = roundN(ori(i,j), 4);
+            if(fabs(ori(i,j)) < 0.001)
+                ori(i,j) = 0.0;
         }   
     }
     
@@ -570,17 +572,22 @@ void ManipulatorKinematicsDynamics::fk()
     {
         if( ori(0, 2) < 1 )
         {
-            if( ori(0, 2) > -1 )
+            // if( ori(0, 2) > -1 )
+            if( ori(0,2) - (-1) > 0.0001 )
             {
                 roll  = asin ( ori(0, 2) );
                 pitch = atan2(-ori(1, 2), ori(2, 2));
                 yaw   = atan2(-ori(0, 1), ori(0, 0));
+                //test
+                if(fabs(roll*180/M_PI)>=90)
+                    yaw   = -atan2( ori(0, 1), ori(0, 0));
             }
             else 
             {
                 roll  = -M_PI/2;
                 pitch = -atan2(-ori(1, 0), ori(1, 1));
                 yaw   =  0;
+                // std::cout<<"ori(0, 2) <= -1";
             }
         }
         else 
@@ -588,18 +595,24 @@ void ManipulatorKinematicsDynamics::fk()
             roll  = M_PI/2;
             pitch = atan2(-ori(1, 0), ori(1, 1));
             yaw   = 0;
+            // std::cout<<"ori(0, 2) >= 1";
         }
         pitch = roundN(pitch, 4);
         roll  = roundN(roll , 4);
         yaw   = roundN(yaw  , 4);
     }
+    // normalizeAngle(pitch);
+    // normalizeAngle(roll);
+    // normalizeAngle(yaw);
     /* update matrix of rotation */
     Eigen::Matrix3d     tmp_rot_matrix;
     Eigen::Quaterniond  tmp_Quat;
-
+    
     // =============================================================================
     tmp_Quat        = robotis_framework::convertEulerToQuaternion(roll, pitch, yaw);
-    manipulator_link_data_[END_LINK]->orientation_  = robotis_framework::convertQuaternionToRotation(tmp_Quat);
+    // robotis_->fk_quaternion = tmp_Quat;
+    manipulator_link_data_[END_LINK]->orientation_  = robotis_framework::convertQuat2Rotation(tmp_Quat);
+    // manipulator_link_data_[END_LINK]->orientation_  = robotis_framework::convertQuaternionToRotation(tmp_Quat);
     // manipulator_link_data_[END_LINK]->orientation_ = tmp_rot_matrix;
     // =============================================================================
 
@@ -607,11 +620,13 @@ void ManipulatorKinematicsDynamics::fk()
 
     /* claculate redundancy for fai */
     this->fai = cal_Redundancy(jointPos);
+
+    //pub the fk info to the topic "/robotis/fk_fb"
     fk_x = pos(0);  fk_y = pos(1);  fk_z = pos(2);
-    fk_roll = roll; fk_pitch = pitch;   fk_yaw = yaw;   fk_fai = this->fai;
+    fk_roll = roll; fk_pitch = pitch;   fk_yaw = yaw;   fk_fai = fai;
     // ======== debug observer area ==========
     static int cnt=0;
-    if(cnt++ > 800)
+    if(cnt++ > 1000)
     {
         // std::cout<<"Qw = "<<roundN(tmp_Quat.w(), 4)<<"\n";
         // std::cout<<"Qx = "<<roundN(tmp_Quat.x(), 4)<<"\n";
@@ -624,23 +639,23 @@ void ManipulatorKinematicsDynamics::fk()
         // std::cout<<"quat_fy = "<<roundN(quat_f.y(), 4)<<"\n";
         // std::cout<<"quat_fz = "<<roundN(quat_f.z(), 4)<<"\n";
         // std::cout<<"========== rotation matrix ==========\n";
-        for(int i=0 ; i<=2;i++)
-        {
-            for(int j=0 ; j<=2 ; j++)
-            {
-                std::cout<<ori(i,j)<<"\t";
-                // std::cout<<roundN(manipulator_link_data_[END_LINK]->orientation_(i,j),4)<<"\t";
-            }
-            std::cout<<"\n";
-        }
+        // for(int i=0 ; i<=2;i++)
+        // {
+        //     for(int j=0 ; j<=2 ; j++)
+        //     {
+        //         // std::cout<<ori(i,j)<<"\t";
+        //         std::cout<<roundN(manipulator_link_data_[END_LINK]->orientation_(i,j),4)<<"\t";
+        //     }
+        //     std::cout<<"\n";
+        // }
         std::cout<<"======================================\n";
         std::cout<<"X Y Z = "<<pos(0)<<", "<<pos(1)<<", "<<pos(2)<<std::endl;
-        std::cout<<"P R Y F = "<<pitch*180/M_PI<<", "<<roll*180/M_PI<<", "<<yaw*180/M_PI<<", "<<fai<<std::endl;
+        std::cout<<"P R Y F = "<<pitch*180/M_PI<<", "<<roll*180/M_PI<<", "<<yaw*180/M_PI+90<<", "<<fai<<std::endl;
         cnt=0;
     }
 }
 
-bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::MatrixXd& tar_orientation, double tarFai /* = 0 */)
+bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::MatrixXd& tar_orientation, double tarFai /* = 0 */, bool exeOpt /*= false*/)
 {
     Eigen::VectorXd angle(7);
     // Eigen::MatrixXd rpy = robotis_framework::convertRotationToRPY(tar_orientation);
@@ -650,18 +665,54 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
 
     /* desired cmd */
     double pitch, roll, yaw;
-    double tmp = tar_position(0);
-    tar_position(0) = tar_position(1);
-    tar_position(1) = tmp;
+
+    // // === save some of the curr angle, help to detect and handle special case ===
+    double Curr_Ang[7];
+    double Curr_Ang_Sum = 0;
+    for(int i=1;i<=7;i++)
+    {
+        Curr_Ang[i-1] = manipulator_link_data_[i]->joint_angle_*180/M_PI;
+        Curr_Ang_Sum += fabs(Curr_Ang[i-1]);
+        std::cout<<"=== orig joint ang = "<<manipulator_link_data_[i]->joint_angle_*180/M_PI<<"\n";
+    }
+        
+    double Curr_J5 = manipulator_link_data_[6]->joint_angle_;
+    double Curr_J7 = manipulator_link_data_[7]->joint_angle_;
+    // //---------------------------------------------------------------------
+        
+    if(exeOpt==false) //Avoid change pos x and pos y again when call ik fn in an ik fn 
+    {
+        std::cout<<"\n ========== exe opt ========== \n";
+        double tmp = tar_position(0);
+        tar_position(0) = tar_position(1);
+        tar_position(1) = tmp;
+    }
     roll  = tar_orientation(0,0);
-    pitch = tar_orientation(0,1);
-    yaw   = tar_orientation(0,2);
+    pitch = tar_orientation(1,0);
+    yaw   = tar_orientation(2,0);
+    
+    //avoid the singularity
+    if( fabs(fabs(roll) - M_PI/2) < 0.1*M_PI/180 )
+    {
+        roll+=1*M_PI/180;
+        std::cout<<"avoid the singularity\n";
+    }
+
     Eigen::Vector3d position = tar_position;
     Eigen::Matrix3d RPY_Rot; // orientation
     // Euler_Mode = e_ICLAB;     // Decide euler angle mode!!!
+    std::cout<<"==xyz = "<<position(0)<<", "<<position(1)<<", "<<position(2)<<"\n";
+    std::cout<<"==pryf = "<<pitch<<", "<<roll<<", "<<yaw<<", "<<tarFai<<"\n";
 
-    std::cout<<"pry = "<<pitch<<", "<<roll<<", "<<yaw<<"\n";
-    std::cout<<std::endl<<"============below============"<<std::endl;
+    /*  for special, assign yaw always=0*/
+    if(( fabs(yaw*180/M_PI) > 0.01 )&&( fabs(roll*180/M_PI) < 0.01 ))//if yaw > 0 and roll = 0  => is special case
+    {
+        roll = roll + yaw;
+        yaw = 0;
+        std::cout<<"exe special case sol\n";
+    }
+    
+    std::cout<<std::endl<<"============ Start Calculate ik ============"<<std::endl;
     if(Euler_Mode == e_ICLAB)
     {
         double Cx = cos(pitch);
@@ -673,7 +724,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
         RPY_Rot <<  Cz*Sy + Sz*Sx*Cy,  Cz*Cy - Sz*Sx*Sy, -Sz*Cx,
                     Sz*Sy - Cz*Sx*Cy,  Sz*Cy + Cz*Sx*Sy,  Cz*Cx,
                     Cx*Cy           , -Cx*Sy           ,     Sx;
-        std::cout<<"ICLab"<<std::endl;
+        std::cout<<"Euler mode:ICLab"<<std::endl;
     }
     else
     {
@@ -686,7 +737,7 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
         RPY_Rot <<   Cy*Cz              , -Cy*Sz            ,     Sy , 
                      Sx*Sy*Cz + Cx*Sz   , -Sx*Sy*Sz + Cx*Cz , -Sx*Cy ,
                     -Cx*Sy*Cz + Sx*Sz   , Cx*Sy*Sz + Sx*Cz  ,  Cx*Cy ;
-        std::cout<<"XYZ"<<std::endl;
+        std::cout<<"Euler mode:XYZ"<<std::endl;
     }
 
     double d_bs = DH(0, 2);
@@ -759,6 +810,9 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     angle[2] = acos(C(0) / sqrt(pow(C(0), 2) + pow(C(1), 2))) - M_PI;
     angle[2] = C(1) > 0.0001 ? angle[2] : -angle[2];
 
+    // for(int i=0;i<4;i++)
+    //     angle[i] = roundN(angle[i], 4);
+
     // /* ------------------------------------------- orientation ------------------------------------------- */
     double sida1 = angle[0] + DH(0, 3);
     double sida2 = angle[1] + DH(1, 3);
@@ -786,29 +840,51 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     Eigen::Matrix3d R4_7 = R0_4.transpose() * RPY_Rot;
 
     int Wrist = -1; // Wrist Up =  1, Wrist Down = -1
-    double tmp_j5 = atan2(-R4_7(1, 2), -R4_7(0, 2));
-    if( fabs(tmp_j5) > 90*M_PI/180.0 )
+
+    //=== Determine better wrist direct to avoid large rotation in wrist ===Curr_Ang
+    double tmp_j5_1 = atan2(-1 * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
+    double tmp_j5_2 = atan2( 1 * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
+    std::cout<<"=== Curr_J5 = "<<Curr_J5*180/M_PI<<"\n";
+    std::cout<<"=== tmp_j5_1 = "<<tmp_j5_1*180/M_PI<<"\n";
+    std::cout<<"=== tmp_j5_2 = "<<tmp_j5_2*180/M_PI<<"\n";
+
+    // if( fabs(Curr_J5-tmp_j5_1) < fabs(Curr_J5-tmp_j5_2) )
+    if( fabs(Curr_Ang[5]-tmp_j5_1) < fabs(Curr_Ang[5]-tmp_j5_2) )
     {
         Wrist = 1;
+        std::cout<<"wrist = 1\n";
     }
+    else
+        std::cout<<"wrist = -1\n";
+    //=======================================================================
 
     /* joint 6 */
     angle[5] = atan2(Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
-
+    
     if (fabs(R4_7(2, 2)) > 0.99999)
     {
         /* joint 5, 7 */
         angle[4] = 0;
-        angle[6] = atan2(R4_7(1, 0), R4_7(0, 0));
+        angle[6] = atan2(R4_7(1, 0), R4_7(0, 0)); 
     }
     else
     {
+        std::cout<<"===== R4_7 =====\n";
+        for(int i=0;i<=2;i++)
+        {
+            for(int j=0;j<=2;j++)
+            {
+                std::cout<<R4_7(i,j)<<",  ";
+            }
+            std::cout<<"\n";
+        }
         if (Wrist > 0)
         {
             angle[4] = atan2(R4_7(1, 2),  R4_7(0, 2));
             angle[6] = atan2(R4_7(2, 1), -R4_7(2, 0));
             if (fabs(angle[4]) > 120.0 * M_PI / 180.0)
             {
+                // std::cout<<"J4 > 120\n";
                 angle[5] = atan2(-Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
                 angle[4] = atan2(-R4_7(1, 2), -R4_7(0, 2));
                 angle[6] = atan2(-R4_7(2, 1),  R4_7(2, 0));
@@ -820,15 +896,20 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
             angle[6] = atan2(-R4_7(2, 1),  R4_7(2, 0));
             if (fabs(angle[4]) > 120.0 * M_PI / 180.0)
             {
+                // std::cout<<"J4 > 120\n";
                 angle[5] = atan2(-Wrist * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
                 angle[4] = atan2(R4_7(1, 2),  R4_7(0, 2));
                 angle[6] = atan2(R4_7(2, 1), -R4_7(2, 0));
             }
         }
+
     }
     if(Euler_Mode == e_nsa)
+    {
         angle[6] -= M_PI/2;
-
+        std::cout<<"angle[6] -= M_PI/2;" <<"\n";
+    }
+        
     for (int i = 0; i < MAX_JOINT_ID; i++)
     {
         /* checking angle is nan */
@@ -837,7 +918,6 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
             std::cout << "angle[" << i << "] is nan" << std::endl;
             return false;
         }
-
         if((fabs(angle[i]) > 0) && (fabs(angle[i]) < 0.0001))
             angle[i] = 0;
 
@@ -869,13 +949,102 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
             std::cout << "ik joint limit: " << i+1 << " " << link_data.joint_angle_ * 180.0 / M_PI << std::endl;
             std::cout << "max ang of joint " <<i+1 <<" is " << link_data.joint_limit_max_* 180.0 / M_PI << std::endl;
             std::cout << "min ang of joint " <<i+1 <<" is " << link_data.joint_limit_min_* 180.0 / M_PI << std::endl;
-            return false;
+            ErrCode.JointLimit = true;
+            std::cout<<"==================\n";
+            std::cout<<"\nJoint Limit\n";
+            std::cout<<"==================\n";
+            break;
         }
-        angle[i] = roundN(angle[i], 3);
-        std::cout <<"r_Joint"<<i+1<<" is  "<<angle[i]*180.0 / M_PI<<std::endl;
+        else
+        {
+            ErrCode.JointLimit = false;  
+            std::cout <<"r_Joint"<<i+1<<" is  "<<angle[i]*180.0 / M_PI<<std::endl;
+            // angle[i] = roundN(angle[i], 4);
+        }
     }
+    // Handle J7 Over 180 (method2)
+    if(( robotis_framework::sign(Curr_Ang[6]) != robotis_framework::sign(angle[6]) )&&(fabs(Curr_Ang_Sum)>1))
+    {
+        ErrCode.J7_Over180 = true;
+        std::cout<<"==================\n";
+        std::cout<<"\nJoint 7 over 180\n";
+        std::cout<<"==================\n";
+    }
+    else 
+    {
+        ErrCode.J7_Over180 = false;
+    }
+
+    //Determine is ik ik_success
+    if((ErrCode.J7_Over180 == false) && (ErrCode.JointLimit == false))
+        return true;
+    else 
+        return false;
+
+    //-----------------------------
+    //=== Handle the special case when J7 move from positive to negative or from negative to positive ===
+    double tmpFai = 10;
+    std::cout<<"Curr_J7  = "<<robotis_framework::sign(Curr_Ang[7])<<"\n";
+    std::cout<<"angle[6] = "<<robotis_framework::sign(angle[6])<<"\n";
+    std::cout<<"Curr_J7  = "<<(Curr_Ang[6])<<"\n";
+    std::cout<<"angle[6] = "<<(angle[6])<<"\n";
+    std::cout<<"Curr_Ang_Sum = "<<Curr_Ang_Sum<<"\n";
+    if(( robotis_framework::sign(Curr_Ang[6]) != robotis_framework::sign(angle[6]) )&&(fabs(Curr_Ang_Sum)>1))
+    {
+        static int recurr_ik_cnt = 0;
+        double tmp_fai = 0;
+        std::cout<<"Handle the special case when J7 move from positive to negative or from negative to positive\n";
+        Eigen::MatrixXd new_pos; 
+        new_pos = robotis_framework::getTransitionXYZ(0.0, 0.0, 0.0);   
+        new_pos <<position(0), position(1), position(2);
+        Eigen::MatrixXd new_ori = Eigen::MatrixXd::Zero(3, 1);
+        for(int i=0;i<=2;i++)
+        {
+            new_ori(i, 0) = tar_orientation(i, 0);
+        }
+        //--------method1 (OK)------------
+        if(recurr_ik_cnt==0)
+        {
+            recurr_ik_cnt++;
+            tmp_fai = robotis_framework::sign(angle[6])*10*M_PI/180;
+            std::cout<<" ======= new fai = "<<tmp_fai<<"\n";
+            // ik(new_pos, new_ori, tarFai = tmp_fai, exeOpt=true);
+            
+        }
+        recurr_ik_cnt = 0;
+        // //---------method2-------------
+        // // if(exeOpt==true)
+        // // {
+        // //     recurr_ik_cnt++;
+        // //     if(recurr_ik_cnt==1)        
+        // //     {
+        // //         tmp_fai = -10;
+        // //         std::cout<<"send new tarFai = "<<tmp_fai<<"\n";
+                
+        // //     }
+        // //     else if(recurr_ik_cnt==2)    
+        // //     {
+        // //         tmp_fai = 10;
+        // //         std::cout<<"send new tarFai = "<<tmp_fai<<"\n";
+        // //     }
+        // //     else
+        // //     {
+        // //         tmp_fai = 0;
+        // //         std::cout<<"\n====== Either 10 or -10 cannot handle this case!!! ====== \n";
+        // //         recurr_ik_cnt=0;
+        // //     }
+        // // }
+        // // if(recurr_ik_cnt<=2)
+        // // {
+        // //     std::cout<<"new tarFai = "<<tmp_fai<<"\n";
+        // //     ik(new_pos, new_ori, tarFai = tmp_fai*M_PI/180, exeOpt=true);
+        // // }
+        // // --------------------------------
+        for (int i = 0; i < MAX_JOINT_ID; i++)
+            std::cout <<"[new ik output]:Joint"<<i+1<<" is  "<<angle[i]*180.0 / M_PI<<std::endl;
+    }
+    //--------------------------------------------------------------------------------------------
     
-    return true;
 }
 
 void ManipulatorKinematicsDynamics::cal_ElbowInfo(Eigen::Vector3d& P_s, Eigen::Vector3d& P_w, double Fai, Eigen::Vector3d& P_e,Eigen::Vector3d& P_LJ)
@@ -1040,6 +1209,11 @@ void ManipulatorKinematicsDynamics::gen_TFMat(int index, double theta, Eigen::Ma
     double s_theta = sin(theta + DH(index, 3));
     double c_alpha = cos(DH(index, 1));
     double s_alpha = sin(DH(index, 1));
+
+    c_theta = roundN(c_theta, 4);
+    s_theta = roundN(s_theta, 4);
+    c_alpha = roundN(c_alpha, 4);
+    s_alpha = roundN(s_alpha, 4);
 
     A << c_theta, -s_theta * c_alpha,  s_theta * s_alpha, DH(index, 0) * c_theta,
          s_theta,  c_theta * c_alpha, -c_theta * s_alpha, DH(index, 0) * s_theta,

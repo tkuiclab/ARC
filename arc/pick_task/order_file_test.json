@@ -1,24 +1,19 @@
 {
     "orders": [
         {
-            "size_id": "1A5",
+            "size_id": "A1",
             "contents": [
-		        "robots_everywhere",
-                "scotch_sponges",
-                "expo_eraser"
             ]
         },
         {
-            "size_id": "A1",
+            "size_id": "1A5",
             "contents": [
-                "tissue_box"
             ]
         },
         {
             "size_id": "1B2",
             "contents": [
-                "robots_dvd",
-                "hanes_socks"
+                "laugh_out_loud_jokes"
             ]
         }
     ]

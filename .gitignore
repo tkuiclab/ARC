@@ -60,9 +60,16 @@ CATKIN_IGNORE
 /vision/pcl_saver/pattern/
 !/vision/pcl_saver/pattern/README.md
 
+# sift ignore
+/vision/sift/training items/
+/vision/sift/Training items/
+/vision/sift/*.png
+
 # ignore for pcd
 *.pcd
 
 # ignore cam2obj/build
 /vision/cam2obj/build/
 /arc/Training items/
+/arc/output/
+*.crdownload

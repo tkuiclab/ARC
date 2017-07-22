@@ -21,6 +21,7 @@ from strategy.srv import *
 
 import arm_task_rel
 import LM_Control
+
 #import task_parser
 from task_parser import *
 from config import *
@@ -35,6 +36,7 @@ TaskType_Pick = 1
 TaskType_Stow = 2
 
 
+
 class Strategy(threading.Thread):
     """ description """
     def __init__(self):
@@ -44,6 +46,8 @@ class Strategy(threading.Thread):
         self.info_pub = rospy.Publisher('/stratege/info', String, queue_size=10)
         
         # === Initialize All Var === 
+        #self.Arm 			= arm_task_rel.ArmTask('/left_arm/robotis')
+        #self.right_Arm 			= arm_task_rel.ArmTask('/right_arm/robotis')
         self.Arm 			= arm_task_rel.ArmTask()
         self.LM  			= LM_Control.CLM_Control()
 
@@ -54,15 +58,19 @@ class Strategy(threading.Thread):
 
         self.run_task_type = TaskType_None
 
+        self.Arm.set_speed(20)
+
         rospy.sleep(0.3)
         rospy.loginfo("Strategy Ready!!")
+
+
+
         
     def shutdown(self):
         """ description """
+        gripper_vaccum_off()
         self.stop_robot = True
         rospy.loginfo("Strategy Exit & Stop Robot")
-
-
 
     def safe_pose(self):
         self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-180, 0, 0))
@@ -156,86 +164,34 @@ class Strategy(threading.Thread):
         self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.34), (0, 0, 0))
 
 
-    
-
 if __name__ == '__main__':
     rospy.init_node('strategy', disable_signals=True)
 
-    
     try:
         s = Strategy()
-        s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
-        #s.safe_pose()
+
+        #===
         gripper_vaccum_off()
+        # #s.stow.test_read_item_location_in_arc_pack("stow_20.json")
+        #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+        # # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+        s.stow.test_read_item_location_in_arc_pack("stow_test.json")
+        
+        s.safe_pose()
+
         s.start() 
         s.stow_run()
         
-        #s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
-        #s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00005.json")
+
+
+        # =========== test ===========
+        # desire_cmd = [0.3, 0, 0.3, -90, 0, 0]
         
-        
-        
-        # s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00009.json")
-        
-        # s.stow.gen_detect_all_in_stow_list()
-        # s.stow.request_highest_item()
-        
-        # rospy.sleep(10)
-        
-        # s.stow.test_2_stow_fail()
+        # s.Arm.Get_Collision_Avoidance_Cmd(desire_cmd, 0, 'C')
+        # s.Arm.Get_Collision_Avoidance_Cmd(desire_cmd, 90, 'C')
+        # ============================
 
 
-
-
-        #print str(s.stow.detect_all_in_stow_list)
-
-        
-        
-        # gripper_vaccum_off()
-        # #s.stow.test_read_item_location_in_arc_pack("stow.toteTask_00021.json")
-        # s.stow.test_read_item_location_in_arc_pack("stow_test.json")
-        # rospy.sleep(0.3)
-        # s.stow_run()
-    
-
-        # write_PickInfo_2_JSON()
-
-
-        # ========== TEST ===========
-        #s.test_go_bin_LM('e')
-
-        #s.safe_pose()
-
-
-
-        # ============ rel motion test area start ============
-        # s.Arm.relative_move_nsa(n = 0.04)  #n = move_cam_y
-        # s.Arm.relative_move_nsa(s = -0.06) #s= move_cam_x
-        # s.Arm.relative_move_nsa(a = 0.1)   #a= move_cam_z
-
-        # ========================= rel motion test area start =============================
-        # s.Arm.pub_ikCmd('ptp', (0.3, 0 , 0.2), (-180, 0, 0) )
-        # dis = -0.05
-        # rot = 20
-        # s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
-        # s.Arm.relative_rot_nsa(roll = rot)
-        # s.Arm.relative_move_nsa(s = dis)
-
-        # s.Arm.pub_ikCmd('ptp', (0.3, -0.05 , 0.2), (-150, -40, 0) )
-        # s.Arm.relative_rot_pry_move_nsa(s = dis, roll = rot)
-
-
-
-        # s.Arm.relative_move_nsa_rot_pry(a = dis, pitch = rot)
-        # s.test_relative_move_nsa(0.05)
-        # s.test_relative_rot_nsa(10)
-        # s.test_relative_xyz_base(0.05)
-        # s.test_relative_move_nsa_rot_pry(dis = 0.05, rot = 10)
-        # s.test_relative_move_xyz_rot_pry(dis = 0.05, rot = 10)
-
-        # ========================= rel motion test area over ==============================
-
-        
 
         rospy.spin()
     except rospy.ROSInterruptException:

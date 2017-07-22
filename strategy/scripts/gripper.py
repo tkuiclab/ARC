@@ -1,14 +1,18 @@
 import rospy
 from vacuum_cmd_msg.srv import VacuumCmd
 
+# 2017/07/19 Gripper Parameter Backup
+# cam2tool_y = -0.025
+# cam2tool_z = 0.14
+# gripper_length = 0.04
+# cam2center_y = 0.025
+# cam2center_y_4_tote = 0.05
 
-# cam2tool_y = -0.11  #-0.095  #cam axis
-# cam2tool_y = -0.04  #-0.095  #cam axis
-cam2tool_y = -0.01 #-0.025  #-0.095  #cam axis
-# cam2tool_z = 0.23   # + 0.035
-cam2tool_z = 0.11   # + 0.035
-gripper_length = 0.04 #0.04
-cam2center_y = 0.03
+# NOW
+cam2tool_z = 0.18 #0.27 #0.26
+gripper_length = 0.04
+cam2center_y = 0.035
+cam2center_y_4_tote = 0.06 #0.05
 
 def robot_cmd_client(cmd):
     rospy.wait_for_service('/robot_cmd')

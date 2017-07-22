@@ -57,6 +57,13 @@ typedef enum
     e_nsa
 }teEuler_Mode;
 
+struct stErrCode
+{
+    bool JointLimit;
+    bool J7_Over180;
+    bool TCP_SoftLimit;
+};
+
 class ManipulatorKinematicsDynamics
 {
 private:
@@ -70,15 +77,17 @@ private:
     double rho2;
 
     double fai;
-
+    
 public:
-    /*for the topic "/robotis/fk_fb" */
+    stErrCode ErrCode;
+    /*Euler rotation mode*/
+
     double fk_x, fk_y, fk_z;
     double fk_roll;
     double fk_pitch;
     double fk_yaw;
     double fk_fai;
-    
+
     teEuler_Mode Euler_Mode;
     ManipulatorKinematicsDynamics();
     ManipulatorKinematicsDynamics(TreeSelect tree);
@@ -121,7 +130,8 @@ public:
     double cal_Redundancy(std::vector<Eigen::Vector3d>& jointPos);
 
     /* ------------------ inverse kinematics ------------------ */
-    bool ik(Eigen::MatrixXd& tar_position, Eigen::MatrixXd& tar_orientation, double tarFai = 0);
+    
+    bool ik(Eigen::MatrixXd& tar_position, Eigen::MatrixXd& tar_orientation, double tarFai = 0, bool exeOpt = false);
     void cal_ElbowInfo(Eigen::Vector3d& P_s, Eigen::Vector3d& P_w, double Fai, Eigen::Vector3d& P_e,Eigen::Vector3d& P_LJ);
 
     Eigen::Vector3d cal_ElbowPos(Eigen::Matrix4d& RotMatrix, double Angle, double LinkLen, double Fai);

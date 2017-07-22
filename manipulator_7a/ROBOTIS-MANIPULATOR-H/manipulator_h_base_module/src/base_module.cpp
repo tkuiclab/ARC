@@ -72,6 +72,7 @@ BaseModule::BaseModule()
 
     /* init velocity */
     vel_percent  = DEFAULT_SPD;
+
     for(int i=0;i<=6;i++)
         fk_fb_msg.data.push_back(0.0);
 }
@@ -290,7 +291,10 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     robotis_->ik_cmd_fai = cmd->data.size() == 7 ? cmd->data[6] * M_PI / 180.0 : 0.0;
 
     robotis_->ik_target_position_ << x, y, z;
-    robotis_->ik_target_rotation_ << roll, pitch, yaw;
+    // robotis_->ik_target_rotation_ << roll, pitch, yaw;
+    robotis_->ik_target_rotation_(0,0) = roll;
+    robotis_->ik_target_rotation_(1,0) = pitch;
+    robotis_->ik_target_rotation_(2,0) = yaw;
     std::cout<<"ori_data = "<<pitch<<", "<<roll<<", "<<yaw<<"\n";
     std::cout<<"ik_input = "<<robotis_->ik_target_rotation_(0,1)<<", "
                             <<robotis_->ik_target_rotation_(0,0)<<", "
@@ -303,12 +307,63 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
     bool ik_success = manipulator_->ik(robotis_->ik_target_position_,
                                        robotis_->ik_target_rotation_,
                                        robotis_->ik_cmd_fai);
-    if (!ik_success)
+    // ======================= new ================================
+    if(!ik_success)
     {
-        ROS_INFO("PTP: IK ERR !!!");
-        publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "IK Failed: Joint Limit");
-        return;
+        bool check_ik_again_success = true;
+        double new_fai_Arr[3] = {10, -10, 0};       // for avoid J7_Over180
+        double fai_interval   = 10;                 // for avoid Joint Limit
+        double new_fai        = 0;
+        if(manipulator_->ErrCode.J7_Over180 == true)
+        {
+            for(int i=0 ; i<=2  ; i++)
+            {
+                // check_ik_again_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_, new_fai_Arr[i]*M_PI/180);
+                if(check_ik_again_success)
+                {
+                    std::cout<<"new_fai = "<<new_fai_Arr[i]<<"\n";
+                    manipulator_->ErrCode.J7_Over180 == false;
+                    new_fai = new_fai_Arr[i];
+                    break;
+                }
+                if((i==2)&&(check_ik_again_success==false))
+                {
+                    std::cout<<"\n====== Neither 10 nor -10 can handle this case!!! ====== \n";
+                }
+            }
+        }
+        // if(manipulator_->ErrCode.JointLimit == true)
+        // {
+        //     for(int i=1 ; i>=-1 ; i-=2 )
+        //     {
+        //         fai_interval *= (robotis_framework::sign(new_fai)>=0) ? 1 : -1 ;
+        //         for(int j = 1 ; j<=9 ; j++)
+        //         {
+        //             check_ik_again_success = ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_, i*fai_interval[j]*M_PI/180);
+        //             if(check_ik_again_success == true)
+        //             {
+        //                 std::cout<<"Solve joint limit with fai = "<<i*new_fai[j]*M_PI/180<<"\n";
+        //                 i = 3;  //for break upper loop
+        //                 break;
+        //             }
+        //         }
+        //     }
+        // }
+        if(manipulator_->ErrCode.JointLimit == true){
+            std::cout<<"\n====== manipulator_->ErrCode.JointLimit == true ====== \n";
+            ROS_INFO("PTP: IK ERR !!!");
+            publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "IK Failed: Joint Limit");
+            return;
+        }
     }
+    // ======================= orig ================================
+    // if (!ik_success)
+    // {
+    //     ROS_INFO("PTP: IK ERR !!!");
+    //     publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "IK Failed: Joint Limit");
+    //     return;
+    // }
+    // =======================================================
 
     // manipulator_->fk();
     // std::cout << "FK position_: " << manipulator_->manipulator_link_data_[END_LINK]->position_ << std::endl;
@@ -333,18 +388,37 @@ void BaseModule::LineCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Cons
 {
     if (enable_ == false)
         return;
+    if( fabs(cmd->data[4]) > 89 )
+    {
+        std::cout<<"[warning] Don't using line fn, when the fabs(roll) is >= 90\n";
+        return ;
+    }
 
     /* 記下命令 */
     robotis_->kinematics_pose_msg_.pose.position.x = cmd->data[0];
     robotis_->kinematics_pose_msg_.pose.position.y = cmd->data[1];
     robotis_->kinematics_pose_msg_.pose.position.z = cmd->data[2];
-    Eigen::Quaterniond quaterion = robotis_framework::convertRPYToQuaternion(cmd->data[4] * M_PI / 180.0,
+    // Eigen::Quaterniond quaterion = robotis_framework::convertRPYToQuaternion(cmd->data[4] * M_PI / 180.0,
+    //                                                                          cmd->data[3] * M_PI / 180.0,
+    //                                                                          cmd->data[5] * M_PI / 180.0);
+    Eigen::Quaterniond quaterion = robotis_framework::convertEulerToQuaternion(cmd->data[4] * M_PI / 180.0,
                                                                              cmd->data[3] * M_PI / 180.0,
                                                                              cmd->data[5] * M_PI / 180.0);
+    
+    
     robotis_->kinematics_pose_msg_.pose.orientation.w = quaterion.w();
     robotis_->kinematics_pose_msg_.pose.orientation.x = quaterion.x();
     robotis_->kinematics_pose_msg_.pose.orientation.y = quaterion.y();
     robotis_->kinematics_pose_msg_.pose.orientation.z = quaterion.z();
+
+    // jmp line1
+    // std::cout<< "cmd data = " <<cmd->data[3] <<"\n";
+    // std::cout<< "cmd data = " <<cmd->data[4] <<"\n";
+    // std::cout<< "cmd data = " <<cmd->data[5] <<"\n";
+    robotis_->line_ik_pos <<cmd->data[0], cmd->data[1], cmd->data[2];
+    robotis_->line_ik_rpy <<cmd->data[4]*M_PI/180.0,
+                            cmd->data[3]*M_PI/180.0,
+                            cmd->data[5]*M_PI/180.0;
     robotis_->ik_cmd_fai = cmd->data.size() == 7 ? cmd->data[6] * M_PI / 180.0 : 0.0;
 
     robotis_->ik_id_start_ = 0;
@@ -571,9 +645,19 @@ void BaseModule::generateTaskTrajProcess()
                                          robotis_->kinematics_pose_msg_.pose.orientation.y,
                                          robotis_->kinematics_pose_msg_.pose.orientation.z));
 
-        /* calc ik */
+        /* calc ik jmp line2 */
+        std::cout   << "line_quat = " 
+                    << robotis_->kinematics_pose_msg_.pose.orientation.w <<", "
+                    << robotis_->kinematics_pose_msg_.pose.orientation.x <<", "
+                    << robotis_->kinematics_pose_msg_.pose.orientation.y <<", "
+                    << robotis_->kinematics_pose_msg_.pose.orientation.z <<"\n";
+
+        std::cout   << "Rot Matrix(ik_target_rotation_) = " << robotis_->ik_target_rotation_ <<"\n";
+
+        std::cout<<"line_ik_pos_cmd = " << robotis_->line_ik_pos <<"\n";
+        std::cout<<"line_ik_ori_cmd = " << robotis_->line_ik_rpy <<"\n";
         bool ik_success = manipulator_->ik(robotis_->ik_target_position_,
-                                           robotis_->ik_target_rotation_,
+                                           robotis_->line_ik_rpy,
                                            robotis_->ik_cmd_fai);
         if (!ik_success)
         {
@@ -589,7 +673,7 @@ void BaseModule::generateTaskTrajProcess()
         {
             double ini_value = joint_state_->curr_joint_state_[id].position_;
             double tar_value = manipulator_->ik_calc_joint_angle_[id - 1];
-            double abs_diff = fabs(tar_value - ini_value);
+            double abs_diff  = fabs(tar_value - ini_value);
 
             if (f_max_diff < abs_diff)
                 f_max_diff = abs_diff;
@@ -680,33 +764,74 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
     /*----- forward kinematics -----*/
     /* 需要下面三行，末端點資訊才會被刷新(教末端點回授) */
     for (int id = 1; id <= MAX_JOINT_ID; id++)
-        // manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->goal_joint_state_[id].position_;
-        manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->curr_joint_state_[id].position_;
+         manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->goal_joint_state_[id].position_;
+        //manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->curr_joint_state_[id].position_;
 
     manipulator_->fk();
-    // pub fk info to the topic "/robotis/fk_fb"
+
+    // pub fk info to tyhe topic "/robotis/fk_fb"
     fk_fb_msg.data.clear();
     fk_fb_msg.data.push_back(manipulator_->fk_x);
     fk_fb_msg.data.push_back(manipulator_->fk_y);
     fk_fb_msg.data.push_back(manipulator_->fk_z);
     fk_fb_msg.data.push_back(manipulator_->fk_pitch);
     fk_fb_msg.data.push_back(manipulator_->fk_roll);
-    fk_fb_msg.data.push_back(manipulator_->fk_yaw+M_PI/2);
+
+    // fk_fb_msg.data.push_back(manipulator_->fk_yaw+M_PI/2);
+    // fk_fb_msg.data.push_back(manipulator_->fk_fai);
+    // FK_FeedBack_pub_.publish(fk_fb_msg);
+
+    // /* ----- send trajectory ----- */
+    // if (robotis_->is_moving_ == true)
+
+    fk_fb_msg.data.push_back(manipulator_->fk_yaw);
     fk_fb_msg.data.push_back(manipulator_->fk_fai);
     FK_FeedBack_pub_.publish(fk_fb_msg);
 
-    /* ----- send trajectory ----- */
-    if (robotis_->is_moving_ == true)
+    /* ----- send trajectory ----- line3*/
+    if (robotis_->is_moving_ == true)//ptp line
     {
         if (robotis_->cnt_ == 0)
+        {
             robotis_->ik_start_rotation_ = manipulator_->manipulator_link_data_[robotis_->ik_id_end_]->orientation_;
-
-        if (robotis_->ik_solve_ == true)
+            
+            // convert error rot matrix to rpy and then fix it
+            Eigen::MatrixXd tmp_start_pry = robotis_framework::convertRotationToRPY(robotis_->ik_start_rotation_);
+            tmp_start_pry(2) += 90*M_PI/180.0;
+            // convert the correct rpy to quaternion and then convert back to rotation matrix
+            Eigen::Quaterniond start_quaternion = robotis_framework::convertEulerToQuaternion( 
+                                                                            tmp_start_pry(2),
+                                                                            tmp_start_pry(0),
+                                                                            tmp_start_pry(1));
+            Eigen::MatrixXd tmp_rot = robotis_framework::convertQuat2Rotation(start_quaternion);
+            for(int i=0 ; i<=2;i++)
+            {
+                for(int j=0 ; j<=2 ; j++)
+                {
+                    robotis_->ik_start_rotation_(i,j) = tmp_rot(i,j);
+                }
+            }
+        }
+        if (robotis_->ik_solve_ == true) //line
         {
             robotis_->setInverseKinematics();
 
             /* kinematics of evo  */
-            bool ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->ik_target_rotation_, robotis_->ik_target_fai);
+            std::cout<<"process"<<"\n";
+            // 
+            std::cout<<"ik_curr_pos = " << robotis_->ik_target_position_ <<"\n";
+            robotis_->line_ik_rpy <<robotis_->line_ik_rpy(0,0), 
+                                    robotis_->line_ik_rpy(1,0), 
+                                    robotis_->line_ik_rpy(2,0);
+            // std::cout<<"ik_curr_ori00 = " << robotis_->line_ik_rpy(0,0) <<"\n";
+            // std::cout<<"ik_curr_ori01 = " << robotis_->line_ik_rpy(0,1) <<"\n";
+            // std::cout<<"ik_curr_ori02 = " << robotis_->line_ik_rpy(0,2) <<"\n";
+            // std::cout<<"ik_curr_ori00 = " << robotis_->line_ik_rpy(0,0) <<"\n";
+            // std::cout<<"ik_curr_ori10 = " << robotis_->line_ik_rpy(1,0) <<"\n";
+            // std::cout<<"ik_curr_ori20 = " << robotis_->line_ik_rpy(2,0) <<"\n";
+            std::cout<<"ik_curr_ori20 = " << robotis_->line_ik_rpy<<"\n";
+
+            bool ik_success = manipulator_->ik(robotis_->ik_target_position_, robotis_->line_ik_rpy, robotis_->ik_target_fai);
             if (ik_success == true)
             {
                 for (int id = 1; id <= MAX_JOINT_ID; id++)
@@ -722,10 +847,13 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
                 robotis_->cnt_ = 0;
             }
         }
-        else
+        else //ptp
         {
             for (int id = 1; id <= MAX_JOINT_ID; id++)
+            {
                 joint_state_->goal_joint_state_[id].position_ = robotis_->calc_joint_tra_(robotis_->cnt_, id);
+                // std::cout<<"Joint " <<id <<" = " <<joint_state_->goal_joint_state_[id].position_;
+            }
         }
 
         robotis_->cnt_++;

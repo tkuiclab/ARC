@@ -8,6 +8,7 @@ from numpy import multiply
 
 import rospy
 import tf
+import object_distribution
 
 from std_msgs.msg import String, Float64
 from robotis_controller_msgs.msg import StatusMsg
@@ -21,47 +22,55 @@ _ORI = (-70, 0, 0)  # pitch, roll, yaw
 class ArmTask:
     """Running arm task class."""
 
-    def __init__(self):
+    def __init__(self, _name = '/robotis'):
         """Inital object."""
+        self.name = _name
+        self.init()
+        
+    def init(self):
+        
         self.__set_pubSub()
         #rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
         self.__is_busy = False
         self.__set_vel_pub.publish(20)
+        self.__ik_fail =False
+
 
     def __set_pubSub(self):
+        print "[Arm] name space : " + str(self.name) 
         self.__set_mode_pub = rospy.Publisher(
-            '/robotis/base/set_mode_msg',
+            str(self.name) + '/base/set_mode_msg',
             String,
             # latch=True,
             queue_size=1
         )
         self.__joint_pub = rospy.Publisher(
-            '/robotis/base/Joint_Control',
+            str(self.name) + '/base/Joint_Control',
             JointPose,
             # latch=True,
             queue_size=1
         )
         self.__ptp_pub = rospy.Publisher(
-            '/robotis/base/JointP2P_msg',
+            str(self.name) + '/base/JointP2P_msg',
             IK_Cmd,
             # latch=True,
             queue_size=1
         )
         self.__cmd_pub = rospy.Publisher(
-            '/robotis/base/TaskP2P_msg',
+            str(self.name) + '/base/TaskP2P_msg',
             IK_Cmd,
             # latch=True,
             queue_size=1
         )
         self.__set_vel_pub = rospy.Publisher(
-            '/robotis/base/set_velocity',
+            str(self.name) + '/base/set_velocity',
             Float64,
             latch=True,
             queue_size=1
         )
         self.__status_sub = rospy.Subscriber(
-            '/robotis/status',
+            str(self.name) + '/status',
             StatusMsg,
             self.__status_callback,
             queue_size=1
@@ -72,7 +81,9 @@ class ArmTask:
     def __status_callback(self, msg):
         if 'IK Failed' in msg.status_msg:
             rospy.logwarn('ik fail')
-            self.stop_task()
+            self.__ik_fail = True
+            #self.stop_task()
+
 
         elif 'End Trajectory' in msg.status_msg:
             self.__is_busy = False
@@ -91,7 +102,14 @@ class ArmTask:
     def home(self):
         self.pub_jointCmd([0,0,0,0, 0,0,0])
 
-    def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI):
+    @property
+    def is_ikfail(self):
+        return self.__ik_fail
+
+    def set_speed(self,i_speed):
+        self.__set_vel_pub.publish(i_speed)
+
+    def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI, fai=0):
         """Publish msg of ik cmd (deg) to manager node."""
         # pub_ikCmd('ptp', (x, y , z), (pitch, roll, yaw) )
         # while self.__is_busy:
@@ -105,8 +123,9 @@ class ArmTask:
             cmd.append(p)
         for e in euler:
             cmd.append(e)
+        cmd.append(fai)
 
-        rospy.loginfo('Sent:{}'.format(cmd))
+        #rospy.loginfo('Sent:{}'.format(cmd))
 
         if mode == 'line':
             self.__cmd_pub.publish(cmd)
@@ -119,10 +138,10 @@ class ArmTask:
         self.__set_mode_pub.publish('')
 
     def get_fb(self):
-        rospy.wait_for_service('/robotis/base/get_kinematics_pose')
+        rospy.wait_for_service(self.name + '/base/get_kinematics_pose')
         try:
             get_endpos = rospy.ServiceProxy(
-                '/robotis/base/get_kinematics_pose',
+                self.name + '/base/get_kinematics_pose',
                 GetKinematicsPose
             )
             res = get_endpos('arm')
@@ -179,10 +198,10 @@ class ArmTask:
         vec_a = [rot[0][2], rot[1][2], rot[2][2]]
         return vec_n, vec_s, vec_a   
 
-    def relative_move_suction(self, mode='ptp', suction_angle=0, dis=0 ):
+    def relative_move_suction(self, mode='ptp', suction_angle=0, dis=0, blocking = False):
         """Get euler angle and run task."""
         # note:suction_anfle type is degree,  dis is m
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         # ======= Calculate suction vector start ========
@@ -224,13 +243,184 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
-    def relative_move_nsa(self, mode='ptp', n=0, s=0, a=0):
+    def Get_Collision_Avoidance_Cmd(self, desire_cmd, LM1, LM2, SuctionAngle, BinID):
+        #desire_cmd = [x, y, z, pitch(deg), roll(deg), yaw(deg)]
+        BinArr          = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+        TCP_BoundPos_ID = ['A', 'B', 'C', 'D', 'E', 'F']
+        BoundPos_Arr = []
+
+        # Define parameters
+        LM1_Orig = 64000
+        LM2_Orig = 60000
+        Arm_Orig = [0.3, -0.12, 0]
+
+        # Calculate the coordinate of whole robot(Arm+LM)
+        LM1_Coor = LM1_Orig - LM1
+        LM2_Coor = LM2_Orig - LM2
+        print 'LM1_Coor = ' + str(LM1_Coor)
+        print 'LM2_Coor = ' + str(LM2_Coor)
+        Arm_Coor = [desire_cmd[0], Arm_Orig[1] + desire_cmd[1], Arm_Orig[2] + desire_cmd[2]]
+
+        Sys_Coor = [desire_cmd[0],  Arm_Coor[1] + LM2_Coor,  Arm_Coor[2] + LM1_Coor, 
+                    desire_cmd[3],  desire_cmd[4],           desire_cmd[5]]
+        
+        # Check is there any TCP_BoundPos is collision
+        fix_vec = [0, 0, 0]
+        extract_dis = 0.05
+
+        Binlimit = object_distribution.parse_shelf(id = BinID)                  # get the target bin's limit info
+        print '===== Bin Limit Info of ' + str(BinID) + ' ====='
+        print 'Binlimit.min_y = ' + str(Binlimit.min_y)
+        print 'Binlimit.max_y = ' + str(Binlimit.max_y)
+        print 'Binlimit.min_z = ' + str(Binlimit.min_z)
+        print 'Binlimit.max_z = ' + str(Binlimit.max_z)
+        print '\n'
+
+        for BP_id in TCP_BoundPos_ID:
+            BoundPos = self.Get_OneBoundPos_of_TCP(Sys_Coor, SuctionAngle, BP_id)      # get each bound pos of tcp
+            # print 'Sys_Coor = ' + str(Sys_Coor)
+            print 'BoundPos = ' + str(BoundPos)
+            if(BoundPos[0] >= 0.4):
+                if (BoundPos[1] > Binlimit.min_y) and (BoundPos[1] < Binlimit.max_y) and (BoundPos[2] > Binlimit.min_z) and (BoundPos[2] < Binlimit.max_z):
+                   print 'OKOK\n'
+                   pass
+                else:
+                    print 'fix'
+                    if BoundPos[1] <= Binlimit.min_y:
+                        tmp = BoundPos[1]
+                        BoundPos[1] = Binlimit.min_y + extract_dis ;    print 'BoundPos[1] <= Binlimit.min_y'
+                        Sys_Coor[1] = Sys_Coor[1] + abs(BoundPos[1] - tmp)
+
+                    if BoundPos[1] >= Binlimit.max_y: 
+                        tmp = BoundPos[1]
+                        BoundPos[1] = Binlimit.max_y - extract_dis ;    print 'BoundPos[1] >= Binlimit.max_y'
+                        Sys_Coor[1] = Sys_Coor[1] - abs(BoundPos[1] - tmp)
+
+                    if BoundPos[2] <= Binlimit.min_z:
+                        tmp = BoundPos[2]
+                        BoundPos[2] = Binlimit.min_z + extract_dis ;    print 'BoundPos[2] <= Binlimit.min_z'
+                        Sys_Coor[2] = Sys_Coor[2] + abs(BoundPos[2] - tmp)
+
+                    if BoundPos[2] >= Binlimit.max_z: 
+                        tmp = BoundPos[2]
+                        BoundPos[2] = Binlimit.max_z - extract_dis ;    print 'BoundPos[2] >= Binlimit.max_z'
+                        Sys_Coor[2] = Sys_Coor[2] - abs(BoundPos[2] - tmp)
+                    print '==\n'
+            else:
+                pass
+        # print '---------------------------------------------------------'
+        print 'Final Sys_Coor = ' + str(Sys_Coor)
+        a = (80000-LM1)/100000.0
+        b = (60000-LM2)/100000.0
+        print a
+        Fix_output = [Sys_Coor[0],  Sys_Coor[1]-b*0,  Sys_Coor[2]-a*0]
+        print 'Fix_output = ' + str(Fix_output)
+
+    def Get_OneBoundPos_of_TCP(self, desire_cmd, angle, BoundID):
+        # Get Curr FeedBack
+        print 'BoundID = ' + str(BoundID)
+        pi = 3.14159
+        fb = self.get_fb()
+        pos = fb.group_pose.position
+
+        # Get desire cmd
+        pos.x = desire_cmd[0]
+        pos.y = desire_cmd[1]
+        pos.z = desire_cmd[2]
+        euler = [ desire_cmd[3], desire_cmd[4], desire_cmd[5] ]
+
+        # Get n s a vector
+        rot = self.nsa2rotation(euler)
+        vec_s, vec_n, vec_a = self.rotation2vector(rot)
+
+        # init var(m)
+        len_f  = 0.08
+        len_TM = 0.02
+        T_U    = 0.06
+        T_D    = 0.035
+        Suct_L = 0.03
+        Suct_R = 0.05
+        len_tool = 0.15
+
+        offset = [0,0,0]
+        tmp_pos  = [0,0,0]
+        BoundPos = [0,0,0]
+
+        # Get_OneBoundPos_of_TCP 
+        if(BoundID=='A'):  # Pipe_FL(A)
+            tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_f*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, -T_U, -Suct_L)
+
+        elif(BoundID=='B'):
+            tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_f*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, -T_U, Suct_R)
+
+        elif(BoundID=='C'):
+            tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_f*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, T_D, -Suct_L)
+
+        elif(BoundID=='D'):
+            tmp_pos[0] = pos.x + len_f*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_f*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, T_D, Suct_R)
+
+        elif(BoundID=='E'):
+            tmp_pos[0] = pos.x + len_TM*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_TM*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, T_D, -Suct_L)
+
+        elif(BoundID=='F'):
+            tmp_pos[0] = pos.x + len_TM*cos(angle) + len_tool
+            tmp_pos[1] = pos.y
+            tmp_pos[2] = pos.z + len_TM*sin(angle)
+            offset   = self.Get_Suction_rel_offset(desire_cmd, angle, T_D,  Suct_R)
+        
+        else :
+            print 'err BinID\n'
+        
+        BoundPos[0] = tmp_pos[0] + offset[0]
+        BoundPos[1] = tmp_pos[1] + offset[1]
+        BoundPos[2] = tmp_pos[2] + offset[2]
+        return BoundPos
+        
+    def Get_Suction_rel_offset(self, desire_cmd, angle, dis, vec_s_len):
+        pi = 3.14159
+        # Get desire cmd (cal offset only need euler)
+        euler = [ desire_cmd[3]*pi/180, desire_cmd[4]*pi/180, desire_cmd[5]*pi/180 ]
+
+        # Get n s a unit vector
+        rot = self.nsa2rotation(euler)
+        vec_s, vec_n, vec_a = self.rotation2vector(rot)
+
+        # calculate n s a len
+        rate_n = float((90-angle)/90.0)
+        rate_a = float(angle/90.0)
+        n = rate_n*(dis)
+        a = rate_a*(dis)
+        s = vec_s_len
+
+        offset  = [0, 0, 0]
+        offset += multiply(vec_n, n)
+        offset += multiply(vec_s, s)
+        offset += multiply(vec_a, a)
+        
+        return offset
+
+    def relative_move_nsa(self, mode='ptp', n=0, s=0, a=0, blocking = False):
         """Get euler angle and run task."""
         # note:for nsa rotation only
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb = self.get_fb()
@@ -259,10 +449,10 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
-    def relative_move_nsa_rot_pry(self, mode='ptp', n=0, s=0, a=0, yaw=0, pitch=0, roll=0):
+    def relative_move_nsa_rot_pry(self, mode='ptp', n=0, s=0, a=0, yaw=0, pitch=0, roll=0, blocking = False):
         """Get euler angle and run task."""
         # ============================================================================
         # note1: for nsa rotation only
@@ -270,7 +460,7 @@ class ArmTask:
         #        however, in ik cmd, it will first move along with nsa, then rot pry
         # ============================================================================
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb = self.get_fb()
@@ -303,15 +493,15 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
 
-    def relative_move_xyz_rot_pry(self, mode='ptp', x=0, y=0, z=0, yaw=0, pitch=0, roll=0):
+    def relative_move_xyz_rot_pry(self, mode='ptp', x=0, y=0, z=0, yaw=0, pitch=0, roll=0, fai=0, blocking=False):
         """Get euler angle and run task."""
         # note:for nsa rotation only
         # euler[0~2] = [r p y] = [a s n]
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb    = self.get_fb()
@@ -330,13 +520,13 @@ class ArmTask:
                 degrees(euler[1]+(pitch*3.14156/180)),              
                 degrees(euler[2]+((roll+90)*3.14156/180)),
                 degrees(euler[0]+(yaw*3.14156/180))
-            )
+            ),fai
         )
 
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
-    def relative_rot_nsa(self, mode='ptp', pitch=0, roll=0, yaw=0, exe=True):
+    def relative_rot_nsa(self, mode='ptp', pitch=0, roll=0, yaw=0, exe=True, blocking=False):
         """Get euler angle and run task."""
         # note:for nsa rotation only
         # euler[0~2] = [r p y] = [a s n]
@@ -344,7 +534,7 @@ class ArmTask:
         tmp_ori = [yaw, pitch, roll]
         print '\n2.relative_rot_nsa = ' + str(pitch)
         print '===[n, s, a] = ' + str(tmp_ori)
-        while self.__is_busy:
+        while self.__is_busy and blocking:
             rospy.sleep(.1)
 
         fb    = self.get_fb()
@@ -365,16 +555,15 @@ class ArmTask:
                     # degrees(euler[1]+(pitch*3.14156/180)),              
                     # degrees(euler[2]+((roll+90)*3.14156/180)),
                     # degrees(euler[0]+(yaw*3.14156/180))
-                    
                     degrees(euler[1] + radians(pitch) ),
                     degrees(euler[2] + radians(roll+90) + radians(0) ),
                     degrees(euler[0] + radians(yaw) )
                 )
             )
-            while self.__is_busy:
+            while self.__is_busy and blocking:
                 rospy.sleep(.1)
         else:
-            print 'exe = false'
+            print '[relative_rot_nsa Error] exe = false'
             rel_fb_pitch = euler[1]+(pitch*3.14156/180)
             rel_fb_roll  = euler[2]+((roll+90)*3.14156/180)
             rel_fb_yaw   = euler[0]+(yaw*3.14156/180)
@@ -474,9 +663,10 @@ class ArmTask:
         # while self.__is_busy:
         #     rospy.sleep(.1)
 
-    def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0):
+    def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0, fai=0, blocking = False):
         """relative move xyz with manipulator base axis."""
-        while self.__is_busy:
+        while self.__is_busy and blocking:
+            print 'first self.__is_busy = ' + str(self.__is_busy)
             rospy.sleep(.1)
 
         fb = self.get_fb()
@@ -505,7 +695,10 @@ class ArmTask:
             )
         )
 
-        while self.__is_busy:
+
+        print 'befoer second busy self.__is_busy = ' + str(self.__is_busy)
+        while self.__is_busy and blocking:
+            #print 'self.__is_busy = ' + str(self.__is_busy)
             rospy.sleep(.1)
 
     def Move2_Abs_xyz(self, x, y, z, mode='ptp'):

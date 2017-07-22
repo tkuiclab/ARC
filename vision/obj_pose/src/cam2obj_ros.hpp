@@ -111,7 +111,7 @@ void get_pass_through_points(PCT::Ptr cloud_in,
     pass.setFilterFieldName ("z");
     pass.setFilterLimits (min_z, max_z);
 
-    //std::cout << "PT->min_z= " << min_z << ", max_z = " << max_z << std::endl;
+    std::cout << "PT->min_z= " << min_z << ", max_z = " << max_z << std::endl;
 
 
     pass.setInputCloud (now_cloud);
@@ -122,7 +122,7 @@ void get_pass_through_points(PCT::Ptr cloud_in,
     pass.setFilterFieldName ("y");
     pass.setFilterLimits (min_y, max_y);
 
-    //std::cout << "PT->min_y= " << min_y << ", max_y = " << max_y << std::endl;
+    std::cout << "PT->min_y= " << min_y << ", max_y = " << max_y << std::endl;
 
     pass.setInputCloud (now_cloud);
     pass.filter (*now_cloud);
@@ -132,7 +132,7 @@ void get_pass_through_points(PCT::Ptr cloud_in,
     pass.setFilterFieldName ("x");
     pass.setFilterLimits (min_x, max_x);
 
-    //std::cout << "PT->min_x= " << min_x << ", max_x = " << max_x << std::endl;
+    std::cout << "PT->min_x= " << min_x << ", max_x = " << max_x << std::endl;
 
 
     pass.setInputCloud (now_cloud);
@@ -141,6 +141,49 @@ void get_pass_through_points(PCT::Ptr cloud_in,
 
   
   *cloud_out = *now_cloud;
+}
+
+void get_pass_xyz_from_arg( int argc,  char **argv,
+            float& pass_x_min, float& pass_x_max, 
+            float& pass_y_min, float& pass_y_max,
+            float& pass_z_min, float& pass_z_max){
+
+  float tool_z = 0.26;
+
+  pass_z_max = 0.60;
+  pass_z_min = tool_z;
+
+  pass_x_min = -0.5;
+  pass_x_max =  0.5;
+  pass_y_min = -0.5;
+  pass_y_max =  0.5;
+
+
+  if (pcl::console::find_switch (argc, argv, "-pass_x_min")){
+    pcl::console::parse (argc, argv, "-pass_x_min", pass_x_min);
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_x_max")){
+    pcl::console::parse (argc, argv, "-pass_x_max", pass_x_max);
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_y_min")){
+    pcl::console::parse (argc, argv, "-pass_y_min", pass_y_min);
+  }
+  
+  if (pcl::console::find_switch (argc, argv, "-pass_y_max")){
+    pcl::console::parse (argc, argv, "-pass_y_max", pass_y_max);
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_z_min")){
+    pcl::console::parse (argc, argv, "-pass_z_min", pass_z_min);
+
+  }
+
+  if (pcl::console::find_switch (argc, argv, "-pass_z_max")){
+    pcl::console::parse (argc, argv, "-pass_z_max", pass_z_max);
+  }
+
 }
 
 void pass_through_from_arg(PCT::Ptr cloud_in, 
@@ -173,7 +216,7 @@ void pass_through_from_arg(PCT::Ptr cloud_in,
   
   if (pcl::console::find_switch (argc, argv, "-pass_y_max")){
     pcl::console::parse (argc, argv, "-pass_y_max", pass_y_max);
-    //ROS_INFO("Use pass_y_max = %lf",pass_y_max);
+    ROS_INFO("Use pass_y_max = %lf",pass_y_max);
     //std::cout << "Use pass_y_max =" << pass_y_max << std::endl;
   }
 
@@ -379,7 +422,7 @@ Vector3f del_out_mean_normal(PC_NT::Ptr i_cloud, PC_NT::Ptr o_cloud){
 
 
 //get camera center to object center transform
-void cam_2_obj_center(PCT::Ptr i_cloud,
+bool cam_2_obj_center(PCT::Ptr i_cloud,
           double &x, double &y, double &z,
           double &roll, double &pitch, double &yaw,
           double &nx, double &ny, double &nz,
@@ -400,6 +443,11 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   // std::cout << "Near Points Percent = " << (near_points_percent*100) << "%" 
   //     << ", get_near_points() Points = " << cloud->size()  << std::endl;
 
+  if(cloud->size() <= 0){
+    std::cout << "[ERROR] cam_2_obj_center say _near_points size() <=0" << std::endl;
+    return false;
+  }
+
 #ifdef SaveCloud
   write_pcd_2_rospack(cloud,"_near_points.pcd");
 #endif
@@ -418,6 +466,11 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
     vg.filter (*cloud);
     std::cout << "cam_2_obj_center() say After VoxelGrid Points = " << cloud->size() << std::endl;
   
+    if(cloud->size() <= 0){
+      std::cout << "[ERROR] cam_2_obj_center say _vg size() <=0" << std::endl;
+      return false;
+    }
+
 #ifdef SaveCloud
   write_pcd_2_rospack(cloud,"_vg.pcd");
 #endif
@@ -437,6 +490,11 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   mls.setInputCloud (cloud);
   mls.process (*cloud_normal);
 
+  if(cloud_normal->size() <= 0){
+    std::cout << "[ERROR] cam_2_obj_center say mls size() <=0" << std::endl;
+    return false;
+  }
+
 #ifdef SaveCloud    
   write_pcd_2_rospack_normals(cloud_normal,"_mls.pcd");
 #endif
@@ -445,6 +503,12 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   
   Vector3f  obj_normal = del_out_mean_normal(cloud_normal,del_normal);
   
+  if(del_normal->size() <= 0){
+    std::cout << "[ERROR] cam_2_obj_center say del_normal size() <=0" << std::endl;
+    return false;
+  }
+
+
 #ifdef SaveCloud
   write_pcd_2_rospack_normals(del_normal,"_del_out_normal.pcd");
 #endif  
@@ -469,19 +533,15 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   float tool_yaw , tool_roll ;
   rotation_with_tool(obj_normal, tool_yaw, tool_roll );
 
-// std::cout << " (yaw, roll) = "   <<  
-//       "("  << (tool_yaw) << "," << 
-//       (tool_roll) << ")"  << std::endl;
-
-  std::cout << " (yaw, roll) = "   <<  
-      "("  << pcl::rad2deg(tool_yaw) << "," << 
-      pcl::rad2deg(tool_roll) << ")"  << std::endl;
+  // std::cout << " (yaw, roll) = "   <<  
+  //     "("  << pcl::rad2deg(tool_yaw) << "," << 
+  //     pcl::rad2deg(tool_roll) << ")"  << std::endl;
 
   float real_tool_yaw = (tool_yaw > 0) ? (tool_yaw-M_PI) : (tool_yaw+M_PI);
   float real_tool_roll = 90 - (tool_roll + 180);
-   std::cout << " (real_tool_yaw, real_tool_roll) = "   <<  
-      "("  << pcl::rad2deg(real_tool_yaw) << "," << 
-      pcl::rad2deg(real_tool_roll) << ")"  << std::endl;
+  //  std::cout << " (real_tool_yaw, real_tool_roll) = "   <<  
+  //     "("  << pcl::rad2deg(real_tool_yaw) << "," << 
+  //     pcl::rad2deg(real_tool_roll) << ")"  << std::endl;
 
 
   yaw = tool_yaw;
@@ -512,7 +572,8 @@ void cam_2_obj_center(PCT::Ptr i_cloud,
   ny = obj_normal[1];
   nz = obj_normal[2];
 
-  return;
+  //return;
+  return true;
 
   // ----cam_normal_2_obj_normal()-------//
   float r, p ;//, cam_r, cam_p;
@@ -579,9 +640,9 @@ bool get_center_from_2dbox(
     int max_x, int max_y, 
     //pass_through_z
     float pt_min_z, float pt_max_z,
-    float& center_y, float& center_z){
+    float& center_x,float& center_y, float& center_z){
 
-
+    float sum_x = 0;
     float sum_z = 0;
     float sum_y = 0;
     unsigned int  cp = 0 ;
@@ -591,12 +652,14 @@ bool get_center_from_2dbox(
 
           index = j*i_cloud->width+i;
           if (pcl::isFinite (i_cloud->points[index])) {
+            float x = i_cloud->points[index].x;
             float y = i_cloud->points[index].y;
             float z = i_cloud->points[index].z;
             if(z > pt_min_z &&  z < pt_max_z 
                ){
-              sum_z += z;
+              sum_x += x;
               sum_y += y;
+              sum_z += z;
               ++cp;
             }
           }
@@ -605,7 +668,7 @@ bool get_center_from_2dbox(
 
   
   if(cp > 0 ){
-
+    center_x = sum_x/(float)cp;
     center_y = sum_y/(float)cp;
     center_z =  sum_z / (float)cp;
     return true;

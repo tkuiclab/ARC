@@ -3,9 +3,11 @@
 """Get location of item in which bin and place into which box."""
 
 #from __future__ import print_function
-from os import path
+from os import path, mkdir
+
 import rospkg
 import json
+from object_distribution import stow_distribution, find_obj_in_bin_content, show_bin_content
 
 
 class PickInfo:
@@ -28,7 +30,7 @@ class StowInfo:
         self.to_other_tote = False
         self.success = False
 
-        self.gripper_down = True
+        self.gripper_down = False
 
 def read_json(path):
     """Read a JSON file from path, and convert to object of python."""
@@ -49,25 +51,38 @@ def write_json(path, content):
         with open(path, 'w') as f:
             # json.dump(content, f, indent=4, separators=(',', ': '), skipkeys=True) # sort_keys=True
             # or following, assume content is str obj
-            f.write(json.dumps(content, f, indent=4, separators=(',', ': ')))
+            f.write(json.dumps(content, f, indent=4, separators=(',', ': '), sort_keys=True))
         return True
     except IOError as e:
         print(e)
         return False
 
 
-def make_pick_list_from_path(item_loc_path, order_path):
+def make_pick_list_from_path(item_loc_path, order_path, sort='bin'):
     """Using item location file and order file to make a list for picking task."""
     item_loc_json = read_json(item_loc_path)
     order_json = read_json(order_path)
 
     pick_list = list()
-    for order in order_json["orders"]:
-        box_id = order["size_id"]
-        for item in order["contents"]:
-            bin_id = search_item(item_loc_json, item)
-            if bin_id is not None:
-                pick_list.append(PickInfo(item, bin_id, box_id))
+    if sort == 'bin':
+        for bin in item_loc_json["bins"]:
+            bin_id = bin["bin_id"]
+            for item in bin["contents"]:
+                box_id = search_item(order_json, item)
+                if box_id is not None:
+                    pick_list.append(PickInfo(item, bin_id, box_id))
+    else:
+        for order in order_json["orders"]:
+            box_id = order["size_id"]
+            for item in order["contents"]:
+                bin_id = search_item(item_loc_json, item, 'loc')
+                if bin_id is not None:
+                    pick_list.append(PickInfo(item, bin_id, box_id))
+
+    # Print information of task
+    for info in pick_list:
+        print "[task_parser.py] item: {:25}".format(info.item), "from_bin:", info.from_bin, "to_box:", info.to_box
+
     return pick_list
 
 
@@ -94,15 +109,26 @@ def make_stow_list(i_item_loc_json):
     
     #print 'item_loc_json["tote"]["contents"] = ' + str(item_loc_json["tote"]["contents"])  
 
+
+    #bin_distribution = Distribution('stow',item_loc_json["tote"]["contents"],0.9)
+    bin_distribution, bin_content = stow_distribution(item_loc_json["tote"]["contents"])
+
+    show_bin_content(bin_content)
+
     stow_list = list()
 
-    
-    bin_id = 'e'
+
+    #bin_id = 'e'
     for item in item_loc_json["tote"]["contents"]:
-        stow_list.append(StowInfo(item, bin_id))
+        bin = find_obj_in_bin_content(bin_content, item)
+        stow_list.append(StowInfo(item, bin) )
+        # for item_bin in bin_distribution:
+        #     if item_bin[1] == item:
+        #         stow_list.append(StowInfo(item, item_bin[0]))
         #bin_id = bin_id + 1
         #bin_id = chr(ord(bin_id)+1)
 
+    
     show_stow_list(stow_list)
 
     return stow_list
@@ -111,23 +137,31 @@ def make_stow_list(i_item_loc_json):
 def show_stow_list(i_stow_list):
     for stow in i_stow_list:
         if stow.to_other_tote:
-            print stow.item + '\t\t-> Unknown Tote' + ' (' + str(stow.success) + ')'
+            print '{} -> Unknown Tote'.format(stow.item)
+            #print stow.item + '\t\t\t-> Unknown Tote' + ' (' + str(stow.success) + ')'
         else:
-            print stow.item + '\t\t-> ' + stow.to_bin + ' (' + str(stow.success) + ')'
+            print '{} -> {}'.format(stow.item,stow.to_bin )
+            #print stow.item + '\t\t\t-> ' + stow.to_bin + ' (' + str(stow.success) + ')'
         
 
 def get_json(json_str):
     return json.loads(json_str)
 
 
-def search_item(item_loc_json, target):
+def search_item(json_content, target, file='order'):
     """Searching target item in which bin."""
-    for bin in item_loc_json["bins"]:
-        for item in bin["contents"]:
-            if item == target:
-                return bin["bin_id"]
-
-    print '[task_parser.py] Say Cannot find '+ target
+    if file == 'order':
+        for order in json_content["orders"]:
+            for item in order["contents"]:
+                if item == target:
+                    return order["size_id"]
+        print '[task_parser.py] Cannot find {:25} in order file.'.format(target)
+    else:
+        for bin in json_content["bins"]:
+            for item in bin["contents"]:
+                if item == target:
+                    return bin["bin_id"]
+        print '[task_parser.py] Cannot find {:25} in item location file.'.format(target)
     return None
 
 
@@ -144,12 +178,16 @@ def read_pick_task_and_location():
     return pick_task, location_json
 
 
-def write_pick_task_location(content):
+def write_item_location(content, filetype='Pick'):
     directory = path.join(rospkg.RosPack().get_path('arc'), 'output')
-    ilf = "item_location_file_test.json"
+    if not path.exists(directory):
+        mkdir(directory)
+
+    ilf = "[{}] item_location_file.json".format(filetype)
     item_loc_path = path.join(directory, ilf)
     write_json(item_loc_path, content)
-     
+    print "[{0}] Save Path={1}".format(filetype, item_loc_path)
+
 
 def _test_pick():
     """Testing function."""

@@ -75,6 +75,7 @@ double calcInner(Eigen::MatrixXd vector3d_a, Eigen::MatrixXd vector3d_b);
 
 Pose3D getPose3DfromTransformMatrix(Eigen::MatrixXd  transform);
 Eigen::Quaterniond convertEulerToQuaternion(double roll, double pitch, double yaw);// Added for arc
+Eigen::MatrixXd convertQuat2Rotation(Eigen::Quaterniond quaternion);// Added for arc
 }
 
 
