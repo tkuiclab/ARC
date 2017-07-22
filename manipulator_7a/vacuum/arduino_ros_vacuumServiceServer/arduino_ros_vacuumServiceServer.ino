@@ -6,8 +6,8 @@
 
 
 #define ID 2
-#define UPSPEED 256
-#define DOWNSPEED 128
+#define UPSPEED 150
+#define DOWNSPEED 150
 #define ADJ_STEP 16
 #define POS_LMT 1024
 
@@ -77,12 +77,13 @@ void callback(const VacuumCmd::Request& req , VacuumCmd::Response& res)
   if(strcmp(req.cmd, "setMaxPos") == 0)
   {
     MaxPos = Dxl.readPosition(ID) - ADJ_STEP;
-    if (MaxPos != 0)
+    MaxPos = MaxPos > 0 ? MaxPos : 0;
+    if (MaxPos < 0)
     {
       res.success = false;
       return;
     }
-    MaxPos = MaxPos > 0 ? MaxPos : 0;
+
 
     MaxPos_L = MaxPos;
     MaxPos_H = MaxPos >> 8;
@@ -93,13 +94,12 @@ void callback(const VacuumCmd::Request& req , VacuumCmd::Response& res)
   else if(strcmp(req.cmd, "setMinPos") == 0)
   {
     MinPos = Dxl.readPosition(ID) ;//+ ADJ_STEP;
-    if (MinPos != 0)
+    MinPos = MinPos < POS_LMT ? MinPos : POS_LMT - 1;
+    if (MinPos < 0)
     {
       res.success = false;
       return;
     }
-    
-    MinPos = MinPos < POS_LMT ? MinPos : POS_LMT - 1;
 
     MinPos_L = MinPos;
     MinPos_H = MinPos >> 8;
@@ -141,9 +141,6 @@ void callback(const VacuumCmd::Request& req , VacuumCmd::Response& res)
   {
     String cmd(req.cmd);
     double angle = cmd.toDouble();
-    //if (strcmp(req.cmd, "0") != 0 && angle == 0)
-      //res.success = false;
-      //return;
 
     int pos = map(angle, 90, 0, MaxPos, MinPos);
     if (Dxl.moveSpeed(ID, pos, DOWNSPEED) != 0)
