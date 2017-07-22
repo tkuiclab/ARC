@@ -75,3 +75,11 @@ rosrun strategy t2o_robot.py
 
 # for checking pass through
 ~/arc_ws/src/ARC/vision/obj_pose/pcd_file$ pcl_viewer _scene_cloud_pass_through.pcd
+
+# use SIFT
+(Pre step
+rosrun strategy gen_sift_training_item.py)
+
+rosrun sift sift_node.py
+
+(see service example in test_request_closest_sift)

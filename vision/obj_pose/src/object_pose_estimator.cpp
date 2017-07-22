@@ -362,16 +362,17 @@ void ObjEstAction::get_closest(){
     }
     
     if(near_from_cam == 999.0){
-      ROS_WARN("CANNOT Get Highest near_from_cam == 999.0");
-     // error_code = ERR_CANNOT_GET_CLOSEST;
-      pub_error("CANNOT Get Highest near_from_cam == 999.0");
+      ROS_WARN("CANNOT Get Highest near_from_cam == 999.0  in get_closest()");
+      pub_error("CANNOT Get Highest near_from_cam == 999.0  in get_closest()");
+      state = NADA;
       return ;
     }
     
   }else{
-    ROS_WARN("CANNOT Call Service (/detect)");
-    //error_code = ERR_CANNOT_CALL_DETECT_SERVICE;
+    ROS_WARN("CANNOT Call Service (/detect) ");
     pub_error("CANNOT Call Service (/detect)");
+    //state = NADA;
+    call_detect_times++;
     return ;
   }
   ROS_INFO("The highest is %s -> [mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",
@@ -381,6 +382,9 @@ void ObjEstAction::get_closest(){
   set_ROI_cloud(mini_x,mini_y,max_x,max_y);
 
   if(!check_0_cloud(ROI_cloud,"_closest_ROI")){
+    ROS_WARN("ROI_cloud size = 0 in get_closest()");
+    pub_error("ROI_cloud size = 0 in get_closest()");
+    state = NADA;
     return;
   }
 
@@ -395,109 +399,87 @@ void ObjEstAction::get_closest(){
 //Need Class Var: obj_list, call_detect_times
 //Output Class Var: int mini_x, int mini_y,  int max_x,  int max_y;
 void ObjEstAction::get_closest_SIFT(){
-
+  float near_from_cam = 999.0;
+  int t_mini_x, t_mini_y, t_max_x, t_max_y;
+  
   for(int i =0;i < obj_list.size();i++){
       
       std::cout << "Request sift with " << obj_list[i] << std::endl;
       sift_roi_srv.request.fileName = obj_list[i];
       if(sift_roi_client.call(sift_roi_srv)){
-          ROS_INFO("Get ROI from Service (/sift) ");
-          ROS_INFO("The response of /sift is %s -> [xmin: %d, ymin: %d], [xmax: %d, ymax: %d]",
-              sift_roi_srv.response.xmin,sift_roi_srv.response.ymin,
-              sift_roi_srv.response.xmax,sift_roi_srv.response.ymax);
-          
-      }
 
+          t_mini_x = sift_roi_srv.response.xmin.data;
+          t_mini_y = sift_roi_srv.response.ymin.data;
+          t_max_x =  sift_roi_srv.response.xmax.data;
+          t_max_y =  sift_roi_srv.response.ymax.data;
 
+          printf("Get ROI from Service (/sift) ");
+          // ROS_INFO("The response of /sift -> [xmin: %d, ymin: %d], [xmax: %d, ymax: %d]",
+          //     ,sift_roi_srv.response.ymin,
+          //     sift_roi_srv.response.xmax,sift_roi_srv.response.ymax);
 
-  }
-  /*
-  sift_roi_srv.request.fileName = "all";
-  if(sift_roi_client.call(sift_roi_srv))
-  {
-    ROS_INFO("Get ROI from Service (/detect) ");
-
-    if(!sift_roi_srv.response.result || 
-      sift_roi_srv.response.detected.size() == 0){
-      if(call_detect_times < 20){
-        call_detect_times++;
-        return ;    // for try next time
-      }
-
-      ROS_WARN("Call 20 times /detect FAIL");
-      //error_code = ERR_CALL_DETECT_OVER_TIMES;     
-      pub_error("Call 20 times /detect FAIL");
-      state = NADA;
-      return ;
-    }
-
-    float near_from_cam = 999.0;
-    for(int i =0;i < roi_srv.response.detected.size();i++){
-      darkflow_detect::Detected detected = roi_srv.response.detected[i];
-
-      if(!is_obj_in_obj_list(detected.object_name)){
-        continue;
-      }
-
-      float center_x, center_y, center_z;
-      get_center_from_2dbox(
+          printf("The response of /sift -> [xmin: %d, ymin: %d], [xmax: %d, ymax: %d]\n", 
+              t_mini_x, t_mini_y, t_max_x, t_max_y);
+              
+          float center_x, center_y, center_z;
+          get_center_from_2dbox(
             scene_cloud,
-            detected.bound_box[0], detected.bound_box[1],
-            detected.bound_box[2], detected.bound_box[3],
+            t_mini_x, t_mini_y,
+            t_max_x, t_max_y,
             //pass_z_min, pass_z_max,
             limit_z_min, limit_z_max,
             center_x, center_y, center_z);
-      
-      if(center_z != -1 &&
-        center_x > limit_x_min &&  center_x < limit_x_max &&
-        center_y > limit_y_min &&  center_y < limit_y_max &&
-        center_z > limit_z_min &&  center_z < limit_z_max ){
-        if(center_z < near_from_cam){
-          obj_name = detected.object_name;
-          mini_x = detected.bound_box[0];
-          mini_y = detected.bound_box[1];
-          max_x =  detected.bound_box[2];
-          max_y =  detected.bound_box[3];
-          
-          near_from_cam = center_z;
-        }
+
+          if(center_z != -1 &&
+            center_x > limit_x_min &&  center_x < limit_x_max &&
+            center_y > limit_y_min &&  center_y < limit_y_max &&
+            center_z > limit_z_min &&  center_z < limit_z_max ){
+            if(center_z < near_from_cam){
+              obj_name = obj_list[i] ;
+              mini_x = t_mini_x ;
+              mini_y = t_mini_y ;
+              max_x = t_max_x;
+              max_y = t_max_y;
+              
+              near_from_cam = center_z;
+            }
+          }
+
+          std::cout << obj_list[i]  << 
+              " -> (x, y, z) = ("<< center_x << "," << center_y << "," << center_z << ")" 
+              << std::endl; 
+      }else{
+        ROS_WARN("sift_roi_client.call(%s) FAIL",obj_list[i].c_str() );
+        
       }
-
-
-      std::cout << detected.object_name << 
-        " -> (y, z) = ("<< center_y << "," << center_z << ")" 
-        << std::endl; 
-    }
-    
-    if(near_from_cam == 999.0){
-      ROS_WARN("CANNOT Get Highest near_from_cam == 999.0");
-     // error_code = ERR_CANNOT_GET_CLOSEST;
-      pub_error("CANNOT Get Highest near_from_cam == 999.0");
-      return ;
-    }
-    
-  }else{
-    ROS_WARN("CANNOT Call Service (/detect)");
-    //error_code = ERR_CANNOT_CALL_DETECT_SERVICE;
-    pub_error("CANNOT Call Service (/detect)");
-    return ;
   }
-  ROS_INFO("The highest is %s -> [mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",
+
+  if(near_from_cam == 999.0){
+      ROS_WARN("CANNOT Get Highest near_from_cam == 999.0 in get_closest_SIFT()");
+      pub_error("CANNOT Get Highest near_from_cam == 999.0 in get_closest_SIFT()");
+      state = NADA;
+      return ;
+  }
+
+  ROS_INFO("The highest is <[ %s ]> -> [mini_x: %d, mini_y: %d], [max_x: %d, max_y: %d]",
       obj_name.c_str(),
       mini_x,mini_y,max_x,max_y);
   
   set_ROI_cloud(mini_x,mini_y,max_x,max_y);
 
-  if(!check_0_cloud(ROI_cloud,"_closest_ROI")){
+  if(!check_0_cloud(ROI_cloud,"_closest_SIFT_ROI")){
+    ROS_WARN("ROI_cloud size = 0 with SIFT in get_closest_SIFT()");
+    pub_error("ROI_cloud size = 0 with SIFT in get_closest_SIFT()");
+    state = NADA;
     return;
   }
 
 #ifdef SaveCloud
-    write_pcd_2_rospack(ROI_cloud,"_closest_ROI.pcd");
+    write_pcd_2_rospack(ROI_cloud,"_closest_SIFT_ROI.pcd");
 #endif 
 
   state = POSE_ESTIMATION;
-  */
+  
 }
 
 
@@ -847,6 +829,9 @@ int main (int argc, char **argv)
 
       case GET_CLOSEST:
         ObjEst.get_closest();
+        break;
+      case GET_CLOSEST_SIFT:
+        ObjEst.get_closest_SIFT();
         break;
       case UNKNOWN_CLOSEST:
         ObjEst.unknown_closest();

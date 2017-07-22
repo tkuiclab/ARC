@@ -99,7 +99,8 @@ public:
     as_.start();
 
     roi_client = nh_.serviceClient<darkflow_detect::Detect>("/detect");
-    
+    sift_roi_client = nh_.serviceClient<sift::sift>("/sift_server");
+
     ROS_INFO("obj_pose READY!");
   }
 

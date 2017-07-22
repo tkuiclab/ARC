@@ -1111,7 +1111,7 @@ class StowTask:
     def test_request_closest_sift(self):
         
         goal = obj_pose.msg.ObjectPoseGoal(
-            object_name = "<Closest>",
+            object_name = "<Closest_SIFT>",
             # object_list = ["laugh_out_loud_jokes",
             #                 "scotch_sponges",
             #                 "duct_tape",
@@ -1121,11 +1121,11 @@ class StowTask:
             #                 "expo_eraser",
             #                 "ice_cube_tray",
             #                 "robots_dvd"],
-            object_list = ["tissue_box",
-                             "duct_tape"],
+            object_list = ["speed_stick",
+                             "tissue_box"],
 
             #          [ xmin, xmax, ymin, ymax, zmin, zmax]
-            limit_ary =[-0.15, 0.15, 0,  0.3, 0.3, 1.0]
+            limit_ary =[-0.2, 0.2, 0,  0.4, 0.3, 0.6]
             
         )
 
