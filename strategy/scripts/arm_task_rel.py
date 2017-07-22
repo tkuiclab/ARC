@@ -563,7 +563,7 @@ class ArmTask:
             while self.__is_busy and blocking:
                 rospy.sleep(.1)
         else:
-            print 'exe = false'
+            print '[relative_rot_nsa Error] exe = false'
             rel_fb_pitch = euler[1]+(pitch*3.14156/180)
             rel_fb_roll  = euler[2]+((roll+90)*3.14156/180)
             rel_fb_yaw   = euler[0]+(yaw*3.14156/180)
@@ -666,6 +666,7 @@ class ArmTask:
     def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0, fai=0, blocking = False):
         """relative move xyz with manipulator base axis."""
         while self.__is_busy and blocking:
+            print 'first self.__is_busy = ' + str(self.__is_busy)
             rospy.sleep(.1)
 
         fb = self.get_fb()
@@ -694,7 +695,10 @@ class ArmTask:
             )
         )
 
+
+        print 'befoer second busy self.__is_busy = ' + str(self.__is_busy)
         while self.__is_busy and blocking:
+            #print 'self.__is_busy = ' + str(self.__is_busy)
             rospy.sleep(.1)
 
     @property

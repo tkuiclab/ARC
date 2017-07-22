@@ -77,6 +77,11 @@ void callback(const VacuumCmd::Request& req , VacuumCmd::Response& res)
   if(strcmp(req.cmd, "setMaxPos") == 0)
   {
     MaxPos = Dxl.readPosition(ID) - ADJ_STEP;
+    if (MaxPos != 0)
+    {
+      res.success = false;
+      return;
+    }
     MaxPos = MaxPos > 0 ? MaxPos : 0;
 
     MaxPos_L = MaxPos;
@@ -88,6 +93,12 @@ void callback(const VacuumCmd::Request& req , VacuumCmd::Response& res)
   else if(strcmp(req.cmd, "setMinPos") == 0)
   {
     MinPos = Dxl.readPosition(ID) ;//+ ADJ_STEP;
+    if (MinPos != 0)
+    {
+      res.success = false;
+      return;
+    }
+    
     MinPos = MinPos < POS_LMT ? MinPos : POS_LMT - 1;
 
     MinPos_L = MinPos;
@@ -98,11 +109,19 @@ void callback(const VacuumCmd::Request& req , VacuumCmd::Response& res)
   }
   else if(strcmp(req.cmd, "suctionUp") == 0)
   {
-    Dxl.moveSpeed(ID, MaxPos, UPSPEED);
+    if (Dxl.moveSpeed(ID, MaxPos, UPSPEED) != 0)
+    {
+      res.success = false;
+      return;
+    }
   }
   else if(strcmp(req.cmd, "suctionDown") == 0)
   {   
-    Dxl.moveSpeed(ID, MinPos, DOWNSPEED);
+    if (Dxl.moveSpeed(ID, MinPos, DOWNSPEED) != 0)
+    {
+      res.success = false;
+      return;
+    }
   }
   else if(strcmp(req.cmd, "calibration") == 0)
   {
@@ -127,7 +146,11 @@ void callback(const VacuumCmd::Request& req , VacuumCmd::Response& res)
       //return;
 
     int pos = map(angle, 90, 0, MaxPos, MinPos);
-    Dxl.moveSpeed(ID, pos, DOWNSPEED);
+    if (Dxl.moveSpeed(ID, pos, DOWNSPEED) != 0)
+    {
+      res.success = false;
+      return;
+    }
   }
   res.success = true;
 }

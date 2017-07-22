@@ -348,8 +348,12 @@ void BaseModule::P2PCallBack(const manipulator_h_base_module_msgs::IK_Cmd::Const
         //         }
         //     }
         // }
-        if(manipulator_->ErrCode.JointLimit == true)
+        if(manipulator_->ErrCode.JointLimit == true){
+            std::cout<<"\n====== manipulator_->ErrCode.JointLimit == true ====== \n";
+            ROS_INFO("PTP: IK ERR !!!");
+            publishStatusMsg(robotis_controller_msgs::StatusMsg::STATUS_ERROR, "IK Failed: Joint Limit");
             return;
+        }
     }
     // ======================= orig ================================
     // if (!ik_success)

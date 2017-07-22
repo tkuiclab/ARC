@@ -219,7 +219,7 @@ def DistributionV2(type, mission_obj, fullrate, out_of_bin):
         sortedbinValue.append(binsize_dict[i].TotalVolume)
         sortedbinName.append(binsize_dict[i].block)
 
-    sortedBinSize = sorted(zip(sortedbinValue, sortedbinName))
+    sortedBinSize = sorted(zip(sortedbinValue, sortedbinName),reverse=False)
 
     for i in range(len(sortedBinSize)):
         BinOrder.append(sortedBinSize[i][1])
@@ -231,7 +231,7 @@ def DistributionV2(type, mission_obj, fullrate, out_of_bin):
         sortedmissionobjValue.append(allobj_dict[mission_obj[i]].dimensions[0]*allobj_dict[mission_obj[i]].dimensions[1]*allobj_dict[mission_obj[i]].dimensions[2])
         sortedmissionobjName.append(mission_obj[i])
 
-    sortedMissionObjSize = sorted(zip(sortedmissionobjValue, sortedmissionobjName))
+    sortedMissionObjSize = sorted(zip(sortedmissionobjValue, sortedmissionobjName),reverse=False)
 
     for i in range(len(sortedMissionObjSize)):
         MissionObjOrder.append(sortedMissionObjSize[i][1])
@@ -243,17 +243,21 @@ def DistributionV2(type, mission_obj, fullrate, out_of_bin):
         LimitOfObj[BinOrder[i]] = limit
 
     if out_of_bin == 1:
-        LimitOfObj['D'] = 4
-        LimitOfObj['J'] = 4
+        LimitOfObj['D'] = 6
+        LimitOfObj['J'] = 6
+    
+    nobelong = []
 
     for i in MissionObjOrder:
         for j in BinOrder:
             #排序物體和bin的三圍
-            SortMissionObj = sorted([allobj_dict[i].dimensions[0], allobj_dict[i].dimensions[1], allobj_dict[i].dimensions[2]])
+            SortMissionObj = sorted([allobj_dict[i].dimensions[0] , allobj_dict[i].dimensions[1], allobj_dict[i].dimensions[2]])
             SortBinSize = sorted([binsize_dict[Word2Num(j)].L,binsize_dict[Word2Num(j)].W,binsize_dict[Word2Num(j)].H])
             # 如果物體三維依大小順序都超出bin的三維，則換至下一個bin
-            if (SortMissionObj[0] > SortBinSize[0] or SortMissionObj[1] > SortBinSize[1] or SortMissionObj[2] >SortBinSize[2]):
-                # print(mission_obj[i],' over of ' ,bin_dict[j].block ,'dimensions')
+            if (SortMissionObj[0]*1.4 > SortBinSize[0] or SortMissionObj[1]*1.4 > SortBinSize[1] or SortMissionObj[2]*1.4 >SortBinSize[2]):
+                #print(i,' over of ' ,j )
+                if j == BinOrder[-1]:
+                    nobelong.append(i)
                 continue
             else:
                 if binsize_dict[Word2Num(j)].ObjectNum >= LimitOfObj[j]:
@@ -274,17 +278,19 @@ def DistributionV2(type, mission_obj, fullrate, out_of_bin):
                         break
 
     out_dict = zip(object_belong, mission_obj)
+    for i in range(len(nobelong)):
+        binsize_dict[9].Object.append(nobelong[i])
     # print (out_dict)
-    return out_dict, binsize_dict
+    return out_dict, binsize_dict , nobelong
 
 def find_obj_in_bin_content(bin_content, want_obj):
     for i in range(10):
-        print('-----' + bin_content[i].block + '------')
+        #print('-----' + bin_content[i].block + '------')
 
         for obj in bin_content[i].Object:
-            print(obj)
+            #print(obj)
         
-            if obj == want_bj:
+            if obj == want_obj:
                 return bin_content[i].block
 
 def find_obj_in_distribution(bin_distri, want_obj):
@@ -292,15 +298,17 @@ def find_obj_in_distribution(bin_distri, want_obj):
         if item_bin[1] == want_obj:
             return item_bin[0]
 
+
 def stow_distribution(stow_content):
-    output, bin_content = DistributionV2('stow',stow_content,0.01, 0)
+    nobelong = []
+    output, bin_content, nobelong = DistributionV2('stow',stow_content,0.01, 0)
     i = 0
     while len(output) < len(stow_content):
         i = i + 0.01
         if i <= 1:
-            output, bin_content = DistributionV2('stow', stow_content, i, 0)
+            output, bin_content, nobelong = DistributionV2('stow', stow_content, i, 0)
         else:
-            output, bin_content = DistributionV2('stow', stow_content, i, 1)
+            output, bin_content, nobelong = DistributionV2('stow', stow_content, 1, 1)
             print ('Out of bin')
             break
         sys.stdout.write("Use Volume: %d%%   \r" % (i*100) )
@@ -327,7 +335,7 @@ def show_bin_content(bin_content):
         print('bin ',bin_content[i].block,' ',bin_content[i].Object)
 
 def main():
-    item_location_file_path = rospkg.RosPack().get_path('arc') + '/stow_task/stow_20.json'
+    item_location_file_path = rospkg.RosPack().get_path('arc') + '/stow_task/stow_test.json'
 
 
     print("item_location_file_path =" + item_location_file_path)
@@ -338,14 +346,14 @@ def main():
     #     mission_object.append(str(item_loc_json['tote']['contents'][i]))
 
 
-    output, bin_content = DistributionV2('stow',mission_object,0.01, 0)
+    output, bin_content, nobelong = DistributionV2('stow',mission_object,0.01, 0)
     i = 0
     while len(output) < len(mission_object):
         i = i + 0.01
         if i <= 1:
-            output, bin_content = DistributionV2('stow', mission_object, i, 0)
+            output, bin_content, nobelong = DistributionV2('stow', mission_object, i, 0)
         else:
-            output, bin_content = DistributionV2('stow', mission_object, i, 1)
+            output, bin_content, nobelong = DistributionV2('stow', mission_object, 1, 1)
             print ('Out of bin')
             break
 
@@ -356,6 +364,8 @@ def main():
     print('===============Object in bin===============')
     for i in range(10):
         print('bin ',bin_content[i].block,' ',bin_content[i].Object)
+    print('===============Object Not in the bin===============')
+    print(nobelong)
     '''
     output , bin_content = Distribution('pick',mission_object,0.01)
     i = 0
@@ -378,3 +388,4 @@ def main():
     '''
 if __name__ == '__main__':
     main()
+

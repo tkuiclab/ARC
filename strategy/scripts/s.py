@@ -68,6 +68,7 @@ class Strategy(threading.Thread):
         
     def shutdown(self):
         """ description """
+        gripper_vaccum_off()
         self.stop_robot = True
         rospy.loginfo("Strategy Exit & Stop Robot")
 
@@ -168,77 +169,28 @@ if __name__ == '__main__':
 
     try:
         s = Strategy()
-        # =========== test ===========
-        desire_cmd = [0.3, 0, 0.3, -90, 0, 0]
-        
-        s.Arm.Get_Collision_Avoidance_Cmd(desire_cmd, 0, 'C')
-        s.Arm.Get_Collision_Avoidance_Cmd(desire_cmd, 90, 'C')
-        # ============================
-        
+
         #===
-        # gripper_vaccum_off()
+        gripper_vaccum_off()
         # #s.stow.test_read_item_location_in_arc_pack("stow_20.json")
-        # s.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
+        #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
         # # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+        s.stow.test_read_item_location_in_arc_pack("stow_test.json")
         
-        # s.safe_pose()
-        # # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'x', 'a'))
-        # # rospy.sleep(0.5)
-        # # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a'))
-        # # rospy.sleep(0.5)
-        
-        # s.start() 
-        # s.stow_run()
-        # # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 170, 0))
-        # # s.Arm.relative_xyz_base(x = 0.0612402290131, y = -0.0987435177733, z = -0.295083506803)
-        #===
-        ### 1 (OK)
-        # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 0, 0))
-        # s.Arm.relative_rot_nsa(roll = 170.096292583)
-        # s.Arm.relative_move_xyz_rot_pry(x = 0.0612402290131, y = -0.0987435177733, z = -0.2, fai = 0)
-        # #===========
-        # s.Arm.relative_move_xyz_rot_pry(z = 0.2)
+        s.safe_pose()
 
-        # ### 2
-        # s.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.25), (-180, 0, 0))
-        # s.Arm.relative_rot_nsa(roll = -179.096292583)
-        # s.Arm.relative_move_xyz_rot_pry(x = -0.167332398274, y = 0.123866805961, z = -0.2, fai = 20)
-        # #===========
-        # LM up to leave tote
-        # s.Arm.pub_ikCmd('ptp', (0.5, 0.0, 0.15), (-180, 0, 0))  
-
-# ### 3
-# task.Arm.pub_ikCmd('ptp', (0.45, 0.00, 0.25), (-180, 0, 0))
-# self.Arm.relative_rot_nsa(roll = 174.348882876)
-# self.Arm.gripper_suction_deg(71.9343049184)
-# self.Arm.relative_xyz_base(x = -0.121931131417, y = -0.0443766107613, z = -0.329978857648)
-
-# ### 4
-# task.Arm.pub_ikCmd('ptp', (0.45, 0.00, 0.25), (-180, 0, 0))
-# self.Arm.relative_rot_nsa(roll = -168.12720313)
-# self.Arm.gripper_suction_deg(87.1377459354)
-# self.Arm.relative_xyz_base(x = -0.0718525525253, y = 0.0903645809188, z = -0.343695944003)
-        
-        
-        # ----- Temp  Test------#
-        #s.stow.LM_2_tote()
-        #s.stow.LM_amnesty_up()
-        #s.stow.LM_amnesty_down()
-        #s.stow.arm_photo_pose()
-        #s.stow.arm_photo_pose_2()
-        #s.LM.pub_LM_Cmd(LM_ID_Right, ToteLeave_Z)
-
+        s.start() 
+        s.stow_run()
         
 
-        # ----- Pick all Unknown Highest------#
-        #s.stow.request_unknown_highest_item()
 
+        # =========== test ===========
+        # desire_cmd = [0.3, 0, 0.3, -90, 0, 0]
+        
+        # s.Arm.Get_Collision_Avoidance_Cmd(desire_cmd, 0, 'C')
+        # s.Arm.Get_Collision_Avoidance_Cmd(desire_cmd, 90, 'C')
+        # ============================
 
-        # s.LM.rel_move_LM('right',35)
-        # s.LM.rel_move_LM('base', -30)
-
-
-       
 
 
         rospy.spin()

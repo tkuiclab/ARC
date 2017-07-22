@@ -1,35 +1,9 @@
 #!/usr/bin/env python
-"""description"""
 
-# pylint: disable = invalid-name
-# pylint: disable = C0326
-# pylint: disable = W0105, C0303
-
-# import roslib
-# import rospkg
-# import rospy
-# from std_msgs.msg import Bool, Char, Float64, String
-
-# import arm_task_rel
-# import LM_Control
-
-# from config import *
-
-#
-# import math
-# import threading
-# import time
-# import numpy
-
-# import actionlib
-# import roslaunch
-# import roslib;roslib.load_manifest('obj_pose')
-# import rospkg
 import rospy
+import arm_task_rel
 
-# import obj_pose.msg
-# from actionlib_msgs.msg import GoalID, GoalStatusArray
-# from geometry_msgs.msg import PoseStamped, Twist
+
 from std_msgs.msg import Bool, Char, Float64, String
 # from strategy.srv import *
 
@@ -44,7 +18,7 @@ BinArr = ['a',  'b',  'c',  'd',  'e',  'f',  'g',  'h',  'i',  'j']
 class Calibrater:
     def __init__(self):
         self.LM  = LM_Control.CLM_Control()
-        # self.Arm = arm_task_rel.ArmTask()
+        self.Arm = arm_task_rel.ArmTask()
         # rospy.on_shutdown(self.shutdown)
     
     def Move_LM(self, bin):
@@ -56,7 +30,7 @@ class Calibrater:
         print 'move 2 bin ->' + bin
         self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', bin ) + LM_Right_Arm_Shift)
         rospy.sleep(0.5)
-        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', bin ))
+        self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', bin ) - 2000)
         rospy.sleep(0.5)
         # while self.LM.IsArrive == True:
         #     print 'wait2'
@@ -66,18 +40,31 @@ class Calibrater:
     def Show_LM_IsBusy(self):
         print 'LM IS busy == '+ str(self.LM.IsBusy)
 
+    def safe_pose(self):
+        self.Arm.pub_ikCmd('ptp', (0.30, 0.00 , 0.3), (-180, 0, 0))
+        rospy.sleep(.5)
+        while self.Arm.busy:
+            rospy.sleep(.1)
 
+
+    def arm_2_bin_front(self):
+        self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+        rospy.sleep(.5)
+        while self.Arm.busy:
+            rospy.sleep(.1)
+
+    
 if __name__ == '__main__':
 
     """ Initialize ros node and publish cmd """
     try:
         rospy.init_node('Calibrate_Bin_Img', anonymous=True)
         calibrate = Calibrater()
-
+        #calibrate.safe_pose()
+        calibrate.arm_2_bin_front()
         # for single cmd
-        # calibrate.Move_Arm()
-        calibrate.Move_LM('c')
-        exit()
+        # calibrate.Move_LM('e')
+        # exit()
         # for continue caltbration task
         r = rospy.Rate(30)
         i = 0
