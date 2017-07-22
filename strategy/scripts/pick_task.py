@@ -500,10 +500,12 @@ class PickTask:
 
             # Change state
             self.state = WaitRobot
-            self.next_state = RobotMove2Bin
+            # self.next_state = RobotMove2Bin
+            self.next_state = Finish
 
             self.Arm.relative_move_nsa(a=-.15)
-            self.task_state = 'pick'
+            # self.task_state = 'pick'
+            self.pick_list.append(self.now_pick)
 
         # ===============================================================
 
