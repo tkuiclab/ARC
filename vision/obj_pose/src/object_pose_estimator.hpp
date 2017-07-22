@@ -11,7 +11,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <actionlib/server/simple_action_server.h>
 #include <obj_pose/ObjectPoseAction.h>
-
+#include <manipulator_h_base_module_msgs/GetKinematicsPose.h>
 
 #include <boost/thread/thread.hpp>
 #include <Eigen/Core>
@@ -40,6 +40,9 @@
 #include <pcl/surface/mls.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include "object_pose_auxiliary.hpp"
+#include <tf/transform_broadcaster.h>
+#include "tf_conversions/tf_eigen.h"
+#include "manipulator_h_base_module_msgs/IK_Cmd.h"
 
 //#define ShowCloud
 #define SaveCloud
@@ -91,7 +94,7 @@ public:
     segmented_pub_ =nh_.advertise<sensor_msgs::PointCloud2>("segmented_pointcloud", 1);
     align_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("align_pointcloud", 1);
     cloud_sub = nh_.subscribe("/camera/depth_registered/points", 10, &ObjEstAction::cloudCB,this);
-    
+    arm_fb_sub = nh_.subscribe("/robotis/fk_fb", 1, &ObjEstAction::arm_fbCB, this);
     as_.start();
 
     roi_client = nh_.serviceClient<darkflow_detect::Detect>("/detect");
@@ -102,6 +105,62 @@ public:
   void goalCB();
   void preemptCB();
   void cloudCB(const sensor_msgs::PointCloud2ConstPtr& input);
+
+  void arm_fbCB(const manipulator_h_base_module_msgs::IK_Cmd::ConstPtr& eef_pose_msg){
+    eef_pose.linear.x = eef_pose_msg->data[0];
+    eef_pose.linear.y = eef_pose_msg->data[1];
+    eef_pose.linear.z = eef_pose_msg->data[2];
+    eef_pose.angular.x = eef_pose_msg->data[5];
+    eef_pose.angular.y = eef_pose_msg->data[3];
+    eef_pose.angular.z = eef_pose_msg->data[4];
+
+    double tmp_roll= eef_pose.angular.x/3.14*180;
+    double tmp_pitch=eef_pose.angular.y/3.14*180;
+    double tmp_yaw = eef_pose.angular.z/3.14*180;
+
+    tmp_eef = euler2Quaternion(180,90,0);
+    q = tf::Quaternion(tmp_eef.x(),tmp_eef.y(),tmp_eef.z(), tmp_eef.w());
+    transform.setOrigin( tf::Vector3(0,0,0));
+    transform.setRotation(q);
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "ros_world", "robot_arm_base"));
+
+    tmp_eef = euler2Quaternion(0,0,0);
+    q = tf::Quaternion(tmp_eef.x(),tmp_eef.y(),tmp_eef.z(), tmp_eef.w()); 
+    transform.setOrigin( tf::Vector3(eef_pose.linear.z, eef_pose.linear.y, eef_pose.linear.x));
+    transform.setRotation(q);
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "robot_arm_base", "tcp_tmp_y"));
+
+    tmp_eef = euler2Quaternion(0,tmp_pitch,0);
+    q = tf::Quaternion(tmp_eef.x(),tmp_eef.y(),tmp_eef.z(), tmp_eef.w()); 
+    transform.setOrigin( tf::Vector3(0,0,0));
+    transform.setRotation(q);
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "tcp_tmp_y", "tcp_tmp_z"));
+
+
+    tmp_eef = euler2Quaternion(0,0,tmp_yaw);
+    q = tf::Quaternion(tmp_eef.x(),tmp_eef.y(),tmp_eef.z(), tmp_eef.w()); 
+    transform.setOrigin( tf::Vector3(0,0,0));
+    transform.setRotation(q);
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "tcp_tmp_z", "tcp_tmp_x"));
+    
+    tmp_eef = euler2Quaternion(tmp_roll,0,0);
+    q = tf::Quaternion(tmp_eef.x(),tmp_eef.y(),tmp_eef.z(), tmp_eef.w()); 
+    transform.setOrigin( tf::Vector3(0,0,0));
+    transform.setRotation(q);
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "tcp_tmp_x", "tcp"));
+
+    tmp_eef = euler2Quaternion(180,0,0);
+    q = tf::Quaternion(tmp_eef.x(),tmp_eef.y(),tmp_eef.z(), tmp_eef.w());
+    transform.setOrigin( tf::Vector3(0.07, 0.0, 0.09));
+    transform.setRotation(q);
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "tcp", "camera_link"));
+
+    // tmp_eef = euler2Quaternion(-90,90,0);
+    // q = tf::Quaternion(tmp_eef.x(),tmp_eef.y(),tmp_eef.z(), tmp_eef.w());
+    // transform.setOrigin( tf::Vector3(0.0, 0.0, 0.0));
+    // transform.setRotation(q);
+    // br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "camera_link", "camera_rgb_optical_frame"));
+  }
   
   void pub_feedback(std::string msg,int progress);
   void pub_error();
@@ -126,14 +185,16 @@ protected:
 
   bool load_amazon_pcd(std::string pcd_filename);
   bool is_obj_in_obj_list(std::string name);
-  void print4x4Matrix (const Eigen::Matrix4f & matrix);
-
+  void print4x4Matrix (Eigen::Matrix4f & matrix, Eigen::Vector4f centroid);
+  // Eigen::Matrix3d euler2Quaternion( double roll, double pitch, double yaw);
+  Eigen::Quaterniond euler2Quaternion( const double roll, const double pitch, const double yaw);
 
   //------ROS--------//
   ros::NodeHandle nh_;
   ros::Publisher segmented_pub_;
   ros::Publisher align_pub_;
   ros::Subscriber cloud_sub;
+  ros::Subscriber arm_fb_sub;
   ros::ServiceClient roi_client;
 
   actionlib::SimpleActionServer<obj_pose::ObjectPoseAction> as_;
@@ -142,7 +203,7 @@ protected:
   obj_pose::ObjectPoseFeedback feedback_;
   obj_pose::ObjectPoseResult result_;
   geometry_msgs::Twist obj_pose;
-
+  geometry_msgs::Twist eef_pose;
   //--------Class Usage------//
   int mini_x;
   int mini_y;
@@ -154,6 +215,7 @@ protected:
   bool scence_seg;
   
   darkflow_detect::Detect roi_srv;
+  manipulator_h_base_module_msgs::GetKinematicsPose arm_fb_srv;
   // std::string tmp_path;
   // std::string tmp_path2;
   std::string obj_name;
@@ -163,7 +225,11 @@ protected:
   
   sensor_msgs::PointCloud2 seg_msg;
 
-
+  //--------- Pub TF ----------//
+  tf::TransformBroadcaster br;
+  tf::Transform transform;
+  tf::Quaternion q;
+  Eigen::Quaterniond tmp_eef; 
 
 private:
   PT min_p, max_p;
@@ -181,7 +247,6 @@ private:
   pcl::PointCloud<pcl::PointXYZ>::Ptr Max_cluster;
   pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_cluster;
   Eigen::Matrix4f transformation_matrix;
-
 
   int error_code;
 };

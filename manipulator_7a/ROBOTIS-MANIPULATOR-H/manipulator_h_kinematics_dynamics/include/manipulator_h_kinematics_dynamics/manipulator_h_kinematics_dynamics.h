@@ -71,9 +71,14 @@ private:
 
     double fai;
 
-    /*Euler rotation mode*/
-
 public:
+    /*for the topic "/robotis/fk_fb" */
+    double fk_x, fk_y, fk_z;
+    double fk_roll;
+    double fk_pitch;
+    double fk_yaw;
+    double fk_fai;
+    
     teEuler_Mode Euler_Mode;
     ManipulatorKinematicsDynamics();
     ManipulatorKinematicsDynamics(TreeSelect tree);
