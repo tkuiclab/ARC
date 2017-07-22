@@ -89,7 +89,7 @@ class CPCSegmentation
       // Supervoxel Stuff
       float voxel_resolution = 0.0075f;
       float seed_resolution = 0.03f;
-      float color_importance = 0.0f;
+      float color_importance = 1;
       float spatial_importance = 1.0f;
       float normal_importance = 4.0f;
       bool use_single_cam_transform = false;
@@ -99,14 +99,14 @@ class CPCSegmentation
       float concavity_tolerance_threshold = 10;
       float smoothness_threshold = 0.1;
       uint32_t min_segment_size = 0;
-      //bool use_extended_convexity=false;
+
       bool use_extended_convexity=true;
-      bool use_sanity_criterion;
+      bool use_sanity_criterion=false;
 
       // CPCSegmentation Stuff
-      float min_cut_score = 0.16;
-      unsigned int max_cuts = 25;
-      unsigned int cutting_min_segments = 400;
+      float min_cut_score = 0.1;
+      unsigned int max_cuts = 5;
+      unsigned int cutting_min_segments = 200;
       bool use_local_constrain;
       bool use_directed_cutting;
       bool use_clean_cutting;
@@ -330,9 +330,6 @@ class CPCSegmentation
 
     }
 
-
-    
-    /*
     void do_segmentation(){
       do_CPC();
       segmented_cloud_ptr_ = cpc_labeled_cloud;
@@ -394,10 +391,11 @@ class CPCSegmentation
 
           Eigen::Vector4f centroid;
           pcl::compute3DCentroid (*cloud_cluster1, centroid);
-          // if(tmp_max_p.x<=max_points.x && tmp_max_p.y<=max_points.y && tmp_max_p.z<=max_points.z &&
-          //               tmp_min_p.x>=min_points.x && tmp_min_p.y>=min_points.y && tmp_min_p.z>=min_points.z)
-          if(centroid(0) <= max_points.x && centroid(1) <= max_points.y && centroid(2) <= max_points.z 
-                  && centroid(0) >= min_points.x && centroid(1) >= min_points.y && centroid(2) >= min_points.z)
+          
+          if(tmp_max_p.x<=(max_points.x+0.02) && tmp_max_p.y<=(max_points.y+0.02) && tmp_max_p.z<=(max_points.z+0.02) &&
+                        tmp_min_p.x>=(min_points.x-0.02) && tmp_min_p.y>=(min_points.y-0.02) && tmp_min_p.z>=(min_points.z-0.02))
+          //if(centroid(0) <= max_points.x && centroid(1) <= max_points.y && centroid(2) <= max_points.z 
+          //        && centroid(0) >= min_points.x && centroid(1) >= min_points.y && centroid(2) >= min_points.z)
           {
             //std::cout << "------------------------------------------------" << std::endl;
             //std::cout << "cluster_" << j << " save!!!" << std::endl;
@@ -489,7 +487,7 @@ class CPCSegmentation
 
       }
 
-    }*/
+    }
 
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr get_cloud_cluster(){return cloud_cluster;}
     pcl::PointCloud<pcl::PointXYZ>::Ptr get_BiggestCluster(){return Max_cluster;}
