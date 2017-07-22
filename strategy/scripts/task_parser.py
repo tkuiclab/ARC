@@ -7,7 +7,7 @@ from os import path, mkdir
 
 import rospkg
 import json
-from object_distribution import stow_distribution, find_obj_in_distribution, show_bin_content
+from object_distribution import stow_distribution, find_obj_in_bin_content, show_bin_content
 
 
 class PickInfo:
@@ -30,7 +30,7 @@ class StowInfo:
         self.to_other_tote = False
         self.success = False
 
-        self.gripper_down = True
+        self.gripper_down = False
 
 def read_json(path):
     """Read a JSON file from path, and convert to object of python."""
@@ -118,9 +118,9 @@ def make_stow_list(i_item_loc_json):
     stow_list = list()
 
 
-    bin_id = 'e'
+    #bin_id = 'e'
     for item in item_loc_json["tote"]["contents"]:
-        bin = find_obj_in_distribution(bin_distribution, item)
+        bin = find_obj_in_bin_content(bin_content, item)
         stow_list.append(StowInfo(item, bin) )
         # for item_bin in bin_distribution:
         #     if item_bin[1] == item:
@@ -129,7 +129,7 @@ def make_stow_list(i_item_loc_json):
         #bin_id = chr(ord(bin_id)+1)
 
     
-    #show_stow_list(stow_list)
+    show_stow_list(stow_list)
 
     return stow_list
 

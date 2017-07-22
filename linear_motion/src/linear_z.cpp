@@ -252,7 +252,7 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     ros::Subscriber sub = n.subscribe("/position_topic", 10, first_topic_callback);
     ros::Publisher  pub = n.advertise<linear_motion::LM_Cmd>("/LM_FeedBack", 1);
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(50);
 
     // ============================= ROS Loop =============================
     bool is_send1 = false;

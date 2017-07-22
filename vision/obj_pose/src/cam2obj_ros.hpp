@@ -443,7 +443,7 @@ bool cam_2_obj_center(PCT::Ptr i_cloud,
   // std::cout << "Near Points Percent = " << (near_points_percent*100) << "%" 
   //     << ", get_near_points() Points = " << cloud->size()  << std::endl;
 
-  if(cloud->size() < 0){
+  if(cloud->size() <= 0){
     std::cout << "[ERROR] cam_2_obj_center say _near_points size() <=0" << std::endl;
     return false;
   }
@@ -466,7 +466,7 @@ bool cam_2_obj_center(PCT::Ptr i_cloud,
     vg.filter (*cloud);
     std::cout << "cam_2_obj_center() say After VoxelGrid Points = " << cloud->size() << std::endl;
   
-    if(cloud->size() < 0){
+    if(cloud->size() <= 0){
       std::cout << "[ERROR] cam_2_obj_center say _vg size() <=0" << std::endl;
       return false;
     }
@@ -490,7 +490,7 @@ bool cam_2_obj_center(PCT::Ptr i_cloud,
   mls.setInputCloud (cloud);
   mls.process (*cloud_normal);
 
-  if(cloud_normal->size() < 0){
+  if(cloud_normal->size() <= 0){
     std::cout << "[ERROR] cam_2_obj_center say mls size() <=0" << std::endl;
     return false;
   }
@@ -503,7 +503,7 @@ bool cam_2_obj_center(PCT::Ptr i_cloud,
   
   Vector3f  obj_normal = del_out_mean_normal(cloud_normal,del_normal);
   
-  if(del_normal->size() < 0){
+  if(del_normal->size() <= 0){
     std::cout << "[ERROR] cam_2_obj_center say del_normal size() <=0" << std::endl;
     return false;
   }

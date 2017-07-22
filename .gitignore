@@ -63,6 +63,7 @@ CATKIN_IGNORE
 # sift ignore
 /vision/sift/training items/
 /vision/sift/Training items/
+/vision/sift/*.png
 
 # ignore for pcd
 *.pcd

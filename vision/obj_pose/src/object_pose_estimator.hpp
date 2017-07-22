@@ -8,6 +8,8 @@
 //#include <fake_roi/Detect.h>
 #include <darkflow_detect/Detected.h>
 #include <darkflow_detect/Detect.h>
+
+#include <sift/sift.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <actionlib/server/simple_action_server.h>
 #include <obj_pose/ObjectPoseAction.h>
@@ -52,6 +54,7 @@ enum ProcessingState{
     POSE_ESTIMATION,
     GET_ONE_ROI,
     GET_CLOSEST,
+    GET_CLOSEST_SIFT,
     UNKNOWN_CLOSEST
 }state, next_state;
 
@@ -96,7 +99,7 @@ public:
     as_.start();
 
     roi_client = nh_.serviceClient<darkflow_detect::Detect>("/detect");
-  
+    
     ROS_INFO("obj_pose READY!");
   }
 
@@ -117,6 +120,7 @@ public:
   
   void get_one_roi();   //need obj_name
   void get_closest();   //need obj_list
+  void get_closest_SIFT();
   void unknown_closest();
 
 protected:
@@ -139,6 +143,7 @@ protected:
   ros::Publisher align_pub_;
   ros::Subscriber cloud_sub;
   ros::ServiceClient roi_client;
+  ros::ServiceClient sift_roi_client;
 
   actionlib::SimpleActionServer<obj_pose::ObjectPoseAction> as_;
   std::string action_name_;
@@ -158,6 +163,8 @@ protected:
   bool scence_seg;
   
   darkflow_detect::Detect roi_srv;
+  sift::sift sift_roi_srv;
+
   // std::string tmp_path;
   // std::string tmp_path2;
   std::string obj_name;
