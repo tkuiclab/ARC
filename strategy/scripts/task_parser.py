@@ -7,7 +7,7 @@ from os import path, mkdir
 
 import rospkg
 import json
-from object_distribution import stow_distribution, find_obj_in_distribution, show_bin_content
+from object_distribution import stow_distribution, find_obj_in_bin_content, show_bin_content
 
 
 class PickInfo:
@@ -120,7 +120,7 @@ def make_stow_list(i_item_loc_json):
 
     #bin_id = 'e'
     for item in item_loc_json["tote"]["contents"]:
-        bin = find_obj_in_distribution(bin_distribution, item)
+        bin = find_obj_in_bin_content(bin_content, item)
         stow_list.append(StowInfo(item, bin) )
         # for item_bin in bin_distribution:
         #     if item_bin[1] == item:

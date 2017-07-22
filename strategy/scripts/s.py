@@ -177,7 +177,7 @@ if __name__ == '__main__':
         # # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
         s.stow.test_read_item_location_in_arc_pack("stow_test.json")
         
-        #s.safe_pose()
+        s.safe_pose()
 
         s.start() 
         s.stow_run()

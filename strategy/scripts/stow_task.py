@@ -736,6 +736,7 @@ class StowTask:
 
             gripper_vaccum_on()
 
+            #self.Arm.relative_move_suction('ptp', self.gripper_roll, obj_dis +0.02,blocking= True )
             self.Arm.relative_move_suction('ptp', self.gripper_roll, obj_dis +0.02,blocking= True )
             #print("self.Arm.relative_move_suction('ptp', "+str(self.gripper_roll)+", obj_dis +0.02)")
 
