@@ -35,12 +35,12 @@ class CLM_Control:
 
     def Show_FB_callback(self, msg):
         """ description """
-        # print msg.status
+        #print msg.status
         self.z_curr_pos = msg.x_curr_pos
         self.x_curr_pos = msg.z_curr_pos
         if msg.status == 'LM_idle':
             self.__is_busy = False
-            self.__is_Arrive = True
+            #self.__is_Arrive = True
 
         elif msg.status == 'LM_busy':
             # print 'LM_busy'  
@@ -49,7 +49,7 @@ class CLM_Control:
                 
         elif msg.status == 'LM_complete':
             # print 'LM_complete'         # execute arm task
-            self.__is_busy = False
+            #self.__is_busy = False
             self.__is_Arrive = True
         else:
             print 'err'
@@ -149,6 +149,7 @@ class CLM_Control:
             print 'error input arg for pub_LM_Cmd(self, id, pls)'
 
         self.__is_Arrive = False
+        self.__is_busy = True
         self.set_pls_pub.publish(msg)
 
         

@@ -22,6 +22,7 @@ import arm_task_rel
 from gripper import *
 from s import *
 from sift.srv import *
+from LM_Control import *
 
 
 def safe_pose(arm):
@@ -59,7 +60,7 @@ if __name__ == '__main__':
     try:
         ss = Strategy()
 
-        safe_pose(ss.Arm)
+        #safe_pose(ss.Arm)
         # ss.Arm.relative_move_nsa(a = 0.1)
         # exit()
         # sift_client('speed_stick')
@@ -77,7 +78,11 @@ if __name__ == '__main__':
         # print ('request_highest_item()')
 
         # ss.stow.request_highest_item()
-
+        #ss.stow.arm_photo_pose_2()
+        ss.stow.arm_photo_pose()
+        ss.stow.LM_2_tote()
+        #ss.stow.request_highest_item()
+        ss.stow.test_request_unknown_highest_item()
 
         # ----- Test Photo Pose ------#
         # ss.stow.LM_2_tote()
@@ -106,18 +111,32 @@ if __name__ == '__main__':
         # ss.stow.arm_photo_pose()
 
         #---------LM & Arm with Bin----------#
-        gripper_suction_up()
-        #ss.stow.LM_2_Bin_No_Shift('b')
-        ss.stow.LM_2_Bin_Right_Arm('a')
+        # gripper_suction_up()
+        # #ss.stow.LM_2_Bin_No_Shift('b')
+        # ss.stow.LM_2_Bin_Right_Arm('a')
         
-        ss.stow.arm_leave_tote()
-        while ss.Arm.busy:
-            rospy.sleep(.1)
-        # ss.Arm.relative_move_nsa(a = 0.2)
-        #sss.LM.pub_LM_Cmd(LM_ID_Base, 60000)
-        #ss.Arm.relative_move_nsa(a = 0.2)
+        # ss.stow.arm_leave_tote()
+        # while ss.Arm.busy:
+        #     rospy.sleep(.1)
 
+
+
+        #---------Error Pose----------#
+        # gripper_suction_up()
+        # #ss.stow.LM_2_Bin_No_Shift('b')
+        # #ss.stow.LM_2_Bin_Right_Arm('a')
         
+        # ss.stow.arm_leave_tote()
+        # while ss.Arm.busy:
+        #     rospy.sleep(.1)
+        # ss.Arm.relative_move_nsa(a = 0.2, blocking = True)
+        # #sss.LM.pub_LM_Cmd(LM_ID_Base, 60000)
+        # ss.Arm.relative_move_nsa(a = -0.2, blocking = True)
+
+
+        #ss.LM.pub_LM_Cmd(LM_ID_Right, ToteLeave_Z)
+        #ss.LM.pub_LM_Cmd(LM_ID_Base, GetShift('Tote', 'x', 'amnesty'))
+        #ss.stow.LM_amnesty_up()
         rospy.spin()
 
     except rospy.ROSInterruptException:

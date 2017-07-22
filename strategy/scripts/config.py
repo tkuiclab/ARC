@@ -9,6 +9,8 @@ LM_VERTICAL_LIMIT = 80000
 def GetShift(Target_Type, LM_Dir, Target):
     """ Get the motion pulse of linear motor """
     # Bin
+
+    Target = Target.lower()
     if Target_Type == 'Bin':
         if Target in BinId:
             if LM_Dir == 'x':
@@ -108,9 +110,12 @@ ToteId 		= [  'tote',   'amnesty']
 #ToteShift_X	= [49000, 11000 ]
 ToteShift_X	= [27000, 60000]
 #ToteShift_Z	= [72000, 76000]
-ToteShift_Z	= [62000, 76000]
+#ToteShift_Z	= [62000, 76000]
+ToteShift_Z	= [72000, 60000]
 
-ToteLeave_Z = 40000     # pick (suck)  finish
+
+ToteLeave_Z = 50000
+ToteLeave_Z_Amnesty = 30000     # pick (suck)  finish
 
 LM_Right_Arm_Shift = 18000
 

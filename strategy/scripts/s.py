@@ -68,6 +68,7 @@ class Strategy(threading.Thread):
         
     def shutdown(self):
         """ description """
+        gripper_vaccum_off()
         self.stop_robot = True
         rospy.loginfo("Strategy Exit & Stop Robot")
 
@@ -172,8 +173,9 @@ if __name__ == '__main__':
         #===
         gripper_vaccum_off()
         # #s.stow.test_read_item_location_in_arc_pack("stow_20.json")
-        s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+        #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
         # # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+        s.stow.test_read_item_location_in_arc_pack("stow_test.json")
         
         #s.safe_pose()
 
