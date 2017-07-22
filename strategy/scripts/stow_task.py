@@ -238,7 +238,16 @@ class StowTask:
     def arm_leave_tote(self):
         self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
 
+    def arm_leave_tote_i_bin(self):
+        self.Arm.pub_ikCmd('ptp', (0.25, -0.02 , 0.2), (-90, 0, 0) )
 
+
+    def arm_leave_tote_safe(self):
+        self.Arm.move_2_Abs_Roll(90,blocking=True)
+        self.Arm.pub_ikCmd('ptp', (0.2, 0.00 , 0.25), (-180, 0, 0))
+
+    def arm_init_pose(self):
+        self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-90, 0, 0) )
 
     def tool_2_obj(self, obj_pose, norm, shot_deg = 0): #STOW
         p = obj_pose
@@ -589,8 +598,8 @@ class StowTask:
         if n_s in check_next_states:
             self.info = "(Check) Status of Suction: {}".format(self.suck_num)
             print(self.info)
-            return self.suck_num > 1
-            #return self.suck_num > 0
+            #return self.suck_num > 1
+            return self.suck_num > 0
 
         # Other state do not
         #return False
@@ -796,10 +805,12 @@ class StowTask:
             
             pos = self.Arm.get_fb().group_pose.position
 
-            if pos.x > 0.45:
-                self.arm_photo_pose()
+            if pos.x > 0.40:
+                self.arm_leave_tote_safe()
+                
                 while self.Arm.busy:
                     rospy.sleep(0.1)
+        
 
 
             self.arm_leave_tote()
@@ -870,13 +881,13 @@ class StowTask:
             self.info = "(ArmLeaveBin) ArmLeaveBin"
             print self.info
             
-            self.next_state = Recover2InitPos
-            self.state 		= WaitRobot
-
+            self.Arm.relative_move_nsa(a = -0.2) 
 
             
 
-            self.Arm.relative_move_nsa(a = -0.3) 
+            self.next_state = Recover2InitPos
+            self.state 		= WaitRobot
+
 
             
 
@@ -887,7 +898,8 @@ class StowTask:
             print self.info
 
             #self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-90, 0, 0) )
-            self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+            #self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-90, 0, 0) )
+            self.arm_init_pose()
 
             self.next_state = FinishOne
             self.state 		= WaitRobot

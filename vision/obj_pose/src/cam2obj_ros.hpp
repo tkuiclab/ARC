@@ -336,6 +336,9 @@ Vector3f get_normal_mean(pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normal){
   obj_normal[0] = obj_normal[1] = obj_normal[2] = 0.0f;
   
   for(int i =0;i < cloud_normal->size();i++){
+
+
+
     obj_normal [0] += cloud_normal->points[i].normal_x;
     obj_normal [1] += cloud_normal->points[i].normal_y;
     obj_normal [2] += cloud_normal->points[i].normal_z;
@@ -495,12 +498,14 @@ bool cam_2_obj_center(PCT::Ptr i_cloud,
     return false;
   }
 
+  std::vector<int> index;
+  pcl::removeNaNFromPointCloud(*cloud_normal, *cloud_normal, index);
+
 #ifdef SaveCloud    
   write_pcd_2_rospack_normals(cloud_normal,"_mls.pcd");
 #endif
 
-  //std::cout << "cloud_normal size = " << cloud_normal->size() << std::endl;
-  
+ 
   Vector3f  obj_normal = del_out_mean_normal(cloud_normal,del_normal);
   
   if(del_normal->size() <= 0){

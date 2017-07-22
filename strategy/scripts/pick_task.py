@@ -918,8 +918,6 @@ def _test():
         # s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'd') + _LEFT_SHIFT)
         # rospy.sleep(0.3)
         # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'd'))
-
-        # s.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
         # return
 
         # Setting picking list
