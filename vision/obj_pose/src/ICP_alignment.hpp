@@ -18,7 +18,7 @@ class ICP_alignment
        //icp.setMaxCorrespondenceDistance(0.01);  
        //icp.setTransformationEpsilon(1e-7);  
        //icp.setEuclideanFitnessEpsilon(1);  
-       icp.setMaximumIterations(50);  
+       icp.setMaximumIterations(100);  
     }  
   
     ~ICP_alignment () {}  

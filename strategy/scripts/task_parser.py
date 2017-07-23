@@ -13,11 +13,12 @@ from object_distribution import stow_distribution, find_obj_in_bin_content, show
 class PickInfo:
     """ Information of picking task."""
 
-    def __init__(self, item="", form_bin="", to_box=""):
+    def __init__(self, item="", form_bin="", to_box="", to_bin=None):
         """Init object for information of picking task."""
         self.item = item
         self.from_bin = form_bin
         self.to_box = to_box
+        self.to_bin = to_bin
 
 
 class StowInfo:
@@ -165,13 +166,11 @@ def search_item(json_content, target, file='order'):
     return None
 
 
-def read_pick_task_and_location():
+def read_pick_task_and_location(location="item_location_file.json", order="order_file.json"):
     directory = path.join(rospkg.RosPack().get_path('arc'), 'pick_task')
-    ilf = "item_location_file_test.json"
-    orf = "order_file_test.json"
 
-    item_loc_path = path.join(directory, ilf)
-    order_path = path.join(directory, orf)
+    item_loc_path = path.join(directory, location)
+    order_path = path.join(directory, order)
 
     pick_task = make_pick_list_from_path(item_loc_path, order_path)
     location_json = read_json(item_loc_path)

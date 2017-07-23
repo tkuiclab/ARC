@@ -14,6 +14,7 @@ from std_msgs.msg import String, Float64
 from robotis_controller_msgs.msg import StatusMsg
 from manipulator_h_base_module_msgs.msg import IK_Cmd, JointPose
 from manipulator_h_base_module_msgs.srv import GetKinematicsPose, GetKinematicsPoseResponse
+from manipulator_h_base_module_msgs.srv import GetJointPose, GetJointPoseResponse
 
 _POS = (.2, 0, .3)  # x, y, z
 _ORI = (-70, 0, 0)  # pitch, roll, yaw
@@ -26,6 +27,7 @@ class ArmTask:
         """Inital object."""
         self.name = _name
         self.init()
+        self.warn_roll = 160
         
     def init(self):
         
@@ -112,8 +114,8 @@ class ArmTask:
     def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI, fai=0):
         """Publish msg of ik cmd (deg) to manager node."""
         # pub_ikCmd('ptp', (x, y , z), (pitch, roll, yaw) )
-        # while self.__is_busy:
-        #     rospy.sleep(.1)
+        while self.__is_busy:
+            rospy.sleep(.1)
 
         self.__is_busy = True
 
@@ -131,7 +133,8 @@ class ArmTask:
             self.__cmd_pub.publish(cmd)
         elif mode == 'ptp':
             self.__ptp_pub.publish(cmd)
-
+        while self.__is_busy:
+            rospy.sleep(.1)
         
     def stop_task(self):
         """Stop task running."""
@@ -146,6 +149,20 @@ class ArmTask:
             )
             res = get_endpos('arm')
             return res
+        except rospy.ServiceException, e:
+            print "Service call failed: %s" % e
+
+    def get_J7_fb(self):
+        rospy.wait_for_service(self.name + '/base/get_joint_pose')
+        try:
+            get_joint_ang = rospy.ServiceProxy(
+                self.name + '/base/get_joint_pose',
+                GetJointPose
+            )
+            res = get_joint_ang(['joint7'])
+
+            j7 = res.joint_value[0] 
+            return j7
         except rospy.ServiceException, e:
             print "Service call failed: %s" % e
 
@@ -232,7 +249,9 @@ class ArmTask:
             move += multiply(vec_s, s)
         if a != 0:
             move += multiply(vec_a, a)
-    
+
+        fai = degrees(fb.group_redundancy)
+
         self.pub_ikCmd(
             mode,
             (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
@@ -240,7 +259,7 @@ class ArmTask:
                 degrees(euler[1]),              
                 degrees(euler[2]+(90*3.14156/180)),
                 degrees(euler[0])
-            )
+            ),fai
         )
 
         while self.__is_busy and blocking:
@@ -439,6 +458,7 @@ class ArmTask:
         if a != 0:
             move += multiply(vec_a, a)
     
+        fai=0
         self.pub_ikCmd(
             mode,
             (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
@@ -446,11 +466,84 @@ class ArmTask:
                 degrees(euler[1]),              
                 degrees(euler[2]+(90*3.14156/180)),
                 degrees(euler[0])
-            )
+            ),fai
         )
 
         while self.__is_busy and blocking:
             rospy.sleep(.1)
+    
+    def get_fai(self, desire_roll):
+        J7_FB    = self.get_J7_fb()
+        fb       = self.get_fb()
+        ori      = fb.group_pose.orientation
+        curr_fai = fb.group_redundancy
+        euler    = self.quaternion2euler(ori)
+
+        curr_j7   = degrees(J7_FB)
+        curr_roll = degrees(euler[2]+radians(90))
+
+        # desire_j7 = curr_j7 + (curr_roll - desire_roll) + 10
+        desire_j7 = desire_roll 
+
+        fai = 0
+        print 'desire_roll = ' + str(desire_roll)
+        if abs(desire_roll) >= self.warn_roll:
+            print 'abs(desire_roll >= self.warn_roll)\n'
+            if (curr_j7 > 0 and curr_j7 <= 180):
+                print '1'
+                if desire_j7 > -180 and desire_j7 < 0:
+                    print '2'
+                    fai = -20
+                else:
+                    fai = curr_fai
+
+            elif curr_j7 >= -180 and curr_j7 < 0:
+                print '3'
+                if desire_j7 > 0 and desire_j7 < 180:
+                    print '4'
+                    fai = 20
+                else:
+                    fai = curr_fai
+
+            else:
+                fai = curr_fai
+        else:
+            fai = curr_fai
+
+        print '===============================\n'
+        print 'desire_roll = ' + str(desire_roll)
+        print 'curr_j7 = ' + str(curr_j7)
+        print 'desire_j7 = ' + str(desire_j7)
+        print 'send fai = ' + str(fai)
+        print '===============================\n'
+        return fai
+                
+
+        # future_j7 = curr_j7 + (curr_roll - desire_roll)
+
+    def move_2_Abs_Roll(self, abs_roll, blocking = False):
+        while self.__is_busy and blocking:
+            rospy.sleep(.1)
+        fb = self.get_fb()
+        pos = fb.group_pose.position
+        ori = fb.group_pose.orientation
+        euler = self.quaternion2euler(ori)
+        abs_roll = abs_roll*3.14/180.0
+
+        tmp_roll = degrees(abs_roll)
+        self.pub_ikCmd(
+            'ptp',
+            (pos.x, pos.y, pos.z),  
+            (
+                degrees(euler[1]),              
+                degrees(abs_roll),
+                degrees(euler[0])
+            ),self.get_fai(tmp_roll)
+        )
+
+        while self.__is_busy and blocking:
+            rospy.sleep(.1)
+
 
     def relative_move_nsa_rot_pry(self, mode='ptp', n=0, s=0, a=0, yaw=0, pitch=0, roll=0, blocking = False):
         """Get euler angle and run task."""
@@ -496,7 +589,6 @@ class ArmTask:
         while self.__is_busy and blocking:
             rospy.sleep(.1)
 
-
     def relative_move_xyz_rot_pry(self, mode='ptp', x=0, y=0, z=0, yaw=0, pitch=0, roll=0, fai=0, blocking=False):
         """Get euler angle and run task."""
         # note:for nsa rotation only
@@ -532,8 +624,8 @@ class ArmTask:
         # euler[0~2] = [r p y] = [a s n]
         
         tmp_ori = [yaw, pitch, roll]
-        print '\n2.relative_rot_nsa = ' + str(pitch)
-        print '===[n, s, a] = ' + str(tmp_ori)
+        # print '\n2.relative_rot_nsa = ' + str(pitch)
+        # print '===[n, s, a] = ' + str(tmp_ori)
         while self.__is_busy and blocking:
             rospy.sleep(.1)
 
@@ -547,18 +639,17 @@ class ArmTask:
             print'err, yaw(n) is not equal to 0, pitch(s) cannot do relative motion'
             # return 
 
+        # Avoid J7_over 180
+        tmp_roll = degrees(euler[2] + radians(roll+90) )
         if exe == True:
             self.pub_ikCmd(
                 mode,
                 (pos.x, pos.y, pos.z),
                 (
-                    # degrees(euler[1]+(pitch*3.14156/180)),              
-                    # degrees(euler[2]+((roll+90)*3.14156/180)),
-                    # degrees(euler[0]+(yaw*3.14156/180))
                     degrees(euler[1] + radians(pitch) ),
-                    degrees(euler[2] + radians(roll+90) + radians(0) ),
+                    degrees(euler[2] + radians(roll+90) ),
                     degrees(euler[0] + radians(yaw) )
-                )
+                ),self.get_fai(tmp_roll)
             )
             while self.__is_busy and blocking:
                 rospy.sleep(.1)
@@ -614,6 +705,8 @@ class ArmTask:
         
         rel_pos = [pos.x + move[1],  pos.y + move[0],  pos.z + move[2],]
 
+        # Avoid J7_Over 180
+        fai=0
         self.pub_ikCmd(
             mode,
             (rel_pos[0], rel_pos[1], rel_pos[2]),
@@ -621,47 +714,13 @@ class ArmTask:
                 degrees(rel_pry[1]), 
                 degrees(rel_pry[2])+90, 
                 degrees(rel_pry[0]), 
-             )
+             ),fai
         )
         
 
         while self.__is_busy:
             rospy.sleep(.1)
         # ==============
-
-    def relative_control(self, mode='ptp', n=0, s=0, a=0):
-        # """Get euler angle and run task."""
-        # # note:for ICLab rotation only
-        while self.__is_busy:
-            rospy.sleep(.1)
-
-        # fb = self.get_fb()
-        # pos = fb.group_pose.position
-        # ori = fb.group_pose.orientation
-        # euler = self.quaternion2euler(ori)
-        # rot = self.euler2rotation(euler)
-        # vec_n, vec_s, vec_a = self.rotation2vector(rot)
-        
-        # move = [0, 0, 0]
-        # if n != 0:
-        #     move += multiply(vec_n, n)
-        # if s != 0:
-        #     move += multiply(vec_s, s)
-        # if a != 0:
-        #     move += multiply(vec_a, a)
-
-        # self.pub_ikCmd(
-        #     mode,
-        #     (pos.x + move[1], pos.y + move[0], pos.z + move[2]),
-        #     (
-        #         degrees(euler[1]),   # 1 0 2             
-        #         degrees(euler[0]),
-        #         degrees(euler[2])
-        #     )
-        # )
-
-        # while self.__is_busy:
-        #     rospy.sleep(.1)
 
     def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0, fai=0, blocking = False):
         """relative move xyz with manipulator base axis."""
@@ -673,18 +732,11 @@ class ArmTask:
         pos = fb.group_pose.position
         ori = fb.group_pose.orientation
         euler = self.quaternion2euler(ori)
-
-        # self.pub_ikCmd(
-        #     mode,
-        #     (pos.x + x, pos.y + y, pos.z + z),
-        #     (
-        #         degrees(euler[1]),
-        #         degrees(euler[0]),
-        #         degrees(euler[2])
-        #     )
-        # )
         
+        # # Avoid J7 Over 180
         # for nsa
+        tmp_roll = degrees(euler[2]+(90*3.14156/180))
+        
         self.pub_ikCmd(
             mode,
             (pos.x + x, pos.y + y, pos.z + z),
@@ -692,13 +744,37 @@ class ArmTask:
                 degrees(euler[1]),
                 degrees(euler[2]+(90*3.14156/180)),
                 degrees(euler[0])
-            )
+            ),self.get_fai(tmp_roll)
         )
 
 
         print 'befoer second busy self.__is_busy = ' + str(self.__is_busy)
         while self.__is_busy and blocking:
             #print 'self.__is_busy = ' + str(self.__is_busy)
+            rospy.sleep(.1)
+
+    def Move2_Abs_xyz(self, x, y, z, mode='ptp'):
+        """relative move xyz with manipulator base axis."""
+        while self.__is_busy:
+            rospy.sleep(.1)
+
+        fb = self.get_fb()
+        # pos = fb.group_pose.position
+        ori = fb.group_pose.orientation
+        euler = self.quaternion2euler(ori)
+        
+        # for nsa
+        self.pub_ikCmd(
+            mode,
+            (x, y, z),
+            (
+                degrees(euler[1]),
+                degrees(euler[2]+(90*3.14156/180)),
+                degrees(euler[0])
+            )
+        )
+
+        while self.__is_busy:
             rospy.sleep(.1)
 
     @property

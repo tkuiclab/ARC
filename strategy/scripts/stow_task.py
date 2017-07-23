@@ -228,7 +228,7 @@ class StowTask:
      
     def arm_photo_pose_2(self): #arm_photo_pose_2(self):
         #self.Arm.pub_ikCmd('ptp', (0.5, 0.00, 0.15), (-180, 0, 0))
-        self.Arm.pub_ikCmd('ptp', (0.35, 0.00 , 0.20), (180, 180, 0))
+        self.Arm.pub_ikCmd('ptp', (0.4, 0.00 , 0.20), (180, 180, 0))
         self.vision_limit_ary = pose_2_vision_limit_ary
         self.tool_shot_deg = 180
 
@@ -238,7 +238,108 @@ class StowTask:
     def arm_leave_tote(self):
         self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
 
+    def arm_leave_tote_i_bin(self):
+        self.Arm.pub_ikCmd('ptp', (0.25, -0.02 , 0.2), (-90, 0, 0) )
 
+
+    def arm_leave_tote_safe(self):
+        self.Arm.move_2_Abs_Roll(90,blocking=True)
+        self.Arm.pub_ikCmd('ptp', (0.2, 0.00 , 0.25), (-180, 0, 0))
+
+    def arm_init_pose(self):
+        self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-90, 0, 0) )
+
+    def tool_2_obj2(self, obj_pose, norm, shot_deg = 0, robot_pitch = 0): #STOW
+        relativeAng = robot_pitch
+
+        p = obj_pose
+        a = p.angular
+        l = p.linear
+
+        # rospy.loginfo("object_pose")
+        # rospy.loginfo("(x,y,z)= (" + str(l.x) + ", " + str(l.y)+ ", " + str(l.z) + ")")
+        # rospy.loginfo("(roll,pitch,yaw)= (" 
+        #                 + str(numpy.rad2deg(a.x)) + ", " 
+        #                 + str(numpy.rad2deg(a.y)) + ", " 
+        #                 + str(numpy.rad2deg(a.z)) + ")" )
+        # rospy.loginfo("(norm.x, norm.y, norm.z)= (" + str(norm.x) + ", " + str(norm.y)+ ", " + str(norm.z) + ")")
+        
+        if (l.x ==0 and l.y==0 and l.z==0) or l.z < 0:
+            return
+
+        if (l.x * norm.x > 0) and (abs(norm.x) > abs(norm.y)) and (abs(norm.x) > abs(norm.z)) :
+            print("#################\nInvert Norm.x\n#################")
+            norm.x = norm.x*-1
+            norm.y = norm.y*-1
+            norm.z = norm.z*-1
+            print("(norm.x, norm.y, norm.z)= (" + str(norm.x) + ", " + str(norm.y)+ ", " + str(norm.z) + ")")
+
+        new_y = numpy.angle(complex(norm.y*-1, norm.x), deg = True)
+        y = new_y
+        r = 90 - (numpy.rad2deg(a.x) + 180)
+
+        if (abs(90 - r) <= 15):
+            y = 0
+            print("Forward Face y = " + str(new_y) + " -> " + str(0))
+
+        # print("(y, r)= (" + str(y) + ", " + str(r) + ")")
+        
+        move_cam_x = (l.x - (gripper_length*sin(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
+        move_cam_y = ((l.y + cam2center_y_4_tote) + (gripper_length*cos(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
+        move_cam_z = l.z - (gripper_length*cos(radians(r))) - cam2tool_z
+
+        # rospy.loginfo("NORMAL(x, y, z) = (" + str(norm.x) + ", " + str(norm.y) + ", " + str(norm.z) +")")
+        obj_distance = [norm.x*obj_dis, norm.y*obj_dis, norm.z*obj_dis]
+
+        real_move_x = move_cam_x + obj_distance[0]*cos(radians(shot_deg))
+        real_move_y = move_cam_y + obj_distance[1]*cos(radians(shot_deg))
+        real_move_z = move_cam_z + obj_distance[2]
+
+        ###
+        dis_real = math.sqrt(real_move_x*real_move_x + real_move_y*real_move_y + real_move_z*real_move_z)
+
+        real_move_x_unit = real_move_x / dis_real
+        real_move_y_unit = real_move_y / dis_real
+        real_move_z_unit = real_move_z / dis_real
+
+        dis = math.sqrt(real_move_z*real_move_z + real_move_y*real_move_y)*cos(radians(relativeAng))
+        # print("dis_real -> dis : "+str(dis_real)+' -> '+str(dis))
+        detZ = abs(cam2tool_z - cam2tool_z*cos(radians(relativeAng)))
+        detY = abs(cam2tool_z*sin(radians(relativeAng)))
+        # print("(detZ, detY) = ("+str(detZ)+", "+str(detY)+")")
+
+        real_move_x_rot = real_move_x_unit
+        real_move_y_rot = real_move_y_unit*cos(radians(relativeAng*cos(radians(shot_deg)))) - real_move_z_unit*sin(radians(relativeAng*cos(radians(shot_deg))))
+        real_move_z_rot = real_move_z_unit*cos(radians(relativeAng*cos(radians(shot_deg)))) + real_move_y_unit*sin(radians(relativeAng*cos(radians(shot_deg))))
+
+        real_move_x_rot = real_move_x_rot*dis
+        real_move_y_rot = real_move_y_rot*(dis - detY)
+        real_move_z_rot = real_move_z_rot*(dis - detZ)
+        ###
+        # rospy.loginfo("(l.x, l.y, l.z)= (" + str(l.x) + ", " + str(l.y) + ", " + str(l.z) + ")")
+        # rospy.loginfo("(move_cam_x, move_cam_y, move_cam_z)= (" + str(move_cam_x) + ", " + str(move_cam_y) + ", " + str(move_cam_z) + ")")
+        # rospy.loginfo("(real_move_x, real_move_y, real_move_z)= (" + str(real_move_x) + ", " + str(real_move_y) + ", " + str(real_move_z) + ")")
+        # rospy.loginfo("(real_move_x_rot, real_move_y_rot, real_move_z_rot)= (" + str(real_move_x_rot) + ", " + str(real_move_y_rot) + ", " + str(real_move_z_rot) + ")")
+
+        #----------------Place---------------#
+        self.Arm.relative_move_xyz_rot_pry(pitch = robot_pitch)
+        #----------------Rotation---------------_#
+        if y == 0 and shot_deg == 180 :
+            self.Arm.move_2_Abs_Roll(y, blocking=True)
+        else :
+            self.Arm.relative_rot_nsa(roll = y)
+        gripper_suction_deg(r - relativeAng)
+
+        # print('=====')
+        print('self.Arm.relative_rot_nsa(roll = '+str(y)+')')
+        print('self.Arm.gripper_suction_deg('+str(r-relativeAng)+')')
+        print('self.Arm.relative_xyz_base(x = '+str(real_move_y_rot*-1)+', y = '+str(real_move_x_rot)+', z = '+str(real_move_z_rot*-1)+')')
+        # return
+        self.Arm.relative_xyz_base(x = real_move_y_rot*-1, y = real_move_x_rot, z = real_move_z_rot*-1)
+        # self.Arm.relative_xyz_base(x = real_move_y_rot*-1, y = real_move_x_rot)
+
+        self.gripper_roll = r
+        # rospy.loginfo('Move Angle Finish')
 
     def tool_2_obj(self, obj_pose, norm, shot_deg = 0): #STOW
         p = obj_pose
@@ -596,8 +697,8 @@ class StowTask:
         if n_s in check_next_states:
             self.info = "(Check) Status of Suction: {}".format(self.suck_num)
             print(self.info)
-            return self.suck_num > 1
-            #return self.suck_num > 0
+            #return self.suck_num > 1
+            return self.suck_num > 0
 
         # Other state do not
         #return False
@@ -803,10 +904,12 @@ class StowTask:
             
             pos = self.Arm.get_fb().group_pose.position
 
-            if pos.x > 0.45:
-                self.arm_photo_pose()
+            if pos.x > 0.40:
+                self.arm_leave_tote_safe()
+                
                 while self.Arm.busy:
                     rospy.sleep(0.1)
+        
 
 
             self.arm_leave_tote()
@@ -877,13 +980,13 @@ class StowTask:
             self.info = "(ArmLeaveBin) ArmLeaveBin"
             print self.info
             
-            self.next_state = Recover2InitPos
-            self.state 		= WaitRobot
-
+            self.Arm.relative_move_nsa(a = -0.2) 
 
             
 
-            self.Arm.relative_move_nsa(a = -0.3) 
+            self.next_state = Recover2InitPos
+            self.state 		= WaitRobot
+
 
             
 
@@ -894,7 +997,8 @@ class StowTask:
             print self.info
 
             #self.Arm.pub_ikCmd('ptp', (0.35, 0.0 , 0.2), (-90, 0, 0) )
-            self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+            #self.Arm.pub_ikCmd('ptp', (0.3, 0.0 , 0.3), (-90, 0, 0) )
+            self.arm_init_pose()
 
             self.next_state = FinishOne
             self.state 		= WaitRobot

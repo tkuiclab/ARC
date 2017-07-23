@@ -80,6 +80,45 @@ if __name__ == '__main__':
         # ss.stow.test_read_item_location_in_arc_pack("item_location_file.json")
         # exit()
 
+        #--------J7 Over 180 ----------#
+        # case 0
+        # ss.stow.arm_photo_pose()
+        # while ss.Arm.busy:
+        #     rospy.sleep(.1)
+        # ss.Arm.relative_xyz_base(y=0.01, blocking = True)
+        # ss.Arm.relative_rot_nsa(roll = -179.607239859, blocking = True)
+        # ss.Arm.relative_xyz_base(x = 0.0475659708497, y = -0.0263450535138, z = -0.316055137686, blocking = True)
+        # # ss.Arm.relative_move_suction(suction_angle = 90, dis =  0.02, blocking = True)
+
+        # case 1
+        ss.Arm.pub_ikCmd('ptp', (0.45, 0.01, 0.25), (-180, 0, 0))
+        # ss.Arm.relative_rot_nsa(roll = 170.7486847, blocking = True)
+        ss.Arm.move_2_Abs_Roll(170)
+        ss.Arm.relative_xyz_base(x = 0.0612402290131, y = -0.0987435177733, z = -0.20083506803, blocking = True)
+        exit()
+
+        # case 2
+        # ss.Arm.pub_ikCmd('ptp', (0.45, 0.005, 0.25), (-180, 0, 0))
+        # ss.Arm.relative_rot_nsa(roll = -179.096292583, blocking = True)
+        # ss.Arm.relative_xyz_base(x = -0.167332398274, y = 0.123866805961, z = -0.271865771708, blocking = True)
+        # exit()
+
+        # ss.Arm.relative_move_suction(suction_angle = 90, dis =  0.02, blocking = True)
+        # ss.Arm.relative_rot_pry_move_nsa(s = -0.02)
+        # ss.Arm.relative_move_nsa(a = 0.02)
+        
+        #---------Test photo pose 2 ----------#
+        # ss.stow.arm_photo_pose_2()
+        #ss.Arm.pub_ikCmd('ptp', (0.45, 0.02 , -0.05), (-160, 0, 0), 0)
+        # ss.Arm.pub_ikCmd('ptp', (0.45, 0 , 0.1), (-180, 0, 0), 0)
+
+        #---------Go Bin I ----------#
+        #ss.stow.LM_2_Bin_Right_Arm('i')
+        #ss.stow.arm_leave_tote_i_bin()
+
+        #ss.Arm.relative_move_nsa(a = -0.23)
+
+        exit()
 
         #-------Test Vision Closest----------#
         # ss.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
@@ -89,10 +128,10 @@ if __name__ == '__main__':
 
         # ss.stow.request_highest_item()
         #ss.stow.arm_photo_pose_2()
-        ss.stow.arm_photo_pose()
-        ss.stow.LM_2_tote()
-        #ss.stow.request_highest_item()
-        ss.stow.test_request_unknown_highest_item()
+        # ss.stow.arm_photo_pose()
+        # ss.stow.LM_2_tote()
+        # #ss.stow.request_highest_item()
+        # ss.stow.test_request_unknown_highest_item()
 
         # ----- Test Photo Pose ------#
         # ss.stow.LM_2_tote()
@@ -129,14 +168,37 @@ if __name__ == '__main__':
         # while ss.Arm.busy:
         #     rospy.sleep(.1)
 
+        #---------Arm Up ----------#
+        #ss.stow.arm_photo_pose()
+        gripper_vaccum_on()
+        ss.Arm.move_2_Abs_Roll(90,blocking=True)
+        ss.Arm.pub_ikCmd('ptp', (0.2, 0.00 , 0.25), (-180, 0, 0))
+        
+        while ss.Arm.busy:
+            rospy.sleep(.1)
+        #
+        rospy.sleep(1)
+        ss.stow.arm_leave_tote()
+
+        
+        exit()
 
 
         #---------Error Pose----------#
         # gripper_suction_up()
         # #ss.stow.LM_2_Bin_No_Shift('b')
         # #ss.stow.LM_2_Bin_Right_Arm('a')
+
+        #
+        ss.stow.LM_2_Bin_Right_Arm('d')
         
-        # ss.stow.arm_leave_tote()
+        #ss.stow.arm_leave_tote()
+        #ss.Arm.relative_move_nsa(a = -0.2) 
+        #ss.stow.arm_init_pose()
+        ss.stow.arm_photo_pose()
+
+
+        
         # while ss.Arm.busy:
         #     rospy.sleep(.1)
         # ss.Arm.relative_move_nsa(a = 0.2, blocking = True)

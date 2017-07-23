@@ -53,7 +53,7 @@ class T2O:
         rospy.loginfo('obj_pose_request() obj='+obj)
         
         #goal = obj_pose.msg.ObjectPoseGoal(obj)
-        goal = obj_pose.msg.ObjectPoseGoal(object_name = obj)
+        goal = obj_pose.msg.ObjectPoseGoal(object_name = obj, limit_ary =[-0.14, 0.14, -0.1,  0.4, 0.35, 0.6])
 
         self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
         self.__obj_pose_client.wait_for_result()
@@ -106,13 +106,14 @@ class T2O:
         # self.tool_2_obj(result.object_pose)
         # self.tool_2_obj(result.object_pose, result.norm)
         # self.tool_2_obj(result.object_pose, result.norm, 180)
+        self.tool_2_obj2(result.object_pose, result.norm, 180, 20)
         # self.tool_2_obj_bin(result.object_pose, result.norm)
         # self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.1), rel_ang = (10, 0 , 0))
-        self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.2), rel_ang = (10, 0 , 0))
+        # self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.2), rel_ang = (10, 0 , 0))
         # self.tool_2_obj_bin_straight(result.object_pose, result.norm)
         # self.tool_2_obj_bin2(result.object_pose, result.norm)
 
-    def tool_2_obj(self, obj_pose, norm, shot_deg = 0, robot_pitch = 0): #STOW
+    def tool_2_obj2(self, obj_pose, norm, shot_deg = 0, robot_pitch = 0): #STOW
         relativeAng = robot_pitch
 
         p = obj_pose
@@ -141,6 +142,10 @@ class T2O:
         y = new_y
         r = 90 - (numpy.rad2deg(a.x) + 180)
 
+        if (abs(90 - r) <= 15):
+            y = 0
+            print("Forward Face y = " + str(new_y) + " -> " + str(0))
+
         print("(y, r)= (" + str(y) + ", " + str(r) + ")")
         
         move_cam_x = (l.x - (gripper_length*sin(radians(y)))*sin(radians(r)))*cos(radians(shot_deg))
@@ -168,8 +173,8 @@ class T2O:
         print("(detZ, detY) = ("+str(detZ)+", "+str(detY)+")")
 
         real_move_x_rot = real_move_x_unit
-        real_move_y_rot = real_move_y_unit*cos(radians(relativeAng)) - real_move_z_unit*sin(radians(relativeAng))
-        real_move_z_rot = real_move_z_unit*cos(radians(relativeAng)) + real_move_y_unit*sin(radians(relativeAng))
+        real_move_y_rot = real_move_y_unit*cos(radians(relativeAng*cos(radians(shot_deg)))) - real_move_z_unit*sin(radians(relativeAng*cos(radians(shot_deg))))
+        real_move_z_rot = real_move_z_unit*cos(radians(relativeAng*cos(radians(shot_deg)))) + real_move_y_unit*sin(radians(relativeAng*cos(radians(shot_deg))))
 
         real_move_x_rot = real_move_x_rot*dis
         real_move_y_rot = real_move_y_rot*(dis - detY)
@@ -183,15 +188,19 @@ class T2O:
         #----------------Place---------------#
         self.Arm.relative_move_xyz_rot_pry(pitch = robot_pitch)
         #----------------Rotation---------------_#
-        self.Arm.relative_rot_nsa(roll = y)
+        if y == 0 and shot_deg == 180 :
+            self.Arm.move_2_Abs_Roll(y, blocking=True)
+        else :
+            self.Arm.relative_rot_nsa(roll = y)
         gripper_suction_deg(r - relativeAng)
 
         print('=====')
         print('self.Arm.relative_rot_nsa(roll = '+str(y)+')')
         print('self.Arm.gripper_suction_deg('+str(r-relativeAng)+')')
         print('self.Arm.relative_xyz_base(x = '+str(real_move_y_rot*-1)+', y = '+str(real_move_x_rot)+', z = '+str(real_move_z_rot*-1)+')')
-
+        # return
         self.Arm.relative_xyz_base(x = real_move_y_rot*-1, y = real_move_x_rot, z = real_move_z_rot*-1)
+        # self.Arm.relative_xyz_base(x = real_move_y_rot*-1, y = real_move_x_rot)
 
         rospy.loginfo('Move Angle Finish')
 
@@ -538,22 +547,24 @@ if __name__ == '__main__':
     # s.stow.LM_2_tote()
 
     # STOW TEST
-    # arm = arm_task_rel.ArmTask()
-    # lm = LM_Control.CLM_Control()
-    # stow = StowTask(arm, lm)
-    # stow.LM_2_tote()
-    # stow.arm_photo_pose_2()
-    # gripper_suction_up()
-
-    # PICK TEST
     arm = arm_task_rel.ArmTask()
     lm = LM_Control.CLM_Control()
-    s = PickTask(arm, lm)
-    s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'a') + 18000)
-    rospy.sleep(0.3)
-    s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a') + 10000)
-    task.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
-    task.obj_pose_request('duct_tape')
+    stow = StowTask(arm, lm)
+    stow.LM_2_tote()
+    stow.arm_photo_pose_2()
+    # stow.arm_photo_pose()
+    gripper_suction_up()
+    task.obj_pose_request('robots_dvd')
+
+    # PICK TEST
+    # arm = arm_task_rel.ArmTask()
+    # lm = LM_Control.CLM_Control()
+    # s = PickTask(arm, lm)
+    # s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'a') + 18000)
+    # rospy.sleep(0.3)
+    # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a') + 10000)
+    # task.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
+    # task.obj_pose_request('duct_tape')
 
     ### Bin Place ###
     # s = Strategy()

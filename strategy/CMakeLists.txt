@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   Task.srv
+  Gripper.srv
 )
 
 ## Generate added messages and services with any dependencies listed here

@@ -130,7 +130,8 @@ void BaseModule::queueThread()
     /* publish topics */
     status_msg_pub_ = ros_node.advertise<robotis_controller_msgs::StatusMsg>("/robotis/status", 1);
     set_ctrl_module_pub_ = ros_node.advertise<std_msgs::String>("/robotis/enable_ctrl_module", 1);
-    FK_FeedBack_pub_     = ros_node.advertise<manipulator_h_base_module_msgs::IK_Cmd>("/robotis/fk_fb", 1);
+    // added for arc
+    FK_FeedBack_pub_ = ros_node.advertise<manipulator_h_base_module_msgs::IK_Cmd>("/robotis/fk_fb", 1);
 
     /* service */
     ros::ServiceServer get_joint_pose_server = ros_node.advertiseService("/robotis/base/get_joint_pose",
@@ -767,6 +768,7 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
         //manipulator_->manipulator_link_data_[id]->joint_angle_ = joint_state_->curr_joint_state_[id].position_;
 
     manipulator_->fk();
+
     // pub fk info to tyhe topic "/robotis/fk_fb"
     fk_fb_msg.data.clear();
     fk_fb_msg.data.push_back(manipulator_->fk_x);
@@ -774,10 +776,17 @@ void BaseModule::process(std::map<std::string, robotis_framework::Dynamixel *> d
     fk_fb_msg.data.push_back(manipulator_->fk_z);
     fk_fb_msg.data.push_back(manipulator_->fk_pitch);
     fk_fb_msg.data.push_back(manipulator_->fk_roll);
+
+    // fk_fb_msg.data.push_back(manipulator_->fk_yaw+M_PI/2);
+    // fk_fb_msg.data.push_back(manipulator_->fk_fai);
+    // FK_FeedBack_pub_.publish(fk_fb_msg);
+
+    // /* ----- send trajectory ----- */
+    // if (robotis_->is_moving_ == true)
+
     fk_fb_msg.data.push_back(manipulator_->fk_yaw);
     fk_fb_msg.data.push_back(manipulator_->fk_fai);
     FK_FeedBack_pub_.publish(fk_fb_msg);
-
 
     /* ----- send trajectory ----- line3*/
     if (robotis_->is_moving_ == true)//ptp line

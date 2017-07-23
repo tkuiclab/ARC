@@ -1,3 +1,8 @@
-KERNEL=="ttyUSB[0-9]*", ACTION=="add", ATTRS{idVendor}=="0403", MODE="0666", GROUP="dialout", SYMLINK+="arc/manipulator"
+KERNEL=="ttyUSB[0-9]*", ACTION=="add", ATTRS{idVendor}=="0403", MODE="0666", ATTRS{serial}=="A5052NCW", GROUP="dialout", SYMLINK+="arc/manipulator"
+KERNEL=="ttyUSB[0-9]*", ACTION=="add", ATTRS{idVendor}=="0403", MODE="0666", ATTRS{serial}=="A105HPEH", GROUP="dialout", SYMLINK+="arc/manipulator_l"
+
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IFD65000W608084", SYMLINK+="arc/LM2"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IFD65000W650005", SYMLINK+="arc/LM1"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IFD65000W702034", SYMLINK+="arc/LM3"
+
+KERNEL=="ttyACM[0-9]*", ACTION=="add", ATTRS{idVendor}=="2341", MODE="0666", GROUP="dialout", SYMLINK+="arc/arduino"

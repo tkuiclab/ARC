@@ -9,6 +9,8 @@ using namespace ObjEstAction_namespace;
 
 void ObjEstAction::goalCB()
 {
+  std::cout << "EEF = " << eef_pose.angular.y << std::endl;
+
   obj_list.clear();
   call_detect_times = 0;
 
@@ -300,6 +302,7 @@ void ObjEstAction::set_ROI_cloud(
       index_tmp++;
     }
   }
+  pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
 }
 
 //Need Class Var: obj_list, call_detect_times
@@ -642,7 +645,9 @@ void ObjEstAction::get_one_roi(){
     write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
 #endif 
 
-  state = POSE_ESTIMATION;
+  //state = POSE_ESTIMATION;
+  state = SEGMETATION;
+
   return;
 }
 /*
@@ -665,7 +670,7 @@ bool ObjEstAction::get_roi(){
 #ifdef SaveCloud
     write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
 #endif 
-    pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
+      pcl::getMinMax3D(*ROI_cloud, min_p, max_p);
     pub_feedback("ROI Done",60);
   }else{
     
@@ -679,7 +684,7 @@ void ObjEstAction::segmentation()
 {
   ROS_INFO("Doing 3D Segmentation....");
   std::cout << "scene_seg = " << scence_seg << std::endl;
-  /*
+  
   CPCSegmentation cpc_seg;
   if(scence_seg)
   {
@@ -687,12 +692,10 @@ void ObjEstAction::segmentation()
     cpc_seg.set_3D_ROI(min_p, max_p);
     cpc_seg.do_segmentation();
     cloud_cluster = cpc_seg.get_cloud_cluster();
-    //state = ALIGMENT;
   }else{
     cpc_seg.setPointCloud(ROI_cloud);
     cpc_seg.do_segmentation();
     Max_cluster = cpc_seg.get_BiggestCluster();
-    //state = ALIGMENT;
   }
 
   //----------------- Pub Segmentation Cloud to topic -----------------//
@@ -709,7 +712,7 @@ void ObjEstAction::segmentation()
   pcl::toROSMsg(cloud2_, seg_msg);
   seg_msg.header.frame_id = "camera_rgb_optical_frame";
   segmented_pub_.publish(seg_msg);
-  */
+  
   
 }
 
@@ -719,7 +722,7 @@ void ObjEstAction::do_ICP()
   ICP_alignment my_icp;
   pcl::PointCloud<pcl::PointXYZ> temp2;
   transformation_matrix = Eigen::Matrix4f::Identity ();
-  /*
+  
   if(load_amazon_pcd(obj_name))
   {
     ROS_INFO("Load Amazon Model success!");
@@ -750,30 +753,30 @@ void ObjEstAction::do_ICP()
       // Transfer model_cloud to seg_cloud      
       pcl::compute3DCentroid (*Max_cluster, centroid);
       transform_2.translation() << centroid(0), centroid(1), centroid(2);
-      pcl::transprint4x4MatrixformPointCloud (*model_PCD, *model_PCD, transform_2);
+      pcl::transformPointCloud (*model_PCD, *model_PCD, transform_2);
       // Setup input cloud for ICP
       my_icp.setSourceCloud(model_PCD);
       my_icp.setTargetCloud(Max_cluster);
     }
     my_icp.align(temp2);
+    pcl::compute3DCentroid (temp2, centroid);
     printf("Align Score = %f\n",my_icp.getScore());
     transformation_matrix = my_icp.getMatrix ();
-    print4x4Matrix (transformation_matrix);
+    print4x4Matrix (transformation_matrix,centroid);
     //pcl::io::savePCDFile ("BIG_SEG.pcd", temp2, false);
-    //state = NADA;
+    state = NADA;
     //----------------- Pub Segmentation Cloud to topic -----------------//
     pcl::toROSMsg(temp2, seg_msg);
     seg_msg.header.frame_id = "camera_rgb_optical_frame";
     align_pub_.publish(seg_msg);
   }else{
-    //state = NADA;
+    state = NADA;
   }
-  */
 }
 
 
 
-void ObjEstAction::print4x4Matrix (const Eigen::Matrix4f & matrix)
+void ObjEstAction::print4x4Matrix (Eigen::Matrix4f & matrix, Eigen::Vector4f centroid)
 {
   // printf ("Rotation matrix :\n");
   // printf ("    | %6.3f %6.3f %6.3f | \n", matrix (0, 0), matrix (0, 1), matrix (0, 2));
@@ -783,31 +786,226 @@ void ObjEstAction::print4x4Matrix (const Eigen::Matrix4f & matrix)
   // printf ("t = < %6.3f, %6.3f, %6.3f >\n\n", matrix (0, 3), matrix (1, 3), matrix (2, 3));
   float roll, pitch, yaw;
   Eigen::Affine3f transformatoin;
+
+  tf::TransformBroadcaster br;
+  tf::Transform transform;
+  tf::Quaternion q;
+  Eigen::Quaterniond tmp_eef;  
+  //--------------------------------             THIS IS FOR TEST!!!              --------------------------------
+  //-------------------------------- Broadcast TF from TCP to camera_link to item --------------------------------
+  //  while(true)
+  //  {
+  //     tmp_eef = euler2Quaternion(0,90,0);
+
+  //     q = tf::Quaternion(tmp_eef.x(),tmp_eef.y(),tmp_eef.z(), tmp_eef.w());
+  //     transform.setOrigin( tf::Vector3(0.2, 0, 0.3));
+  //     transform.setRotation(q);
+  //     br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "robot_arm_base", "tcp"));
+
+  //     tmp_eef = euler2Quaternion(0,0,0);
+  //     q = tf::Quaternion(tmp_eef.x(),tmp_eef.y(),tmp_eef.z(), tmp_eef.w());
+  //     transform.setOrigin( tf::Vector3(0.0, 0.0, -0.05));
+  //     transform.setRotation(q);
+  //     br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "tcp", "camera_link"));
+
+  //     tmp_eef = euler2Quaternion(-90,90,0);
+  //     q = tf::Quaternion(tmp_eef.x(),tmp_eef.y(),tmp_eef.z(), tmp_eef.w());
+  //     transform.setOrigin( tf::Vector3(0.0, 0.0, 0.0));
+  //     transform.setRotation(q);
+  //     br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "camera_link", "camera_rgb_optical_frame"));
+
+  //     q.setRPY(roll, pitch, yaw);
+  //     transform.setOrigin( tf::Vector3(centroid[0], centroid[1], centroid[2]) );
+  //     transform.setRotation(q);
+  //     br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "camera_rgb_optical_frame", "item"));
+  //  }
+  //-------------------------------- Broadcast TF from TCP to camera_link to item --------------------------------
+
+  Eigen::Quaterniond tmp_q;
+  //-------------------------------- ROS_world to robot_arm_base --------------------------------
+  tmp_q = euler2Quaternion(180, 90, 0);
+  Eigen::Matrix3d tmp = tmp_q.matrix();
+  Eigen::Matrix4f tmp_mat;
+  Eigen::Matrix4f tmp_rot_mat;
+  Eigen::Matrix4f tmp_eef_mat;
+
+  double tmp_roll=(eef_pose.angular.x/3.14*180);
+  double tmp_pitch=(eef_pose.angular.y/3.14*180);
+  double tmp_yaw = eef_pose.angular.z/3.14*180;
+
+  // Define robot_arm_base
+  tmp_mat << tmp(0,0), tmp(0,1), tmp(0,2), 0,
+             tmp(1,0), tmp(1,1), tmp(1,2), 0,
+             tmp(2,0), tmp(2,1), tmp(2,2), 0,
+                    0,        0,        0, 1;
+  //-------------------------------- ROS_world to robot_arm_base --------------------------------
+  //-------------------------------- robot_arm_base to TCP --------------------------------
+  // Translate to EEF X,Y,Z
+  tmp_rot_mat << 1, 0, 0, eef_pose.linear.z,
+                 0, 1, 0, eef_pose.linear.y,
+                 0, 0, 1, eef_pose.linear.x,
+                 0, 1, 0,                 1;
+  tmp_eef_mat = tmp_mat*tmp_rot_mat;
+
+  // Rotate Pitch
+  tmp_q = euler2Quaternion(0, tmp_pitch, 0);
+  tmp = tmp_q.matrix();
+  tmp_rot_mat << tmp(0,0), tmp(0,1), tmp(0,2), 0,
+                 tmp(1,0), tmp(1,1), tmp(1,2), 0,
+                 tmp(2,0), tmp(2,1), tmp(2,2), 0,
+                        0,        0,        0, 1;
+  tmp_eef_mat = tmp_eef_mat*tmp_rot_mat;
+
+  // Rotate Yaw
+  tmp_q = euler2Quaternion(0, 0, tmp_yaw);
+  tmp = tmp_q.matrix();
+  tmp_rot_mat << tmp(0,0), tmp(0,1), tmp(0,2), 0,
+                 tmp(1,0), tmp(1,1), tmp(1,2), 0,
+                 tmp(2,0), tmp(2,1), tmp(2,2), 0,
+                        0,        0,        0, 1;
+  tmp_eef_mat = tmp_eef_mat*tmp_rot_mat;
+
+  // Rotate Roll
+  tmp_q = euler2Quaternion(tmp_roll, 0, 0);
+  tmp = tmp_q.matrix();
+  tmp_rot_mat << tmp(0,0), tmp(0,1), tmp(0,2), 0,
+                 tmp(1,0), tmp(1,1), tmp(1,2), 0,
+                 tmp(2,0), tmp(2,1), tmp(2,2), 0,
+                        0,        0,        0, 1;
+  tmp_eef_mat = tmp_eef_mat*tmp_rot_mat;
+
+  std::cout << "=================== robot_arm_base to TCP ===================" << std::endl;                        
+  // std::cout << tmp_eef_mat << std::endl;
+  transformatoin.matrix() = tmp_eef_mat;
+  pcl::getEulerAngles(transformatoin,roll,pitch,yaw);
+  std::cout << "rosrun tf static_transform_publisher " << tmp_eef_mat(0,3) << " " << tmp_eef_mat(1,3) << " " << tmp_eef_mat(2,3) << " " << yaw << " " << pitch << " " << roll << " ros_world my_tmp 0.1" << std::endl;
+  //-------------------------------- robot_arm_base to TCP --------------------------------
+  //-------------------------------- TCP to camera_link --------------------------------
+  tmp_q = euler2Quaternion(180,0,0);
+  tmp = tmp_q.matrix();
+  Eigen::Matrix4f test_rot_mat;
+  test_rot_mat << tmp(0,0), tmp(0,1), tmp(0,2), 0.0655,
+                  tmp(1,0), tmp(1,1), tmp(1,2), 0.0,
+                  tmp(2,0), tmp(2,1), tmp(2,2), 0.091,
+                        0,        0,        0,    1;
+
+  Eigen::Matrix4f camera_link_mat;
+  camera_link_mat = tmp_eef_mat*test_rot_mat;
+  std::cout << "=================== TCP to camera_link ===================" << std::endl;                        
+  transformatoin.matrix() = camera_link_mat;
+  pcl::getEulerAngles(transformatoin,roll,pitch,yaw);
+  std::cout << "rosrun tf static_transform_publisher " << camera_link_mat(0,3) << " " << camera_link_mat(1,3) << " " << camera_link_mat(2,3) << " " << yaw << " " << pitch << " " << roll << " ros_world my_tmp 0.1" << std::endl;
+  //-------------------------------- TCP to camera_link --------------------------------
+  //-------------------------------- camera_link to camera_rgb_optical --------------------------------
+  tmp_q = euler2Quaternion(-90,90,0);
+  tmp = tmp_q.matrix();
+  test_rot_mat << tmp(0,0), tmp(0,1), tmp(0,2), 0.0,
+                  tmp(1,0), tmp(1,1), tmp(1,2), 0.0,
+                  tmp(2,0), tmp(2,1), tmp(2,2), 0.0,
+                        0,        0,        0,    1;
+
+  Eigen::Matrix4f camera_rgb_optical_frame_mat;
+  camera_rgb_optical_frame_mat = camera_link_mat*test_rot_mat;
+  std::cout << "=================== camera_link to camera_rgb_optical ===================" << std::endl;
+  // Using Quaternion to show TF             
+  // Matrix3f mat;
+  // mat << camera_rgb_optical_frame_mat(0,0), camera_rgb_optical_frame_mat(0,1), camera_rgb_optical_frame_mat(0,2),
+  //        camera_rgb_optical_frame_mat(1,0), camera_rgb_optical_frame_mat(1,1), camera_rgb_optical_frame_mat(1,2),
+  //        camera_rgb_optical_frame_mat(2,0), camera_rgb_optical_frame_mat(2,1), camera_rgb_optical_frame_mat(2,2);
+  // Eigen::Quaternionf tmp_QQ(mat);
+  // std::cout << "tmp_QQ: q.x = " << tmp_QQ.x() << "\tq.y = " << tmp_QQ.y() << "\tq.z = "  << tmp_QQ.z() << "\tq.w = "  << tmp_QQ.w() << std::endl;
+  transformatoin.matrix() = camera_rgb_optical_frame_mat;
+  pcl::getEulerAngles(transformatoin,roll,pitch,yaw);
+  std::cout << "rosrun tf static_transform_publisher " << camera_rgb_optical_frame_mat(0,3) << " " << camera_rgb_optical_frame_mat(1,3) << " " << camera_rgb_optical_frame_mat(2,3) << " " << yaw << " " << pitch << " " << roll << " ros_world my_tmp 0.1" << std::endl;
+  //-------------------------------- camera_link to camera_rgb_optical --------------------------------
+  //-------------------------------- camera_rgb_optical to item --------------------------------
+  // For extent tool
+  // std::cout << "=================== camera_rgb_optical to item_rot_mat ===================" << std::endl;
+  // std::cout << matrix << std::endl;
+  // matrix(2,3) = matrix(2,3)+0.1;
+  // std::cout << matrix << std::endl;
   transformatoin.matrix() = matrix;
   pcl::getEulerAngles(transformatoin,roll,pitch,yaw);
-  Eigen::Affine3f tf_neg = Eigen::Affine3f::Identity();
-  tf_neg.rotate (Eigen::AngleAxisf ( -roll,  Eigen::Vector3f::UnitX()));
-  tf_neg.rotate (Eigen::AngleAxisf ( -pitch, Eigen::Vector3f::UnitY()));
-  tf_neg.rotate (Eigen::AngleAxisf ( -yaw,   Eigen::Vector3f::UnitZ()));
-  Eigen::Vector3f center_vec(matrix (0, 3), matrix (1, 3), matrix (2, 3));
-  Eigen::Vector3f after_rotate_center_with_neg;
+  q.setRPY(roll, pitch, yaw);
+  tmp_q = Eigen::Quaterniond(q.w(), q.x(), q.y(), q.z());
+  tmp = tmp_q.matrix();
+  test_rot_mat << tmp(0,0), tmp(0,1), tmp(0,2), centroid[0],
+                  tmp(1,0), tmp(1,1), tmp(1,2), centroid[1],
+                  tmp(2,0), tmp(2,1), tmp(2,2), centroid[2],
+                        0,        0,        0,            1;
 
-  after_rotate_center_with_neg = tf_neg * center_vec;
+  // std::cout << test_rot_mat << std::endl;
+  // std::cout <<  centroid[0] <<  centroid[1] <<  centroid[2] << std::endl;
 
+  Eigen::Matrix4f item_mat;
+  item_mat = camera_rgb_optical_frame_mat*test_rot_mat;
+  std::cout << "=================== camera_rgb_optical to item ===================" << std::endl;
+  transformatoin.matrix() = item_mat;
+  pcl::getEulerAngles(transformatoin,roll,pitch,yaw);
+  std::cout << "rosrun tf static_transform_publisher " << item_mat(0,3) << " " << item_mat(1,3) << " " << item_mat(2,3) << " " << yaw << " " << pitch << " " << roll << " ros_world item 0.1" << std::endl;
+  //-------------------------------- camera_rgb_optical to item --------------------------------  
+  //-------------------------------- item to grab_item --------------------------------  
+  tmp_q = euler2Quaternion(-90,0,-90);
+
+  tmp = tmp_q.matrix();
+  test_rot_mat << tmp(0,0), tmp(0,1), tmp(0,2), 0.0,
+                  tmp(1,0), tmp(1,1), tmp(1,2), 0.0,
+                  tmp(2,0), tmp(2,1), tmp(2,2), 0.0,
+                        0,        0,        0,    1;
+  Eigen::Matrix4f item_grab_mat;
+  item_grab_mat = item_mat*test_rot_mat;
+
+  transformatoin.matrix() = item_grab_mat;
+  pcl::getEulerAngles(transformatoin,roll,pitch,yaw);
+
+  std::cout << "=================== item to grab_item ===================" << std::endl;                    
+  std::cout << "rosrun tf static_transform_publisher " << item_mat(0,3) << " " << item_mat(1,3) << " " << item_mat(2,3) << " " << yaw << " " << pitch << " " << roll << " ros_world item 0.1" << std::endl;
   roll = roll/3.14159*180;
   pitch = pitch/3.14159*180;
   yaw = yaw/3.14159*180;
-  std::cout << "roll = " << roll << "\t pitch = " << pitch << "\t yaw = " << yaw << std::endl;
+  // roll = yaw/3.14159*180*-1;
+  // pitch = pitch/3.14159*180-180;
+  // yaw = roll/3.14159*-180-180;
+  // std::cout << "roll = " << roll << "\t pitch = " << pitch << "\t yaw = " << yaw << std::endl;    
+  //-------------------------------- item to grab_item --------------------------------  
+  //-------------------------------- FOR TOOL --------------------------------  
+  tmp_q = euler2Quaternion(0,0,0);
+  tmp = tmp_q.matrix();
+  // test_rot_mat << tmp(0,0), tmp(0,1), tmp(0,2), -0.126,
+  test_rot_mat << tmp(0,0), tmp(0,1), tmp(0,2), -0.235,
+                  tmp(1,0), tmp(1,1), tmp(1,2), 0.0,
+                  tmp(2,0), tmp(2,1), tmp(2,2), 0.0,
+                        0,        0,        0,    1;
+
+  Eigen::Matrix4f tool_eef;
+  tool_eef = item_grab_mat*test_rot_mat;
+  transformatoin.matrix() = tool_eef;
+  pcl::getEulerAngles(transformatoin,roll,pitch,yaw);
+  std::cout << "=================== FOR TOOL ===================" << std::endl;                    
+  std::cout << "rosrun tf static_transform_publisher " << tool_eef(0,3) << " " << tool_eef(1,3) << " " << tool_eef(2,3) << " " << yaw << " " << pitch << " " << roll << " ros_world item 0.1" << std::endl;
+  //-------------------------------- FOR TOOL Length --------------------------------  
+  //-------------------------------- Relative camera to item --------------------------------  
+  transformatoin.matrix() = matrix;
+  pcl::getEulerAngles(transformatoin,roll,pitch,yaw);
+  std::cout << "=================== Relative camera to item ===================" << std::endl;
+  roll = roll/3.14159*180;
+  pitch = pitch/3.14159*180;
+  yaw = yaw/3.14159*180;       
+  std::cout << "roll = " << roll << "\t pitch = " << pitch << "\t yaw = " << yaw << std::endl;    
+  //-------------------------------- Relative camera to item --------------------------------  
+
   geometry_msgs::Twist pose;
-  pose.linear.x = after_rotate_center_with_neg[0];
-  pose.linear.y = after_rotate_center_with_neg[1];
-  pose.linear.z = after_rotate_center_with_neg[2];
+  pose.linear.x = tool_eef(0,3);
+  pose.linear.y = tool_eef(1,3);
+  pose.linear.z = tool_eef(2,3);
   pose.angular.x = roll;
   pose.angular.y = pitch;
   pose.angular.z = yaw;
   result_.object_pose = pose;
-  std::cout << "X = " << pose.linear.x << "\t Y = " << pose.linear.y << "\t Z = " << pose.linear.z << std::endl;
-  //as_.setSucceeded(result_);
+  //std::cout << "X = " << pose.linear.x << "\t Y = " << pose.linear.y << "\t Z = " << pose.linear.z << std::endl;
+  // std::cout << "roll = " << roll << "\t pitch = " << pitch << "\t yaw = " << yaw << std::endl;
+  //std::cout << roll << " " << pitch << " " << yaw << std::endl;
+  as_.setSucceeded(result_);
 }
 
 bool ObjEstAction::load_amazon_pcd(std::string pcd_filename)
@@ -821,7 +1019,10 @@ bool ObjEstAction::load_amazon_pcd(std::string pcd_filename)
       index = i;
     }
   }
-  ss1 << "/home/iclab/arc_ws/src/ARC/vision/obj_pose/items/" << AmazonModelList[index] << "/" << AmazonModelList[index] << "1.pcd";
+  std::string tmp_path;
+  tmp_path = ros::package::getPath("obj_pose");
+  tmp_path.append("/items/");
+  ss1 << tmp_path << AmazonModelList[index] << "/" << AmazonModelList[index] << "1.pcd";
   model_PCD = pcl::PointCloud<pcl::PointXYZ>::Ptr (new pcl::PointCloud<pcl::PointXYZ> ());
   ROS_INFO("Loading PCD....");
   ROS_INFO("PCD at %s",ss1.str().c_str());
@@ -838,11 +1039,33 @@ bool ObjEstAction::load_amazon_pcd(std::string pcd_filename)
   }
 }
 
+Eigen::Quaterniond ObjEstAction::euler2Quaternion( double roll,
+                                     double pitch,
+                                     double yaw )
+{
+    roll = roll/180*3.14159;
+    pitch = pitch/180*3.14159;
+    yaw = yaw/180*3.14159;
+    
+    Eigen::AngleAxisd rollAngle(roll, Eigen::Vector3d::UnitX());
+    Eigen::AngleAxisd pitchAngle(pitch, Eigen::Vector3d::UnitY());
+    Eigen::AngleAxisd yawAngle(yaw, Eigen::Vector3d::UnitZ());
+
+    Eigen::Quaterniond q = rollAngle * pitchAngle * yawAngle;
+    Eigen::Matrix3d matrix = q.matrix();
+    // printf ("Rotation matrix :\n");
+    // printf ("    | %6.3f %6.3f %6.3f | \n", matrix (0, 0), matrix (0, 1), matrix (0, 2));
+    // printf ("R = | %6.3f %6.3f %6.3f | \n", matrix (1, 0), matrix (1, 1), matrix (1, 2));
+    // printf ("    | %6.3f %6.3f %6.3f | \n", matrix (2, 0), matrix (2, 1), matrix (2, 2));
+    // std::cout << "Eigen = " << q.x() << std::endl << q.y() << std::endl << q.z() << std::endl << q.w() << std::endl;
+    return q;
+}
+
 int main (int argc, char **argv)
 {
   ros::init(argc, argv, "obj_pose");
   ObjEstAction ObjEst(argc, argv,"obj_pose");
-  ros::Rate loop_rate(10);
+  ros::Rate loop_rate(100);
   while(ros::ok())
   {
     switch(state)

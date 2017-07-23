@@ -10,13 +10,13 @@
     <param name="gazebo_robot_name"        value="robotis_pro7a" />
 
     <param name="offset_table"             value="$(find manipulator_h_manager)/config/offset.yaml" />
-    <param name="robot_file_path"          value="$(find manipulator_h_manager)/config/ROBOTIS_MANIPULATOR_H.robot" />
-    <param name="init_file_path"           value="$(find manipulator_h_manager)/config/dxl_init_n.yaml" />
+    <param name="robot_file_path"          value="$(find manipulator_h_manager)/config/ROBOTIS_MANIPULATOR_H_left.robot" />
+    <param name="init_file_path"           value="$(find manipulator_h_manager)/config/dxl_init_left.yaml" />
 
     <!-- Manipulator Manager -->
     <node name="manipulator_h_manager" pkg="manipulator_h_manager" type="manipulator_h_manager"
             output="screen" >
-        <remap from="/robotis/base/JointP2P_msg"  	  	  to="/left_arm/robotis/base/JointP2P_msg"	    />
+        <!--<remap from="/robotis/base/JointP2P_msg"  	  	  to="/left_arm/robotis/base/JointP2P_msg"	    />
         <remap from="/robotis/base/Joint_Control" 	  	  to="/left_arm/robotis/base/Joint_Control"	    />
         <remap from="/robotis/base/TaskP2P_msg"   	  	  to="/left_arm/robotis/base/TaskP2P_msg"	    />
         <remap from="/robotis/base/ini_pose_msg"  	  	  to="/left_arm/robotis/base/ini_pose_msg"	    />
@@ -34,12 +34,11 @@
         <remap from="/robotis/status" 			  	  to="/left_arm/robotis/status"		    	    />
         <remap from="/robotis/sync_write_item" 		  	  to="/left_arm/robotis/sync_write_item"	    />
 
-	<remap from="/robotis/base/get_joint_pose" 		  to="/left_arm/robotis/base/get_joint_pose"	    	/>
-	<remap from="/robotis/base/get_kinematics_pose" 	  to="/left_arm/robotis/base/get_kinematics_pose"	/>
-	<remap from="/robotis/get_present_joint_ctrl_modules" 	  to="/left_arm/robotis/get_present_joint_ctrl_modules"	/>
+        <remap from="/robotis/base/get_joint_pose" 		  to="/left_arm/robotis/base/get_joint_pose"	    	/>
+        <remap from="/robotis/base/get_kinematics_pose" 	  to="/left_arm/robotis/base/get_kinematics_pose"	/>
+        <remap from="/robotis/get_present_joint_ctrl_modules" 	  to="/left_arm/robotis/get_present_joint_ctrl_modules"	/>-->
     </node>
 
-    
     <!-- run rosserial -->
     <!--
     <node name="serial_node" pkg="rosserial_python" type="serial_node.py" if="$(arg en_vac)">
@@ -51,12 +50,10 @@
     <!--run modbus(linear) -->
     <node name="linear_z" pkg="linear_motion" type="linear_z" output="screen">
         <param name = "port_z" value ="/dev/arc/LM2" />  <!--"/dev/ttyUSB1" -->
-	    <param name = "port_x" value ="/dev/arc/LM1" />  <!--"/dev/ttyUSB0" -->
+        <param name = "port_x" value ="/dev/arc/LM1" />  <!--"/dev/ttyUSB0" -->
         <param name = "baud" value = "9600" />
         
     </node>
-
-
 
 <!--
 <include file="$(find arc_ui)/launch/ui.launch" />
@@ -83,7 +80,5 @@
     <arg name="certfile" value="$(arg certfile)"/>
     <arg name="keyfile" value="$(arg keyfile)"/>
   </include>
-	
-    
 
 </launch>

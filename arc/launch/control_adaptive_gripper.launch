@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<launch>  
+    <node name="adaptive_gripper" pkg="strategy" type="three_finger_gripper.py" output="screen">
+        <param name = "/port" type="string" value ="/dev/arc/three_gripper" />
+        <param name = "/baud" type="int" value = "115200" />
+    </node>
+</launch>
+
