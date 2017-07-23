@@ -22,9 +22,13 @@ if __name__ == '__main__':
     rospy.init_node('yc_test', disable_signals=True)
 
     try:
+        
         Arm   = arm_task_rel.ArmTask()
-        bin_a = object_distribution.BinInfo()
+        # Arm.Get_Curr_Joint7_fb()
+        # exit()
 
+        # bin_a = object_distribution.BinInfo()
+        
         # =========== sim stra send cmd================
         TargetBin = 'D'
         desire_cmd = [0.45, 0, 0.3, -90, 0, 0]                                # decided cmd

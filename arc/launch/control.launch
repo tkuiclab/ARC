@@ -17,7 +17,6 @@
     <node name="manipulator_h_manager" pkg="manipulator_h_manager" type="manipulator_h_manager"
             output="screen" />
 
-    
     <!-- run rosserial -->
     <node name="serial_node" pkg="rosserial_python" type="serial_node.py" if="$(arg en_vac)">
         <param name = "port" value ="/dev/arc/arduino" />
@@ -27,13 +26,10 @@
     <!--run modbus(linear) -->
     <node name="linear_z" pkg="linear_motion" type="linear_z" output="screen">
         <param name = "port_right" value ="/dev/arc/LM2" />  <!--"/dev/ttyUSB1" -->
-	<param name = "port_base"  value ="/dev/arc/LM1" />  <!--"/dev/ttyUSB0" -->
-	<param name = "port_left"  value ="/dev/arc/LM3" />  <!--"/dev/ttyUSB3" -->
+        <param name = "port_base"  value ="/dev/arc/LM1" />  <!--"/dev/ttyUSB0" -->
+        <param name = "port_left"  value ="/dev/arc/LM3" />  <!--"/dev/ttyUSB3" -->
         <param name = "baud" value = "9600" />
-        
     </node>
-
-
 
 <!--
 <include file="$(find arc_ui)/launch/ui.launch" />
@@ -60,7 +56,5 @@
     <arg name="certfile" value="$(arg certfile)"/>
     <arg name="keyfile" value="$(arg keyfile)"/>
   </include>
-	
-    
 
 </launch>
