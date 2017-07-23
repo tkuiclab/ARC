@@ -93,13 +93,12 @@ class PickTask:
     def obj_pose_done_cb(self, state, result):
         """Response callback for obj_pose."""
         if not result.success:
+            if self.task_state == 'cover':
+                rospy.logwarn('ROI Fail in cover!! obj -> {}'.format(self.now_pick.item))
+                self.state = FinishTask
             self.obj_pose_unsuccess()
         else:
             print('CurrentTask:', self.now_pick.item, 'Closest:', result.object_name)
-            if self.task_state == 'cover':
-                self.obj_pose_success(result)
-                return
-
             if result.object_name == self.now_pick.item:
                 self.obj_pose_success(result)
             else:
@@ -115,7 +114,13 @@ class PickTask:
                         print('Current item:', self.now_pick.item)
                         self.obj_pose_success(result)
                         return
-                self.cover_list.append(self.now_pick)
+
+                self.cover_list.append(
+                    (PickInfo(result.object_name,
+                                self.now_pick.from_bin,
+                                to_bin='D'),
+                    self.now_pick)
+                )
                 self.state = FinishTask
 
     def obj_pose_success(self, result):
@@ -220,11 +225,27 @@ class PickTask:
         if not len(which_list):
             return False
 
+        if which_list is self.cover_list:
+            self.task_state = 'cover'
+            self.now_pick = which_list[0][0]
+            self.bin = self.now_pick.from_bin.lower()
+            self.item = self.now_pick.item
+            self.to_bin = self.now_pick.to_bin.lower()
+            return True
+        elif which_list is self.fail_list:
+            self.task_state = 'fail'
+        else
+            self.task_state = 'pick'
+
         self.now_pick = which_list.pop(index)
         self.bin = self.now_pick.from_bin.lower()
         self.item = self.now_pick.item
         self.box = self.convert_box_to_char(self.now_pick.to_box)
         return True
+
+    def recover_item_covered(self, index=0):
+        self.pick_list.append(self.cover_list[index][1])
+        self.cover_list.pop(index)
 
     def run(self):
         self.pick_list = list(self.pick_source)
@@ -455,6 +476,8 @@ class PickTask:
             if self.task_state == 'pick':
                 self.update_location_file()
             else:
+                self.update_location_file_cover()
+                self.recover_item_covered()
                 self.next_state = LeaveCoverBin
 
         # Leave box
@@ -469,7 +492,7 @@ class PickTask:
             self.Arm.relative_move_nsa(a=-.15)
 
         elif self.state == RobotMove2PlaceBin:
-            self.info = "(GoBin) Robot Move to Bin {}".format('d')
+            self.info = "(GoBin) Robot Move to Bin {}".format(self.now_pick.to_bin)
             print(self.info)
 
             # Change state
@@ -477,9 +500,9 @@ class PickTask:
             self.next_state = Go2Place
 
             self.Is_BaseShiftOK = False
-            self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'd') + _LEFT_SHIFT)
+            self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.to_bin) + _LEFT_SHIFT)
             rospy.sleep(0.3)
-            self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'd'))
+            self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.to_bin))
 
         # Move into bin
         elif self.state == Go2Place:
@@ -498,10 +521,9 @@ class PickTask:
 
             # Change state
             self.state = WaitRobot
-            self.next_state = RobotMove2Bin
+            self.next_state = FinishTask
 
             self.Arm.relative_move_nsa(a=-.15)
-            self.task_state = 'pick'
 
         # ===============================================================
 
@@ -534,10 +556,8 @@ class PickTask:
             # Can get next task from pick list
             if self.pick_get_one(self.pick_list):
                 self.info = "Finish Pick One Object"
-                self.task_state = 'pick'
             elif self.pick_get_one(self.cover_list):
                 self.info = "Finish Pick One Object and Execute cover list"
-                self.task_state = 'cover'
             # elif self.pick_get_one(self.fail_list):
             #     self.info = "Finish Pick One Object and Execute Fail list"
             else:
@@ -574,6 +594,22 @@ class PickTask:
         # Savie item location file
         write_item_location(self.item_loc, filetype='Pick')
         self.success_list.append(self.now_pick.item)
+
+    def update_location_file_cover(self):
+        """Update item location file and save for cover."""
+        rospy.loginfo('Update item location file cover')
+        # Remove item in bin
+        for bin in self.item_loc['bins']:
+            if bin['bin_id'] == self.now_pick.from_bin:
+                bin['contents'].remove(self.now_pick.item)
+                break
+        # Append item to box
+        for bin in self.item_loc['bins']:
+            if bin['bin_id'] == self.now_pick.to_bin:
+                bin['contents'].append(self.now_pick.item)
+                break
+        # Savie item location file
+        write_item_location(self.item_loc, filetype='Pick')
 
     def get_info(self):
         """Return json information."""
