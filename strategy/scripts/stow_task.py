@@ -81,9 +81,9 @@ obj_dis = 0.01
 Arm_Photo_Index_Max  = 3
 
 
-pose_1_vision_limit_ary = [-0.13, 0.13, -0.15,  0.3, 0.35, 0.58]
-pose_2_vision_limit_ary = [-0.13, 0.13, -0.15,  0.2, 0.35, 0.58]
-pose_3_vision_limit_ary = [-0.13, 0.13, -0.15,  0.14, 0.35, 0.58]
+pose_1_vision_limit_ary = [-0.13, 0.13, -0.15,  0.3, 0.3, 0.6]
+pose_2_vision_limit_ary = [-0.13, 0.13, -0.15,  0.2, 0.3, 0.6]
+pose_3_vision_limit_ary = [-0.13, 0.13, -0.15,  0.14, 0.3, 0.6]
 
 
 
@@ -531,7 +531,7 @@ class StowTask:
         print 'in request_unknown_highest_item() '
 
         # -------------Fix Bound----------------#
-        fix_ary = [0.03, -0.03, 0.02, -0.02, 0.05,-0.02]
+        fix_ary = [0.03, -0.03, 0.02, -0.02, 0.03,-0.01]
 
         new_limit_ary = []
         for i in range(len(fix_ary)):
@@ -547,8 +547,7 @@ class StowTask:
 
         goal = obj_pose.msg.ObjectPoseGoal(
             object_name = cmd,
-            limit_ary =[-0.2, 0.2, 0,  0.3, 0.3, 0.6]
-            #limit_ary = new_limit_ary #self.vision_limit_ary
+            limit_ary = new_limit_ary #self.vision_limit_ary
         )
         self.obj_pose_client.send_goal(
                 goal,
@@ -568,7 +567,7 @@ class StowTask:
         else:
             #self.mode = Mode_UnknownProcess   #maybe no need
             self.state = Arm2ObjUp
-            self.arm_chage_side_and_state()
+
 
 #--------------------Strategy Area--------------------#
     def run(self):
@@ -892,7 +891,7 @@ class StowTask:
             else:
                 
                 self.LM.pub_LM_Cmd(LM_ID_Right, ToteLeave_Z_Amnesty)
-                if suck_num > 0:
+                if self.suck_num > 0:
                     self.next_state = LM2Amnesty_Up
                 else:
                     self.next_state = PhotoPose

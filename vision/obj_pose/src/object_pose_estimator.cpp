@@ -527,13 +527,18 @@ void ObjEstAction::unknown_closest(){
   if(!cpc.do_CPC()){
     pub_error("do_CPC() Fail");
     state = NADA;  
+    return;
   }
   cpc.extract_with_min_size(min_size, cpc_min_size_cloud , label_map);
 
-  if(!check_0_cloud(want_label_cloud,"_want_label.pcd")){
+
+  if(cpc_min_size_cloud->size() <= 0){
+    check_0_cloud_error_sub("_cpc_min_size.pcd" );
     state = NADA;
     return;
   }
+
+
 #ifdef SaveCloud
    write_label_pcd_2_rospack(cpc_min_size_cloud, "_cpc_min_size.pcd" );
 #endif
@@ -567,7 +572,7 @@ void ObjEstAction::unknown_closest(){
                     }
                     
 
-                    //std::cout << "label_index  = " << label_index << ", tmp_center.z = " << tmp_center.z << std::endl;
+                    std::cout << "label_index  = " << label_index << ", tmp_center.z = " << tmp_center.z << std::endl;
             }
          }
       }
@@ -581,16 +586,18 @@ void ObjEstAction::unknown_closest(){
         if(index ==Unknown_Closest_num ){
           
           want_label = z_map_iter->second;
-          //break;
-          //std::cout<<"  want_label = "<< want_label << std::endl;
+          
+          std::cout<<" Unknown_Closest_num > 0  want_label = "<< want_label << std::endl;
+          break;
         }
         //std::cout<< z_map_iter->first<<" "<<z_map_iter->second<< std::endl;
         index++;
       }
   }
   
-  //cout << "cpc_min_size_cloud size  = " << cpc_min_size_cloud->size() << endl;
-  
+  cout << "cpc_min_size_cloud size  = " << cpc_min_size_cloud->size() << endl;
+  std::cout<<"  want_label = "<< want_label << std::endl;
+
   cpc.getCloudWithLabel(cpc_min_size_cloud, scene_cloud, want_label_cloud, want_label);
   
   if(!check_0_cloud(want_label_cloud,"_want_label.pcd")){

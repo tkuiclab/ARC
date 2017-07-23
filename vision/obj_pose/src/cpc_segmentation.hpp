@@ -89,8 +89,8 @@ class CPCSegmentation
       // Supervoxel Stuff
       float voxel_resolution = 0.0075f;
       float seed_resolution = 0.03f;
-      float color_importance = 1;//1;
-      float spatial_importance = 1.0f;
+      float color_importance = 0;//1;
+      float spatial_importance = 3.0f;
       float normal_importance = 4.0f;
       bool use_single_cam_transform = false;
       bool use_supervoxel_refinement;
@@ -114,6 +114,8 @@ class CPCSegmentation
 
       normals_scale = seed_resolution / 2.0;
 
+
+      std::cout << "In do_CPC()" << std::endl;
       // Segmentation Stuff
       unsigned int k_factor = 0;
       if (use_extended_convexity)
@@ -142,7 +144,7 @@ class CPCSegmentation
         }
         std::stringstream temp;
         temp << "  Nr. Supervoxels: " << supervoxel_clusters.size () << "\n";
-        // PCL_INFO (temp.str ().c_str ());
+        PCL_INFO (temp.str ().c_str ());
 
         // PCL_INFO ("Getting supervoxel adjacency\n");
         std::multimap<uint32_t, uint32_t>supervoxel_adjacency;
@@ -153,7 +155,7 @@ class CPCSegmentation
 
         /// Set paramters for LCCP preprocessing and CPC (CPC inherits from LCCP, thus it includes LCCP's functionality)
 
-        // PCL_INFO ("Starting Segmentation\n");
+        PCL_INFO ("Starting Segmentation\n");
         pcl::CPCSegmentation<PT> cpc;
         cpc.setConcavityToleranceThreshold (concavity_tolerance_threshold);
         cpc.setSanityCheck (use_sanity_criterion);
@@ -165,13 +167,15 @@ class CPCSegmentation
         cpc.setMinSegmentSize (min_segment_size);
         cpc.segment ();
         
-        // PCL_INFO ("Interpolation voxel cloud -> input cloud and relabeling\n");
+        PCL_INFO ("Interpolation voxel cloud -> input cloud and relabeling\n");
         pcl::PointCloud<PLabel>::Ptr sv_labeled_cloud = super.getLabeledCloud ();
         //pcl::PointCloud<PLabel>::Ptr cpc_labeled_cloud = sv_labeled_cloud->makeShared ();
         cpc_labeled_cloud = sv_labeled_cloud->makeShared ();
         cpc.relabelCloud (*cpc_labeled_cloud);
         SuperVoxelAdjacencyList sv_adjacency_list;
         cpc.getSVAdjacencyList (sv_adjacency_list);  // Needed for visualization
+
+        std::cout << "CPC Finish" << std::endl;
 
         return true;
       } catch (const std::exception& ex) {
