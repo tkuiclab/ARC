@@ -259,7 +259,8 @@ class ArmTask:
                 degrees(euler[1]),              
                 degrees(euler[2]+(90*3.14156/180)),
                 degrees(euler[0])
-            ),fai
+            )
+            # ),fai
         )
 
         while self.__is_busy and blocking:
@@ -649,7 +650,8 @@ class ArmTask:
                     degrees(euler[1] + radians(pitch) ),
                     degrees(euler[2] + radians(roll+90) ),
                     degrees(euler[0] + radians(yaw) )
-                ),self.get_fai(tmp_roll)
+                )
+                # ),self.get_fai(tmp_roll)
             )
             while self.__is_busy and blocking:
                 rospy.sleep(.1)
@@ -744,7 +746,8 @@ class ArmTask:
                 degrees(euler[1]),
                 degrees(euler[2]+(90*3.14156/180)),
                 degrees(euler[0])
-            ),self.get_fai(tmp_roll)
+            )
+            # ),self.get_fai(tmp_roll)
         )
 
 

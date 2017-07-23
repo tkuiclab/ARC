@@ -1,14 +1,14 @@
 {
     "orders": [
         {
-            "size_id": "A1",
+            "size_id": "1A5",
             "contents": [
                 "hinged_ruled_index_cards",
-                "duct_tape"
+                "tissue_box"
             ]
         },
         {
-            "size_id": "1A5",
+            "size_id": "1B2",
             "contents": [
                 "composition_book",
                 "speed_stick",
@@ -16,13 +16,13 @@
             ]
         },
         {
-            "size_id": "1B2",
+            "size_id": "K3",
             "contents": [
-                "robots_dvd",
-                "pie_plates",
+                "ice_cube_tray",
                 "reynolds_wrap",
                 "scotch_sponges",
-                "laugh_out_loud_jokes"
+                "duct_tape",
+                "burts_bees_baby_wipes"
             ]
         }
     ]

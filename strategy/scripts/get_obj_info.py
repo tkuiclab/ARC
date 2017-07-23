@@ -49,7 +49,7 @@ def _get_path(file='obj'):
     if file == 'box':
         return join(pkg_path, 'pick_task', 'box_sizes.json')
     elif file == 'order_box':
-        return join(pkg_path, 'pick_task', 'order_file_test.json')
+        return join(pkg_path, 'pick_task', 'order_file.json')
     else:
         return join(pkg_path, 'Training items')
 

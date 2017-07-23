@@ -3,25 +3,17 @@
         {
             "size_id": "1A5",
             "contents": [
-                "hinged_ruled_index_cards",
-                "tissue_box"
             ]
         },
         {
             "size_id": "1B2",
             "contents": [
-                "composition_book",
-                "speed_stick",
-                "ticonderoga_pencils"
+                "composition_book"
             ]
         },
         {
             "size_id": "K3",
             "contents": [
-                "ice_cube_tray",
-                "reynolds_wrap",
-                "scotch_sponges",
-                "duct_tape",
                 "burts_bees_baby_wipes"
             ]
         }

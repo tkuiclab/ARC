@@ -59,7 +59,7 @@ CheckIsHold = 30
 _REL_GO_BIN_FRONT = .1
 _BIN_MAX_DOWN = .135
 
-obj_dis = 0.01
+obj_dis = 0.04
 
 # For checking vacuum function
 check_next_states = [
@@ -106,6 +106,17 @@ class PickTask:
             else:
                 print('Search other item in same bin')
                 # Search other item in same bin
+                if self.task_state == 'cover':
+                    for i, task in enumerate(self.cover_list):
+                        print('Searching...')
+                        if (task[1].from_bin.lower() == self.bin and
+                                task[1].item == result.object_name):
+                            self.recover_item_covered()
+                            self.pick_get_one(self.pick_list)
+                            print('Current item:', self.now_pick.item)
+                            self.obj_pose_success(result)
+                            return
+
                 for i, task in enumerate(self.pick_list):
                     print('Searching...')
                     if (task.from_bin.lower() == self.bin and
@@ -130,12 +141,13 @@ class PickTask:
         self.obj_pose_ret = result
         print('obj_pose {}'.format(self.obj_pose_ret.object_pose))
 
-    def obj_pose_unsuccess(self):
+    def obj_pose_unsuccess(self, add_fail=True):
         rospy.logwarn('ROI Fail!! obj -> {}'.format(self.now_pick.item))
         self.state = FinishTask
         self.obj_pose_ret = None
         # Add the item to fail list
-        self.fail_list.append(self.now_pick)
+        if add_fail:
+            self.fail_list.append(self.now_pick)
 
     def get_bin_dims(self, bin):
         bin_id = ord(bin) - ord('a')
@@ -173,7 +185,7 @@ class PickTask:
                 object_name="<Closest>",
                 object_list=self.detect_all_in_bin,
                 # [xmin, xmax, ymin, ymax, zmin, zmax]
-                limit_ary=[-W/2.0, W/2.0, -H/2.0, H/2.0, 0.3, 0.6]
+                limit_ary=[-W/2.0 +0.02 , W/2.0, -H/2.0, H/2.0, 0.3, 0.6]
             )
             self.__obj_pose_client.send_goal(
                 goal,
@@ -193,12 +205,12 @@ class PickTask:
         W, _, H = self.get_bin_dims(self.bin)
 
         goal = obj_pose.msg.ObjectPoseGoal(
-            object_name = "<Closest>",
+            object_name = "<Closest_SIFT>",
             object_list = bin_content,
             # [xmin, xmax, ymin, ymax, zmin, zmax]
             limit_ary=[-W/2.0, W/2.0, -H/2.0, H/2.0, 0.3, 0.6]
         )
-        self.obj_pose_client.send_goal(
+        self.__obj_pose_client.send_goal(
             goal,
             feedback_cb=self.obj_pose_feedback_cb,
             done_cb=self.obj_pose_done_cb
@@ -295,6 +307,7 @@ class PickTask:
     def recover_item_covered(self, index=0):
         self.pick_list.append(self.cover_list[index][1])
         self.cover_list.pop(index)
+        self.task_state = 'pick'
 
     def run(self):
         self.pick_list = list(self.pick_source)
@@ -327,6 +340,7 @@ class PickTask:
             self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.bin))
             # Arm move to initial pose
             gripper_suction_up()
+            gripper_vaccum_off()
             self.Arm.pub_ikCmd('ptp', (0.3, 0.0, 0.3), (-90, 0, 0))
             # self.Arm.pub_ikCmd('ptp', (0.4, 0.0 , 0.3), (-90, 0, 0))
 
@@ -373,7 +387,12 @@ class PickTask:
                 if self.request_closest_item():
                     pass
                 else:
-                    self.obj_pose_unsuccess()
+                    # check fail lists
+                    add_fail = True
+                    for task in self.fail_list:
+                        if task.item == self.item:
+                            add_fail=False
+                    self.obj_pose_unsuccess(add_fail=add_fail)
 
         elif self.state == NeetStep:
             self.info = "(Catch) Arm Move to Bin Front {}".format(self.bin)
@@ -450,7 +469,7 @@ class PickTask:
             self.state = WaitRobot
             self.next_state = LeaveBin
 
-            self.Arm.relative_xyz_base(z=0.025)
+            self.Arm.relative_xyz_base(z=0.03)
 
         # Move out of bin
         elif self.state == LeaveBin:
@@ -471,12 +490,14 @@ class PickTask:
 
             # Change state
             self.state = WaitRobot
-            if self.task_state == 'pick':
-                self.next_state = RobotMove2Box
-            else:
-                self.next_state = RobotMove2PlaceBin
 
-            self.Arm.pub_ikCmd('ptp', (0.3, 0, 0.2), (-90, 0, 0))
+            if self.task_state == 'cover':
+                self.next_state = RobotMove2PlaceBin
+            # pick or fail list
+            else:
+                self.next_state = RobotMove2Box
+
+            self.Arm.pub_ikCmd('ptp', (0.25, 0, 0.2), (-90, 0, 0))
             print('Task state:', self.task_state)
 
         # Move to target box
@@ -528,12 +549,12 @@ class PickTask:
 
             gripper_vaccum_off()
 
-            if self.task_state == 'pick':
-                self.update_location_file()
-            else:
+            if self.task_state == 'cover':
                 self.update_location_file_cover()
                 self.recover_item_covered()
                 self.next_state = LeaveCoverBin
+            else:
+                self.update_location_file()
 
         # Leave box
         elif self.state == LeaveBox:
@@ -726,6 +747,7 @@ class PickTask:
         self.Is_BaseShiftOK = False
 
     def tool_2_obj_bin(self, obj_pose, norm, rel_pos = (0, 0, -0.2), rel_ang = (10, 0 , 0)): # BIN
+        cam2tool_z = .17
         relativeAng = rel_ang[0]
 
         p = obj_pose
@@ -825,10 +847,10 @@ def _test():
         lm = LM_Control.CLM_Control()
         s = PickTask(arm, lm)
 
-        s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'j') + _LEFT_SHIFT)
-        rospy.sleep(0.3)
-        s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'j'))
-        return
+        # s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'j') + _LEFT_SHIFT)
+        # rospy.sleep(0.3)
+        # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'j'))
+        # return
 
         # Setting picking list
         s.pick_source, s.item_loc = read_pick_task_and_location()
