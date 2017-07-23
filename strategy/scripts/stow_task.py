@@ -516,20 +516,27 @@ class StowTask:
         self.mode = Mode_KnownProcess
 
     
-
-    def request_unknown_highest_item(self):
+    # num is which closest(highest) item, if 1 -> second unknown highest 
+    def request_unknown_highest_item(self, closest_ind =0 ):
+        # -------------Fix Bound----------------#
         fix_ary = [0.03, -0.03, 0.02, -0.02, -0.05,0]
 
         new_limit_ary = []
         for i in range(len(fix_ary)):
             #print('i='+str(i))
             new_limit_ary.append(self.vision_limit_ary[i] +fix_ary[i])
-
+        
+        # -------------Make Cmd----------------#
+        cmd = "<Unknown_Closest>"
+        if closest_ind > 0:
+            num_str = '{:02}'.format(closest_ind)
+            cmd += '+' +  num_str
+            print("Request cmd = " + cmd)
 
         goal = obj_pose.msg.ObjectPoseGoal(
-            object_name = "<Unknown_Closest>",
-            #limit_ary =[-0.14, 0.14, 0,  0.4, 0.3, 0.6]
-            limit_ary = new_limit_ary #self.vision_limit_ary
+            object_name = cmd,
+            limit_ary =[-0.2, 0.2, 0,  0.3, 0.3, 0.6]
+            #limit_ary = new_limit_ary #self.vision_limit_ary
         )
         self.obj_pose_client.send_goal(
                 goal,
@@ -1302,7 +1309,7 @@ class StowTask:
     def test_request_closest_sift(self):
         
         goal = obj_pose.msg.ObjectPoseGoal(
-            object_name = "<Closest>",
+            object_name = "<Closest_SIFT>",
             # object_list = ["laugh_out_loud_jokes",
             #                 "scotch_sponges",
             #                 "duct_tape",
@@ -1312,35 +1319,38 @@ class StowTask:
             #                 "expo_eraser",
             #                 "ice_cube_tray",
             #                 "robots_dvd"],
-            object_list = ["tissue_box",
-                             "duct_tape"],
-
+            object_list = ["speed_stick",
+                             "tissue_box"],
             #          [ xmin, xmax, ymin, ymax, zmin, zmax]
             #limit_ary =[-0.15, 0.15, 0,  0.3, 0.3, 1.0]
             limit_ary = self.vision_limit_ary
+
         )
 
         self.obj_pose_client.send_goal(
                 goal,
                 done_cb=self.test_done_cb )
     
-    def test_request_unknown_highest_item(self):
+    def test_request_unknown_highest_item(self, num = 0):
+        # -------------Fix Bound----------------#
         fix_ary = [0.03, -0.03, 0.02, -0.02, -0.05,0]
 
         new_limit_ary = []
         for i in range(len(fix_ary)):
             print('i='+str(i))
             new_limit_ary.append(self.vision_limit_ary[i] +fix_ary[i])
-
-
-
         print 'new_limit_ary=' + str(new_limit_ary)
         print 'self.vision_limit_ary=' + str(self.vision_limit_ary)
 
-
+        #--------------Make Cmd-----------------#
+        cmd = "<Unknown_Closest>"
+        if num > 0:
+            num_str = '{:02}'.format(num)
+            cmd += '+' +  num_str
+            print(cmd)
 
         goal = obj_pose.msg.ObjectPoseGoal(
-            object_name = "<Unknown_Closest>",
+            object_name = cmd,
             #limit_ary =[-0.12, 0.12, -0.1,  0.4, 0.35, 0.6],
             limit_ary = new_limit_ary
         )
@@ -1348,6 +1358,9 @@ class StowTask:
                 goal,
                 feedback_cb = self.obj_pose_feedback_cb, 
                 done_cb=self.test_done_cb )
+
+
+    
 
     def test_request_highest(self):
         

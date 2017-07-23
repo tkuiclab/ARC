@@ -61,6 +61,16 @@ if __name__ == '__main__':
         ss = Strategy()
 
         #safe_pose(ss.Arm)
+
+        # ss.stow.test_request_closest_sift()
+        # rospy.spin()
+        # exit()
+        # #--------Test save_item_location() & distributioni--------#
+        # #ss.stow.test_read_item_location_in_arc_pack("stow_20.json")
+        # ss.stow.test_read_item_location_in_arc_pack("item_location_file.json")
+        # rospy.spin()
+        # exit()
+
         # ss.Arm.relative_move_nsa(a = 0.1)
         # exit()
         # sift_client('speed_stick')
