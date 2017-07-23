@@ -21,7 +21,7 @@ import arm_task_rel
 from config import *
 from gripper import *
 from task_parser import *
-from get_obj_info import order_boxes
+from get_obj_info import order_boxes, info_dict
 from object_distribution import bin_dict
 
 # Define State jmp
@@ -118,7 +118,7 @@ class PickTask:
                 self.cover_list.append(
                     (PickInfo(result.object_name,
                                 self.now_pick.from_bin,
-                                to_bin='D'),
+                                to_bin=self.get_more_space_bin()),
                     self.now_pick)
                 )
                 self.state = FinishTask
@@ -139,6 +139,28 @@ class PickTask:
         bin_id = ord(bin) - ord('a')
         # dims of the box
         return bin_dict[bin_id].L, bin_dict[bin_id].W, bin_dict[bin_id].H
+
+    def get_more_space_bin(self):
+        remain_space = dict()
+        for bin in self.item_loc['bins']:
+            bin_id = bin['bin_id']
+            if bin_id in ['D', 'J']:
+                # calculate all of items vol in bin
+                all_vol = 0
+                for item in bin['contents']:
+                    vol = 1
+                    # calculate vol of the item
+                    for dim in info_dict[item]:
+                        vol *= dim
+                    all_vol += vol
+                remain_space[bin_id] = bin_dict[bin_id].TotalVolume - all_vol
+
+        # find max space
+        more_space = 'D'
+        for key in remain_space:
+            if remain_space[key] > remain_space['D']:
+                more_space = key
+        return more_space
 
     def request_closest_item(self):
         if len(self.detect_all_in_bin):
@@ -519,7 +541,7 @@ class PickTask:
             self.Arm.relative_move_nsa(a=-.15)
 
         elif self.state == RobotMove2PlaceBin:
-            self.info = "(GoBin) Robot Move to Bin {}".format(self.now_pick.to_bin)
+            self.info = "(GoBin) Robot Move to Bin {}".format(self.to_bin)
             print(self.info)
 
             # Change state
@@ -625,16 +647,15 @@ class PickTask:
     def update_location_file_cover(self):
         """Update item location file and save for cover."""
         rospy.loginfo('Update item location file cover')
-        # Remove item in bin
+
         for bin in self.item_loc['bins']:
+            # Remove item in bin
             if bin['bin_id'] == self.now_pick.from_bin:
                 bin['contents'].remove(self.now_pick.item)
-                break
-        # Append item to box
-        for bin in self.item_loc['bins']:
+            # Append item to box
             if bin['bin_id'] == self.now_pick.to_bin:
                 bin['contents'].append(self.now_pick.item)
-                break
+
         # Savie item location file
         write_item_location(self.item_loc, filetype='Pick')
 
