@@ -13,11 +13,12 @@ from object_distribution import stow_distribution, find_obj_in_bin_content, show
 class PickInfo:
     """ Information of picking task."""
 
-    def __init__(self, item="", form_bin="", to_box=""):
+    def __init__(self, item="", form_bin="", to_box="", to_bin=None):
         """Init object for information of picking task."""
         self.item = item
         self.from_bin = form_bin
         self.to_box = to_box
+        self.to_bin = to_bin
 
 
 class StowInfo:
