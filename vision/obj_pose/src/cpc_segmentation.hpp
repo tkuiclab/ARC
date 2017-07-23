@@ -89,7 +89,7 @@ class CPCSegmentation
       // Supervoxel Stuff
       float voxel_resolution = 0.0075f;
       float seed_resolution = 0.03f;
-      float color_importance = 1;
+      float color_importance = 0;//1;
       float spatial_importance = 1.0f;
       float normal_importance = 4.0f;
       bool use_single_cam_transform = false;
