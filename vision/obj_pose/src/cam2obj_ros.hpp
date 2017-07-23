@@ -432,6 +432,8 @@ bool cam_2_obj_center(PCT::Ptr i_cloud,
   PC_NT::Ptr cloud_normal (new PC_NT);
   PC_NT::Ptr del_normal(new PC_NT);
 
+
+  std::cout << "----------------------cam_2_obj_center----------------"  << std::endl;
   //get center of colud
   PT center =  getCenter(i_cloud);
   //std::cout << "Center Point = " << center << std::endl;

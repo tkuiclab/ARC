@@ -69,16 +69,17 @@ void ObjEstAction::goalCB()
       if (plus_pos!=std::string::npos){
         std::string add_str = obj_name.substr (plus_pos); 
         
-        int add;
+        int add = 0;
         try {
             add = boost::lexical_cast<int>( add_str);
         } catch( boost::bad_lexical_cast const& ) {
             std::cout << "<Error> input string(add_str) was not valid, add_str = " <<  add_str << std::endl;
+
         }
 
-        std::cout << "first '+' found at: " << plus_pos << '\n';
-        std::cout << "add_str" << add_str << '\n';
-        printf("add=%d\n",add);
+        // std::cout << "first '+' found at: " << plus_pos << '\n';
+        // std::cout << "add_str" << add_str << '\n';
+        printf("Unknown_Closest_num=%d\n",add);
 
         Unknown_Closest_num = add;
       }
@@ -495,10 +496,8 @@ void ObjEstAction::unknown_closest(){
     pcl::console::parse (g_argc, g_argv, "-cpc_min_size", min_size);
     
   }
-
+  std::cout << "----------------------unknown_closest----------------"  << std::endl;
   std::cout << "USE Min_Size = " << min_size << std::endl;
-
-
 
   // float pass_x_min, pass_x_max, pass_y_min, pass_y_max,pass_z_min, pass_z_max;
 
@@ -514,9 +513,12 @@ void ObjEstAction::unknown_closest(){
 #ifdef SaveCloud
    write_label_pcd_2_rospack(cpc_min_size_cloud, "_cpc_min_size.pcd" );
 #endif
-
+  //map<label_index, label_point_count>
   std::map<int, int>::iterator  iter;
 
+  // center_z, label_index (if Unknown_Closest_num > 0 )
+  std::map<float, int>  z_map;
+  
 
   pcl::PointXYZ tmp_center;
   int want_label = 0;   //want the highest label
@@ -529,12 +531,37 @@ void ObjEstAction::unknown_closest(){
             if(tmp_center.x <= limit_x_max && tmp_center.x >= limit_x_min &&
                tmp_center.y <= limit_y_max && tmp_center.y >= limit_y_min &&
                tmp_center.z <= limit_z_max && tmp_center.z >= limit_z_min ){    
-                    if(tmp_center.z < min_z){
-                      want_label = label_index;
-                      min_z = tmp_center.z;
+                    if(Unknown_Closest_num == 0){
+                      if(tmp_center.z < min_z){
+                        want_label = label_index;
+                        min_z = tmp_center.z;
+                      }
+                    }else if(Unknown_Closest_num > 0){
+                      z_map[tmp_center.z] = label_index;
+                    }else{
+                      std::cout << "[ERROR] unknown_closest say  Unknown_Closest_num <0 , Unknown_Closest_num=" << Unknown_Closest_num << std::endl;
                     }
+                    
+
+                    //std::cout << "label_index  = " << label_index << ", tmp_center.z = " << tmp_center.z << std::endl;
             }
          }
+      }
+  }
+
+  if(Unknown_Closest_num > 0){
+      std::map<float, int>::iterator z_map_iter;
+
+      int index = 0;
+      for(z_map_iter = z_map.begin(); z_map_iter != z_map.end(); z_map_iter++){
+        if(index ==Unknown_Closest_num ){
+          
+          want_label = z_map_iter->second;
+          //break;
+          //std::cout<<"  want_label = "<< want_label << std::endl;
+        }
+        //std::cout<< z_map_iter->first<<" "<<z_map_iter->second<< std::endl;
+        index++;
       }
   }
   
@@ -542,7 +569,10 @@ void ObjEstAction::unknown_closest(){
   
   cpc.getCloudWithLabel(cpc_min_size_cloud, scene_cloud, want_label_cloud, want_label);
   
-
+  if(!check_0_cloud(want_label_cloud,"_want_label.pcd")){
+    state = NADA;
+    return;
+  }
 #ifdef SaveCloud
     cout << "want_label_cloud size  = " << want_label_cloud->size() << endl;
      write_pcd_2_rospack(want_label_cloud, "_want_label.pcd" );
