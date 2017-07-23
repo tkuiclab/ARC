@@ -59,7 +59,7 @@ CheckIsHold = 30
 _REL_GO_BIN_FRONT = .1
 _BIN_MAX_DOWN = .135
 
-obj_dis = 0.02
+obj_dis = 0.01
 
 # For checking vacuum function
 check_next_states = [
@@ -152,15 +152,16 @@ class PickTask:
                 for item in bin['contents']:
                     vol = 1
                     # calculate vol of the item
-                    for dim in info_dict[item]:
+                    for dim in info_dict[item].dimensions:
                         vol *= dim
                     all_vol += vol
-                remain_space[bin_id] = bin_dict[bin_id].TotalVolume - all_vol
+                bin_num = ord(bin_id) - ord('A')
+                remain_space[bin_id] = self.bin_dict[bin_num].TotalVolume - all_vol
 
         # find max space
         more_space = 'D'
         for key in remain_space:
-            if remain_space[key] > remain_space['D']:
+            if remain_space[key] > remain_space[more_space]:
                 more_space = key
         return more_space
 
@@ -232,7 +233,9 @@ class PickTask:
             print(i, task.item, task.from_bin, task.to_box)
         print('cover_list')
         for i, task in enumerate(self.cover_list):
-            print(i, task.item, task.from_bin, task.to_box)
+            for idx, conent in enumerate(task):
+                print(i, idx, conent.item, conent.from_bin,
+                    conent.to_box if conent.to_bin is None else conent.to_bin)
         print('fail_list')
         for i, task in enumerate(self.fail_list):
             print(i, task.item, task.from_bin, task.to_box)
@@ -280,7 +283,7 @@ class PickTask:
             return True
         elif which_list is self.fail_list:
             self.task_state = 'fail'
-        else
+        else:
             self.task_state = 'pick'
 
         self.now_pick = which_list.pop(index)
@@ -364,10 +367,10 @@ class PickTask:
 
             # ActionLib request
             if self.task_state == 'fail':
-                self.request_closest_sift():
+                self.request_closest_sift()
             # pick or cover state
             else:
-                if self.request_closest_item()
+                if self.request_closest_item():
                     pass
                 else:
                     self.obj_pose_unsuccess()
@@ -822,10 +825,10 @@ def _test():
         lm = LM_Control.CLM_Control()
         s = PickTask(arm, lm)
 
-        # s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'd') + _LEFT_SHIFT)
-        # rospy.sleep(0.3)
-        # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'd'))
-        # return
+        s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'j') + _LEFT_SHIFT)
+        rospy.sleep(0.3)
+        s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'j'))
+        return
 
         # Setting picking list
         s.pick_source, s.item_loc = read_pick_task_and_location()

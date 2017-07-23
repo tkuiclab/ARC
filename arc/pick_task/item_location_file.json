@@ -5,8 +5,7 @@
             "contents": [
                 "robots_dvd",
                 "hinged_ruled_index_cards",
-                "scotch_sponges",
-                "robots_everywhere"
+                "tissue_box"
             ]
         },
         {
@@ -19,8 +18,8 @@
         {
             "bin_id": "C",
             "contents": [
-                "speed_stick",
-                "expo_eraser"
+                "expo_eraser",
+                "scotch_sponges"
             ]
         },
         {
@@ -28,19 +27,20 @@
             "contents": [
                 "ice_cube_tray",
                 "reynolds_wrap",
-                "composition_book"
+                "composition_book",
+                "robots_everywhere"
             ]
         },
         {
             "bin_id": "E",
             "contents": [
-                "duct_tape",
-                "ballons"
+                "duct_tape"
             ]
         },
         {
             "bin_id": "F",
             "contents": [
+                "speed_stick"
             ]
         },
         {
