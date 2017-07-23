@@ -69,7 +69,7 @@ class CPCSegmentation
     }
 
 
-    void do_CPC(){
+    bool do_CPC(){
       /// -----------------------------------|  Preparations  |-----------------------------------
 
       bool sv_output_specified;
@@ -89,7 +89,7 @@ class CPCSegmentation
       // Supervoxel Stuff
       float voxel_resolution = 0.0075f;
       float seed_resolution = 0.03f;
-      float color_importance = 0;//1;
+      float color_importance = 1;//1;
       float spatial_importance = 1.0f;
       float normal_importance = 4.0f;
       bool use_single_cam_transform = false;
@@ -118,60 +118,69 @@ class CPCSegmentation
       unsigned int k_factor = 0;
       if (use_extended_convexity)
         k_factor = 1;
-      
-      textcolor = bg_white?0:1;
-
-      pcl::SupervoxelClustering<PT> super (voxel_resolution, seed_resolution);
-      super.setInputCloud (input_cloud_ptr_);
-      if (has_normals)
-        super.setNormalCloud (input_normals_ptr);
-      super.setColorImportance (color_importance);
-      super.setSpatialImportance (spatial_importance);
-      super.setNormalImportance (normal_importance);
-      std::map<uint32_t, pcl::Supervoxel<PT>::Ptr> supervoxel_clusters;
-
-      // PCL_INFO ("Extracting supervoxels\n");
-      super.extract (supervoxel_clusters);
-
-      if (use_supervoxel_refinement)
-      {
-        // PCL_INFO ("Refining supervoxels\n");
-        super.refineSupervoxels (2, supervoxel_clusters);
-      }
-      std::stringstream temp;
-      temp << "  Nr. Supervoxels: " << supervoxel_clusters.size () << "\n";
-      // PCL_INFO (temp.str ().c_str ());
-
-      // PCL_INFO ("Getting supervoxel adjacency\n");
-      std::multimap<uint32_t, uint32_t>supervoxel_adjacency;
-      super.getSupervoxelAdjacency (supervoxel_adjacency);
-
-      /// Get the cloud of supervoxel centroid with normals and the colored cloud with supervoxel coloring (this is used for visulization)
-      pcl::PointCloud<pcl::PointNormal>::Ptr sv_centroid_normal_cloud = pcl::SupervoxelClustering<PT>::makeSupervoxelNormalCloud (supervoxel_clusters);
-
-      /// Set paramters for LCCP preprocessing and CPC (CPC inherits from LCCP, thus it includes LCCP's functionality)
-
-      // PCL_INFO ("Starting Segmentation\n");
-      pcl::CPCSegmentation<PT> cpc;
-      cpc.setConcavityToleranceThreshold (concavity_tolerance_threshold);
-      cpc.setSanityCheck (use_sanity_criterion);
-      cpc.setCutting (max_cuts, cutting_min_segments, min_cut_score, use_local_constrain, use_directed_cutting, use_clean_cutting);
-      cpc.setRANSACIterations (ransac_iterations);
-      cpc.setSmoothnessCheck (true, voxel_resolution, seed_resolution, smoothness_threshold);
-      cpc.setKFactor (k_factor);
-      cpc.setInputSupervoxels (supervoxel_clusters, supervoxel_adjacency);
-      cpc.setMinSegmentSize (min_segment_size);
-      cpc.segment ();
-      
-      // PCL_INFO ("Interpolation voxel cloud -> input cloud and relabeling\n");
-      pcl::PointCloud<PLabel>::Ptr sv_labeled_cloud = super.getLabeledCloud ();
-      //pcl::PointCloud<PLabel>::Ptr cpc_labeled_cloud = sv_labeled_cloud->makeShared ();
-      cpc_labeled_cloud = sv_labeled_cloud->makeShared ();
-      cpc.relabelCloud (*cpc_labeled_cloud);
-      SuperVoxelAdjacencyList sv_adjacency_list;
-      cpc.getSVAdjacencyList (sv_adjacency_list);  // Needed for visualization
+      try{
 
 
+        textcolor = bg_white?0:1;
+
+        pcl::SupervoxelClustering<PT> super (voxel_resolution, seed_resolution);
+        super.setInputCloud (input_cloud_ptr_);
+        if (has_normals)
+          super.setNormalCloud (input_normals_ptr);
+        super.setColorImportance (color_importance);
+        super.setSpatialImportance (spatial_importance);
+        super.setNormalImportance (normal_importance);
+        std::map<uint32_t, pcl::Supervoxel<PT>::Ptr> supervoxel_clusters;
+
+        // PCL_INFO ("Extracting supervoxels\n");
+        super.extract (supervoxel_clusters);
+
+        if (use_supervoxel_refinement)
+        {
+          // PCL_INFO ("Refining supervoxels\n");
+          super.refineSupervoxels (2, supervoxel_clusters);
+        }
+        std::stringstream temp;
+        temp << "  Nr. Supervoxels: " << supervoxel_clusters.size () << "\n";
+        // PCL_INFO (temp.str ().c_str ());
+
+        // PCL_INFO ("Getting supervoxel adjacency\n");
+        std::multimap<uint32_t, uint32_t>supervoxel_adjacency;
+        super.getSupervoxelAdjacency (supervoxel_adjacency);
+
+        /// Get the cloud of supervoxel centroid with normals and the colored cloud with supervoxel coloring (this is used for visulization)
+        pcl::PointCloud<pcl::PointNormal>::Ptr sv_centroid_normal_cloud = pcl::SupervoxelClustering<PT>::makeSupervoxelNormalCloud (supervoxel_clusters);
+
+        /// Set paramters for LCCP preprocessing and CPC (CPC inherits from LCCP, thus it includes LCCP's functionality)
+
+        // PCL_INFO ("Starting Segmentation\n");
+        pcl::CPCSegmentation<PT> cpc;
+        cpc.setConcavityToleranceThreshold (concavity_tolerance_threshold);
+        cpc.setSanityCheck (use_sanity_criterion);
+        cpc.setCutting (max_cuts, cutting_min_segments, min_cut_score, use_local_constrain, use_directed_cutting, use_clean_cutting);
+        cpc.setRANSACIterations (ransac_iterations);
+        cpc.setSmoothnessCheck (true, voxel_resolution, seed_resolution, smoothness_threshold);
+        cpc.setKFactor (k_factor);
+        cpc.setInputSupervoxels (supervoxel_clusters, supervoxel_adjacency);
+        cpc.setMinSegmentSize (min_segment_size);
+        cpc.segment ();
+        
+        // PCL_INFO ("Interpolation voxel cloud -> input cloud and relabeling\n");
+        pcl::PointCloud<PLabel>::Ptr sv_labeled_cloud = super.getLabeledCloud ();
+        //pcl::PointCloud<PLabel>::Ptr cpc_labeled_cloud = sv_labeled_cloud->makeShared ();
+        cpc_labeled_cloud = sv_labeled_cloud->makeShared ();
+        cpc.relabelCloud (*cpc_labeled_cloud);
+        SuperVoxelAdjacencyList sv_adjacency_list;
+        cpc.getSVAdjacencyList (sv_adjacency_list);  // Needed for visualization
+
+        return true;
+      } catch (const std::exception& ex) {
+          std::cout << "[ERROR] in CPC exception" << std::endl;
+          return false;
+      } catch (const std::string& ex) {
+          std::cout << "[ERROR] in CPC string exception" << std::endl;
+          return false;
+      } 
     }
 
     void unknown_highest(){

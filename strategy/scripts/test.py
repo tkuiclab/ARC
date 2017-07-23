@@ -59,14 +59,13 @@ if __name__ == '__main__':
 
     try:
         ss = Strategy()
-        print('dddd')
         #safe_pose(ss.Arm)
 
         # ss.stow.test_request_closest_sift()
         # rospy.spin()
         # exit()
         # #--------Test save_item_location() & distributioni--------#
-        # #ss.stow.test_read_item_location_in_arc_pack("stow_20.json")
+        #ss.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
         # ss.stow.test_read_item_location_in_arc_pack("item_location_file.json")
         # rospy.spin()
         # exit()
@@ -131,8 +130,10 @@ if __name__ == '__main__':
         ss.stow.arm_photo_pose()
         ss.stow.LM_2_tote()
         #ss.stow.request_highest_item()
-        ss.stow.test_request_unknown_highest_item(1)
-
+        while ss.Arm.busy:
+            rospy.sleep(.1)
+        ss.stow.test_request_unknown_highest_item()
+        rospy.spin()
         # ----- Test Photo Pose ------#
         # ss.stow.LM_2_tote()
         # ss.stow.arm_photo_pose()

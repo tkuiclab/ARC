@@ -111,6 +111,9 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
 
       pcl::fromROSMsg(*input,*scene_cloud);
 
+
+
+
   
 #ifdef SaveCloud
       //Remove All PCD File in [package]/pcd_file/*.pcd      
@@ -128,6 +131,10 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
   // for test
   //pass_through_from_arg(scene_cloud, g_argc, g_argv, pass_through_cloud);
 
+   //write_pcd_2_rospack(pass_through_cloud, "_scene_cloud_pass_through.pcd" );
+
+#endif
+
   PCT::Ptr pass_through_cloud(new PCT);
   get_pass_through_points(scene_cloud,  pass_through_cloud,
                         limit_x_min, limit_x_max,
@@ -135,7 +142,13 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
                         limit_z_min, limit_z_max
                      
                         );
-   write_pcd_2_rospack(pass_through_cloud, "_scene_cloud_pass_through.pcd" );
+
+    if(!check_0_cloud(pass_through_cloud,"_scene_cloud_pass_through" )){
+        return ;
+    }
+
+#ifdef SaveCloud
+     write_pcd_2_rospack(pass_through_cloud, "_scene_cloud_pass_through.pcd" );
 
 #endif
       
@@ -511,8 +524,16 @@ void ObjEstAction::unknown_closest(){
 
   CPCSegmentation cpc;
   cpc.setPointCloud(scene_cloud);
-  cpc.do_CPC();
+  if(!cpc.do_CPC()){
+    pub_error("do_CPC() Fail");
+    state = NADA;  
+  }
   cpc.extract_with_min_size(min_size, cpc_min_size_cloud , label_map);
+
+  if(!check_0_cloud(want_label_cloud,"_want_label.pcd")){
+    state = NADA;
+    return;
+  }
 #ifdef SaveCloud
    write_label_pcd_2_rospack(cpc_min_size_cloud, "_cpc_min_size.pcd" );
 #endif

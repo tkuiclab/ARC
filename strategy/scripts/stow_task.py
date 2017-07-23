@@ -78,11 +78,13 @@ check_next_states = [
 obj_dis = 0.01
 
 
-Arm_Photo_Index_Max  = 2
+Arm_Photo_Index_Max  = 3
 
 
-pose_1_vision_limit_ary = [-0.13, 0.13, -0.15,  0.3, 0.35, 0.6]
-pose_2_vision_limit_ary = [-0.13, 0.13, -0.15,  0.3, 0.35, 0.6]
+pose_1_vision_limit_ary = [-0.13, 0.13, -0.15,  0.3, 0.35, 0.58]
+pose_2_vision_limit_ary = [-0.13, 0.13, -0.15,  0.2, 0.35, 0.58]
+pose_3_vision_limit_ary = [-0.13, 0.13, -0.15,  0.14, 0.35, 0.58]
+
 
 
 
@@ -236,7 +238,9 @@ class StowTask:
         self.tool_shot_deg = 180
 
     def arm_photo_pose_3(self):
-        self.Arm.pub_ikCmd('ptp', (0.4, 0.00 , 0.25), (180, 180, 0))
+        self.Arm.pub_ikCmd('ptp', (0.3, 0.00 , 0.25), (-180, 0, 0))
+        self.vision_limit_ary = pose_3_vision_limit_ary
+        self.tool_shot_deg = 0
 
     def arm_leave_tote(self):
         self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
@@ -446,7 +450,7 @@ class StowTask:
                 self.arm_photo_index = 1
                 self.unknown_closest_index = 0
 
-                self.mlog('--------------- Mode_UnknownProcess--------------')
+                self.mlog('--------------- Mode_UnKnownProcess--------------')
 
             else:
                 
@@ -461,7 +465,9 @@ class StowTask:
                 #     self.arm_photo_index = 1
                 # else:
                 #     self.state = EndTask
-    
+                self.mlog('--------------- Mode_KnownProcess--------------')
+
+
     def unknown_change_2_known(self):
         self.mlog('---------------Change back 2 Mode_KnownProcess--------------')
         self.mode = Mode_KnownProcess
@@ -517,13 +523,15 @@ class StowTask:
             else :
                 self.state = Arm2ObjUp
 
-        self.mode = Mode_KnownProcess
+        #self.mode = Mode_KnownProcess
 
     
     # num is which closest(highest) item, if 1 -> second unknown highest 
     def request_unknown_highest_item(self, closest_ind =0 ):
+        print 'in request_unknown_highest_item() '
+
         # -------------Fix Bound----------------#
-        fix_ary = [0.03, -0.03, 0.02, -0.02, -0.05,0]
+        fix_ary = [0.03, -0.03, 0.02, -0.02, 0.05,-0.02]
 
         new_limit_ary = []
         for i in range(len(fix_ary)):
@@ -558,8 +566,9 @@ class StowTask:
             
             return
         else:
-            self.mode = Mode_UnknownProcess
+            #self.mode = Mode_UnknownProcess   #maybe no need
             self.state = Arm2ObjUp
+            self.arm_chage_side_and_state()
 
 #--------------------Strategy Area--------------------#
     def run(self):
@@ -784,15 +793,9 @@ class StowTask:
 
         elif self.state == VisionProcess:
 
-            '''    
-            self.info = "(Vision) Request Object_Pose with "  + self.now_stow_info.item
+            self.info = "(VisionProcess)"  
             print self.info
-            goal = obj_pose.msg.ObjectPoseGoal(self.now_stow_info.item)
-            self.obj_pose_client.send_goal(
-                    goal,
-                    feedback_cb = self.obj_pose_feedback_cb, 
-                    done_cb=self.obj_pose_done_cb )
-            '''
+
 
             if self.mode == Mode_KnownProcess:
                 self.info = "(VisionProcess) Mode_KnownProcess"
@@ -1344,7 +1347,7 @@ class StowTask:
     def test_request_unknown_highest_item(self, num = 0):
         print('test_request_unknown_highest_item()')
         # -------------Fix Bound----------------#
-        fix_ary = [0.03, -0.03, 0.02, -0.02, -0.05,0]
+        fix_ary = [0.03, -0.03, 0.02, -0.02, 0.05,-0.02]
 
         new_limit_ary = []
         for i in range(len(fix_ary)):
@@ -1362,8 +1365,8 @@ class StowTask:
 
         goal = obj_pose.msg.ObjectPoseGoal(
             object_name = cmd,
-            limit_ary =[-0.14, 0.14, -0.1,  0.1, 0.35, 0.6],
-            #limit_ary = new_limit_ary
+            #limit_ary =[-0.14, 0.14, -0.1,  0.1, 0.35, 0.6],
+            limit_ary = new_limit_ary
         )
         self.obj_pose_client.send_goal(
                 goal,
