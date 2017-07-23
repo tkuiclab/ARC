@@ -145,6 +145,9 @@ class StowTask:
         self.mode = Mode_KnownProcess
 
 
+        self.unknown_closest_index  = 0
+
+
     def ifsuck_cb(self, res):
         self.suck_ary = res.data
 
@@ -441,11 +444,12 @@ class StowTask:
                 self.mode = Mode_UnknownProcess
                 self.state = PhotoPose #LM2Tote
                 self.arm_photo_index = 1
+                self.unknown_closest_index = 0
 
                 self.mlog('--------------- Mode_UnknownProcess--------------')
 
             else:
-
+                
                 self.mode == Mode_KnownProcess
                 self.arm_photo_index = 1
                 
@@ -551,6 +555,7 @@ class StowTask:
         if result.success == False or (l.z < 0) or (l.x == 0 and l.y == 0 and l.z==0):
             rospy.logwarn('Unknown Highest Fail!!')
             self.arm_chage_side_and_state()
+            
             return
         else:
             self.mode = Mode_UnknownProcess
@@ -806,7 +811,7 @@ class StowTask:
                 self.info = "(VisionProcess) Mode_UnknownProcess"
                 print self.info
 
-                self.request_unknown_highest_item()
+                self.request_unknown_highest_item(self.unknown_closest_index)
 
                 self.state 		= WaitVision
             else:
@@ -882,8 +887,13 @@ class StowTask:
                 self.LM.pub_LM_Cmd(LM_ID_Right, ToteLeave_Z)
                 self.next_state = ArmLeaveTote
             else:
+                
                 self.LM.pub_LM_Cmd(LM_ID_Right, ToteLeave_Z_Amnesty)
-                self.next_state = LM2Amnesty_Up
+                if suck_num > 0:
+                    self.next_state = LM2Amnesty_Up
+                else:
+                    self.next_state = PhotoPose
+                    self.unknown_closest_index  +=  1                
                 #self.next_state = WaitTask
 
             self.state 		= WaitRobot
@@ -1332,6 +1342,7 @@ class StowTask:
                 done_cb=self.test_done_cb )
     
     def test_request_unknown_highest_item(self, num = 0):
+        print('test_request_unknown_highest_item()')
         # -------------Fix Bound----------------#
         fix_ary = [0.03, -0.03, 0.02, -0.02, -0.05,0]
 
@@ -1351,8 +1362,8 @@ class StowTask:
 
         goal = obj_pose.msg.ObjectPoseGoal(
             object_name = cmd,
-            #limit_ary =[-0.12, 0.12, -0.1,  0.4, 0.35, 0.6],
-            limit_ary = new_limit_ary
+            limit_ary =[-0.14, 0.14, -0.1,  0.1, 0.35, 0.6],
+            #limit_ary = new_limit_ary
         )
         self.obj_pose_client.send_goal(
                 goal,

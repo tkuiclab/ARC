@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     try:
         ss = Strategy()
-
+        print('dddd')
         #safe_pose(ss.Arm)
 
         # ss.stow.test_request_closest_sift()
@@ -91,11 +91,11 @@ if __name__ == '__main__':
         # # ss.Arm.relative_move_suction(suction_angle = 90, dis =  0.02, blocking = True)
 
         # case 1
-        ss.Arm.pub_ikCmd('ptp', (0.45, 0.01, 0.25), (-180, 0, 0))
-        # ss.Arm.relative_rot_nsa(roll = 170.7486847, blocking = True)
-        ss.Arm.move_2_Abs_Roll(170)
-        ss.Arm.relative_xyz_base(x = 0.0612402290131, y = -0.0987435177733, z = -0.20083506803, blocking = True)
-        exit()
+        # ss.Arm.pub_ikCmd('ptp', (0.45, 0.01, 0.25), (-180, 0, 0))
+        # # ss.Arm.relative_rot_nsa(roll = 170.7486847, blocking = True)
+        # ss.Arm.move_2_Abs_Roll(170)
+        # ss.Arm.relative_xyz_base(x = 0.0612402290131, y = -0.0987435177733, z = -0.20083506803, blocking = True)
+        # exit()
 
         # case 2
         # ss.Arm.pub_ikCmd('ptp', (0.45, 0.005, 0.25), (-180, 0, 0))
@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
         #ss.Arm.relative_move_nsa(a = -0.23)
 
-        exit()
+        #exit()
 
         #-------Test Vision Closest----------#
         # ss.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
@@ -128,10 +128,10 @@ if __name__ == '__main__':
 
         # ss.stow.request_highest_item()
         #ss.stow.arm_photo_pose_2()
-        # ss.stow.arm_photo_pose()
-        # ss.stow.LM_2_tote()
-        # #ss.stow.request_highest_item()
-        # ss.stow.test_request_unknown_highest_item()
+        ss.stow.arm_photo_pose()
+        ss.stow.LM_2_tote()
+        #ss.stow.request_highest_item()
+        ss.stow.test_request_unknown_highest_item(1)
 
         # ----- Test Photo Pose ------#
         # ss.stow.LM_2_tote()
@@ -170,15 +170,15 @@ if __name__ == '__main__':
 
         #---------Arm Up ----------#
         #ss.stow.arm_photo_pose()
-        gripper_vaccum_on()
-        ss.Arm.move_2_Abs_Roll(90,blocking=True)
-        ss.Arm.pub_ikCmd('ptp', (0.2, 0.00 , 0.25), (-180, 0, 0))
+        # gripper_vaccum_on()
+        # ss.Arm.move_2_Abs_Roll(90,blocking=True)
+        # ss.Arm.pub_ikCmd('ptp', (0.2, 0.00 , 0.25), (-180, 0, 0))
         
-        while ss.Arm.busy:
-            rospy.sleep(.1)
-        #
-        rospy.sleep(1)
-        ss.stow.arm_leave_tote()
+        # while ss.Arm.busy:
+        #     rospy.sleep(.1)
+        # #
+        # rospy.sleep(1)
+        # ss.stow.arm_leave_tote()
 
         
         exit()

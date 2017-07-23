@@ -114,9 +114,7 @@ class ArmTask:
     def pub_ikCmd(self, mode='line', pos=_POS, euler=_ORI, fai=0):
         """Publish msg of ik cmd (deg) to manager node."""
         # pub_ikCmd('ptp', (x, y , z), (pitch, roll, yaw) )
-        while self.__is_busy:
-            rospy.sleep(.1)
-
+        
         self.__is_busy = True
 
         cmd = []
@@ -133,8 +131,7 @@ class ArmTask:
             self.__cmd_pub.publish(cmd)
         elif mode == 'ptp':
             self.__ptp_pub.publish(cmd)
-        while self.__is_busy:
-            rospy.sleep(.1)
+        
         
     def stop_task(self):
         """Stop task running."""
