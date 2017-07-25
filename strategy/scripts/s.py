@@ -175,9 +175,9 @@ if __name__ == '__main__':
         #===
         gripper_vaccum_off()
         # #s.stow.test_read_item_location_in_arc_pack("stow_20.json")
+        #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+        s.stow.test_read_item_location_in_arc_pack("stow_test.json")
         #s.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
-        # # #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
-        s.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
         
         s.safe_pose()
 

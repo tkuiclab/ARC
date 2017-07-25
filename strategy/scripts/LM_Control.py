@@ -100,7 +100,7 @@ class CLM_Control:
             # print'wait'
 
     def pub_LM_Cmd(self, id, pls):
-        rospy.sleep(0.2)
+        rospy.sleep(0.3)
         msg = LM_Cmd()
         msg.id = id
         if msg.status == 'LM_busy':

@@ -192,8 +192,8 @@ class StowTask:
 
         self.Is_BaseShiftOK = False
         self.LM.pub_LM_Cmd(LM_ID_Base, GetShift('Tote', 'x', 'amnesty'))
-        rospy.sleep(0.3)
-        self.LM.pub_LM_Cmd(1, ToteLeave_Z)
+        #rospy.sleep(0.3)
+        #self.LM.pub_LM_Cmd(1, ToteLeave_Z_Amnesty)
 
     # def LM_up_from_amnesty(self):
 
@@ -642,6 +642,19 @@ class StowTask:
         # Savie item location file
         write_item_location(item_location_json, filetype='Stow')
     
+    def get_bin_item_number(self,bin_id):
+
+        bin_item_number = 0
+        
+        for t_stow_info in self.stow_success:
+            if bin_id == t_stow_info.to_bin:
+                bin_item_number += 1
+                break
+
+        return bin_item_number
+
+    
+
     # def get_info(self):
     # 	if self.now_stow_info
     # 	info_json = {'info': self.info, 
@@ -940,13 +953,19 @@ class StowTask:
             print self.info
 
             #show_stow_list(self.use_stow_list)
-    
+            shift_x = 0
+            now_bin_item = self.get_bin_item_number(self.now_stow_info.to_bin)
+            if  now_bin_item > 0:
+                print('NEWNEW--->now_bin_item = ' + str(now_bin_item) )
+
+                
+
             self.Is_BaseShiftOK = False
             self.LM_2_Bin_Right_Arm(self.now_stow_info.to_bin)
             # self.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', self.now_stow_info.to_bin ))
             # rospy.sleep(0.3)
             # self.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', self.now_stow_info.to_bin ))
-        
+            
             
 
             self.next_state 	= ArmPutInBin #ArmLeaveTote   
@@ -1025,7 +1044,7 @@ class StowTask:
 
             #print 'self.Last_LMArrive == ' + str(self.Last_LMArrive) + ' and  self.Is_LMArrive ==' + str(self.Is_LMArrive) + ' and self.Is_LMBusy == ' + str(self.Is_LMBusy)
 
-
+            
             #if self.Last_LMArrive == False and self.Is_LMArrive == True and self.Is_ArmBusy == False:
             if not self.Is_BaseShiftOK and self.LM.IsArrive and  self.Last_LMArrive == True and self.Is_LMArrive == True and self.Is_LMBusy == False and  self.Is_ArmBusy == False:
             #if not self.Is_BaseShiftOK and self.Last_LMArrive and self.Is_LMArrive and  not self.Is_LMBusy  and not self.Is_ArmBusy:

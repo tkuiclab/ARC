@@ -23,7 +23,7 @@ from gripper import *
 from s import *
 from sift.srv import *
 from LM_Control import *
-
+from config import *
 
 def safe_pose(arm):
     arm.pub_ikCmd('ptp', (0.30, 0.00 , 0.3), (-180, 0, 0))
@@ -119,6 +119,27 @@ if __name__ == '__main__':
 
         #exit()
 
+        #---------Test LM-----------#
+        print 'LM_2_tote()'
+        ss.stow.LM_2_tote()
+        while not ss.LM.IsArrive:
+            rospy.sleep(.1)
+
+        print 'LM_2  [2]'
+        ss.LM.pub_LM_Cmd(LM_ID_Right, ToteLeave_Z_Amnesty)
+        while not ss.LM.IsArrive:
+            rospy.sleep(.1)
+
+        print 'LM_2  [3]'
+        ss.LM.pub_LM_Cmd(LM_ID_Base, ToteLeave_Z_Amnesty)
+
+        while not ss.LM.IsArrive:
+            rospy.sleep(.1)
+
+        print 'LM_2  [4]'
+        ss.LM.pub_LM_Cmd(2, GetShift('Tote', 'x', 'amnesty'))
+        rospy.sleep(0.3)
+        ss.LM.pub_LM_Cmd(1, GetShift('Tote', 'z', 'amnesty'))
         #-------Test Vision Closest----------#
         # ss.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
         # ss.stow.gen_detect_all_in_stow_list()
@@ -127,13 +148,29 @@ if __name__ == '__main__':
 
         # ss.stow.request_highest_item()
         #ss.stow.arm_photo_pose_2()
-        ss.stow.arm_photo_pose()
-        ss.stow.LM_2_tote()
-        #ss.stow.request_highest_item()
-        while ss.Arm.busy:
-            rospy.sleep(.1)
-        ss.stow.test_request_unknown_highest_item()
-        rospy.spin()
+        
+        
+        # ss.stow.arm_photo_pose()
+        # ss.stow.LM_2_tote()
+        # #ss.stow.request_highest_item()
+        # while ss.Arm.busy:
+        #     rospy.sleep(.1)
+        # ss.stow.test_request_unknown_highest_item()
+        # rospy.spin()
+        
+        
+        # ss.Arm.pub_ikCmd('ptp', (0.54, -0.08, -0.04), (180, 160.63, 0))
+        # while ss.Arm.busy:
+        #     rospy.sleep(.1)
+
+        # ss.stow.arm_photo_pose_3()
+
+
+        # while ss.Arm.busy:
+        #     rospy.sleep(.1)
+
+
+        
         # ----- Test Photo Pose ------#
         # ss.stow.LM_2_tote()
         # ss.stow.arm_photo_pose()

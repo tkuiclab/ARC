@@ -35,7 +35,7 @@ class ArmTask:
         #rospy.on_shutdown(self.stop_task)
         self.__set_mode_pub.publish('set')
         self.__is_busy = False
-        self.__set_vel_pub.publish(20)
+        self.__set_vel_pub.publish(10)
         self.__ik_fail =False
 
 
