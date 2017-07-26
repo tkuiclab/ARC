@@ -1,0 +1,7 @@
+{
+    "powerai_gpu0": ["yolo-new-142000", "yolo-new-155000"],
+    "powerai_gpu1": ["yolo-new-83000", "yolo-new-95000"],
+    "powerai_gpu2": ["yolo-new-162000", "yolo-new-188000"],
+    "titanx1": ["yolo-new-260000", "yolo-new-272000", "yolo-new-288000"],
+    "titanx2": ["yolo-new-270930", "yolo-new-384930", "yolo-new-402930"]
+}
