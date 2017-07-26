@@ -69,6 +69,8 @@ class Strategy(threading.Thread):
     def shutdown(self):
         """ description """
         #gripper_vaccum_off()
+        print '--------------In Shutdown-----------------'
+
         if self.run_task_type == TaskType_Stow:
             self.stow.dump_stow_list_2_item_location_file()
         self.stop_robot = True
@@ -175,16 +177,16 @@ if __name__ == '__main__':
         #===
         gripper_vaccum_off()
         # #s.stow.test_read_item_location_in_arc_pack("stow_20.json")
-        #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
-        s.stow.test_read_item_location_in_arc_pack("stow_test.json")
+        s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+        #s.stow.test_read_item_location_in_arc_pack("stow_test.json")
         #s.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
         
         s.safe_pose()
 
         s.start() 
         s.stow_run()
-        
 
+        #s.stow.test_dump_stow_success()
 
         # =========== test ===========
         # desire_cmd = [0.3, 0, 0.3, -90, 0, 0]

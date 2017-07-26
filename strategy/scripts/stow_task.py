@@ -76,7 +76,7 @@ check_next_states = [
     LM2Amnesty_Up
 ]
 
-obj_dis = 0.01
+obj_dis = 0.04
 
 
 Arm_Photo_Index_Max  = 3
@@ -251,7 +251,7 @@ class StowTask:
 
 
     def arm_leave_tote_safe(self):
-        self.Arm.move_2_Abs_Roll(90,blocking=True)
+        #self.Arm.move_2_Abs_Roll(90,blocking=True)
         self.Arm.pub_ikCmd('ptp', (0.2, 0.00 , 0.25), (-180, 0, 0))
 
     def arm_init_pose(self):
@@ -631,9 +631,12 @@ class StowTask:
         # Pare Json
         item_location_json = json.loads(self.item_location_file)
         rospy.loginfo('Save stow_success to item location file')
-        # Remove item in bin
+        # Add item in bin
         for t_stow_info in self.stow_success:
             for bin in item_location_json['bins']:
+                print "bin[bin_id ].lower()  = " + bin['bin_id'].lower()
+                print "t_stow_info.to_bin = " + t_stow_info.to_bin
+
                 if bin['bin_id'].lower() == t_stow_info.to_bin:
                     print 'append ' + t_stow_info.item
                     bin['contents'].append(t_stow_info.item)
@@ -847,7 +850,11 @@ class StowTask:
             #     self.tool_2_obj(self.obj_pose, self.norm, self.tool_shot_deg)
             # elif self.arm_photo_index == 2:
             #     self.tool_2_obj(self.obj_pose, self.norm, self.tool_shot_deg)
+            
             self.tool_2_obj(self.obj_pose, self.norm, self.tool_shot_deg)
+
+            gripper_vaccum_on()
+
 
             self.next_state = ArmDown_And_Vaccum 
             self.state 		= WaitRobot
@@ -863,15 +870,16 @@ class StowTask:
 
             print self.info
 
-            gripper_vaccum_on()
+            # gripper_vaccum_on()
 
             #self.Arm.relative_move_suction('ptp', self.gripper_roll, obj_dis +0.02,blocking= True )
-            self.Arm.relative_move_suction('ptp', self.gripper_roll, obj_dis +0.02,blocking= True )
+            #self.Arm.relative_move_suction('ptp', self.gripper_roll, obj_dis +0.02,blocking= True )
+            #self.Arm.relative_move_suction('ptp', self.gripper_roll, obj_dis,blocking= True )
             #print("self.Arm.relative_move_suction('ptp', "+str(self.gripper_roll)+", obj_dis +0.02)")
 
 
             if self.suck_num == 0:
-                self.Arm.relative_move_suction('ptp', self.gripper_roll, 0.01,blocking= True )
+                self.Arm.relative_move_suction('ptp', self.gripper_roll, obj_dis,blocking= True )
 
             if self.suck_num == 0:
                 self.Arm.relative_move_suction('ptp', self.gripper_roll, 0.01,blocking= True )
@@ -930,11 +938,11 @@ class StowTask:
             
             pos = self.Arm.get_fb().group_pose.position
 
-            if pos.x > 0.40:
-                self.arm_leave_tote_safe()
-                
-                while self.Arm.busy:
-                    rospy.sleep(0.1)
+            #if pos.x > 0.40:
+            self.arm_leave_tote_safe()
+            
+            while self.Arm.busy:
+                rospy.sleep(0.1)
         
 
 
@@ -993,6 +1001,7 @@ class StowTask:
             if self.suck_num > 0:
                 self.now_stow_info.success = True
                 self.stow_success.append(self.now_stow_info)
+                self.dump_stow_list_2_item_location_file()
             else:
                 self.now_stow_info.success = False
                 if self.use_stow_list == self.stow_fail:
@@ -1174,7 +1183,7 @@ class StowTask:
         elif self.state == LM_LeaveAmnesty: 
             self.mlog('(LM_LeaveAmnesty)')
 
-            self.LM.pub_LM_Cmd(LM_ID_Right, GetShift('Tote', 'z', 'tote'))
+            self.LM.pub_LM_Cmd(LM_ID_Right, ToteLeave_Z_Amnesty)
 
             rospy.sleep(0.5)
 

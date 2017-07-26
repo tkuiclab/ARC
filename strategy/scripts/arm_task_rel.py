@@ -485,7 +485,7 @@ class ArmTask:
         fai = 0
         print 'desire_roll = ' + str(desire_roll)
         if abs(desire_roll) >= self.warn_roll:
-            print 'abs(desire_roll >= self.warn_roll)\n'
+            #print 'abs(desire_roll >= self.warn_roll)\n'
             if (curr_j7 > 0 and curr_j7 <= 180):
                 print '1'
                 if desire_j7 > -180 and desire_j7 < 0:
@@ -507,12 +507,12 @@ class ArmTask:
         else:
             fai = curr_fai
 
-        print '===============================\n'
-        print 'desire_roll = ' + str(desire_roll)
-        print 'curr_j7 = ' + str(curr_j7)
-        print 'desire_j7 = ' + str(desire_j7)
-        print 'send fai = ' + str(fai)
-        print '===============================\n'
+        # print '===============================\n'
+        # print 'desire_roll = ' + str(desire_roll)
+        # print 'curr_j7 = ' + str(curr_j7)
+        # print 'desire_j7 = ' + str(desire_j7)
+        # print 'send fai = ' + str(fai)
+        # print '===============================\n'
         return fai
                 
 
