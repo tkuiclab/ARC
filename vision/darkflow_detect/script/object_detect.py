@@ -25,6 +25,9 @@ from convert_label.convert import offical2Our, our2Offical, colors
 sys.path.append(rospkg.RosPack().get_path('strategy')+'/scripts')
 from get_obj_info import info_dict
 
+sys.path.append(rospkg.RosPack().get_path('arc')+'/pick_task')
+from select_ckpt.iou import selectCKPT
+
 
 def handle_request(req):
     """Service request callback."""
@@ -206,18 +209,6 @@ class Image(object):
 
 _img = Image()
 
-# Options for net building
-options = {
-    "model": "cfg/yolo-new.cfg",    # model of net
-    "backup": "ckpt/",              # directory of ckpt (training result)
-    "load": -1,                     # which ckpt will be loaded. -1 represent the last ckpt
-
-    "threshold": -0.1,              # threshold for confidence
-    "gpu": 0.5                      # gpu using rate
-}
-tfnet = TFNet(options)
-prepare_network()
-
 
 if __name__ == '__main__':
     rospy.init_node('object_detect', anonymous=True)
@@ -226,6 +217,19 @@ if __name__ == '__main__':
         else sys.argv[1]
     )
     img_cvt = ImageConverter(img_topic)
+
+    task_type = rospy.get_param('task_type')
+    ckpt_num = int(selectCKPT(task_type, "item_location_file.json").split('-')[-1])
+    # Options for net building
+    options = {
+        "model": "cfg/yolo-new.cfg",    # model of net
+        "backup": "ckpt/",              # directory of ckpt (training result)
+        "load": ckpt_num,               # which ckpt will be loaded. -1 represent the last ckpt
+        "threshold": -0.1,              # threshold for confidence
+        "gpu": 0.5                      # gpu using rate
+    }
+    tfnet = TFNet(options)
+    prepare_network()
 
     # Show result of detection for every 50ms if the frame is fresh
     rospy.Timer(rospy.Duration(.05), show_detection)
