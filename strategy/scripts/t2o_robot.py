@@ -53,8 +53,9 @@ class T2O:
         rospy.loginfo('obj_pose_request() obj='+obj)
         
         #goal = obj_pose.msg.ObjectPoseGoal(obj)
-        goal = obj_pose.msg.ObjectPoseGoal(object_name = obj, limit_ary =[-0.14, 0.14, -0.1,  0.4, 0.35, 0.6])
-
+        # goal = obj_pose.msg.ObjectPoseGoal(object_name = obj, limit_ary =[-0.14, 0.14, -0.1,  0.4, 0.35, 0.6])
+        goal = obj_pose.msg.ObjectPoseGoal(object_name = '<Closest>', limit_ary =[-0.14, 0.14, -0.1,  0.4, 0.35, 0.6])
+        
         self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
         self.__obj_pose_client.wait_for_result()
 
@@ -106,10 +107,9 @@ class T2O:
         # self.tool_2_obj(result.object_pose)
         # self.tool_2_obj(result.object_pose, result.norm)
         # self.tool_2_obj(result.object_pose, result.norm, 180)
-        self.tool_2_obj2(result.object_pose, result.norm, 180, 20)
+        # self.tool_2_obj2(result.object_pose, result.norm, 180, 20)
         # self.tool_2_obj_bin(result.object_pose, result.norm)
-        # self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.1), rel_ang = (10, 0 , 0))
-        # self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.2), rel_ang = (10, 0 , 0))
+        self.tool_2_obj_bin(result.object_pose, result.norm, rel_pos = (0, 0, -0.2), rel_ang = (10, 0 , 0))
         # self.tool_2_obj_bin_straight(result.object_pose, result.norm)
         # self.tool_2_obj_bin2(result.object_pose, result.norm)
 
@@ -547,24 +547,24 @@ if __name__ == '__main__':
     # s.stow.LM_2_tote()
 
     # STOW TEST
-    arm = arm_task_rel.ArmTask()
-    lm = LM_Control.CLM_Control()
-    stow = StowTask(arm, lm)
-    stow.LM_2_tote()
-    stow.arm_photo_pose_2()
-    # stow.arm_photo_pose()
-    gripper_suction_up()
-    task.obj_pose_request('robots_dvd')
-
-    # PICK TEST
     # arm = arm_task_rel.ArmTask()
     # lm = LM_Control.CLM_Control()
-    # s = PickTask(arm, lm)
-    # s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'a') + 18000)
-    # rospy.sleep(0.3)
-    # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a') + 10000)
-    # task.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
-    # task.obj_pose_request('duct_tape')
+    # stow = StowTask(arm, lm)
+    # stow.LM_2_tote()
+    # stow.arm_photo_pose_2()
+    # stow.arm_photo_pose()
+    # gripper_suction_up()
+    # task.obj_pose_request('robots_dvd')
+
+    # PICK TEST
+    arm = arm_task_rel.ArmTask()
+    lm = LM_Control.CLM_Control()
+    s = PickTask(arm, lm)
+    s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'a') + 18000)
+    rospy.sleep(0.3)
+    s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a'))
+    task.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
+    task.obj_pose_request('colgate_toothbrush_4pk')
 
     ### Bin Place ###
     # s = Strategy()

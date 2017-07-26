@@ -58,6 +58,7 @@ Amnesty_End = 42
 
 LM2Amnesty_Up   = 43
 LM2Amnesty_Down = 44
+LM_LeaveAmnesty = 45
 
 Mode_KnownProcess = 1
 Mode_UnknownProcess = 2
@@ -1167,18 +1168,32 @@ class StowTask:
             
             
             self.state 			= WaitRobot
-            self.next_state 	= Amnesty_End  #PhotoPose
+            self.next_state 	= LM_LeaveAmnesty  #PhotoPose
             return
 
+        elif self.state == LM_LeaveAmnesty: 
+            self.mlog('(LM_LeaveAmnesty)')
+
+            self.LM.pub_LM_Cmd(LM_ID_Right, GetShift('Tote', 'z', 'tote'))
+
+            rospy.sleep(0.5)
+
+            self.arm_photo_pose()
+            
+            
+            self.state 			= WaitRobot
+            self.next_state 	= Amnesty_End  #PhotoPose
+
+            return
 
         elif self.state == Amnesty_End: 
             self.mlog('(Amnesty_End)')
             #self.LM_amnesty_up()
 
-            self.LM.pub_LM_Cmd(LM_ID_Right, GetShift('Tote', 'z', 'tote'))
-            self.arm_photo_pose()
-            rospy.sleep(0.3)
-            #self.LM_2_tote()
+            # self.LM.pub_LM_Cmd(LM_ID_Right, GetShift('Tote', 'z', 'tote'))
+            # self.arm_photo_pose()
+            # rospy.sleep(0.3)
+            # #self.LM_2_tote()
             self.LM.pub_LM_Cmd(LM_ID_Base, GetShift('Tote', 'x', 'tote'))
             
         

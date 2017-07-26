@@ -24,23 +24,22 @@ if __name__ == '__main__':
     rospy.sleep(0.5)
 
     left_arm  = arm_task_rel.ArmTask('/left_arm')
-    right_arm = arm_task_rel.ArmTask()
+    # right_arm = arm_task_rel.ArmTask()
 
 
 
     # left_arm.home()
     # right_arm.home()
-    safe_pose(right_arm)
-    init_pose(left_arm)
+    # safe_poft_arm)
 
-    while (left_arm.busy) or (right_arm.busy):
-         rospy.sleep(.1)
+    # while (left_arm.busy) or (right_arm.busy):
+    #      rospy.sleep(.1)
 
-    safe_pose(left_arm)
-    init_pose(right_arm)
+    # safe_pose(left_arm)
+    # init_pose(right_arm)
 
-    while (left_arm.busy) or (right_arm.busy):
-         rospy.sleep(.1)
+    # while (left_arm.busy) or (right_arm.busy):
+    #      rospy.sleep(.1)
 
     # safe_pose(left_arm)
     # safe_pose(right_arm)
@@ -49,7 +48,10 @@ if __name__ == '__main__':
     #     rospy.sleep(.1)
 
     left_arm.home()
-    right_arm.home()
+    # right_arm.home()
 
-    while (left_arm.busy) or (right_arm.busy):
-         rospy.sleep(.1)
+    # while (left_arm.busy) or (right_arm.busy):
+    #      rospy.sleep(.1)
+
+    # init_pose(left_arm)
+    # init_pose(right_arm)

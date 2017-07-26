@@ -114,7 +114,7 @@ ToteShift_X	= [27000, 60000]
 ToteShift_Z	= [72000, 60000]
 
 
-ToteLeave_Z = 50000
+ToteLeave_Z = 40000
 ToteLeave_Z_Amnesty = 30000     # pick (suck)  finish
 
 LM_Right_Arm_Shift = 18000
