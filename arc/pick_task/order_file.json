@@ -1,20 +1,28 @@
 {
     "orders": [
         {
+            "size_id": "A1",
+            "contents": [
+                "paper_napkins",
+                "crayons"
+            ]
+        },
+        {
             "size_id": "1A5",
             "contents": [
+                "vinyl_liner",
+                "smurf_hat",
+                "colgate_toothbrush_4pk"
             ]
         },
         {
             "size_id": "1B2",
             "contents": [
-                "composition_book"
-            ]
-        },
-        {
-            "size_id": "K3",
-            "contents": [
-                "burts_bees_baby_wipes"
+                "circular_cake_pans",
+                "disney_princess_journal",
+                "balloons",
+                "measuring_spoons",
+                "ticonderoga_pencils"
             ]
         }
     ]

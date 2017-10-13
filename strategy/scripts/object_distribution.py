@@ -243,11 +243,19 @@ def DistributionV2(type, mission_obj, fullrate, out_of_bin):
         LimitOfObj[BinOrder[i]] = limit
 
     if out_of_bin == 1:
-        LimitOfObj['D'] = 6
-        LimitOfObj['J'] = 6
+        LimitOfObj['D'] = 10
+        LimitOfObj['J'] = 10
     
     nobelong = []
 
+    LimitOfObj['B'] = 0
+    LimitOfObj['C'] = 0
+    LimitOfObj['E'] = 0
+    LimitOfObj['F'] = 0
+    LimitOfObj['G'] = 0
+    LimitOfObj['H'] = 0
+    
+    
     for i in MissionObjOrder:
         for j in BinOrder:
             #排序物體和bin的三圍
@@ -335,7 +343,7 @@ def show_bin_content(bin_content):
         print('bin ',bin_content[i].block,' ',bin_content[i].Object)
 
 def main():
-    item_location_file_path = rospkg.RosPack().get_path('arc') + '/stow_task/stow_test.json'
+    item_location_file_path = rospkg.RosPack().get_path('arc') + '/stow_task/item_location_file.json' #stow_test.json'
 
 
     print("item_location_file_path =" + item_location_file_path)

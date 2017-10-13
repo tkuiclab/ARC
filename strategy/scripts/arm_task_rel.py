@@ -258,9 +258,11 @@ class ArmTask:
                 degrees(euler[0])
             ),fai
         )
+        
 
         while self.__is_busy and blocking:
             rospy.sleep(.1)
+            #print 'self.__is_busy = ' + str(self.__is_busy)
 
     def Get_Collision_Avoidance_Cmd(self, desire_cmd, LM1, LM2, SuctionAngle, BinID):
         #desire_cmd = [x, y, z, pitch(deg), roll(deg), yaw(deg)]
@@ -722,7 +724,7 @@ class ArmTask:
     def relative_xyz_base(self, mode='ptp', x=0, y=0, z=0, fai=0, blocking = False):
         """relative move xyz with manipulator base axis."""
         while self.__is_busy and blocking:
-            print 'first self.__is_busy = ' + str(self.__is_busy)
+            # print 'first self.__is_busy = ' + str(self.__is_busy)
             rospy.sleep(.1)
 
         fb = self.get_fb()
@@ -747,7 +749,7 @@ class ArmTask:
 
         print 'befoer second busy self.__is_busy = ' + str(self.__is_busy)
         while self.__is_busy and blocking:
-            #print 'self.__is_busy = ' + str(self.__is_busy)
+            # print 'self.__is_busy = ' + str(self.__is_busy)
             rospy.sleep(.1)
 
     def Move2_Abs_xyz(self, x, y, z, mode='ptp'):

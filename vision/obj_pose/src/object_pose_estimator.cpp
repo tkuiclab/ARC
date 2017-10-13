@@ -169,6 +169,10 @@ void ObjEstAction::cloudCB(const sensor_msgs::PointCloud2ConstPtr& input)
         pub_feedback("Getting Highest of UNKNOWN....",40);
       } else if(state == GET_ONE_ROI){
         pub_feedback("Getting One ROI....",40);
+      }else if(state == GET_CLOSEST_SIFT){
+        pub_feedback("Getting ROI from SIFT....",40);
+      }    else{
+        state = GET_ONE_ROI;
       }
   }
 }
@@ -419,6 +423,9 @@ void ObjEstAction::get_closest_SIFT(){
   float near_from_cam = 999.0;
   int t_mini_x, t_mini_y, t_max_x, t_max_y;
   
+
+  printf("in get_closest_SIFT()............\n");
+
   for(int i =0;i < obj_list.size();i++){
       
       std::cout << "Request sift with " << obj_list[i] << std::endl;
@@ -673,7 +680,7 @@ void ObjEstAction::get_one_roi(){
     write_pcd_2_rospack(ROI_cloud,"_ROI.pcd");
 #endif 
 
-  //state = POSE_ESTIMATION;
+  // state = POSE_ESTIMATION;
   state = SEGMETATION;
 
   return;

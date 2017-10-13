@@ -62,7 +62,9 @@ CATKIN_IGNORE
 
 # sift ignore
 /vision/sift/training items/
+/vision/sift/training items_2/
 /vision/sift/Training items/
+
 /vision/sift/*.png
 /vision/sift/result/
 
@@ -72,5 +74,10 @@ CATKIN_IGNORE
 # ignore cam2obj/build
 /vision/cam2obj/build/
 /arc/Training items/
+/arc/Training items_arc/
 /arc/output/
 *.crdownload
+
+# ignore traing items
+/Training items_arc/
+/Training items_stow/

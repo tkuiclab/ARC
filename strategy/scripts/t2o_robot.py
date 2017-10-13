@@ -40,7 +40,9 @@ class T2O:
         self.Arm 			= arm_task_rel.ArmTask()
         rospy.on_shutdown(self.stop_task)
         self.__obj_pose_client = actionlib.SimpleActionClient("/obj_pose", obj_pose.msg.ObjectPoseAction)
-        
+
+        self.lm = LM_Control.CLM_Control()
+        self.pt = PickTask(self.Arm, self.lm)
 
     def stop_task(self):
         """Stop task running."""
@@ -53,8 +55,8 @@ class T2O:
         rospy.loginfo('obj_pose_request() obj='+obj)
         
         #goal = obj_pose.msg.ObjectPoseGoal(obj)
-        # goal = obj_pose.msg.ObjectPoseGoal(object_name = obj, limit_ary =[-0.14, 0.14, -0.1,  0.4, 0.35, 0.6])
-        goal = obj_pose.msg.ObjectPoseGoal(object_name = '<Closest>', limit_ary =[-0.14, 0.14, -0.1,  0.4, 0.35, 0.6])
+        goal = obj_pose.msg.ObjectPoseGoal(object_name = obj, limit_ary =[-0.14, 0.14, -0.1,  0.4, 0.35, 0.6])
+        # goal = obj_pose.msg.ObjectPoseGoal(object_name = '<Closest>', limit_ary =[-0.14, 0.14, -0.1,  0.4, 0.35, 0.6])
         
         self.__obj_pose_client.send_goal(goal,feedback_cb = self.obj_pose_feedback_cb, done_cb=self.obj_pose_done_cb )
         self.__obj_pose_client.wait_for_result()
@@ -340,6 +342,7 @@ class T2O:
         rospy.loginfo("(move_cam_x, move_cam_y, move_cam_z)= (" + str(move_cam_x) + ", " + str(move_cam_y) + ", " + str(move_cam_z) + ")")
         rospy.loginfo("(real_move_x, real_move_y, real_move_z)= (" + str(real_move_x) + ", " + str(real_move_y) + ", " + str(real_move_z) + ")")
         rospy.loginfo("(real_move_x_rot, real_move_y_rot, real_move_z_rot)= (" + str(real_move_x_rot) + ", " + str(real_move_y_rot) + ", " + str(real_move_z_rot) + ")")
+        print('self.Arm.relative_xyz_base(x = '+str(real_move_z_rot)+', y = '+str(real_move_x_rot)+', z = '+str(real_move_y_rot*-1)+')')
 
         #----------------Place---------------#
         # self.bin_place_pose()
@@ -350,12 +353,24 @@ class T2O:
         self.Arm.relative_rot_nsa(roll = y)
         gripper_suction_deg(r - relativeAng)
 
+        if real_move_y_rot*-1 < -0.019:
+            print("\\\SPECIAL CASE 4 LOWER ITEM///")
+            self.Arm.relative_xyz_base(x = 0.1, blocking=True)
+            self.Arm.move_2_Abs_Roll(179, blocking=True)
+            gripper_suction_deg(90)
+            self.pt.LM.rel_move_LM('right', -5)
+            self.Arm.relative_xyz_base(z = 0.05 + 0.045, blocking = True)
+            self.Arm.relative_xyz_base(x = real_move_z_rot - (0.02 + 0.1), y = real_move_x_rot, blocking = True)
+            return
+
         print('=====')
         print('self.Arm.relative_rot_nsa(roll = '+str(y)+')')
         print('self.Arm.gripper_suction_deg('+str(r-relativeAng)+')')
         print('self.Arm.relative_xyz_base(x = '+str(real_move_z_rot)+', y = '+str(real_move_x_rot)+', z = '+str(real_move_y_rot*-1)+')')
         # return
-        self.Arm.relative_xyz_base(x = real_move_z_rot, y = real_move_x_rot, z = real_move_y_rot*-1)
+
+
+        self.Arm.relative_xyz_base(x = real_move_z_rot, y = real_move_x_rot, z = real_move_y_rot*-1, blocking = True)
         # self.Arm.relative_xyz_base(x = 0.15)
         # self.Arm.relative_xyz_base(y = real_move_x_rot, z = real_move_y_rot*-1)
 
@@ -560,11 +575,15 @@ if __name__ == '__main__':
     arm = arm_task_rel.ArmTask()
     lm = LM_Control.CLM_Control()
     s = PickTask(arm, lm)
-    s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'a') + 18000)
-    rospy.sleep(0.3)
-    s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'a'))
-    task.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
-    task.obj_pose_request('colgate_toothbrush_4pk')
+    # s.LM.pub_LM_Cmd(2, GetShift('Bin', 'x', 'e') + 18000)
+    # rospy.sleep(0.3)
+    # s.LM.pub_LM_Cmd(1, GetShift('Bin', 'z', 'e'))
+    # task.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0))
+    # task.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.2), (-90, 0, 0))#
+    # task.Arm.relative_xyz_base(x = 0.1, blocking = True)#
+    # task.Arm.move_2_Abs_Roll(179, blocking = True)#
+    # gripper_suction_deg(90)#
+    # task.obj_pose_request('irish_spring_soap')
 
     ### Bin Place ###
     # s = Strategy()

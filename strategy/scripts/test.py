@@ -24,6 +24,9 @@ from s import *
 from sift.srv import *
 from LM_Control import *
 from config import *
+from get_obj_info import info_dict
+
+
 
 def safe_pose(arm):
     arm.pub_ikCmd('ptp', (0.30, 0.00 , 0.3), (-180, 0, 0))
@@ -112,12 +115,56 @@ if __name__ == '__main__':
         # ss.Arm.pub_ikCmd('ptp', (0.45, 0 , 0.1), (-180, 0, 0), 0)
 
         #---------Go Bin I ----------#
-        #ss.stow.LM_2_Bin_Right_Arm('i')
-        #ss.stow.arm_leave_tote_i_bin()
+        #ss.Arm.pub_ikCmd('ptp', (0.52, 0.00 , 0.22), (-170, 0, 0))
+        ss.Arm.pub_ikCmd('ptp', (0.35, 0.00 , 0.05), (-180, 0, 0))
+        gripper_suction_down()
+        gripper_vaccum_on()
+        ss.LM.pub_LM_Cmd(LM_ID_Right, 70000 ) #65000)
+        rospy.sleep(0.3)
+        ss.LM.pub_LM_Cmd(LM_ID_Base, 60000)
+        exit()
+        ss.stow.LM_2_Bin_Right_Arm('j')
+        # gripper_suction_down()
+        # # gripper_vaccum_on()
+        
+        # #ss.stow.arm_leave_tote_i_bin()
+        # # ss.stow.arm_photo_pose()
 
-        #ss.Arm.relative_move_nsa(a = -0.23)
+        # #ss.Arm.pub_ikCmd('ptp', (0.25, 0.00 , 0.25), (-180, 0, 0))
+        # ss.LM.pub_LM_Cmd(1, 65000)
+        # ss.Arm.pub_ikCmd('ptp', (0.5, 0.00 , 0.25), (-180, 0, 0))
+        # ss.Arm.relative_move_nsa(a = -0.23)
 
         #exit()
+
+        #ss.stow.LM_2_Bin_Right_Arm('j')
+        #ss.stow.arm_leave_tote()
+        #ss.Arm.pub_ikCmd('ptp', (0.12, 0.0 , 0.3), (-90, 0, 0) )
+        while ss.Arm.busy:
+            rospy.sleep(.1)
+        
+        #ss.Arm.relative_move_nsa(a = (0.2 + 0.08))  #d
+        #ss.Arm.relative_move_nsa(a = (0.2 + 0.10))  #e
+        #ss.Arm.relative_move_nsa(a = (0.2 + 0.08))   #g   
+        #ss.Arm.relative_move_nsa(a = (0.2 + 0.05))
+        # c in more
+        # put to big 
+        # why get out expo eraser
+        
+        rospy.spin()
+
+
+        #-------- Test obj_info-----------#
+        item_info = info_dict['baby_sandals']
+
+        print str(item_info.dimensions)
+        print str(item_info.type)
+        
+        w_plus_h = item_info.dimensions[0] + item_info.dimensions[1]
+
+        print('w_plus_h = ' + str(w_plus_h))
+
+        exit()        
 
         #---------Test LM-----------#
         print 'LM_2_tote()'

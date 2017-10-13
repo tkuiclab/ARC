@@ -214,7 +214,8 @@ if __name__ == '__main__':
     #     '/camera/rgb/image_raw' if len(sys.argv) < 2
     #     else sys.argv[1]
     # )
-    img_cvt = ImageConverter('/camera/rgb/image_raw')
+    img_topic = rospy.get_param('/img_topic')
+    img_cvt = ImageConverter(img_topic)
 
     task_type = rospy.get_param('/task_type')
     rospy.loginfo('Task Type: ' + task_type)
@@ -225,8 +226,8 @@ if __name__ == '__main__':
         "model": "cfg/yolo-new.cfg",    # model of net
         "backup": "ckpt/",              # directory of ckpt (training result)
         "load": ckpt_num,               # which ckpt will be loaded. -1 represent the last ckpt
-        "threshold": -0.1,              # threshold for confidence
-        "gpu": 0.8,                     # gpu using rate
+        "threshold": 0.2,              # threshold for confidence
+        "gpu": 0.4,                     # gpu using rate
     }
     tfnet = TFNet(options)
     prepare_network()
@@ -234,7 +235,7 @@ if __name__ == '__main__':
     # Show result of detection for every 50ms if the frame is fresh
     rospy.Timer(rospy.Duration(.05), show_detection)
     # for Testing
-    #rospy.Timer(rospy.Duration(.05), req_for_testing)
+    # rospy.Timer(rospy.Duration(.05), req_for_testing)
     rospy.Service('detect', Detect, handle_request)
     rospy.loginfo('Object detector is running.')
     rospy.spin()

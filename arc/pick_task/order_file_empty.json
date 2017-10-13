@@ -1,0 +1,20 @@
+{
+    "orders": [
+        {
+            "size_id": "1A5",
+            "contents": [
+                "intel_cpu"
+            ]
+        },
+        {
+            "size_id": "1B2",
+            "contents": [
+            ]
+        },
+        {
+            "size_id": "K3",
+            "contents": [
+            ]
+        }
+    ]
+}

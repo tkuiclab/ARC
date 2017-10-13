@@ -83,3 +83,15 @@ rosrun strategy gen_sift_training_item.py)
 rosrun sift sift_node.py
 
 (see service example in test_request_closest_sift)
+
+
+
+
+
+roslaunch arc control.launch 
+roslaunch realsense_camera sr300_nodelet_rgbd.launch 
+roslaunch usb_cam usb_cam-test.launch
+rosrun obj_pose object_pose_estimator
+
+roslaunch darkflow_detect detect.launch task_type:=stow 
+roslaunch darkflow_detect detect_2.launch img_topic:=/usb_cam/image_raw task_type:=stow

@@ -1,18 +1,6 @@
 {
-    "dir": "/home/iclab/arc_ws/src/arc_ui/web/item-app/public/arc_items/",
+    "dir": "/home/iclab/arc_ws/src/ARC/arc_ui/web/item-app/public/arc_items/",
     "items": [
-        {
-            "name": "avery_binder",
-            "img": "arc_items/Avery_Binder/Avery_Binder_Top_01.png",
-            "dimensions": [
-                0.266,
-                0.294,
-                0.041
-            ],
-            "weight": 0.36,
-            "type": "book",
-            "description": "For on-the-go organization, this Durable Binder is the perfect fit for briefcases, purses and backpacks. The binder design is stronger, lasts longer and resists tearing, while the DuraEdge feature makes the sides and top more pliable to resist splitting. Our deep texture film offers a smoother finish and features a linen pattern for high quality look and feel. Easily organize and secure loose papers with two interior pockets."
-        },
         {
             "name": "balloons",
             "img": "arc_items/Balloons/Balloons_Top_01.png",
@@ -26,28 +14,16 @@
             "description": "This pack contains 15 red latex balloons. WARNING: choking hazard - children under 8 can choke or suffocate on uninflated or broken balloons. Adult supervision required. Helium not included."
         },
         {
-            "name": "band_aid_tape",
-            "img": "arc_items/Band_Aid_Tape/Band_Aid_Tape_Top_01.png",
+            "name": "bendy_straws",
+            "img": "arc_items/Bendy_Straws/Bendy_Straws_Top_01.png",
             "dimensions": [
-                0.089,
-                0.126,
-                0.03
+                0.041,
+                0.129,
+                0.3095
             ],
-            "weight": 0.024,
-            "type": "clamshell",
-            "description": "Johnson & Johnson Hurt Free Paper Tape. Firmly secure dressings around wounds with BAND-AID Brand of First Aid Products Paper Tape. Ideal for when frequent bandage changes are required, this tape is breathable, free of natural rubber latex, and dermatologically tested to be non-irritating. It's easy and painless to remove and tears easily, so it can be customized to fit any size bandage. It comes in one roll measuring 1 inch by 12 yards."
-        },
-        {
-            "name": "bath_sponge",
-            "img": "arc_items/Bath_Sponge/Bath_Sponge_Top_01.png",
-            "dimensions": [
-                0.136,
-                0.217,
-                0.123
-            ],
-            "weight": 0.076,
-            "type": "deformable",
-            "description": "EcoTools EcoPouf Delicate Bath Sponge. Look beautiful and live beautifully every day with the EcoTools EcoPouf Delicate Bath Sponge This soft sponge will help you cleanse all over with a rich lather. EcoTools EcoPouf can also be recycled (just remove the ribbon). Reveal softer, younger-looking skin. Gently cleanse with 100% recycled netting. Softest EcoPouf ever. Earth-friendly beauty. Orange color (available in alternative colors)."
+            "weight": 0.103,
+            "type": "wrapped",
+            "description": "80 count of neon colored bendy straws with longer flex"
         },
         {
             "name": "black_fashion_gloves",
@@ -62,16 +38,16 @@
             "description": "Authentic FOMANN gloves in retail packaging. One size fits most Teens(Age 15 and up), Mens and Ladies. Soft and comfortable, superior quality gloves. Good for field works & outdoor sports and winter gloves. Fibers Blend"
         },
         {
-            "name": "burts_bees_baby_wipes",
-            "img": "arc_items/Burts_Bees_Baby_Wipes/Burts_Bees_Baby_Wipes_Top_01.png",
+            "name": "circular_cake_pans",
+            "img": "arc_items/Circular_Cake_Pans/Circular_Cake_Pans_Top_01.png",
             "dimensions": [
-                0.119,
-                0.225,
-                0.066
+                0.04,
+                0.244,
+                0.2445
             ],
-            "weight": 0.444,
-            "type": "wrapped",
-            "description": "Natural baby wipes gentle enough for babys sensitive skin. Burts Bees Baby Chlorine Free Wipes are made with aloe and vitamin E to leave babys skin smoother, softer and clean. These cloth like wipes are super soft and soothes skin. It is safe and gentle for everyday use on babys face or bottom. These 99.2% natural baby wipes are fragrance free and pediatrician tested. They are also chlorine free, which means that no chlorine of any kind was used in the process of making the fabric. Nurture babys skin naturally with Baby Bee from Burts Bees. 72 ct. pack of 99.2% natural baby wipes. Aloe and vitamin E calm, clean and soften delicate skin. Non irritating natural baby wipes without chlorine or fragrance. Pediatrician tested and hypoallergenic cloth like body wipes. Handy pack fits into a diaper bag or on the change table."
+            "weight": 0.151,
+            "type": "other",
+            "description": "9-inch diameter cake pan, 1.5-inch deep, matte silver, not wrapped."
         },
         {
             "name": "colgate_toothbrush_4pk",
@@ -110,6 +86,30 @@
             "description": "Great for use at home or school, Crayola Crayons are an essential creative tool for kids. This pack of 24 non-toxic crayons contains classic colors as well as bright, fun shades to inspire self-expression and imaginative play. Plus, Crayola Crayons can last 35 percent longer. Vibrant, High-Quality Results. Crayola Crayons provide color-loving kids with 24 hues that feature vibrant, long-lasting color. Amp up school projects and artistic endeavors with high-quality results. The variety of bright colors in this pack invites imaginative expression. 24 Classic and Fun Colors. Kids will love to use these vividly colored, durable crayons at home or at school. Small enough to fit in a book bag, this portable box is large enough to hold a wide variety of colors. In addition to classic Crayola colors, this 24-count box contains fun shades such as carnation pink, dandelion, indigo, and scarlet, so you can mix and match to create colorful drawings and bold signs. Durable, Long-Lasting Crayons. Crayola Crayons can last 35 percent longer, based on square foot coverage against key competitors. Children can enjoy drawing more pictures and filling coloring books even longer. About Crayola: Art and Imagination. Crayola art supplies and activities help children express, create, and connect through colorful play. Package Contents: Crayola Crayons, 24 Count."
         },
         {
+            "name": "disney_princess_journal",
+            "img": "arc_items/Disney_Princess_Journal/Disney_Princess_Journal_Top_01.png",
+            "dimensions": [
+                0.0195,
+                0.142,
+                0.209
+            ],
+            "weight": 0.304,
+            "type": "book",
+            "description": "This is a mostly pink journal with three Disney Princesses on the cover, Belle, Cinderella, and Rapunzel. It is hard covered with a lock on the side. It measures 8.25 by 5.25 inches and has 120 sheets."
+        },
+        {
+            "name": "dove_soap",
+            "img": "arc_items/Dove_Soap/Dove_Soap_Top_01.png",
+            "dimensions": [
+                0.037,
+                0.0615,
+                0.088
+            ],
+            "weight": 0.098,
+            "type": "box",
+            "description": "small white cardboard box. Contains a bar of soap that has enough room to bounce from side to side within box"
+        },
+        {
             "name": "duct_tape",
             "img": "arc_items/Duct_Tape/Duct_Tape_Top_01.png",
             "dimensions": [
@@ -120,18 +120,6 @@
             "weight": 0.144,
             "type": "cylinder",
             "description": "Scotch(R) Cloth Tape is a general purpose cloth tape. It is intended for bundling, sealing, and holding applications. Great in the home and office. General purpose duct tape. For bundling. For sealing. For holding applications in the home and office."
-        },
-        {
-            "name": "epsom_salts",
-            "img": "arc_items/Epsom_Salts/Epsom_Salts_Top_01.png",
-            "dimensions": [
-                0.163,
-                0.252,
-                0.068
-            ],
-            "weight": 0.898,
-            "type": "deformable",
-            "description": "Pamper tired achy feet with Dr Teal's Epsom Salt Foot Soak. Dr Teal's Foot Soak with Pure Epsom Salt (Magnesium Sulfate U.S.P.) is known to revitalize tired, achy feet and refresh skin's appearance. Plus, peppermint essential oil and baking soda provide a cooling sensation and help eliminate foot odor. Pour at least 1/2 cup of Dr Teal's Foot Soak per gallon of warm water into a basin or small container. Soak feet for 15-20 minutes. Breathe in the relaxing scent of peppermint to soothe the senses."
         },
         {
             "name": "expo_eraser",
@@ -146,64 +134,16 @@
             "description": "Soft pile felt eraser quickly removes marks on any whiteboard, porcelain or melamine surface. Non-abrasive material erases cleanly without scratching. Washable - simply use soap and water to clean. Expo Whiteboard Dry Erase Board Soft Pile Eraser, 5 1/8-inch, 1-count."
         },
         {
-            "name": "fiskars_scissors",
-            "img": "arc_items/Fiskars_Scissors/Fiskars_Scissors_Top_01.png",
+            "name": "great_value_dishwasher_packets",
+            "img": "arc_items/Great_Value_Dishwasher_Packets/Great_Value_Dishwasher_Packets_Top_01.png",
             "dimensions": [
-                0.066,
-                0.124,
-                0.011
+                0.0615,
+                0.149,
+                0.219
             ],
-            "weight": 0.032,
-            "type": "other",
-            "description": "Blunt-tip Kids Scissors (5 in). Recommended by teachers, trusted by moms and loved by kids! Children love our Blunt-tip Kids Scissors for the handle that’s shiny, bright and smooth, not “sticky” or “bumpy.” Teachers and moms love the safe design and the antimicrobial handle protection. Like all of our Kids Scissors, our Blunt-tip Kids Scissors feature our innovative safety-edge blades for high-quality cutting with a safer blade angle, plus a larger finger loop and an ergonomic thumb loop to provide a natural, more comfortable fit for kids’ fingers. Features: Ideal for kids ages four and up. #1 teacher recommended brand. Innovative safety-edge blades feature a safer blade angle to protect kids while still cutting all classroom materials. Blunt-tip blades provide added safety. Larger finger loop and an ergonomic thumb loop provide a natural, more comfortable fit for kids’ fingers. Smooth, shiny pink handle was specifically requested by kids. Antimicrobial handle protection inhibits the growth of bacterial odors and helps prevent product deterioration. Accommodates right- and left-handed users. Length: 5 in. Lifetime warranty."
-        },
-        {
-            "name": "flashlight",
-            "img": "arc_items/Flashlight/Flashlight_Top_01.png",
-            "dimensions": [
-                0.025,
-                0.085,
-                0.03
-            ],
-            "weight": 0.052,
-            "type": "cylinder",
-            "description": "Aluminum-body blue Amazon Robotics branded LED flashlight. Takes 3 AAA batteries. Convenient wrist strap, sturdy construction."
-        },
-        {
-            "name": "glue_sticks",
-            "img": "arc_items/Glue_Sticks/Glue_Sticks_Top_01.png",
-            "dimensions": [
-                0.102,
-                0.185,
-                0.022
-            ],
-            "weight": 0.116,
-            "type": "clamshell",
-            "description": "Goes on purple but dries clear! Easy, no mess bonding. Works on a variety of paper types — including cardboard, foam board, display board, computer paper and more. Washable with soap and water; Acid free; Certified AP nontoxic."
-        },
-        {
-            "name": "hand_weight",
-            "img": "arc_items/Hand_Weight/Hand_Weight_Top_01.png",
-            "dimensions": [
-                0.059,
-                0.144,
-                0.057
-            ],
-            "weight": 0.952,
-            "type": "other",
-            "description": "These 2lb handweights are shaped for comfort. The neoprene coating prevents slipping during use, and the faceted shape keeps the weight from rolling away. Stand out at the gym with a pair of pink Champion weights. Stay in shape and keep your muscles toned with this hexagonal C9 2lb Neoprene Hand Weight. This hand weight's neoprene coating provides a comfortable, non-slip grip. Hand weights enhance all aerobic exercise and fitness training; they help improve muscle tone and core strength."
-        },
-        {
-            "name": "hanes_socks",
-            "img": "arc_items/Hanes_Socks/Hanes_Socks_Top_01.png",
-            "dimensions": [
-                0.226,
-                0.267,
-                0.072
-            ],
-            "weight": 0.356,
-            "type": "wrapped",
-            "description": "Give your feet the comfort they deserve with these Hanes Men's Cushion Crew Socks, 6 Pairs. They feature a reinforced heel and toe for enhanced durability. The extra support provided by the cushioned sole helps reduce the impact your feet receive on a daily basis. The stay-up top holds them in place even during exercise. Add these men's crew socks to your wardrobe or buy them as a gift for a loved one."
+            "weight": 0.395,
+            "type": "deformable",
+            "description": "white blue and green plastic bag holds 20 dishwasher packets. They are tightly packed but still move a little within the bag. The bag has a resealable flap at the top. It measure 8.5 by 6 inches."
         },
         {
             "name": "hinged_ruled_index_cards",
@@ -230,18 +170,6 @@
             "description": "Sterilite Ice Cube Tray 1-pk - White. The durable, yet flexible ice cube trays allows ice cubes to release with an easy twist. The ice trays stack securely without sticking and are designed to channel water so trays fill quickly. Each tray makes 16 nice-sized ice cubes. FLEXIBLE AND DURABLE: Ice cubes release easily with just a twist. STACKABLE: Trays stack easily and neatly in the freezer without sticking. Features: BPA-free. Material: Plastic. Care and Cleaning: Freezer Safe, Dishwasher-safe. Number of cavities: 16."
         },
         {
-            "name": "irish_spring_soap",
-            "img": "arc_items/Irish_Spring_Soap/Irish_Spring_Soap_Top_01.png",
-            "dimensions": [
-                0.064,
-                0.1,
-                0.039
-            ],
-            "weight": 0.122,
-            "type": "box",
-            "description": "Irish Spring Moisture Blast Bar Soap 3.75oz. Irish Spring Moisture Blast Bar Soap is formulated with emollients that dissolve so you feel moisturized, never high and dry. HydroBeads particles instantly dissolve on your skin as you shower. Irish Spring Moisture Blast Bar Soap helps retain your skin’s natural moisture. Its revitalizing scent awakens your senses, and its 12-hour deodorant protection lets you feel fresh throughout the day. Includes: Body Bar. Used For: Fragrance, Moisturizing, Skin Tone Improvement, basic cleansing. For Use On: Whole Body. Product Form: Bar. Scent: Fresh. Product Warning: no warning applicable. Features: Non-irritating, Soothing, Non-drying."
-        },
-        {
             "name": "laugh_out_loud_jokes",
             "img": "arc_items/Laugh_Out_Loud_Jokes/Laugh_Out_Loud_Jokes_Top_01.png",
             "dimensions": [
@@ -252,6 +180,18 @@
             "weight": 0.082,
             "type": "book",
             "description": "What happens to race car drivers when they eat too much? They get indy-gestion. Laugh-Out-Loud Jokes for Kids provides children ages 7-10 many hours of fun and laughter. Young readers will have a blast sharing this collection of hundreds of one-liners, knock knock jokes, tongue twisters, and more with their friends and family This brand new book will have children rolling on the floor with laughter and is sure to be a great gift idea for any child."
+        },
+        {
+            "name": "listerine",
+            "img": "arc_items/Listerine/Listerine_Top_01.png",
+            "dimensions": [
+                0.049,
+                0.092,
+                0.223
+            ],
+            "weight": 0.563,
+            "type": "other",
+            "description": "500 mL bottle of listerine. Teal coloured antiseptic mouthwash in a rectangular shaped bottle."
         },
         {
             "name": "marbles",
@@ -278,16 +218,16 @@
             "description": "Precision and style blend together to enhance your cooking with this Stainless Steel Mixing Measuring Spoon Set. An essential utensil for any chef, this Measuring Spoon Set is made of gorgeous and sturdy stainless steel so it's easy to clean and adds sharp appeal to your kitchen decor. The measurements are carved into the handles to make the Spoons easy to read. Including a teaspoon, tablespoon, 1/4 teaspoon and 1/2 teaspoon, this Set ensures your recipes come out just right."
         },
         {
-            "name": "mesh_cup",
-            "img": "arc_items/Mesh_Cup/Mesh_Cup_Top_01.png",
+            "name": "mesh_strainer",
+            "img": "arc_items/Mesh_Strainer/Mesh_Strainer_Top_01.png",
             "dimensions": [
-                0.108,
-                0.144,
-                0.109
+                0.079,
+                0.1635,
+                0.3315
             ],
-            "weight": 0.1,
-            "type": "cylinder",
-            "description": "Rolodex Nestable Jumbo Wire Mesh Pencil Cup, Black. Store pencils, pens, and other office supplies conveniently in the Rolodex Mesh Collection Jumbo Pencil Cup. With a large capacity to conveniently store oddly shaped office supplies, the jumbo pencil cup is a great addition to any home or business workspace. Choose a stylish way to control desktop clutter. Taller, extra-capacity cup holds writing instruments, scissors, rulers and other longer-taller desk supplies. Pencil Cup Type: Mesh Metal; Color(s): Black; Material(s): Steel Mesh; Diameter: 4 3/8 in."
+            "weight": 0.118,
+            "type": "other",
+            "description": "6 inch  MAINSTAYS strainer with black easy grip handle and heavy-duty rust resistant silver mesh. Not wrapped"
         },
         {
             "name": "mouse_traps",
@@ -302,16 +242,40 @@
             "description": "The Tomcat Mouse Trap (Wooden) is the pesticide-free way to control mice. It can be used with Tomcat Mouse Attractant Gel to attract mice. You can rely on this economical, easy-to-use trap to help you exterminate your mouse infestation."
         },
         {
-            "name": "pie_plates",
-            "img": "arc_items/Pie_Plates/Pie_Plates_Top_01.png",
+            "name": "mouth_guard_case",
+            "img": "arc_items/Mouth_Guard_Case/Mouth_Guard_Case_Top_01.png",
             "dimensions": [
-                0.258,
-                0.258,
-                0.05
+                0.037,
+                0.104,
+                0.173
             ],
-            "weight": 0.104,
-            "type": "other",
-            "description": "2 pack of disposable 9in pie pans with lids. Easy to serve, non-stick design. Holds up to 3 cups. Eliminate the need of using oil or non-stick sprays with the Reynolds 9in Pie Pan with Lid. This disposable, foil pie pans come with lids for easy transport of your fresh baked goodies."
+            "weight": 0.087,
+            "type": "clamshell",
+            "description": "Flat back made out of plastic. Red/Black cardboard insert describing the producted, located in the packaging. Roughly ½ of the front side is an extruded square were the product is located. The case is white with black lettering."
+        },
+        {
+            "name": "number_flash_cards",
+            "img": "arc_items/Number_Flash_Cards/Number_Flash_Cards_Top_01.png",
+            "dimensions": [
+                0.017,
+                0.0965,
+                0.1545
+            ],
+            "weight": 0.115,
+            "type": "box",
+            "description": "yellow cardboard box. It is short in height and lightweight."
+        },
+        {
+            "name": "paper_napkins",
+            "img": "arc_items/Paper_Napkins/Paper_Napkins_Top_01.png",
+            "dimensions": [
+                0.0605,
+                0.169,
+                0.1705
+            ],
+            "weight": 0.171,
+            "type": "wrapped",
+            "description": "50 count of white 32cm x 32cm 2-ply napkins. Each square napkin has floral printing"
         },
         {
             "name": "plastic_wine_glass",
@@ -338,88 +302,64 @@
             "description": "Sourced from carefully selected springs in Maine since 1845, POLAND SPRING spring water contains naturally occurring minerals for a crisp, refreshing taste. 100% natural spring water. Zero calories, no sweeteners and no artificial colors or flavors. Contains naturally balanced minerals for a crisp, refreshing taste. Every bottle is 100% recyclable (excluding label and cap)."
         },
         {
-            "name": "reynolds_wrap",
-            "img": "arc_items/Reynolds_Wrap/Reynolds_Wrap_Top_01.png",
+            "name": "promarx_pens",
+            "img": "arc_items/Promarx_Pens/Promarx_Pens_Top_01.png",
             "dimensions": [
-                0.047,
-                0.319,
-                0.047
+                0.0185,
+                0.1,
+                0.2025
             ],
-            "weight": 0.39,
-            "type": "box",
-            "description": "Reynolds Wrap Aluminum Foil is moisture-proof, odor-proof, grease-proof, and it can be molded to any shape you like. It withstands high heat and extreme cold, making it perfect for everything from grilling to freezer storage. Foil minimizes cleanup and ensures that your food stays moist and tastes delicious.Some of the most popular uses of Reynolds Wrap Foil are lining pans before making foods like roasts, covering cheesy casseroles or making foil packets. Package Quantity: 1. Used For: Freezer, Multi-purpose, Baking. Length of Roll: 85.000 Square feet. Material: Aluminum. Product Results: Blocks Moisture, Oven-safe."
+            "weight": 0.064,
+            "type": "clamshell",
+            "description": "flat piece of blue cardboard holds three average sized pens of different colors. The pens are centered on the cardboard with a lot of extra room on the sides but are held snug and enclosed in a hard plastic shell"
         },
         {
-            "name": "robots_dvd",
-            "img": "arc_items/Robots_DVD/Robots_DVD_Top_01.png",
+            "name": "red_decorative_shred",
+            "img": "arc_items/Red_Decorative_Shred/Red_Decorative_Shred_Top_01.png",
             "dimensions": [
-                0.136,
-                0.192,
-                0.016
+                0.0535,
+                0.169,
+                0.223
             ],
-            "weight": 0.06,
-            "type": "box",
-            "description": "In a world populated entirely by robots, a young, idealist inventor sets off for Robot City to make his mark on the world. Once he arrives, he is confronted with a reality that is nothing like his dreams and aspirations. Actors: Ewan McGregor, Halle Berry, Mel Brooks, Robin Williams, Paula Abdul. Directors: Carlos Saldanha, Chris Wedge. Writers: Babaloo Mandel, David Lindsay-Abaire, Jim McClain, Lowell Ganz, Ron Mita. Producers: Bob Gordon. Movie Genre: Kids and Family. Format: Multiple Formats, Animated, Closed-captioned, Color, Dolby, DTS Surround Sound, Dubbed, NTSC, Subtitled, Widescreen. Language: English (Dolby Digital 5.1), English (DTS 5.1), French (Dolby Digital 2.0 Surround), Spanish (Dolby Digital 2.0 Surround). Subtitles: English, Spanish. Dubbed: English, French, Spanish. Region: Region 1 (U.S. and Canada only. Read more about DVD formats.) Aspect Ratio: 1.85:1. Number of discs: 1. Rated: PG Parental Guidance Suggested. Studio: 20th Century Fox"
-        },
-        {
-            "name": "robots_everywhere",
-            "img": "arc_items/Robots_Everywhere/Robots_Everywhere_Top_01.png",
-            "dimensions": [
-                0.168,
-                0.201,
-                0.006
-            ],
-            "weight": 0.116,
-            "type": "book",
-            "description": "Robots are everywhere in this bright and funny board book – and preschoolers are going to love it! Whether up in space, beneath the seas, or even under couches, award-winning illustrator Bob Staake’s bold and colorful bots make this book a must have."
-        },
-        {
-            "name": "scotch_sponges",
-            "img": "arc_items/Scotch_Sponges/Scotch_Sponges_Top_01.png",
-            "dimensions": [
-                0.083,
-                0.159,
-                0.072
-            ],
-            "weight": 0.066,
-            "type": "wrapped",
-            "description": "Cellulose Sponges Clean More Effectively. The sponge side of every Scotch-Brite Scrub Sponge is made of cellulose, a material derived from wood pulp, which is a renewable resource. Cellulose sponges wipe and absorb better than conventional foam sponges. You can sanitize your Scotch-Brite Scrub Sponge in the dishwasher to extend its cleaning life. Made from Plant-Based Renewable Resources. Make an environmentally responsible cleaning choice with the Scotch-Brite Greener Clean Non-Scratch Scrub Sponge. The scrubbing fibers are made from 50 percent agave plant, a renewable resource. The sponge side is made from 100 percent plant-based materials, including 23 percent recycled content. Won't Scratch Delicate Surfaces. Your nonstick cookware, dishes, and countertops are safe with the Greener Clean Non-Scratch Scrub Sponge. Scrub away residue quickly and effectively without a scratch. Use the sponge side to absorb spills and messes. One Sponge Can Outlast 30 Rolls of Paper Towels. These reusable sponges reduce waste and offer an economical alternative to disposable products like paper towels. In fact, one sponge can outlast more than 30 rolls of paper towels. Package Contents. Scotch-Brite Greener Clean Non-Scratch Scrub Sponges, 3 Pack."
-        },
-        {
-            "name": "speed_stick",
-            "img": "arc_items/Speed_Stick/Speed_Stick_Top_01.png",
-            "dimensions": [
-                0.069,
-                0.144,
-                0.061
-            ],
-            "weight": 0.276,
-            "type": "box",
-            "description": "Speed Stick Men's Deodorant, Regular, 3 Ounce (Pack of 2). Men's Deodorant with Odor Fighting Formula that Provides 24 Hour Freshness for maximum confidence. Feel clean, masculine and confident. Aluminum Free. Includes guard applicator for comfort and control. To Use: Turn dial to raise product. Apply to underarms only."
-        },
-        {
-            "name": "table_cloth",
-            "img": "arc_items/Table_Cloth/Table_Cloth_Top_01.png",
-            "dimensions": [
-                0.187,
-                0.398,
-                0.023
-            ],
-            "weight": 0.136,
+            "weight": 0.064,
             "type": "deformable",
-            "description": "Bright Pink Rectangle Plastic Tablecover. This tablecloth measures 108 by 54 inches when opened. Single ply sturdy plastic tablecloth is colored pink. Other colors available."
+            "description": "a mostly clear plastic bag with a white and purple logo on the top holds 2 ounces of red shred. The bag is not easily compressed due to all the air within. It measures 7 by 9.5 inches."
         },
         {
-            "name": "tennis_ball_container",
-            "img": "arc_items/Tennis_Ball_Container/Tennis_Ball_Container_Top_01.png",
+            "name": "scotties_tissues",
+            "img": "arc_items/Scotties_Tissues/Scotties_Tissues_Top_01.png",
             "dimensions": [
-                0.077,
-                0.218,
-                0.077
+                0.0795,
+                0.1245,
+                0.232
             ],
-            "weight": 0.228,
-            "type": "cylinder",
-            "description": "Head to the court with these Wilson Championship Tennis Balls. They are designed for excellent performance on both indoor and clay courts. Constructed from Dura-weave felt, they are extremely durable and made to endure even the most rigorous games."
+            "weight": 0.203,
+            "type": "box",
+            "description": "this is a white blue and green colored box. It is made of a thin/light cardboard and has 120 sheets of tissues inside. It is lightweight."
+        },
+        {
+            "name": "smurf_hat",
+            "img": "arc_items/Smurf_Hat/Smurf_Hat_Top_01.png",
+            "dimensions": [
+                0.0365,
+                0.209,
+                0.3625
+            ],
+            "weight": 0.03,
+            "type": "deformable",
+            "description": "white flat soft hat made from 100% polyester. The bottom of the hat opens  to fit a head and there is a hook like shape to the top of the hat"
+        },
+        {
+            "name": "super_washable_markers",
+            "img": "arc_items/Super_Washable_Markers/Super_Washable_Markers_Top_01.png",
+            "dimensions": [
+                0.0185,
+                0.1595,
+                0.17
+            ],
+            "weight": 0.152,
+            "type": "box",
+            "description": "short yellow box holding 10 thick markers of different colors. The markers are tightly packed and don’t move at all within the box. There is an opening on the front face of the box so that the markers are exposed."
         },
         {
             "name": "ticonderoga_pencils",
@@ -434,52 +374,16 @@
             "description": "Ticonderoga #2 Wooden Pencils, 2.2mm, 12ct. When you're taking a test, trust Ticonderoga 12ct Wooden Pencils no.2. Everyone knows that some tests simply require a No. 2 pencil and when you need it you select 'The World's Best Pencil,' Ticonderoga. Tried and true and a time-tested favorite, this pencil will get you through with one less worry on test day. Package Quantity: 12. Includes: Pencil. Lead Size: 2.2mm. Lead Type: no. 2. Features: Low-odor, Non-toxic. Suggested Age: 3 Years and Up."
         },
         {
-            "name": "tissue_box",
-            "img": "arc_items/Tissue_Box/Tissue_Box_Top_01.png",
+            "name": "vinyl_liner",
+            "img": "arc_items/Vinyl_Liner/Vinyl_Liner_Top_01.png",
             "dimensions": [
-                0.116,
-                0.132,
-                0.113
+                0.043,
+                0.044,
+                0.3075
             ],
-            "weight": 0.168,
-            "type": "box",
-            "description": "Kleenex Cool Touch Tissues, Upright 50 count. One soft tissue is all it takes to show you care. Reach for gentle, soothing, fragrance-free Kleenex Cool Touch Tissues for a friend, a stranger or yourself. When Kleenex Cool Touch Tissues come in contact with skin, body heat activates the unique blend of moisturizers and aloe to release cooling comfort to soothe a sore nose. With the perfect balance of softness and strength, Kleenex facial tissues are durable with 2-ply thickness and are absorbent to lock in moisture. Stock up on Kleenex Tissues and keep tissues on hand to care for family, company and yourself during cold and flu season, allergy season, back-to-school and holidays. Kleenex boxes blend beautifully into your home décor. Place boxes in the living room, kitchen, bathrooms, bedrooms and office. Kleenex disposable facial tissues have been there for happy tears and stuffy noses since 1924. Number of Packs: 1. Number of Sheets: 50. Scent: Unscented. Features: cool to the touch."
-        },
-        {
-            "name": "toilet_brush",
-            "img": "arc_items/Toilet_Brush/Toilet_Brush_Top_01.png",
-            "dimensions": [
-                0.168,
-                0.403,
-                0.085
-            ],
-            "weight": 0.128,
-            "type": "other",
-            "description": "Rubbermaid Commercial Toilet Bowl Brush with Plastic Handle. Polypropylene Fill, 1.13-Inch Trim Length, 14.5-Inch Length, White. The Rubbermaid Commercial Products Toilet Brush with Plastic Handle is ideal for commercial, medical, and industrial applications. The sturdy plastic toilet bowl brush handle is suited for moderate to heavy cleaning. A hole near the end of the toilet brush handle allows the toilet cleaning brush to be hung for storage. The white polypropylene bristles are resistant to stains, odors, bacteria, fungi, and wear."
-        },
-        {
-            "name": "white_facecloth",
-            "img": "arc_items/White_Facecloth/White_Facecloth_Top_01.png",
-            "dimensions": [
-                0.17,
-                0.182,
-                0.039
-            ],
-            "weight": 0.062,
-            "type": "deformable",
-            "description": "100% cotton and resists fading and benzoyl peroxide stains, a common skin care product ingredient. Durable double needle side hems and low lint and bleach friendly. Oeko-Tex certified, includes no harmful substances. Create a spa experience in your own home with Threshold Performance Solid Bath Towels. These 100% cotton towels come in an array of gorgeous and fade resistant colors that coordinate easily with other bath items, helping you to design the bathroom of your dreams."
-        },
-        {
-            "name": "windex",
-            "img": "arc_items/Windex/Windex_Top_01.png",
-            "dimensions": [
-                0.103,
-                0.269,
-                0.061
-            ],
-            "weight": 0.758,
-            "type": "other",
-            "description": "Windex Blue Trigger 23oz. Windex Original is America’s #1 glass cleaner. Trusted by generations for its famous streak-free shine, Windex Original cleans and shines glass, mirrors, and more! Thanks to its patented ingredient, Ammonia-D, Windex Original starts working on dirt and grime even before you wipe. #1 Glass Cleaner claim based on AC Nielsen sales data for 52 week period ending 6/28/2014. Trusted by generations for its famous streak-free shine. Thanks to its patented ingredient, Ammonia-D, Windex Original starts working on dirt and grime even before you wipe. Perfect for cleaning glass and more! Starts working on dirt even before you wipe. Easy-grip bottle. Product Results: Cleaner, Removes Dust, Removes Finger Prints, Removes Dirt, Glass Protectant."
+            "weight": 0.105,
+            "type": "cylindrical",
+            "description": "a one foot long tube of white vinyl liner with brown flowers on it. It is wrapped around a cardboard tube to hold its shape and has a diameter of about 1.5 inches. There is also a white and purple sticker around the middle of the tube that is over 6 inches in length."
         }
     ]
 }

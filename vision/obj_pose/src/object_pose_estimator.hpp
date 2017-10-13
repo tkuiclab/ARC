@@ -87,7 +87,8 @@ public:
     g_argc = argc;
     g_argv = argv;
 
-    scence_seg = pcl::console::find_switch (argc, argv, "-ss");
+    //scence_seg = pcl::console::find_switch (argc, argv, "-ss");
+    scence_seg = true;
     // pcd_folder = "/";
     // path = ros::package::getPath("obj_pose");
     // path.append(pcd_folder);

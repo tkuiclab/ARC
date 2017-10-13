@@ -1,0 +1,3 @@
+<launch>
+    <node name="object_pose_estimator" pkg="obj_pose" type="object_pose_estimator" output="screen"/>
+</launch>

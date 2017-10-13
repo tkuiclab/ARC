@@ -1,0 +1,29 @@
+{
+    "orders": [
+        {
+            "size_id": "A1",
+            "contents": [
+                "mini_solo_cups",
+                "irish_spring_soap"
+            ]
+        },
+        {
+            "size_id": "1A5",
+            "contents": [
+                "assured_lavender_epsom_salts",
+                "r2_precision_pens",
+                "mesh_cup"
+            ]
+        },
+        {
+            "size_id": "K3",
+            "contents": [
+                "five_star_red_hinged_note_cards",
+                "assured_face_mask",
+                "pie_plates",
+                "toilet_brush",
+                "marbles"
+            ]
+        }
+    ]
+}

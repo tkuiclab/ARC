@@ -1,0 +1,139 @@
+{
+    "bins": [
+        {
+            "bin_id": "A",
+            "contents": [
+                "equate_flushable_wipes",
+                "assured_face_mask",
+                "hand_weight",
+                "irish_spring_soap",
+                "scotch_sponges"
+            ]
+        },
+        {
+            "bin_id": "B",
+            "contents": [
+                "glue_sticks",
+                "speed_stick"
+            ]
+        },
+        {
+            "bin_id": "C",
+            "contents": [
+                "laugh_out_loud_jokes"
+            ]
+        },
+        {
+            "bin_id": "D",
+            "contents": [
+                "ice_cube_tray",
+                "scrub_buddies",
+                "toilet_brush",
+                "pink_flamingo_cup"
+            ]
+        },
+        {
+            "bin_id": "E",
+            "contents": [
+                "mini_solo_cups",
+                "green_treat_bags",
+                "orange_balloons"
+            ]
+        },
+        {
+            "bin_id": "F",
+            "contents": [
+                "white_facecloth",
+                "mesh_cup",
+                "black_fashion_gloves"
+            ]
+        },
+        {
+            "bin_id": "G",
+            "contents": [
+                "duct_tape",
+                "marbles",
+                "r2_precision_pens"
+            ]
+        },
+        {
+            "bin_id": "H",
+            "contents": [
+                "betty_crocker_measuring_spoons",
+                "five_star_red_hinged_note_cards",
+                "bobbins_with_ring",
+                "star_wars_bubbles"
+            ]
+        },
+        {
+            "bin_id": "I",
+            "contents": [
+                "salad_tongs",
+                "assured_lavender_epsom_salts",
+                "robots_everywhere"
+            ]
+        },
+        {
+            "bin_id": "J",
+            "contents": [
+                "pie_plates",
+                "casemate_black_binder",
+                "reynolds_wrap",
+                "jute_twine"
+            ]
+        }
+    ],
+    "boxes": [
+        {
+            "size_id": "A1",
+            "contents": [
+            ]
+        },
+        {
+            "size_id": "1A5",
+            "contents": [
+            ]
+        },
+        {
+            "size_id": "K3",
+            "contents": [
+            ]
+        }
+    ],
+    "tote": {
+        "contents": [
+                "casemate_black_binder",
+                "mesh_cup",
+                "duct_tape",
+                "irish_spring_soap",
+                "speed_stick",
+                "pink_flamingo_cup",
+                "scrub_buddies",
+                "mini_solo_cups",
+                "jute_twine",
+                "five_star_red_hinged_note_cards",
+                "assured_lavender_epsom_salts",
+                "orange_balloons",
+                "hand_weight",
+                "salad_tongs",
+                "laugh_out_loud_jokes",
+                "star_wars_bubbles",
+                "equate_flushable_wipes",
+                "white_facecloth",
+                "r2_precision_pens",
+                "pie_plates",
+                "glue_sticks",
+                "bobbins_with_ring",
+                "reynolds_wrap",
+                "green_treat_bags",
+                "ice_cube_tray",
+                "scotch_sponges",
+                "marbles",
+                "toilet_brush",
+                "assured_face_mask",
+                "black_fashion_gloves",
+                "robots_everywhere",
+                "betty_crocker_measuring_spoons"
+        ]
+    }
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+
+<launch>
+
+    <arg name="task_type" default="stow" />
+    <arg name="img_topic" default="/camera/rgb/image_raw" />
+    <param name="task_type"   type="str" value="$(arg task_type)" />
+    <param name="img_topic"   type="str" value="$(arg img_topic)" />
+
+    <node name="object_detect_2" pkg="darkflow_detect" type="object_detect.py"
+            output="screen">
+        <remap from="/detect"  	  	  to="/detect_2"	    />
+            
+    </node>
+
+</launch>

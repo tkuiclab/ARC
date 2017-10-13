@@ -1,0 +1,11 @@
+{
+    "name": "led_spot_light", 
+    "dimensions": [
+        0.102, 
+        0.1025, 
+        0.1335
+    ], 
+    "weight": 0.187, 
+    "type": "box", 
+    "description": "this is a green white and red box with a picture of a light bulb on the sides. It is taller than it is in length and width. It has one solid object condensely packed inside"
+}

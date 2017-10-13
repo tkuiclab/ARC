@@ -169,22 +169,43 @@ class Strategy(threading.Thread):
 
 
 if __name__ == '__main__':
-    rospy.init_node('strategy', disable_signals=True)
-
+    # rospy.init_node('strategy', disable_signals=True)
+    rospy.init_node('strategy')
     try:
         s = Strategy()
 
         #===
         gripper_vaccum_off()
         # #s.stow.test_read_item_location_in_arc_pack("stow_20.json")
-        s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
+        #s.stow.test_read_item_location_in_arc_pack("stow_1_obj.json")
         #s.stow.test_read_item_location_in_arc_pack("stow_test.json")
         #s.stow.test_read_item_location_in_arc_pack("stow_2_obj.json")
+        s.stow.test_read_item_location_in_arc_pack("item_location_file.json")
         
         s.safe_pose()
 
-        s.start() 
+        #s.start() 
+
+
+
         s.stow_run()
+
+        rate = rospy.Rate(30)  # 30hz
+        while not rospy.is_shutdown():
+            if s.stop_robot == True :
+                continue
+            
+            if  s.run_task_type != TaskType_None:
+                if s.run_task_type == TaskType_Pick:
+                    s.pick.pick_core()
+                    #info_json = self.pick.get_info()
+                elif s.run_task_type == TaskType_Stow:
+                    s.stow.stow_core()
+                    #info_json = self.stow.get_info()
+                    
+                #self.info_pub.publish(json.dumps(info_json))
+            
+            rate.sleep()
 
         #s.stow.test_dump_stow_success()
 

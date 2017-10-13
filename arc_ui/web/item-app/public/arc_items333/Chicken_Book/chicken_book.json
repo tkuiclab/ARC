@@ -1,0 +1,11 @@
+{
+    "name": "chicken_book", 
+    "dimensions": [
+        0.0155, 
+        0.16, 
+        0.1605
+    ], 
+    "weight": 0.138, 
+    "type": "book", 
+    "description": "This is a chicken-shaped book that is hinged at the top instead of on the left. It has four thick cardboard pages. Each page is a different shape making up the chicken. It is 6.25 inches wide and 6.25 inches tall."
+}

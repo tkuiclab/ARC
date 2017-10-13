@@ -153,8 +153,11 @@ class image_converter:
           bufferX.append(point.x); bufferY.append(point.y)
         
         bufferX.sort(); bufferY.sort()
-        xmin.data = bufferX[0]; xmax.data = bufferX[-1]
-        ymin.data = bufferY[0]; ymax.data = bufferY[-1]
+        if bufferX[0] < 0 or bufferX[-1] < 0 or bufferY[0] < 0 or bufferY[-1] < 0 or bufferX[0] > 640 or bufferX[-1] > 640 or bufferY[0] > 480 or bufferX[-1] > 480 :
+          xmin.data = -1; xmax.data = -1; ymin.data = -1; ymax.data = -1
+        else :
+          xmin.data = bufferX[0]; xmax.data = bufferX[-1]
+          ymin.data = bufferY[0]; ymax.data = bufferY[-1]
 
         img2 = cv2.polylines(img2,[np.int32(dst)],True,255,3, cv2.LINE_AA)
 

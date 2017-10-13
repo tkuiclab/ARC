@@ -3,67 +3,83 @@
         {
             "bin_id": "A",
             "contents": [
-                "robots_dvd",
-                "hinged_ruled_index_cards",
-                "tissue_box"
+                "crayons",
+                "number_flash_cards",
+                "expo_eraser"
             ]
         },
         {
             "bin_id": "B",
             "contents": [
-                "burts_bees_baby_wipes",
-                "laugh_out_loud_jokes"
+                "ticonderoga_pencils",
+                "super_washable_markers",
+                "colgate_toothbrush_4pk"
             ]
         },
         {
             "bin_id": "C",
             "contents": [
-                "expo_eraser",
-                "scotch_sponges"
+                "laugh_out_loud_jokes",
+                "marbles",
+                "black_fashion_gloves"
             ]
         },
         {
             "bin_id": "D",
             "contents": [
+                "scotties_tissues",
                 "ice_cube_tray",
-                "reynolds_wrap",
                 "composition_book",
-                "robots_everywhere"
+                "great_value_dishwasher_packets",
+                "mesh_strainer"
             ]
         },
         {
             "bin_id": "E",
             "contents": [
-                "duct_tape"
+                "paper_napkins",
+                "hinged_ruled_index_cards"
             ]
         },
         {
             "bin_id": "F",
             "contents": [
-                "speed_stick"
+                "balloons",
+                "mouse_traps",
+                "dove_soap"
             ]
         },
         {
             "bin_id": "G",
             "contents": [
-                "ticonderoga_pencils"
+                "duct_tape",
+                "promarx_pens",
+                "listerine"
             ]
         },
         {
             "bin_id": "H",
             "contents": [
-                
+                "mouth_guard_case",
+                "red_decorative_shred",
+                "disney_princess_journal"
             ]
         },
         {
             "bin_id": "I",
             "contents": [
+                "smurf_hat",
+                "poland_spring_water",
+                "plastic_wine_glass",
+                "measuring_spoons"
             ]
         },
         {
             "bin_id": "J",
             "contents": [
-                "avery_binder"
+                "circular_cake_pans",
+                "vinyl_liner",
+                "bendy_straws"
             ]
         }
     ],

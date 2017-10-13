@@ -50,6 +50,8 @@ def _get_path(file='obj'):
         return join(pkg_path, 'pick_task', 'box_sizes.json')
     elif file == 'order_box':
         return join(pkg_path, 'pick_task', 'order_file.json')
+    elif file == 'graspOrSuck':
+        return join(pkg_path, 'graspOrSuck.json')
     else:
         return join(pkg_path, 'Training items')
 
@@ -111,6 +113,18 @@ def parse_all_json():
     return info
 
 
+def json_parse_graspType():
+    try:
+        content = read_json(_get_path('graspOrSuck'))
+        grasp_list = list()
+        for item in content['grasp']:
+            grasp_list.append(item)
+        return grasp_list
+    except Exception as e:
+        print('============== Exception ==============')
+        print(path, e)
+
+
 def get_box_width():
     """Get all of box width."""
     box_width = list()
@@ -125,6 +139,10 @@ def sort_box_by_width(box_info, boxes):
         for i in range(len(boxes)-1):
             if box_info[boxes[i]].dimensions[1] < box_info[boxes[i+1]].dimensions[1]:
                 boxes[i], boxes[i+1] = boxes[i+1], boxes[i]
+            elif (box_info[boxes[i]].dimensions[1] == box_info[boxes[i+1]].dimensions[1] and 
+                    box_info[boxes[i]].dimensions[0] < box_info[boxes[i+1]].dimensions[0]):
+                boxes[i], boxes[i+1] = boxes[i+1], boxes[i]
+    print('Boxes were sorted:', boxes)
     return tuple(boxes)
 
 
@@ -133,3 +151,5 @@ box_info_dict = json_parser_box(_get_path('box'))
 
 _box_list = json_parser_order(_get_path('order_box'))
 order_boxes = sort_box_by_width(box_info_dict, _box_list)
+
+grasp_list = json_parse_graspType()

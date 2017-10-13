@@ -704,8 +704,13 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     std::cout<<"==xyz = "<<position(0)<<", "<<position(1)<<", "<<position(2)<<"\n";
     std::cout<<"==pryf = "<<pitch<<", "<<roll<<", "<<yaw<<", "<<tarFai<<"\n";
 
-    /*  for special, assign yaw always=0*/
-    if(( fabs(yaw*180/M_PI) > 0.01 )&&( fabs(roll*180/M_PI) < 0.01 ))//if yaw > 0 and roll = 0  => is special case
+    /*  for special, assign yaw always=0*/      //if yaw > 0 and roll = 0  => is special case
+    // if( ( fabs(yaw*180/M_PI) > 0.01            )&&
+    //     ( fabs(roll*180/M_PI)  < 0.01  )&&
+    //     ( fabs(1-fabs(tarFai*180/M_PI))< 0.01  ) )
+    if( ( fabs(yaw*180/M_PI) > 0.01            )&&
+        ( fabs(roll*180/M_PI)  < 0.01  ) )
+    
     {
         roll = roll + yaw;
         yaw = 0;
@@ -844,12 +849,15 @@ bool ManipulatorKinematicsDynamics::ik(Eigen::MatrixXd& tar_position, Eigen::Mat
     //=== Determine better wrist direct to avoid large rotation in wrist ===Curr_Ang
     double tmp_j5_1 = atan2(-1 * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
     double tmp_j5_2 = atan2( 1 * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
+    double tmp_j6_1 = atan2(-1 * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
+    double tmp_j6_2 = atan2( 1 * sqrt(1 - pow(R4_7(2, 2), 2)), R4_7(2, 2));
     std::cout<<"=== Curr_J5 = "<<Curr_J5*180/M_PI<<"\n";
     std::cout<<"=== tmp_j5_1 = "<<tmp_j5_1*180/M_PI<<"\n";
     std::cout<<"=== tmp_j5_2 = "<<tmp_j5_2*180/M_PI<<"\n";
 
-    // if( fabs(Curr_J5-tmp_j5_1) < fabs(Curr_J5-tmp_j5_2) )
-    if( fabs(Curr_Ang[5]-tmp_j5_1) < fabs(Curr_Ang[5]-tmp_j5_2) )
+    // if( fabs(Curr_Ang[6]-tmp_j6_1) < fabs(Curr_Ang[6]-tmp_j6_2) )
+    // if( fabs(Curr_Ang[5]-tmp_j5_1) < fabs(Curr_Ang[5]-tmp_j5_2) )
+    if ( ( fabs(Curr_Ang[6]-tmp_j6_1) < fabs(Curr_Ang[6]-tmp_j6_2) )&&fabs(Curr_Ang[5]-tmp_j5_1) < fabs(Curr_Ang[5]-tmp_j5_2) )
     {
         Wrist = 1;
         std::cout<<"wrist = 1\n";

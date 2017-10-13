@@ -1,0 +1,11 @@
+{
+    "name": "mesh_laundry_bag", 
+    "dimensions": [
+        0.0235, 
+        0.1595, 
+        0.2065
+    ], 
+    "weight": 0.046, 
+    "type": "deformable", 
+    "description": "green mesh laundry bag completely sealed in a tight plastic bag that has a flap on top without any product in it. Easily deformable, product inside measures 8 by 6 inches."
+}

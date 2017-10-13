@@ -48,7 +48,7 @@ class Calibrater:
 
 
     def arm_2_bin_front(self):
-        self.Arm.pub_ikCmd('ptp', (0.25, 0.0 , 0.2), (-90, 0, 0) )
+        self.Arm.pub_ikCmd('ptp', (0.2, 0.0 , 0.4), (-100, 0, 0) )
         rospy.sleep(.5)
         while self.Arm.busy:
             rospy.sleep(.1)
@@ -66,14 +66,17 @@ if __name__ == '__main__':
         # calibrate.Move_LM('e')
         # exit()
         # for continue caltbration task
-        r = rospy.Rate(30)
+        r = rospy.Rate(1)
+        # i = 0
         i = 0
-        while not rospy.is_shutdown() and i < len(BinArr):
-            calibrate.Move_LM(BinArr[i])
-            i = i+1
+
+        calibrate.Move_LM(BinArr[i])
+        # while not rospy.is_shutdown() and i < len(BinArr):
+            # calibrate.Move_LM(BinArr[i])
+            # i = i+1
         # ==================================================
 
-        r.sleep()
+        # r.sleep()
     except rospy.ROSInterruptException:
         rospy.loginfo('error')
         pass
